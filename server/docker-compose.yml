@@ -1,0 +1,41 @@
+# docker-compose.yml
+
+version: "3.3"
+
+services:
+  app:
+    build:
+      context: .
+    restart: always
+    volumes:
+      - static-data:/vol/static
+      - media-data:/vol/media
+    depends_on:
+      - db
+
+  proxy:
+    build:
+      context: ./proxy
+    restart: always
+    volumes:
+      - static-data:/vol/static
+      - media-data:/vol/media
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - app
+
+  db:
+    image: mysql:latest
+    ports:
+      - '3306:3306'
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'  
+      MYSQL_DATABASE: 'qpoll_db'
+      MYSQL_PASSWORD: qpoll_db_password 
+
+volumes:
+  static-data:
+  media-data:
