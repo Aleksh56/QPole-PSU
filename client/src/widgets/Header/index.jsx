@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { StyledContainer, StyledHeader, StyledLogoLink } from './styled';
 import PrimaryButton from '@/shared/PrimaryButton';
-import HeaderNavigationOutput from '@features/HeaderNavigationOutput';
+import HeaderNavigationOutput from '@/features/HeaderNavOutput';
+import { Box } from '@mui/material';
 
-const Header = () => {
+const Header = ({ isMainPage = true }) => {
   const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
@@ -20,11 +21,18 @@ const Header = () => {
   }, []);
 
   return (
-    <StyledHeader isSticky={isSticky}>
+    <StyledHeader isSticky={isSticky} isMainPage={isMainPage}>
       <StyledContainer>
         <StyledLogoLink to="/">QPole</StyledLogoLink>
         <HeaderNavigationOutput
-          children={<PrimaryButton caption="Войти" to="/login" />}
+          children={
+            <Box
+              sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}
+            >
+              <PrimaryButton caption="Создать квиз" to="/signup" />
+              <PrimaryButton caption="Войти" to="/signin" />
+            </Box>
+          }
         />
       </StyledContainer>
     </StyledHeader>
