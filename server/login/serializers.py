@@ -24,3 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+    
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
