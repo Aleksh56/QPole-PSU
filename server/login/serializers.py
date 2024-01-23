@@ -1,11 +1,26 @@
-from rest_framework import serializers
 from django.contrib.auth.models import User
-# from .models import CustomUser
-
+from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
-    class Meta(object):
-        model = User 
+    username = serializers.CharField(required=False)  
+
+    class Meta:
+        model = User
         fields = ['id', 'username', 'password', 'email']
 
+    def create(self, validated_data):
+        email = validated_data.get('email')
+        del(validated_data['email'])
+        username = email.split('@')[0] if email else None
+        user = User.objects.create(
+            username=username,
+            email=email,
+            **validated_data  # Включаем остальные валидированные данные
+        )
 
+        password = validated_data.get('password')
+        if password:
+            user.set_password(password)
+            user.save()
+
+        return user

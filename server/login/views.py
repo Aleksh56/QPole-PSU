@@ -3,7 +3,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
@@ -14,20 +14,17 @@ from .serializers import UserSerializer
 def register(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get(username=request.data['username'])
-        user.set_password(request.data['password'])
-        user.save()
-        token = Token.objects.create(user=user)
+        user = serializer.save()
         auth_login(request, user)
-        return Response({'token': token.key, 'user': serializer.data})
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'auth_token': token.key, 'user_data': serializer.data})
     else:
-        return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 def login(request):
-    user = get_object_or_404(User, username=request.data['username'])
+    user = get_object_or_404(User, email=request.data['email'])
     if not user.check_password(request.data['password']):
         return Response("Пользователь не найден!", status=status.HTTP_404_NOT_FOUND)
     token, created = Token.objects.get_or_create(user=user)
@@ -35,12 +32,12 @@ def login(request):
 
     auth_login(request, user)
 
-    return Response({'auth_token': token.key, 'user': serializer.data})
+    return Response({'auth_token': token.key, 'user_data': serializer.data})
 
 
 @api_view(['POST'])
 def logout(request):
-    user = get_object_or_404(User, username=request.data['username'])
+    user = get_object_or_404(User, email=request.data['email'])
     if not user.check_password(request.data['password']):
         return Response("Пользователь не найден!", status=status.HTTP_404_NOT_FOUND)
     token, created = Token.objects.get_or_create(user=user)
