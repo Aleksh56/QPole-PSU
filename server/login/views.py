@@ -13,14 +13,20 @@ from .utils import generate_random_code, send_reset_code_email, store_reset_code
 
 @api_view(['POST'])
 def register(request):
-    serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
-        auth_login(request, user)
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'auth_token': token.key, 'user_data': serializer.data})
+    email = request.data['email']
+    check_email = User.objects.filter(email=email).exists()
+
+    if not check_email:
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            auth_login(request, user)
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'auth_token': token.key, 'user_data': serializer.data})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message':"Данная почта уже занята"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -46,7 +52,7 @@ def logout(request):
 
     auth_logout(request)
 
-    return Response("Успешно разлогинен")
+    return Response({'message':"Вы были успешно разлогинены"})
 
 
 @api_view(['POST'])
@@ -94,7 +100,6 @@ def send_reset_code(request):
 @permission_classes([AllowAny])
 def reset_password(request):
     if request.method == 'POST':
-        user = request.user
         email = request.data.get('email')
         code = request.data.get('code')
         new_password = request.data.get('new_password')
@@ -102,8 +107,11 @@ def reset_password(request):
         success = reset_password_with_code(email, code, new_password)
 
         if success:
+            user = get_object_or_404(User, email=email)
             auth_login(request, user)
-            return Response({'message': 'Password reset successful.'})
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'message': 'Password reset successful and user logged in.',
+                             'auth_token': token.key})
         else:
             return Response({'error': 'Invalid reset code.'}, status=status.HTTP_400_BAD_REQUEST)
     else:

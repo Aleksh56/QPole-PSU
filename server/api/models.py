@@ -8,23 +8,63 @@ class Profile(models.Model):
     patronymic = models.CharField(max_length=50, default="Не указано")
     sex = models.CharField(max_length=1, blank=False, null=False)
     number = models.CharField(max_length=50)
-    email = models.CharField(max_length=50)
-    
-    polls = models.ManyToManyField("Poll", related_name="user_poll")
+
     joining_date = models.DateField(auto_now_add=True)
 
+    # role = models.ForeignKey("UserRole", on_delete=models.CASCADE)
+    # polls = models.ManyToManyField("Poll", related_name="profile_poll")
 
-    
     def __str__(self):
         return self.name + " " + self.surname
     
 
-class Poll(models.Model):
-    author = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    name = models.CharField(max_length=50)
-
-    created_date = models.DateField(auto_now_add=True)
+class UserRole(models.Model):
+    role = models.CharField(max_length=50)
 
 
     def __str__(self):
-        return self.name + " " + self.author
+        return self.role
+    
+
+class Poll(models.Model):
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    created_date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Question(models.Model):
+    poll = models.ForeignKey("Poll", on_delete=models.CASCADE)
+    text = models.TextField()
+    correct_answers = models.ManyToManyField("Answer", related_name="correct_for_question")
+
+    def __str__(self):
+        return f"Question for {self.poll.name}: {self.text}"
+
+
+class Answer(models.Model):
+    question = models.ForeignKey("Question", on_delete=models.CASCADE)
+    text = models.TextField()
+
+    def __str__(self):
+        return f"Answer to {self.question.text}: {self.text}"
+
+
+class PollResponse(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    poll = models.ForeignKey("Poll", on_delete=models.CASCADE)
+    created_date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Response for {self.poll.name} by {self.author.username}"
+
+
+class PollParticipant(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    poll = models.ForeignKey("Poll", on_delete=models.CASCADE)
+    voting_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.profile.user.username} participated in {self.poll.name} poll"
