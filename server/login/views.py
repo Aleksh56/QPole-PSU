@@ -5,13 +5,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
 from .serializers import UserSerializer, PasswordChangeSerializer
-from .utils import generate_random_code, send_reset_code_email, store_reset_code_in_cache, reset_password_with_code
+from .utils import *
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def register(request):
     email = request.data['email']
     check_email = User.objects.filter(email=email).exists()
@@ -30,6 +32,7 @@ def register(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     user = get_object_or_404(User, email=request.data['email'])
     if not user.check_password(request.data['password']):
@@ -43,10 +46,10 @@ def login(request):
 
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def logout(request):
-    user = get_object_or_404(User, email=request.data['email'])
-    if not user.check_password(request.data['password']):
-        return Response("Пользователь не найден!", status=status.HTTP_404_NOT_FOUND)
+    user = request.user
     token, created = Token.objects.get_or_create(user=user)
     token.delete()
 
@@ -89,33 +92,68 @@ def send_reset_code(request):
             reset_code = generate_random_code()
             send_reset_code_email(email, reset_code)
             store_reset_code_in_cache(email, reset_code)
-            return Response({'message': 'Reset code sent successfully.'})
+            return Response({'message': 'Код восстановления отправлен на почту.'})
         else:
-            return Response({'error': 'User not found.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Пользователь не найден.'}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response({'error': 'Invalid request method.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Недостимый метод запроса.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def check_reset_code(request):
+    try:
+        if request.method == 'POST':
+            email = request.data.get('email')
+            reset_code = request.data.get('reset_code')
+
+            if not email or not reset_code:
+                return Response({'error': 'Пожалуйста, предоставьте электронную почту и код сброса пароля.'},
+                                 status=status.HTTP_400_BAD_REQUEST)
+
+            user_exists = User.objects.filter(email=email).exists()
+
+            if user_exists:
+                cache_key = f'reset_code:{email}'
+                stored_code = cache.get(cache_key)
+
+                if stored_code and int(stored_code) == int(reset_code):
+                    reset_token_key = f'reset_token:{email}'
+                    reset_token = generate_random_token()
+                    cache.set(reset_token_key, reset_token, timeout=300)
+                    return Response({'message': 'Код верный, введите новый пароль.'}, headers={'reset_token': reset_token})
+                else:
+                    return Response({'error': 'Неверный код, повторите попытку.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'Пользователь не найден.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Недостимый метод запроса.'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def reset_password(request):
     if request.method == 'POST':
+        reset_token = request.data.get('reset_token')
         email = request.data.get('email')
-        code = request.data.get('code')
         new_password = request.data.get('new_password')
 
-        success = reset_password_with_code(email, code, new_password)
+        if reset_token == get_reset_code_from_cache(email):
+            if reset_password_after_code_validation(email, new_password):
+                user = get_object_or_404(User, email=email)
+                auth_login(request, user)
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'message': 'Пароль успешно сменен и произведен вход в аккаунт.',
+                                    'auth_token': token.key})
+            else: 
+                return Response({'error': 'Произошла ошибка при смене пароля.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else: 
+            return Response({'error': 'Неверный токен смены пароля.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if success:
-            user = get_object_or_404(User, email=email)
-            auth_login(request, user)
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'message': 'Password reset successful and user logged in.',
-                             'auth_token': token.key})
-        else:
-            return Response({'error': 'Invalid reset code.'}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response({'error': 'Invalid request method.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Недопустимый метод запроса.'}, status=status.HTTP_400_BAD_REQUEST)
     
     
 @api_view(['GET'])

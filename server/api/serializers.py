@@ -9,6 +9,12 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = '__all__'
 
+    def validate(self, data):
+        if data.get('age') and data['age'] < 18:
+            raise serializers.ValidationError("Возраст должен быть 18 или более.")
+
+        return data
+    
     def create(self, validated_data):
         instance = Profile.objects.create(**validated_data)
         return instance

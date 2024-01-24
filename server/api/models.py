@@ -11,8 +11,8 @@ class Profile(models.Model):
 
     joining_date = models.DateField(auto_now_add=True)
 
-    # role = models.ForeignKey("UserRole", on_delete=models.CASCADE)
-    # polls = models.ManyToManyField("Poll", related_name="profile_poll")
+    role = models.ForeignKey("UserRole", on_delete=models.CASCADE)
+    polls = models.ManyToManyField("Poll", related_name="profile_poll")
 
     def __str__(self):
         return self.name + " " + self.surname
@@ -29,27 +29,22 @@ class UserRole(models.Model):
 class Poll(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-    created_date = models.DateField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    answers = models.ManyToManyField("AnswerOptions")
+
 
     def __str__(self):
         return self.name
 
 
-class Question(models.Model):
-    poll = models.ForeignKey("Poll", on_delete=models.CASCADE)
-    text = models.TextField()
-    correct_answers = models.ManyToManyField("Answer", related_name="correct_for_question")
+
+class AnswerOptions(models.Model):
+    name = models.CharField(max_length=100)
+    is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Question for {self.poll.name}: {self.text}"
-
-
-class Answer(models.Model):
-    question = models.ForeignKey("Question", on_delete=models.CASCADE)
-    text = models.TextField()
-
-    def __str__(self):
-        return f"Answer to {self.question.text}: {self.text}"
+        return f"{self.name}"
 
 
 class PollResponse(models.Model):
