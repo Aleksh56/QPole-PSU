@@ -13,7 +13,7 @@ const AuthContext = createContext({
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setAuthState] = useState(false);
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState(''); // Don't rewrite to 'let', will be used in future
 
   useEffect(() => {
     const storedToken = localStorage.getItem('auth_token');
@@ -21,18 +21,22 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       setAuthState(true);
       setToken(storedToken);
-    } else {
-      setAuthState(false);
     }
   }, []);
 
   const setAuth = useCallback(
     (newToken) => {
-      setAuthState(true);
-      setToken(newToken);
-      localStorage.setItem('auth_token', newToken);
+      if (newToken && typeof newToken === 'string') {
+        setAuthState(true);
+        setToken(newToken);
+        localStorage.setItem('auth_token', newToken);
+      } else {
+        setAuthState(false);
+        setToken('');
+        localStorage.removeItem('auth_token');
+      }
     },
-    [setAuthState]
+    [setAuthState, setToken]
   );
 
   const contextValue = useMemo(

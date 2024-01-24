@@ -12,8 +12,19 @@ import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuItem } from '@mui/base/MenuItem';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import useAuth from '@/hooks/useAuth';
 
 const AppHeader = () => {
+  const { setAuth } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogOut = () => {
+    setAuth(false);
+    navigate('/');
+  };
+
   return (
     <StyledHeaderWrapper>
       <StyledHeaderContainer>
@@ -25,9 +36,12 @@ const AppHeader = () => {
             <ArrowDropDownIcon fontSize="small" />
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>
-            <MenuItem>Profile</MenuItem>
-            <MenuItem>Language settings</MenuItem>
-            <MenuItem>Log out</MenuItem>
+            <MenuItem>
+              <Button>Profile</Button>
+            </MenuItem>
+            <MenuItem>
+              <Button onClick={() => handleLogOut()}>Log out</Button>
+            </MenuItem>
           </Menu>
         </Dropdown>
       </StyledHeaderContainer>

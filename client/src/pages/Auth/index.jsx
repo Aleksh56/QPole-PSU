@@ -1,36 +1,26 @@
-import {
-  FormContainer,
-  FormGridWrapper,
-  FormHeadingContainer,
-  IllustrationGridWrapper,
-  OverlayWrapper,
-  StyledAuthWrapper,
-  StyledConfirmButton,
-  StyledForm,
-} from './styled';
+import { OverlayWrapper, StyledAuthWrapper } from './styled';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Typography, Box, TextField } from '@mui/material';
-import AuthIllustration from '@assets/loginIllustration.svg';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, registerUser } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
+import AuthForm from '@/widgets/AuthForm';
+import AuthIllustration from '@/features/AuthIllustration';
 
 const AuthPage = () => {
-  const [isSignIn, setIsSignIn] = useState(true);
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const path = useMemo(() => location.pathname, [location.pathname]);
+  const [isSignIn, setIsSignIn] = useState(path === '/signin');
 
   useEffect(() => {
-    console.log(path);
-    setIsSignIn(path === '/signin');
-  }, [path]);
+    const storedToken = localStorage.getItem('auth_token');
+    if (storedToken) navigate('/app');
+  }, [navigate]);
 
   const handleFormSwitch = useCallback(() => {
     setIsSignIn((prev) => !prev);
-    const newPath = isSignIn ? '/signup' : '/signin';
-    navigate(newPath);
+    navigate(isSignIn ? '/signup' : '/signin');
   }, [isSignIn, navigate]);
 
   const handleFormSubmit = useCallback(
@@ -58,76 +48,12 @@ const AuthPage = () => {
   return (
     <StyledAuthWrapper component="main">
       <OverlayWrapper container>
-        <IllustrationGridWrapper item>
-          <Link to="/">QPole</Link>
-          <img src={AuthIllustration} alt="Illustration" />
-        </IllustrationGridWrapper>
-
-        <FormGridWrapper item>
-          <FormContainer>
-            <FormHeadingContainer>
-              <Typography variant="h5" gutterBottom>
-                {isSignIn ? 'Вход' : 'Регистрация'}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                <Box>
-                  <span>
-                    {isSignIn ? 'Нет аккаунта ?' : 'Уже есть аккаунт?'}
-                  </span>
-                  <button onClick={handleFormSwitch}>
-                    {isSignIn ? 'Регистрация' : 'Войти'}
-                  </button>
-                </Box>
-              </Typography>
-            </FormHeadingContainer>
-
-            <StyledForm onSubmit={handleFormSubmit}>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                placeholder="Эл. почта"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                placeholder="Пароль"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
-              {!isSignIn && (
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="tel"
-                  placeholder="Телефон"
-                  type="tel"
-                  id="tel"
-                  autoComplete="tel"
-                />
-              )}
-              <StyledConfirmButton
-                disabled={false}
-                type="submit"
-                fullWidth
-                variant="contained"
-              >
-                {isSignIn ? 'Войти' : 'Создать аккаунт'}
-              </StyledConfirmButton>
-            </StyledForm>
-          </FormContainer>
-        </FormGridWrapper>
+        <AuthIllustration />
+        <AuthForm
+          isSignIn={isSignIn}
+          handleFormSwitch={handleFormSwitch}
+          handleFormSubmit={handleFormSubmit}
+        />
       </OverlayWrapper>
     </StyledAuthWrapper>
   );
