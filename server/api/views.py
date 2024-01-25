@@ -10,7 +10,6 @@ from rest_framework.authtoken.models import Token
 
 from .serializers import *
 from .models import *
-# from .utils import generate_random_code, send_reset_code_email, store_reset_code_in_cache, reset_password_with_code
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -77,3 +76,32 @@ def my_profile(request):
 
     else:
         return Response({'message': "Неподдерживаемый метод запроса!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def test_api(request):
+    # Получение опроса по имени (замените 'example_poll' на фактическое имя)
+    poll = Poll.objects.get(name='Чи или не чи')
+
+    # # Получение всех AnswerOption для этого опроса
+    # answer_options_for_poll = poll.answer_options.all()
+
+    # # Создайте список для хранения всех участников
+    # all_participants = []
+
+    # # Пройдите по всем AnswerOption
+    # for answer_option in answer_options_for_poll:
+    #     # Получение всех PollParticipant, которые проголосовали за этот AnswerOption
+    #     participants_for_option = PollParticipant.objects.filter(answers=answer_option)
+
+    #     # Добавление участников в общий список
+    #     all_participants.extend(participants_for_option)
+
+    # # Получение всех пользователей, проголосовавших за все AnswerOption
+    # users_voted_for_all_options = [participant.profile.user for participant in all_participants]
+
+    # # Теперь у вас есть список пользователей, проголосовавших за все AnswerOption
+    # print(users_voted_for_all_options)
+
+    poll_serializer = PollSerializer(poll)
+    return Response(poll_serializer.data)

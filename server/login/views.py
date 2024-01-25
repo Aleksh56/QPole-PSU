@@ -121,7 +121,8 @@ def check_reset_code(request):
                     reset_token_key = f'reset_token:{email}'
                     reset_token = generate_random_token()
                     cache.set(reset_token_key, reset_token, timeout=300)
-                    return Response({'message': 'Код верный, введите новый пароль.'}, headers={'reset_token': reset_token})
+                    return Response({'message': 'Код верный, введите новый пароль.',
+                                     'reset_token': reset_token})
                 else:
                     return Response({'error': 'Неверный код, повторите попытку.'}, status=status.HTTP_400_BAD_REQUEST)
             else:
