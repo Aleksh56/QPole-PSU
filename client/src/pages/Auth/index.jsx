@@ -37,8 +37,8 @@ const AuthPage = () => {
         ? await loginUser(formData)
         : await registerUser(formData);
 
-      if (response.auth_token && response.auth_token.length > 0) {
-        setAuth(response.auth_token);
+      if (response.data.auth_token && response.data.auth_token.length > 0) {
+        setAuth(response.data.auth_token);
         navigate('/app');
       }
     },

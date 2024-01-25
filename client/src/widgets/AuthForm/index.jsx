@@ -6,15 +6,17 @@ import {
   StyledForm,
   StyledPasswordWrapper,
 } from './styled';
-import { Box, TextField, Typography } from '@mui/material';
+import { TextField, Typography } from '@mui/material';
 import AuthFormHeading from '@/features/AuthFormHeading';
 import AuthPhoneField from '@/features/AuthPhoneField';
+import { useNavigate } from 'react-router-dom';
 
 const AuthForm = ({
   isSignIn,
   handleFormSwitch = () => {},
   handleFormSubmit = () => {},
 }) => {
+  const navigate = useNavigate();
   return (
     <FormGridWrapper item>
       <FormContainer>
@@ -41,7 +43,13 @@ const AuthForm = ({
             <Typography variant="subtitle1" gutterBottom>
               Пароль
             </Typography>
-            {isSignIn ? <button>Забыли пароль?</button> : ''}
+            {isSignIn ? (
+              <button onClick={() => navigate('/password-reset')}>
+                Забыли пароль?
+              </button>
+            ) : (
+              ''
+            )}
           </StyledPasswordWrapper>
           <TextField
             variant="outlined"
