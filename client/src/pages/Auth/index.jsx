@@ -5,8 +5,10 @@ import { loginUser, registerUser } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
 import AuthForm from '@/widgets/AuthForm';
 import AuthIllustration from '@/features/AuthIllustration';
+import { ThemeProvider, useTheme } from '@mui/material';
 
 const AuthPage = () => {
+  const authTheme = useTheme();
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,16 +48,18 @@ const AuthPage = () => {
   );
 
   return (
-    <StyledAuthWrapper component="main">
-      <OverlayWrapper container>
-        <AuthIllustration />
-        <AuthForm
-          isSignIn={isSignIn}
-          handleFormSwitch={handleFormSwitch}
-          handleFormSubmit={handleFormSubmit}
-        />
-      </OverlayWrapper>
-    </StyledAuthWrapper>
+    <ThemeProvider theme={authTheme}>
+      <StyledAuthWrapper component="main">
+        <OverlayWrapper container>
+          <AuthIllustration />
+          <AuthForm
+            isSignIn={isSignIn}
+            handleFormSwitch={handleFormSwitch}
+            handleFormSubmit={handleFormSubmit}
+          />
+        </OverlayWrapper>
+      </StyledAuthWrapper>
+    </ThemeProvider>
   );
 };
 

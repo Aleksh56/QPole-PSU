@@ -1,11 +1,20 @@
 import styled from '@emotion/styled';
 import { Rem } from '@/utils/convertToRem';
 import { designTokens } from '@/constants/designTokens';
-import { Box, Button, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 
-export const FormGridWrapper = styled(Grid)(() => ({
+export const FormGridWrapper = styled(Grid)(({ theme }) => ({
   flexBasis: '30%',
   maxWidth: '100%',
+  [theme.breakpoints.down('lg')]: {
+    flexBasis: '50%',
+  },
+  [theme.breakpoints.down('md')]: {
+    flexBasis: '75%',
+  },
+  [theme.breakpoints.down('sm')]: {
+    flexBasis: '100%',
+  },
 }));
 
 export const FormContainer = styled(Grid)(() => ({
@@ -36,28 +45,4 @@ export const StyledForm = styled('form')(() => ({
     {
       border: `2px solid ${designTokens.colors.primaryBlue}`,
     },
-}));
-
-export const StyledConfirmButton = styled(Button)(({ disabled }) => ({
-  marginTop: Rem(16),
-  height: Rem(48),
-  borderRadius: Rem(30),
-  backgroundColor: designTokens.colors.primaryBlue,
-  opacity: disabled ? '0.7' : '1',
-  color: '#fff',
-}));
-
-export const StyledReturnButton = styled(Button)(() => ({
-  marginTop: Rem(16),
-  height: Rem(48),
-  borderRadius: Rem(30),
-  backgroundColor: designTokens.colors.primaryBlue,
-  color: '#fff',
-}));
-
-export const StyledButtonsWrapper = styled(Box)(() => ({
-  width: '100%',
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  columnGap: Rem(20),
 }));

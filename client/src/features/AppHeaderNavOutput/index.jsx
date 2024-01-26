@@ -5,6 +5,7 @@ import {
   StyledNavigation,
   StyledNavigationList,
 } from './styled';
+import { v4 } from 'uuid';
 
 const AppHeaderNavigationOutput = ({ itemsData = [] }) => {
   return (
@@ -13,6 +14,7 @@ const AppHeaderNavigationOutput = ({ itemsData = [] }) => {
         {itemsData.map((item) => {
           return (
             <StyledNavLink
+              key={v4()}
               to={item.to}
               className={({ isActive, isPending }) =>
                 isPending ? 'pending' : isActive ? 'active' : ''

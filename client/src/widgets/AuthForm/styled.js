@@ -1,11 +1,20 @@
 import styled from '@emotion/styled';
-import { Box, Button, Grid } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 import { designTokens } from '@/constants/designTokens';
 
-export const FormGridWrapper = styled(Grid)(() => ({
+export const FormGridWrapper = styled(Grid)(({ theme }) => ({
   flexBasis: '30%',
   maxWidth: '100%',
+  [theme.breakpoints.down('lg')]: {
+    flexBasis: '50%',
+  },
+  [theme.breakpoints.down('md')]: {
+    flexBasis: '75%',
+  },
+  [theme.breakpoints.down('sm')]: {
+    flexBasis: '100%',
+  },
 }));
 
 export const FormContainer = styled(Grid)(() => ({
@@ -45,17 +54,4 @@ export const StyledConfirmButton = styled(Button)(({ disabled }) => ({
   backgroundColor: designTokens.colors.primaryBlue,
   opacity: disabled ? '0.7' : '1',
   color: '#fff',
-}));
-
-export const StyledPasswordWrapper = styled(Box)(() => ({
-  display: 'grid',
-  width: '100%',
-  alignItems: 'center',
-  gridTemplateColumns: '1fr auto',
-  '& button': {
-    backgroundColor: 'transparent',
-    border: 0,
-    cursor: 'pointer',
-    color: designTokens.colors.primaryBlue,
-  },
 }));

@@ -8,9 +8,6 @@ import {
   StyledReturnButton,
 } from './styled';
 import PasswordResetHeading from '@/features/PasswordResetHeading';
-import PasswordResetCodeField from '@/features/PasswordResetCodeField';
-import PasswordResetNewPassFields from '@/features/PasswordResetNewPassFields';
-import PasswordResetEmailField from '@/features/PasswordResetEmailField';
 import { useNavigate } from 'react-router-dom';
 import {
   checkResetPasswordCode,
@@ -18,8 +15,12 @@ import {
   sendResetPasswordCode,
 } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
+import { ThemeProvider, useTheme } from '@mui/material';
+import LabeledInput from '@/shared/LabeledInput';
+import PasswordResetButtons from '@/features/PasswordResetButtons';
 
 const PasswordResetForm = () => {
+  const resetPasswordFormTheme = useTheme();
   const [isEmailSubmitted, setEmailSubmitted] = useState(false);
   const [isCodeSubmitted, setCodeSubmitted] = useState(false);
   const [resetAccountEmail, setResetAccountEmail] = useState('');
@@ -62,57 +63,63 @@ const PasswordResetForm = () => {
   };
 
   return (
-    <FormGridWrapper item>
-      <FormContainer>
-        <PasswordResetHeading />
-        <StyledForm
-          onSubmit={
-            isEmailSubmitted
-              ? isCodeSubmitted
-                ? handlePasswordReset
-                : handleCodeSubmit
-              : handleEmailSubmit
-          }
-        >
-          {!isEmailSubmitted && (
-            <PasswordResetEmailField
-              onResetAccountEmailChange={setResetAccountEmail}
-              resetAccountEmailChangeState={resetAccountEmail}
+    <ThemeProvider theme={resetPasswordFormTheme}>
+      <FormGridWrapper item>
+        <FormContainer>
+          <PasswordResetHeading />
+          <StyledForm
+            onSubmit={
+              isEmailSubmitted
+                ? isCodeSubmitted
+                  ? handlePasswordReset
+                  : handleCodeSubmit
+                : handleEmailSubmit
+            }
+          >
+            {!isEmailSubmitted && (
+              <LabeledInput
+                label="Введите вашу почту"
+                required={true}
+                id="email"
+                autoComplete="email"
+                placeholder="example@mail.ru"
+                value={resetAccountEmail}
+                handleChange={setResetAccountEmail}
+              />
+            )}
+            {isEmailSubmitted && !isCodeSubmitted && (
+              <LabeledInput
+                label="Введите код восстановления"
+                required={true}
+                id="code"
+                autoComplete="one-time-code"
+                placeholder="000-000"
+                value={resetAccountCode}
+                handleChange={setResetAccountCode}
+              />
+            )}
+            {isCodeSubmitted && (
+              <LabeledInput
+                label="Новый пароль"
+                required={true}
+                id="new-password"
+                autoComplete="new-password"
+                placeholder="Пароль"
+                value={resetAccountNewPassword}
+                handleChange={setResetAccountNewPassword}
+              />
+            )}
+
+            <PasswordResetButtons
+              confirmCaption="Отправить"
+              returnCaption="Вернуться назад"
+              isConfirmDisabled={false}
+              returnClick={navigate('/signin')}
             />
-          )}
-          {isEmailSubmitted && !isCodeSubmitted && (
-            <PasswordResetCodeField
-              onResetAccountCodeChange={setResetAccountCode}
-              resetAccountCode={resetAccountCode}
-            />
-          )}
-          {isCodeSubmitted && (
-            <PasswordResetNewPassFields
-              setResetAccountNewPassword={setResetAccountNewPassword}
-              resetAccountNewPassword={resetAccountNewPassword}
-            />
-          )}
-          <StyledButtonsWrapper>
-            <StyledReturnButton
-              type="button"
-              fullWidth
-              variant="contained"
-              onClick={() => navigate('/signin')}
-            >
-              Вернуться назад
-            </StyledReturnButton>
-            <StyledConfirmButton
-              disabled={false}
-              type="submit"
-              fullWidth
-              variant="contained"
-            >
-              Отправить
-            </StyledConfirmButton>
-          </StyledButtonsWrapper>
-        </StyledForm>
-      </FormContainer>
-    </FormGridWrapper>
+          </StyledForm>
+        </FormContainer>
+      </FormGridWrapper>
+    </ThemeProvider>
   );
 };
 
