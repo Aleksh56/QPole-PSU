@@ -37,10 +37,10 @@ const AppHeader = () => {
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>
             <MenuItem>
-              <Button>Profile</Button>
+              <Button onClick={() => navigate('/app/profile')}>Профиль</Button>
             </MenuItem>
             <MenuItem>
-              <Button onClick={() => handleLogOut()}>Log out</Button>
+              <Button onClick={() => handleLogOut()}>Выйти из аккаунта</Button>
             </MenuItem>
           </Menu>
         </Dropdown>

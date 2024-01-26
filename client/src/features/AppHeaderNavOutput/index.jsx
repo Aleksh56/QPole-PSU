@@ -1,5 +1,4 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import {
   StyledNavLink,
   StyledNavigation,
@@ -14,6 +13,7 @@ const AppHeaderNavigationOutput = ({ itemsData = [] }) => {
         {itemsData.map((item) => {
           return (
             <StyledNavLink
+              end
               key={v4()}
               to={item.to}
               className={({ isActive, isPending }) =>

@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  FormContainer,
-  FormGridWrapper,
-  StyledButtonsWrapper,
-  StyledConfirmButton,
-  StyledForm,
-  StyledReturnButton,
-} from './styled';
+import { FormContainer, FormGridWrapper, StyledForm } from './styled';
 import PasswordResetHeading from '@/features/PasswordResetHeading';
 import { useNavigate } from 'react-router-dom';
 import {
