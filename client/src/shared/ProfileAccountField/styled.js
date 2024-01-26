@@ -9,7 +9,9 @@ export const StyledTypography = styled(Typography)(() => ({
 }));
 
 export const StyledTextField = styled(TextField)(() => ({
+  margin: `0 0 ${Rem(25)} 0`,
   '& .MuiInputBase-input': {
+    margin: 0,
     padding: Rem(8),
   },
 }));
@@ -19,6 +21,9 @@ export const StyledPasswordWrapper = styled(Box)(() => ({
   width: '100%',
   alignItems: 'center',
   gridTemplateColumns: '1fr auto',
+  '& .MuiTypography-root': {
+    marginBottom: Rem(8),
+  },
   '& button': {
     backgroundColor: 'transparent',
     border: 0,
