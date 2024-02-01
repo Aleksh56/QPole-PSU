@@ -7,7 +7,7 @@ QPole-PSU is a web application that serves as a tool for creating and taking min
 ### Front-end
 - React
 - JavaScript
-- Effector (for state management)
+- EffectorJS (for state management)
 - Material-UI (MUI)
 - Vite (as the build tool)
 - Hapi (for Server-Side Rendering - SSR)
