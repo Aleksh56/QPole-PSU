@@ -1,27 +1,23 @@
-import AppHeader from '@/widgets/AppHeader';
-import ProfileAccountInfo from '@/widgets/ProfileAccountInfo';
-import ProfileChangeCurrentPass from '@/widgets/ProfileChangeCurrentPass';
-import { Box } from '@mui/material';
 import React from 'react';
+import ProfileSidebar from '@/widgets/ProfileSidebar';
+import { Routes, Route } from 'react-router-dom';
+import { Box } from '@mui/material';
+import { SidebarLinksData } from './data/SidebarLinksData';
+import ProfileAboutPage from '../ProfileAbout';
 
 const ProfileAppPage = () => {
   return (
-    <>
-      <AppHeader />
-      <Box
-        sx={{
-          padding: '100px 15px',
-          display: 'grid',
-          gridTemplateColumns: '1fr 0.7fr',
-          maxWidth: '1100px',
-          margin: '0 auto',
-          columnGap: '30px',
-        }}
-      >
-        <ProfileAccountInfo />
-        <ProfileChangeCurrentPass />
+    <Box sx={{ display: 'flex', width: '100%', height: '100vh' }}>
+      <Box sx={{ width: '20%', flexShrink: 0 }}>
+        <ProfileSidebar linksData={SidebarLinksData} />
       </Box>
-    </>
+      <Box sx={{ flex: 1, backgroundColor: '#f7f9fa' }}>
+        <Routes>
+          <Route path="/" element={<ProfileAboutPage />} />
+          <Route path="/contributors" element={'Contributors'} />
+        </Routes>
+      </Box>
+    </Box>
   );
 };
 
