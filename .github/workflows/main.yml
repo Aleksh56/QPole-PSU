@@ -23,7 +23,7 @@ jobs:
           ls -la ./server
 
       - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.2
         with:
           host: 89.111.155.6
           username: root
@@ -33,7 +33,7 @@ jobs:
           target: "/home/app"
 
       - name: SSH into server and build Docker image
-        uses: appleboy/ssh-action@v0.1.7
+        uses: appleboy/ssh-action@v0.1.2
         with:
           host: 89.111.155.6
           username: root
@@ -44,7 +44,7 @@ jobs:
             docker build -t django-image .
 
       - name: SSH into server and start Docker container
-        uses: appleboy/ssh-action@v0.1.7
+        uses: appleboy/ssh-action@v0.1.2
         with:
           host: 89.111.155.6
           username: root
