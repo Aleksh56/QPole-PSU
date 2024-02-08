@@ -1,0 +1,41 @@
+name: Deploy Docker Container
+
+on:
+  push:
+    branches:
+      - back-dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build . -t django-image
+
+      - name: Save Docker image
+        run: docker save django-image > image.tar
+
+      - name: Copy Docker image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 89.111.155.6
+          username: root
+          port: 22
+          source: "image.tar"
+          target: "/home"
+
+      - name: Deploy Docker container
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: 89.111.155.6
+          username: root
+          port: 22
+          script: |
+            docker load < /home/image.tar
+            docker stop django-image || true
+            docker rm django-image || true
+            docker run --name django-image -d django-image
