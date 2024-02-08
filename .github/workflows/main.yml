@@ -23,7 +23,7 @@ jobs:
           ls -la ./server
 
       - name: Build Docker image
-        run: docker build -t django-image .
+        run: docker build -t django-image ./server
 
       - name: Save Docker image
         run: docker save django-image > image.tar
