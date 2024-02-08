@@ -23,7 +23,7 @@ jobs:
           ls -la ./server
 
       - name: Build Docker image
-        run: docker build --build-arg SECRET_KEY="django-insecure-kf8bj38wyg@vr)42_=50**uo-8$1s%(c$&l#t4ga=(m+@bm7fs" -t django-image ./server
+        run: docker build -t django-image ./server
 
       - name: Save Docker image
         run: docker save django-image > image.tar
