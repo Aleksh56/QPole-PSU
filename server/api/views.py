@@ -27,7 +27,7 @@ def get_my_profile(request):
         return Response({'message':"Пользователь не найден!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'POST', 'DELETE', 'PUT'])
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_profile(request):
@@ -53,7 +53,7 @@ def my_profile(request):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'PUT':
+    elif request.method == 'PATCH':
         current_user_profile = Profile.objects.filter(user=current_user).first()
         if current_user_profile:
             serializer = ProfileSerializer(current_user_profile, data=request.data)

@@ -26,7 +26,5 @@ __pycache__/
 # Ignore migrations
 **/migrations/
 
-# Ignore sensitive configuration files
-.env
 
 test.py
