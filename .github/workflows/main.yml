@@ -28,6 +28,7 @@ jobs:
           host: 89.111.155.6
           username: root
           port: 22
+          key: ${{ secrets.SERVER_SSH_KEY }}
           source: "."
           target: "/home/app"
 
@@ -37,6 +38,7 @@ jobs:
           host: 89.111.155.6
           username: root
           port: 22
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/app/server
             docker build -t django-image .
@@ -47,6 +49,7 @@ jobs:
           host: 89.111.155.6
           username: root
           port: 22
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             docker stop django-image || true
             docker rm django-image || true
