@@ -21,7 +21,7 @@ RUN apt-get update \
 # Install Python dependencies, including MySQL Connector
 RUN pip install -r requirements.txt
 
-RUN mysqld --bind-address=0.0.0.0
+RUN mysql --bind-address=0.0.0.0
 
 # Run migrations
 RUN python manage.py makemigrations
