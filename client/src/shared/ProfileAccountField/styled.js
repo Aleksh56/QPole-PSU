@@ -4,15 +4,14 @@ import { designTokens } from '@/constants/designTokens';
 import { Rem } from '@/utils/convertToRem';
 
 export const StyledTypography = styled(Typography)(() => ({
-  fontSize: Rem(14),
-  marginBottom: Rem(12),
+  marginBottom: Rem(5),
 }));
 
 export const StyledTextField = styled(TextField)(() => ({
-  margin: `0 0 ${Rem(25)} 0`,
+  margin: 0,
   '& .MuiInputBase-input': {
     margin: 0,
-    padding: Rem(8),
+    padding: Rem(12),
   },
 }));
 
@@ -21,9 +20,7 @@ export const StyledPasswordWrapper = styled(Box)(() => ({
   width: '100%',
   alignItems: 'center',
   gridTemplateColumns: '1fr auto',
-  '& .MuiTypography-root': {
-    marginBottom: Rem(8),
-  },
+
   '& button': {
     backgroundColor: 'transparent',
     border: 0,

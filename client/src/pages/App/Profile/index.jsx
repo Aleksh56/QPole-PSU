@@ -11,7 +11,7 @@ const ProfileAppPage = () => {
       <Box sx={{ width: '20%', flexShrink: 0 }}>
         <ProfileSidebar linksData={SidebarLinksData} />
       </Box>
-      <Box sx={{ flex: 1, backgroundColor: '#f7f9fa' }}>
+      <Box sx={{ flex: 1, backgroundColor: '#f7f9fa', overflowY: 'auto' }}>
         <Routes>
           <Route path="/" element={<ProfileAboutPage />} />
           <Route path="/contributors" element={'Contributors'} />

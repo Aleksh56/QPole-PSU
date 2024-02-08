@@ -8,7 +8,7 @@ import {
 import AuthFormHeading from '@/features/AuthFormHeading';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from '@mui/material';
-import LabeledInput from '@/shared/LabeledInput';
+import LabeledInput from '@/shared/AuthLabeledInput';
 
 const AuthForm = ({
   isSignIn,

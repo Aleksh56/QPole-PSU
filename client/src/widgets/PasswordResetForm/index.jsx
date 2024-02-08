@@ -9,7 +9,7 @@ import {
 } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
 import { ThemeProvider, useTheme } from '@mui/material';
-import LabeledInput from '@/shared/LabeledInput';
+import LabeledInput from '@/shared/AuthLabeledInput';
 import PasswordResetButtons from '@/features/PasswordResetButtons';
 
 const PasswordResetForm = () => {
