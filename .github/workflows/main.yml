@@ -20,7 +20,7 @@ jobs:
           echo "List of files:"
           ls -la
            echo "List of files /server:"
-          ls -la /server
+          ls -la ./server
 
       - name: Build Docker image
         run: docker build -t django-image .
