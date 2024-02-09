@@ -34,4 +34,4 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Run Gunicorn
-ENTRYPOINT ["gunicorn", "qpoll.wsgi", "-b", "0.0.0.0:8000"]
+ENTRYPOINT ["gunicorn", "qpoll.wsgi", "-b", "89.111.155.6:8000"]
