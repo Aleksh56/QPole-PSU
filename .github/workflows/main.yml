@@ -29,7 +29,9 @@ jobs:
           password: H4b9hpYG4N44R5Gh
           port: 22
           script: |
-            cd /home/server
             docker container stop $(docker container ls -q)
             docker container prune
+            cd /home/db
+            docker-compose up -d
+            cd /home/server
             docker-compose up -d
