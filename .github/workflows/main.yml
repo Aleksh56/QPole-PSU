@@ -20,33 +20,22 @@ jobs:
         port: 22
         source: "."
         target: "/home"
-    # steps:
-    #   - name: Check out the repo
-    #     uses: actions/checkout@v4
-
-    #   - name: List files
-    #     run: |
-    #       echo "Current directory:"
-    #       pwd
-    #       echo "List of files:"
-    #       ls -la
-    #       echo "List of files /server:"
-    #       ls -la ./server
         
-      # - name: Copy files to server
-      #   uses: cross-the-world/ssh-scp-ssh-pipelines@latest
-      #   with:
-      #     host: 89.111.155.6
-      #     user: root
-      #     pass:  H4b9hpYG4N44R5Gh
-      #     scp: |
-      #       "." => "/home"
-      #     last_ssh: |
-      #       cd /home/server
-      #       docker build -t django-image .
-      #       docker stop django-image || true
-      #       docker rm django-image || true
-      #       docker run --name django-image -d django-image
+    - name: Execute docker commands
+      uses: appleboy/ssh-action@v0.1.4
+      with:
+        host: 89.111.155.6
+        username: root
+        password: H4b9hpYG4N44R5Gh
+        port: 22
+        script: |
+          cd /home/server
+          docker build -t django-image .
+          docker run -d --name django-image
+
+
+        
+      
         # uses: appleboy/scp-action@v0.1.2
         # with:
         #   host: 89.111.155.6
