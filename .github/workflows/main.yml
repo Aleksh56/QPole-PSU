@@ -28,10 +28,6 @@ jobs:
           host: 89.111.155.6
           user: root
           pass:  H4b9hpYG4N44R5Gh
-          first_ssh: |
-            if [ -d /server ]; then
-              rm -rf /server
-            fi
           scp: |
             "." => "/home/app"
           last_ssh: |
