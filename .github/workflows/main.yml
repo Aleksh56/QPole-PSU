@@ -8,28 +8,29 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    - name: copy file via ssh password
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: 89.111.155.6
-        username: root
-        password: H4b9hpYG4N44R5Gh
-        port: 22
-        source: "."
-        target: "/home"
-        
-    - name: Execute docker commands
-      uses: appleboy/ssh-action@v0.1.4
-      with:
-        host: 89.111.155.6
-        username: root
-        password: H4b9hpYG4N44R5Gh
-        port: 22
-        script: |
-          cd /home/server
-          docker container stop $(docker container ls -q)
-          docker container prune
-          docker-compose up -d
+      - uses: actions/checkout@v4
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 89.111.155.6
+          username: root
+          password: H4b9hpYG4N44R5Gh
+          port: 22
+          source: "."
+          target: "/home"
+
+      - name: Execute docker commands
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: 89.111.155.6
+          username: root
+          password: H4b9hpYG4N44R5Gh
+          port: 22
+          script: |
+            cd /home/server
+            ls -l
+            docker container stop $(docker container ls -q)
+            docker container prune
+            docker-compose up -d
