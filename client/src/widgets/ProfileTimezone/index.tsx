@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   StyledProfileContainer,
   StyledProfileFieldsBox,
@@ -12,6 +12,17 @@ const ProfileTimezone = ({
   options = [],
 }) => {
   const selectedOption = useFormInput('');
+
+  useEffect(() => {
+    const getAllTimeZones = async () => {
+      await fetch('http://worldtimeapi.org/api/timezone').then((res) => {
+        const data = res;
+        console.log(data);
+      });
+    };
+    getAllTimeZones();
+  }, []);
+
   return (
     <StyledProfileContainer>
       <Typography

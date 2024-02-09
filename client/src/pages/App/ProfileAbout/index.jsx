@@ -7,6 +7,7 @@ import useFormInput from '@/hooks/useFormInput';
 import { ProfileInfoFieldsConfig } from './data/ProfileInfoFields';
 import ProfileUserData from '@/widgets/ProfileUserData';
 import ProfileTimezone from '@/widgets/ProfileTimezone';
+import Profile2AuthBlock from '@/widgets/Profile2Auth';
 
 const ProfileAboutPage = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const ProfileAboutPage = () => {
           ProfileInfoFields={ProfileInfoFields}
         />
         <ProfileTimezone caption="Язык и страна" selectCaption="Часовой пояс" />
+        <Profile2AuthBlock caption="Безопасность" />
       </Box>
     </StyledProfileAboutWrapper>
   );

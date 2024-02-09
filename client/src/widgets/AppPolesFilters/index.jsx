@@ -4,7 +4,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import { StyledButton, StyledStack, StyledStackWrapper } from './styled';
 
-const AppPolesFilters = () => {
+const AppPolesFilters = ({ handleCreateModalOpen }) => {
   const types = ['Все типы', 'Type 2', 'Type 3'];
   const statuses = ['Все статусы', 'Status 2', 'Status 3'];
   const groups = ['Для всех', 'Group 2', 'Group 3'];
@@ -63,7 +63,12 @@ const AppPolesFilters = () => {
           ))}
         </TextField>
 
-        <StyledButton variant="contained">Создать новый опрос</StyledButton>
+        <StyledButton
+          variant="contained"
+          onClick={() => handleCreateModalOpen()}
+        >
+          Создать новый опрос
+        </StyledButton>
       </StyledStack>
     </StyledStackWrapper>
   );
