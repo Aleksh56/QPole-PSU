@@ -23,7 +23,7 @@ jobs:
           ls -la ./server
 
       - name: Copy files to server
-        uses: cross-the-world/ssh-scp-ssh-pipeline@latest
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
         with:
           host: 89.111.155.6
           user: root
