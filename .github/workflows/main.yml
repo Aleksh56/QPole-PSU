@@ -34,4 +34,4 @@ jobs:
             cd /home/db
             docker-compose up -d
             cd /home/server
-            docker-compose up -d
+            docker-compose up -d --build
