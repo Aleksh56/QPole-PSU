@@ -31,7 +31,7 @@ jobs:
           scp: |
             "." => "/home"
           last_ssh: |
-            cd /home/app/server
+            cd /home/server
             docker build -t django-image .
             docker stop django-image || true
             docker rm django-image || true
