@@ -29,7 +29,7 @@ jobs:
           user: root
           pass:  H4b9hpYG4N44R5Gh
           scp: |
-            "." => "/home/app"
+            "." => "/home"
           last_ssh: |
             cd /home/app/server
             docker build -t django-image .
