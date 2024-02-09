@@ -10,8 +10,6 @@ services:
     volumes:
       - static-data:/vol/static
       - media-data:/vol/media
-    depends_on:
-      - db
 
   proxy:
     build:
@@ -25,16 +23,6 @@ services:
       - 443:443
     depends_on:
       - app
-
-  db:
-    image: mysql:latest
-    ports:
-      - '3306:3306'
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: qpoll_db_password
-      MYSQL_DATABASE: qpoll_db
-      MYSQL_PASSWORD: qpoll_db_password
 
 volumes:
   static-data:
