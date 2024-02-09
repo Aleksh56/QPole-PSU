@@ -30,43 +30,6 @@ jobs:
         port: 22
         script: |
           cd /home/server
-          docker-compose up
-
-          
-        # docker build -t django-image .
-        # docker run --name django-image -d django-image
-
-
-        
-      
-        # uses: appleboy/scp-action@v0.1.2
-        # with:
-        #   host: 89.111.155.6
-        #   username: root
-        #   port: 22
-        #   key: ${{ secrets.SERVER_SSH_KEY }}
-        #   source: "."
-        #   target: "/home/app"
-
-      # - name: SSH into server and build Docker image
-      #   uses: appleboy/ssh-action@v0.1.2
-      #   with:
-      #     host: 89.111.155.6
-      #     username: root
-      #     port: 22
-      #     key: ${{ secrets.SERVER_SSH_KEY }}
-      #     script: |
-      #       cd /home/app/server
-      #       docker build -t django-image .
-
-      # - name: SSH into server and start Docker container
-      #   uses: appleboy/ssh-action@v0.1.2
-      #   with:
-      #     host: 89.111.155.6
-      #     username: root
-      #     port: 22
-      #     key: ${{ secrets.SERVER_SSH_KEY }}
-      #     script: |
-      #       docker stop django-image || true
-      #       docker rm django-image || true
-      #       docker run --name django-image -d django-image
+          docker container stop $(docker container ls -q)
+          docker container prune
+          docker-compose up -d
