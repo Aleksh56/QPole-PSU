@@ -18,7 +18,7 @@ jobs:
         username: root
         password: H4b9hpYG4N44R5Gh
         port: 22
-        source: "/server"
+        source: "."
         target: "/home"
     # steps:
     #   - name: Check out the repo
