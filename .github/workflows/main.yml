@@ -30,6 +30,11 @@ jobs:
         port: 22
         script: |
           cd /home/server
+          mkdir app
+          cd /app
+          mkdir static
+          cd ..
+          cd ..
           docker build -t django-image .
           docker run -d --name django-image
 
