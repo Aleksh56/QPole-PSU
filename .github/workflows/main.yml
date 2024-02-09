@@ -23,14 +23,21 @@ jobs:
           ls -la ./server
 
       - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.2
+        uses: cross-the-world/ssh-scp-ssh-pipeline@latest
         with:
           host: 89.111.155.6
-          username: root
-          port: 22
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "."
-          target: "/home/app"
+          user: root
+          pass:  H4b9hpYG4N44R5Gh
+          scp: |
+            "." => "/home/app"
+        # uses: appleboy/scp-action@v0.1.2
+        # with:
+        #   host: 89.111.155.6
+        #   username: root
+        #   port: 22
+        #   key: ${{ secrets.SERVER_SSH_KEY }}
+        #   source: "."
+        #   target: "/home/app"
 
       - name: SSH into server and build Docker image
         uses: appleboy/ssh-action@v0.1.2
