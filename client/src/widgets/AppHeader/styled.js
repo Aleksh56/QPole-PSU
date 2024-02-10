@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 import { Link } from 'react-router-dom';
 import { MenuButton } from '@mui/base/MenuButton';
-import { Menu } from '@mui/base/Menu';
 
 export const StyledHeaderWrapper = styled('header')(() => ({
   backgroundColor: '#ebebeb',

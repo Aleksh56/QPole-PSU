@@ -9,9 +9,10 @@ import {
 } from './styled';
 import CreatePoleIllustration from '@assets/createPole.svg';
 
-const AppCreateFirstPole = ({ settings = {} }) => {
-  const handleOpenCreatePoleModal = () => {};
-
+const AppCreateFirstPole = ({
+  settings = {},
+  handleOpenCreatePoleModal = () => {},
+}) => {
   return (
     <StyledHeroWrapper>
       <StyledLeftColumn>
@@ -20,7 +21,7 @@ const AppCreateFirstPole = ({ settings = {} }) => {
           <StyledDescription variant={'body1'}>
             {settings.description}
           </StyledDescription>
-          <StyledButton onClick={handleOpenCreatePoleModal}>
+          <StyledButton onClick={() => handleOpenCreatePoleModal(true)}>
             {settings.buttonCaption}
           </StyledButton>
         </StyledInfoWrapper>

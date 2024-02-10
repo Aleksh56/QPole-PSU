@@ -1,72 +1,44 @@
 import React from 'react';
+import { Dialog, DialogContent } from '@mui/material';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-  Box,
-} from '@mui/material';
+  ButtonContainer,
+  ButtonContainerDescription,
+  ButtonContainerTitle,
+  DialogContentWrapper,
+  StyledDialogTitle,
+} from './styled';
+import { v4 } from 'uuid';
+import { createPole } from './api/apiRequests';
+import { useNavigate } from 'react-router-dom';
 
-const CreatePoleModal = ({ isOpen, onClose, title, content, buttons }) => {
-  const classes = 1;
+const CreatePoleModal = ({ isOpen, onClose, title, buttons }) => {
+  const navigate = useNavigate();
+
+  const handlePoleTypeSelect = async (poleType) => {
+    const newPoleId = v4();
+    // await createPole(poleType, newPoleId);
+    navigate(`/app/tests/${newPoleId}/main`);
+  };
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
-      <DialogTitle className={classes.modalTitle}>{title}</DialogTitle>
+    <Dialog open={isOpen} onClose={() => onClose(false)}>
+      <StyledDialogTitle>{title}</StyledDialogTitle>
       <DialogContent>
-        <Box
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            columnGap: '20px',
-          }}
-        >
-          {buttons.map((button, index) => (
-            <div
-              key={index}
-              style={{
-                cursor: 'pointer',
-                textAlign: 'center',
-                padding: '20px 10px',
-                borderRadius: '7px',
-                boxShadow:
-                  '0px 8px 20px rgba(0, 0, 0, 0.1), 0px 2px 4px rgba(0, 0, 0, 0.05)',
-              }}
+        <DialogContentWrapper>
+          {buttons.map((button) => (
+            <ButtonContainer
+              key={v4()}
+              onClick={() => handlePoleTypeSelect(button.type)}
             >
-              <img src={button.image} alt={button.title} />
-              <p
-                style={{
-                  marginTop: '20px',
-                  fontSize: '14px',
-                  color: '#515151',
-                  lineHeight: '18px',
-                  fontWeight: 600,
-                }}
-              >
-                {button.title}
-              </p>
-              <p
-                style={{
-                  marginTop: '5px',
-                  fontSize: '12px',
-                  lineHeight: '14px',
-                }}
-              >
+              <button.image sx={{ width: '38px', height: '38px' }} />
+              <ButtonContainerTitle>{button.title}</ButtonContainerTitle>
+              <ButtonContainerDescription>
                 {button.caption}
-              </p>
-            </div>
+              </ButtonContainerDescription>
+            </ButtonContainer>
           ))}
-        </Box>
+        </DialogContentWrapper>
       </DialogContent>
-      {/* <DialogActions>
-        {buttons.map((button, index) => (
-          <Button key={index} onClick={button.onClick} color="primary">
-            {button.label}
-          </Button>
-        ))}
-      </DialogActions> */}
     </Dialog>
   );
 };

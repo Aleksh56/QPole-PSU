@@ -9,45 +9,51 @@ const api = axios.create({
   },
 });
 
-const handleRequest = async (requestFunction, successMessage) => {
+export const handleRequest = async (method, url, data, successMessage) => {
   try {
-    const response = await requestFunction();
+    const response = await api[method](url, data);
     console.log(successMessage, response);
     return { data: response.data, ok: true };
   } catch (error) {
-    console.error(`${successMessage} failed:`, error.request.response);
+    console.error(
+      `${successMessage} failed:`,
+      error?.response?.data || error.message
+    );
     throw error;
   }
 };
 
-export const registerUser = async (userData) => {
-  return handleRequest(
-    () => api.post('/login/register/', userData),
-    'Registration'
-  );
+export const registerUser = (userData) => {
+  return handleRequest('post', '/login/register/', userData, 'Registration');
 };
 
-export const loginUser = async (userData) => {
-  return handleRequest(() => api.post('/login/login/', userData), 'Login');
+export const loginUser = (userData) => {
+  return handleRequest('post', '/login/login/', userData, 'Login');
 };
 
 export const sendResetPasswordCode = async (userEmail) => {
   return handleRequest(
-    () => api.post('/login/send_reset_code/', userEmail),
+    'post',
+    '/login/send_reset_code/',
+    userEmail,
     'Send_reset_code'
   );
 };
 
 export const checkResetPasswordCode = async (resetCode) => {
   return handleRequest(
-    () => api.post('/login/check_reset_code/', resetCode),
+    'post',
+    '/login/check_reset_code/',
+    resetCode,
     'Check_reset_code'
   );
 };
 
 export const resetPasswordRequest = async (newUserPasswordData) => {
   return handleRequest(
-    () => api.post('/login/reset_password/', newUserPasswordData),
+    'post',
+    '/login/reset_password/',
+    newUserPasswordData,
     'Reset_password_request'
   );
 };

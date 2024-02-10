@@ -6,13 +6,13 @@ import {
 import { Box, FormControlLabel } from '@mui/material';
 import SecurityIcon from '@assets/security.svg';
 import {
-  IOSSwitch,
   Styled2AuthContainerHeading,
   Styled2AuthHeading,
   Styled2AuthInfo,
   StyledAuthContentWrapper,
   StyledImage,
 } from './styled';
+import CustomSwitch from '@/shared/Switch';
 
 const Profile2AuthBlock = ({ caption = '' }) => {
   return (
@@ -34,11 +34,7 @@ const Profile2AuthBlock = ({ caption = '' }) => {
           </Box>
           <FormControlLabel
             control={
-              <IOSSwitch
-                focusVisibleClassName=".Mui-focusVisible"
-                disableRipple
-                sx={{ m: 1 }}
-              />
+              <CustomSwitch focusVisibleClassName={'.Mui-focusVisible'} />
             }
           />
         </StyledAuthContentWrapper>
