@@ -1,15 +1,25 @@
 import React from 'react';
 import { Button } from '@mui/material';
-import { StyledNavLink } from './styled';
+import { StyledButton, StyledNavLink } from './styled';
 import { useParams } from 'react-router-dom';
 
-const PoleSettingsMenuButton = ({ icon, label, page }) => {
+const PoleSettingsMenuButton = ({ icon: Icon, label, page }) => {
   const { id } = useParams();
   return (
-    <StyledNavLink end to={`/app/tests/${id}/${page}`}>
-      <Button component="div" style={{ justifyContent: 'flex-start' }}>
+    <StyledNavLink
+      end
+      to={`/app/tests/${id}/${page}`}
+      className={({ isActive, isPending }) =>
+        isPending ? 'pending' : isActive ? 'active' : ''
+      }
+    >
+      <StyledButton
+        startIcon={<Icon />}
+        component="div"
+        style={{ justifyContent: 'flex-start' }}
+      >
         {label}
-      </Button>
+      </StyledButton>
     </StyledNavLink>
   );
 };
