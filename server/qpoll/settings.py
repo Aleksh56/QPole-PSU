@@ -170,6 +170,7 @@ REST_FRAMEWORK = {
 
 # AUTH_USER_MODEL = 'login.CustomUser'
 
+SILENCED_SYSTEM_CHECKS = ['fields.W340']
 
 
 

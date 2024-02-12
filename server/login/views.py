@@ -5,30 +5,46 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 from django.core.cache import cache
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
 from .serializers import UserSerializer, PasswordChangeSerializer
 from .utils import *
+from api.models import *
+
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
-    email = request.data['email']
+    data = request.data
+    email = data['email']
     check_email = User.objects.filter(email=email).exists()
 
     if not check_email:
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            auth_login(request, user)
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'auth_token': token.key, 'user_data': serializer.data})
+            with transaction.atomic():
+                user = serializer.save()
+                auth_login(request, user)
+                user_profile = Profile.objects.create(
+                    user=user, 
+                    name=data['first_name'],
+                    surname=data['last_name'],
+                    patronymic=data['patronymic'],
+                    sex=data['sex'],
+                    number=data['phone'], 
+                    role=UserRole.objects.get(role=data['role'])
+                )
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'auth_token': token.key, 'user_data': serializer.data})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response({'message':"Данная почта уже занята"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': "Данная почта уже занята"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['POST'])
