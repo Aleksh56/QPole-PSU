@@ -119,7 +119,7 @@ class Poll(models.Model):
    
     @property
     def opened_for_voting(self):    # доступно ли для голосования по времени
-        return true
+        return True
 
 
 
