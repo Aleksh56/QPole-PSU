@@ -14,9 +14,9 @@ jobs:
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: 89.111.155.6
-          username: root
-          password: H4b9hpYG4N44R5Gh
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASS }}
           port: 22
           source: "."
           target: "/home"
@@ -24,9 +24,9 @@ jobs:
       - name: Execute docker commands
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: 89.111.155.6
-          username: root
-          password: H4b9hpYG4N44R5Gh
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASS }}
           port: 22
           script: |
             docker container stop $(docker container ls -q)
