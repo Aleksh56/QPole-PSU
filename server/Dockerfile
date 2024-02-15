@@ -14,7 +14,7 @@ COPY . /app/
 COPY ./requirements.txt /app/
 
 # Install system dependencies
-RUN apt-get update \
+RUN apt-get update --allow-unauthenticated \
     && apt-get install -y python3-dev mariadb-client build-essential \
     && rm -rf /var/lib/apt/lists/*
 
