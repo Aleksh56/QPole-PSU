@@ -102,19 +102,55 @@ def my_poll(request, poll_id=None):
             return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = PollSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(author=current_user.profile)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        current_user = request.user
+        data = request.data
+
+        poll_id = data.get('poll_id', None)
+        author_profile = Profile.objects.get(user=current_user)
+        poll_type, _ = PollType.objects.get_or_create(name=data['poll_type'])
+
+        poll = Poll(
+            id=poll_id,
+            author=author_profile,
+            poll_type=poll_type,
+        )
+
+        poll.save()
+        return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
 
     elif request.method == 'PATCH':
-        # Implement logic to update poll
-        return Response({'message': "PATCH method not implemented yet!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        data = request.data
+        poll_id = data.get('poll_id', None)
+        
+        poll = None
+        if poll_id:
+            poll = Poll.objects.get(id=poll_id)
+        else:
+            return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
+
+        for key, value in data.items():
+            if key == 'duration':
+                poll.set_duration(data['duration'])
+            else:
+                setattr(poll, key, value)
+
+        poll.save()
+        return Response("Опрос успешно изменен", status=status.HTTP_200_OK)
+
 
     elif request.method == 'DELETE':
-        # Implement logic to delete poll
-        return Response({'message': "DELETE method not implemented yet!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
+        data = request.data
+        poll_id = data.get('poll_id', None)
+
+        poll = None
+        if poll_id:
+            poll = Poll.objects.get(id=poll_id)
+        else:
+            return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
+
+        poll.delete()
+
+        return Response("Опрос успешно удален", status=status.HTTP_204_NO_CONTENT)
 
     else:
         return Response({'message': "Unsupported request method!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -155,23 +191,25 @@ def create_initial_poll(request):
         current_user = request.user
         data = request.data
 
+        poll_id = data.get('poll_id', None)
         author_profile = Profile.objects.get(user=current_user)
         poll_type, _ = PollType.objects.get_or_create(name=data['poll_type'])
 
         poll = Poll(
+            id=poll_id,
             author=author_profile,
             poll_type=poll_type,
-            name=data['name'],
-            description=data['description'],
-            has_multiple_choices=data['has_multiple_choices'],
-            has_correct_answer=data['has_correct_answer'],
-            is_anonymous=data['is_anonymous'],
-            can_cancel_vote=data['can_cancel_vote']
+            # name=data['name'],
+            # description=data['description'],
+            # has_multiple_choices=data['has_multiple_choices'],
+            # has_correct_answer=data['has_correct_answer'],
+            # is_anonymous=data['is_anonymous'],
+            # can_cancel_vote=data['can_cancel_vote']
         )
-        poll.set_duration(data['duration'])
+        # poll.set_duration(data['duration'])
 
-        if 'image' in request.FILES:
-            poll.image = request.FILES['image']
+        # if 'image' in request.FILES:
+        #     poll.image = request.FILES['image']
 
         poll.save()
         return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
@@ -180,6 +218,31 @@ def create_initial_poll(request):
     #     logger.error(f"Произошла ошибка при создании опроса: {e}")
     #     return Response(f"Произошла ошибка при создании опроса: {e}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def edit_poll(request):
+    data = request.data
+    poll_id = data.pop('poll_id')
+    
+    poll = None
+    if poll_id:
+        poll = Poll.objects.get(id=poll_id)
+    else:
+        return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
+
+    for key, value in data.items():
+        if key == 'duration':
+            poll.set_duration(data['duration'])
+        else:
+            setattr(poll, key, value)
+
+    poll.save()
+    return Response("Опрос успешно изменен", status=status.HTTP_200_OK)
+
+
+
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])

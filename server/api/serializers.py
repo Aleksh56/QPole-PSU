@@ -8,8 +8,15 @@ def validate_age(value):
         raise serializers.ValidationError("Возраст должен быть 14 или более.")
 
 
+class MiniUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'username']
+    
 
 class ProfileSerializer(serializers.ModelSerializer):
+    user = MiniUserSerializer()
+    
     class Meta:
         model = Profile
         fields = '__all__'
