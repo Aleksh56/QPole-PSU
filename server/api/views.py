@@ -11,6 +11,10 @@ from rest_framework.authtoken.models import Token
 from .serializers import *
 from .models import *
 
+import logging
+logger = logging.getLogger('debug') 
+
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -43,6 +47,7 @@ def my_profile(request):
 
     elif request.method == 'POST':
         current_user_profile = Profile.objects.filter(user=current_user).first()
+        request.data['user'] = current_user.id
         if current_user_profile:
             return Response({'message': "Профиль уже существует!"}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -56,8 +61,9 @@ def my_profile(request):
     elif request.method == 'PATCH':
         current_user_profile = Profile.objects.filter(user=current_user).first()
         if current_user_profile:
+            request.data['user'] = current_user.id
             serializer = ProfileSerializer(current_user_profile, data=request.data)
-
+    
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -76,6 +82,116 @@ def my_profile(request):
 
     else:
         return Response({'message': "Неподдерживаемый метод запроса!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def my_poll(request, poll_id=None):
+    current_user = request.user
+
+    if request.method == 'GET':
+        if poll_id:
+            poll = get_object_or_404(Poll.objects.filter(author__user=current_user), pk=poll_id)
+            serializer = PollSerializer(poll)
+            return Response(serializer.data)
+        else:
+            polls = Poll.objects.filter(author__user=current_user)
+            serializer = PollSerializer(polls, many=True)
+            return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = PollSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(author=current_user.profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'PATCH':
+        # Implement logic to update poll
+        return Response({'message': "PATCH method not implemented yet!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
+
+    elif request.method == 'DELETE':
+        # Implement logic to delete poll
+        return Response({'message': "DELETE method not implemented yet!"}, status=status.HTTP_501_NOT_IMPLEMENTED)
+
+    else:
+        return Response({'message': "Unsupported request method!"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def close_my_poll(request, poll_id):
+    current_user = request.user
+
+    poll = get_object_or_404(Poll.objects.filter(author__user=current_user), pk=poll_id)
+    poll.is_closed = True
+    if poll.save():
+        return Response(f"Опрос №{poll_id} успешно закрыт", status=status.HTTP_200_OK)
+    else: 
+        return Response(f"Опрос №{poll_id} не был успешно закрыт", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def pause_my_poll(request, poll_id):
+    current_user = request.user
+
+    poll = get_object_or_404(Poll.objects.filter(author__user=current_user), pk=poll_id)
+    poll.is_paused = True
+    if poll.save():
+        return Response(f"Опрос №{poll_id} успешно приостановлен", status=status.HTTP_200_OK)
+    else: 
+        return Response(f"Опрос №{poll_id} не был успешно приостановлен", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def create_initial_poll(request):
+    # try:
+        current_user = request.user
+        data = request.data
+
+        author_profile = Profile.objects.get(user=current_user)
+        poll_type, _ = PollType.objects.get_or_create(name=data['poll_type'])
+
+        poll = Poll(
+            author=author_profile,
+            poll_type=poll_type,
+            name=data['name'],
+            description=data['description'],
+            has_multiple_choices=data['has_multiple_choices'],
+            has_correct_answer=data['has_correct_answer'],
+            is_anonymous=data['is_anonymous'],
+            can_cancel_vote=data['can_cancel_vote']
+        )
+        poll.set_duration(data['duration'])
+
+        if 'image' in request.FILES:
+            poll.image = request.FILES['image']
+
+        poll.save()
+        return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
+    
+    # except Exception as e:
+    #     logger.error(f"Произошла ошибка при создании опроса: {e}")
+    #     return Response(f"Произошла ошибка при создании опроса: {e}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_options_to_poll(request, poll_id):
+    # try:
+        data = request.data
+        poll = Poll.objects.filter(id=poll_id).first()
+        for option_data in data['options']:
+            poll.add_answer_option(option_data['name'], option_data['is_correct'])
+
+        return Response("Варианты ответа успешно добавлены", status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET'])
@@ -105,3 +221,4 @@ def test_api(request):
 
     poll_serializer = PollSerializer(poll)
     return Response(poll_serializer.data)
+

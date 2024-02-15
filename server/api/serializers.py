@@ -3,17 +3,18 @@ from rest_framework import serializers
 
 from .models import *
 
+def validate_age(value):
+    if value < 14:
+        raise serializers.ValidationError("Возраст должен быть 14 или более.")
+
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
 
-    def validate(self, data):
-        if data.get('age') and data['age'] < 18:
-            raise serializers.ValidationError("Возраст должен быть 18 или более.")
-
-        return data
+    # age = serializers.IntegerField(validators=[validate_age])
     
     def create(self, validated_data):
         instance = Profile.objects.create(**validated_data)
@@ -31,19 +32,26 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 
+class MiniProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('name', 'surname', 'user')
+
+
+class PollParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PollParticipant
+        fields = '__all__'
+
+    profile = MiniProfileSerializer()
+
+
 class AnswerOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerOption
         fields = '__all__'
 
-
-
-class PollParticipantSerializer(serializers.ModelSerializer):
-    answers = AnswerOptionSerializer(many=True)
-
-    class Meta:
-        model = PollParticipant
-        fields = '__all__'
+    answers = PollParticipantSerializer(many=True)
 
 
 
@@ -62,10 +70,12 @@ class UserRoleSerializer(serializers.ModelSerializer):
 
 class PollSerializer(serializers.ModelSerializer):
     poll_type = serializers.CharField(source='poll_type.name', read_only=True)
-    answer_options = AnswerOptionSerializer(many=True)
-    participants = PollParticipantSerializer(many=True)
     author = ProfileSerializer()
+    answer_options = AnswerOptionSerializer(many=True)
+
+    members_quantity = serializers.IntegerField()
+    opened_for_voting = serializers.BooleanField()
 
     class Meta:
         model = Poll
-        fields = '__all__'
+        fields = '__all__'  
