@@ -6,20 +6,19 @@ export const surveyTypesData = [
   {
     image: QuizIcon,
     title: 'Тест викторина',
-    type: 'quiz',
+    type: 'Викторина',
     caption: 'Есть правильные и неправильные ответы. Считается кол-во баллов',
   },
   {
     image: PortraitOutlinedIcon,
     title: 'Личностный тест',
-    type: 'personality',
-    caption:
-      'Нет правильных ответов. Результаты привязываются к вариантам ответов',
+    type: 'Тест',
+    caption: 'Нет правильных ответов. Результаты привязываются к вариантам ответов',
   },
   {
     image: LinearScaleOutlinedIcon,
     title: 'Квиз опросник',
-    type: 'survey',
+    type: 'Опрос',
     caption: 'Возможность ветвления и начисление баллов за определенные ответы',
   },
 ];

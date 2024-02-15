@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box, FormControlLabel } from '@mui/material';
+import { Box } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 
 export const MainSettingsContentWrapper = styled(Box)(() => ({
@@ -21,12 +21,4 @@ export const PoleInfoContainer = styled(Box)(() => ({
 export const PoleInfoSwitchContainer = styled(Box)(() => ({
   display: 'grid',
   rowGap: '5px',
-}));
-
-export const StyledFormControlLabel = styled(FormControlLabel)(() => ({
-  maxWidth: 'max-content',
-  '& .MuiTypography-root': {
-    fontSize: '14px',
-    color: '#909090',
-  },
 }));

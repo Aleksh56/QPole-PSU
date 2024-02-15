@@ -16,7 +16,7 @@ const CreatePoleModal = ({ isOpen, onClose, title, buttons }) => {
 
   const handlePoleTypeSelect = async (poleType) => {
     const newPoleId = v4();
-    // await createPole(poleType, newPoleId);
+    await createPole(poleType, newPoleId);
     navigate(`/app/tests/${newPoleId}/main`);
   };
 
@@ -26,15 +26,10 @@ const CreatePoleModal = ({ isOpen, onClose, title, buttons }) => {
       <DialogContent>
         <DialogContentWrapper>
           {buttons.map((button) => (
-            <ButtonContainer
-              key={v4()}
-              onClick={() => handlePoleTypeSelect(button.type)}
-            >
+            <ButtonContainer key={v4()} onClick={() => handlePoleTypeSelect(button.type)}>
               <button.image sx={{ width: '38px', height: '38px' }} />
               <ButtonContainerTitle>{button.title}</ButtonContainerTitle>
-              <ButtonContainerDescription>
-                {button.caption}
-              </ButtonContainerDescription>
+              <ButtonContainerDescription>{button.caption}</ButtonContainerDescription>
             </ButtonContainer>
           ))}
         </DialogContentWrapper>

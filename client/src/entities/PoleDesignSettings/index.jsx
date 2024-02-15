@@ -1,20 +1,20 @@
-import React from 'react';
-import { Stack, TextField } from '@mui/material';
+import React, { useCallback } from 'react';
+import { Grid } from '@mui/material';
 import { poleDesignFieldData } from './data/PoleDesignFieldData';
+import ColorPicker from '@/shared/ColorPicker';
 
 const PoleDesignSettingsTab = () => {
+  const handleColorChange = useCallback((name, color) => {
+    console.log(name, color);
+  }, []);
   return (
-    <Stack spacing={2}>
+    <Grid container spacing={2}>
       {poleDesignFieldData.map(({ label, name }) => (
-        <TextField
-          key={name}
-          fullWidth
-          label={label}
-          variant="outlined"
-          type="color"
-        />
+        <Grid item xs={6} key={name}>
+          <ColorPicker label={label} name={name} onChange={handleColorChange} />
+        </Grid>
       ))}
-    </Stack>
+    </Grid>
   );
 };
 

@@ -1,5 +1,10 @@
 import { handleRequest } from '@/api/api';
 
-export const createPole = async (poleType) => {
-  return handleRequest('post', '/pole/createPole/', poleType, 'Create_pole');
+export const createPole = async (poleType, poleId) => {
+  return handleRequest(
+    'post',
+    '/api/my_poll/',
+    { poll_type: poleType, poll_id: poleId },
+    'Create_pole'
+  );
 };

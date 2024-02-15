@@ -6,14 +6,10 @@ import InvisibleLabeledField from '@/shared/InvisibleLabeledField';
 import useTabs from '@/hooks/useTabs';
 import PoleImageUpload from '@/entities/PoleImageUpload';
 import PoleMainSettingsTabs from '@/entities/PoleMainSettingsTabs';
-import {
-  MainSettingsContentWrapper,
-  PoleInfoContainer,
-  PoleInfoSwitchContainer,
-  StyledFormControlLabel,
-} from './styled';
+import { MainSettingsContentWrapper, PoleInfoContainer, PoleInfoSwitchContainer } from './styled';
 import { poleSwitchData } from './data/PoleSwitchData';
 import { poleTabsButtonsData } from './data/PoleTabsButtonsData';
+import { StyledFormControlLabel } from '@/constants/styles';
 
 const PoleMainSettingsPage = () => {
   const [tabValue, handleTabChange] = useTabs();
@@ -23,14 +19,8 @@ const PoleMainSettingsPage = () => {
       <MainSettingsContentWrapper>
         <PoleInfoContainer>
           <PoleImageUpload />
-          <InvisibleLabeledField
-            label="Название теста"
-            placeholder="Введите название"
-          />
-          <InvisibleLabeledField
-            label="Описание"
-            placeholder="Введите описание"
-          />
+          <InvisibleLabeledField label="Название теста" placeholder="Введите название" />
+          <InvisibleLabeledField label="Описание" placeholder="Введите описание" />
           <Divider sx={{ my: 2 }} />
           <PoleInfoSwitchContainer>
             {poleSwitchData.map((setting) => (

@@ -13,7 +13,7 @@ const AuthContext = createContext({
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setAuthState] = useState(false);
-  const [token, setToken] = useState(''); // Don't rewrite to 'let', will be used in future
+  const [token, setToken] = useState('');
 
   useEffect(() => {
     const storedToken = localStorage.getItem('auth_token');
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   );
 
   const contextValue = useMemo(
-    () => ({ isAuthenticated, setAuth }),
+    () => ({ isAuthenticated, setAuth, token }),
     [isAuthenticated, setAuth]
   );
 
