@@ -24,7 +24,6 @@ def get_my_profile(request):
     if current_user:
         current_user_profile = Profile.objects.get(user=current_user)
         serializer = ProfileSerializer(current_user_profile)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     else:
@@ -36,11 +35,19 @@ def get_my_profile(request):
 @permission_classes([IsAuthenticated])
 def my_profile(request):
     current_user = request.user
-
+    current_profile = Profile.objects.get(user=current_user)
     if request.method == 'GET':
         current_user_profile = Profile.objects.filter(user=current_user).first()
+
         if current_user_profile:
             serializer = ProfileSerializer(current_user_profile)
+            user_polls = Poll.objects.filter(author=current_profile)
+            if user_polls:
+                serializer.data['polls'] = user_polls
+            else:
+                serializer.data['polls'] = []
+
+            print(serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({'message': "Профиль не найден!"}, status=status.HTTP_404_NOT_FOUND)
@@ -110,7 +117,7 @@ def my_poll(request, poll_id=None):
         poll_type, _ = PollType.objects.get_or_create(name=data['poll_type'])
 
         poll = Poll(
-            id=poll_id,
+            poll_id=poll_id,
             author=author_profile,
             poll_type=poll_type,
         )
