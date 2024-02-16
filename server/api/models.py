@@ -118,8 +118,10 @@ class Poll(models.Model):
         return len(profiles)   
    
     @property
-    def opened_for_voting(self):    # доступно ли для голосования по времени
-        return timezone.now() < self.created_date + self.duration
+    def opened_for_voting(self):
+        if self.duration:     # доступно ли для голосования по времени
+            return timezone.now() < self.created_date + self.duration
+        else: return True
 
 
 

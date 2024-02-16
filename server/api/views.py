@@ -48,6 +48,7 @@ def my_profile(request):
                 serializer.data['polls'] = []
 
             print(serializer.data)
+            print(type(serializer.data))
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({'message': "Профиль не найден!"}, status=status.HTTP_404_NOT_FOUND)
@@ -95,12 +96,13 @@ def my_profile(request):
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def my_poll(request, poll_id=None):
+def my_poll(request):
     current_user = request.user
 
     if request.method == 'GET':
+        poll_id = request.GET.get('poll_id', None)
         if poll_id:
-            poll = get_object_or_404(Poll.objects.filter(author__user=current_user), pk=poll_id)
+            poll = get_object_or_404(Poll.objects.filter(author__user=current_user), poll_id=poll_id)
             serializer = PollSerializer(poll)
             return Response(serializer.data)
         else:
@@ -188,67 +190,6 @@ def pause_my_poll(request, poll_id):
     else: 
         return Response(f"Опрос №{poll_id} не был успешно приостановлен", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-
-
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def create_initial_poll(request):
-    # try:
-        current_user = request.user
-        data = request.data
-
-        poll_id = data.get('poll_id', None)
-        author_profile = Profile.objects.get(user=current_user)
-        poll_type, _ = PollType.objects.get_or_create(name=data['poll_type'])
-
-        poll = Poll(
-            id=poll_id,
-            author=author_profile,
-            poll_type=poll_type,
-            # name=data['name'],
-            # description=data['description'],
-            # has_multiple_choices=data['has_multiple_choices'],
-            # has_correct_answer=data['has_correct_answer'],
-            # is_anonymous=data['is_anonymous'],
-            # can_cancel_vote=data['can_cancel_vote']
-        )
-        # poll.set_duration(data['duration'])
-
-        # if 'image' in request.FILES:
-        #     poll.image = request.FILES['image']
-
-        poll.save()
-        return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
-    
-    # except Exception as e:
-    #     logger.error(f"Произошла ошибка при создании опроса: {e}")
-    #     return Response(f"Произошла ошибка при создании опроса: {e}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def edit_poll(request):
-    data = request.data
-    poll_id = data.pop('poll_id')
-    
-    poll = None
-    if poll_id:
-        poll = Poll.objects.get(id=poll_id)
-    else:
-        return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
-
-    for key, value in data.items():
-        if key == 'duration':
-            poll.set_duration(data['duration'])
-        else:
-            setattr(poll, key, value)
-
-    poll.save()
-    return Response("Опрос успешно изменен", status=status.HTTP_200_OK)
-
-
 
 
 @api_view(['POST'])
