@@ -170,7 +170,7 @@ def my_poll(request):
             return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            if poll.add_answer_option(is_free_response=False, image=image, name='name2'):
+            if poll.add_answer_option(is_free_response=True, image=image, name='name2'):
                 return Response("Вариант ответа успешно добавлен.", status=status.HTTP_200_OK)
             else:
                 return Response(f"Не удалось добавить вариант ответа.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)

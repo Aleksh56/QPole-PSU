@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 
-import magic
+import imghdr
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 class Profile(models.Model):
@@ -237,14 +237,20 @@ class Poll(models.Model):
         else: return True
 
 
+
+
     def __check_file(self, file):
-        mime = magic.Magic(mime=True)
-        file_mime = mime.from_buffer(file.read())
-        if not file_mime.startswith('image'):
+        # Проверяем тип файла с помощью imghdr
+        file_type = imghdr.what(file)
+        if not file_type:
+            return False
+        
+        # Проверяем, является ли файл изображением
+        if file_type not in ['jpeg', 'png', 'gif', 'bmp', 'pdf']:
             return False
 
         # Проверяем размер файла
-        if isinstance(file, InMemoryUploadedFile) and file.size > 100 * 1024 * 1024: 
+        if file.size > 100 * 1024 * 1024: 
             return False
 
         return True
