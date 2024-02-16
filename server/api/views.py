@@ -93,7 +93,7 @@ def my_profile(request):
 
 
 
-@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_poll(request):
@@ -133,13 +133,18 @@ def my_poll(request):
         
         poll = None
         if poll_id:
-            poll = Poll.objects.get(poll_id=poll_id)
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
+                return Response("Не удалось найти опрос по данному poll_id", status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
+            return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
 
         for key, value in data.items():
             if key == 'duration':
-                poll.set_duration(data['duration'])
+                try:
+                    poll.set_duration(data['duration'])
+                except ValueError as ve:
+                    return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
             else:
                 setattr(poll, key, value)
 
@@ -147,15 +152,45 @@ def my_poll(request):
         return Response("Опрос успешно изменен", status=status.HTTP_200_OK)
 
 
+    elif request.method == 'PUT':
+        data = request.data
+        poll_id = data.get('poll_id', None)
+        is_free_response = data.get('is_free_response', False)
+        name = data.get('name', None)
+        is_correct = data.get('is_correct', None)
+        
+        image = request.FILES.get('image')
+
+        poll = None
+        if poll_id:
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
+                return Response("Не удалось найти опрос по данному poll_id", status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            if poll.add_answer_option(is_free_response=False, image=image, name='name2'):
+                return Response("Вариант ответа успешно добавлен.", status=status.HTTP_200_OK)
+            else:
+                return Response(f"Не удалось добавить вариант ответа.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except ValueError as ve:
+            return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
+
+        
+    
+
     elif request.method == 'DELETE':
         data = request.data
         poll_id = data.get('poll_id', None)
 
         poll = None
         if poll_id:
-            poll = Poll.objects.get(poll_id=poll_id)
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
+                return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
+            return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
 
         poll.delete()
 

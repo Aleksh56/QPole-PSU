@@ -1,7 +1,11 @@
 from django.db import models
+from django.db import transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
+
+import magic
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -47,19 +51,27 @@ class PollParticipant(models.Model):
 
 
 class AnswerOption(models.Model):
-    name = models.CharField(max_length=100)
-    is_correct = models.BooleanField(default=None, blank=True, null=True)
+    name = models.CharField(max_length=100, default=None, null=True)
+    image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
     answers = models.ManyToManyField(PollParticipant, related_name='answeroption_participants', blank=True, null=True)
 
+    is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
+    is_text_response = models.BooleanField(default=True, null=True)    # текст ли как ответ
+    is_free_response = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
+    is_image_response = models.BooleanField(default=False, null=True)    # фото ли как ответ
+
     def __str__(self):
-        return f"{self.name}"
+        if self.name:
+            return f"Вариант ответа '{self.name}'"
+        else:
+            return f"Вариант ответа №{self.id}"
 
 
 
 class Poll(models.Model):
     poll_id = models.CharField(max_length=100, unique=True) # уникальный id
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='authored_polls') # автор опроса
-    image = models.ImageField(verbose_name='Фото опроса', upload_to=f'img/poll_images/', blank=True, null=True) # фото 
+    image = models.ImageField(verbose_name='Фото опроса', upload_to=f'images/poll_images/', blank=True, null=True) # фото 
     name = models.CharField(max_length=50, blank=True, null=True) # имя опроса
     description = models.TextField(blank=True, null=True) # текст начать опрос
 
@@ -72,28 +84,129 @@ class Poll(models.Model):
     is_anonymous = models.BooleanField(default=False) # анонимное
     can_cancel_vote = models.BooleanField(default=False) # запретить повторное.
 
-    # ответы пользователей
+    # варианты ответа
     answer_options = models.ManyToManyField(AnswerOption, related_name='polls_with_answer_options', blank=True, null=True)
     
     is_paused = models.BooleanField(default=False) # приостановлено
     is_closed = models.BooleanField(default=False) # завершено
 
+
     def __str__(self):
-        return self.name
+        if self.name:
+            return f"Опрос '{self.name}'"
+        else:
+            return f"Опрос №{self.id}"
     
+    def delete(self):
+        self.__delete_related_answers()
+        super().delete()
+
+    # удаление связанных с опросом ваританов ответа
+    def __delete_related_answers(self): 
+        answer_options = self.answer_options.all()
+        for answer_option in answer_options:
+            answer_option.delete()
+
     def set_duration(self, duration:str):
-        duration = list(map(int, duration.split(':')))
-        duration = timedelta(days=duration[0], hours=duration[1],
-                             minutes=duration[2], seconds=duration[3])
+        duration_parts = duration.split(':')
+
+        if len(duration_parts) != 4:
+            raise ValueError("Неверный формат времени. Ожидается дни:часы:минуты:секунды")
+
+        try:
+            days = int(duration_parts[0])
+            if days < 0:
+                raise ValueError("Количество дней должно быть неотрицательным")
+            hours = int(duration_parts[1])
+            if not 0 <= hours < 24:
+                raise ValueError("Количество часов должно быть от 0 до 23")
+            minutes = int(duration_parts[2])
+            if not 0 <= minutes < 60:
+                raise ValueError("Количество минут должно быть от 0 до 59")
+            seconds = int(duration_parts[3])
+            if not 0 <= seconds < 60:
+                raise ValueError("Количество секунд должно быть от 0 до 59")
+        except ValueError as e:
+            raise ValueError("Неверный формат времени. Ожидается целое число для каждой части") from e
+
+
+        duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
         self.duration = duration
 
-    def add_answer_option(self, name, is_correct=False):
-        answer_option = AnswerOption.objects.create(
-            name=name,
-            is_correct=is_correct,
-        )
-        self.answer_options.add(answer_option)
-        return True
+
+    def add_answer_option(self, is_free_response=None, image=None, **kwargs):
+        """
+            is_free_response - свободная форма ответа
+            name - наименование варианта ответа
+        """
+        if is_free_response is not None and not isinstance(is_free_response, bool):
+            raise ValueError("'is_free_response' должен быть указан в формате bool или None")
+
+        answer_option = None
+
+        if is_free_response:
+            if image:
+                if self.__check_file(image):
+                    answer_option = AnswerOption(
+                        name=None,
+                        is_correct=None,
+                        is_text_response = False,
+                        is_image_response = True,
+                        is_free_response = True,
+                        image = image
+                    )
+                else:
+                    raise ValueError(f"Файл не прошел проверку!")     
+            else:
+                name = kwargs.get('name', None)
+                if not name or len(name) == 0:
+                    raise ValueError(f"Параметр 'name' не указан или пустой.")
+                # проверка на то что такой вариант ответа уже есть
+                if name in [option.name for option in self.answer_options.all()]:
+                    raise ValueError(f"Вариант '{name}' уже имеется среди вариантов ответа.")
+                
+                answer_option = AnswerOption(
+                    name=name,
+                    is_correct=None,
+                    is_text_response = True,
+                    is_image_response = False,
+                    is_free_response = True,
+                    image = None
+                )          
+        else:
+            is_correct = kwargs.get('is_correct', None)
+            if is_correct is not None and not isinstance(is_correct, bool):
+                raise ValueError("'is_correct' должен быть в формате bool или None.")
+
+            name = kwargs.get('name', None)
+            if not isinstance(name, str):
+                raise ValueError(f"'name' должен быть в формате str.")
+            
+            if not name or len(name) == 0:
+                raise ValueError(f"Параметр 'name' не указан или пустой.")
+            
+            # проверка на то что такой вариант ответа уже есть
+            if name in [option.name for option in self.answer_options.all()]:
+                raise ValueError(f"Вариант '{name}' уже имеется среди вариантов ответа.")
+
+
+            answer_option = AnswerOption(
+                name=name,
+                is_correct=is_correct,
+                is_text_response = True,
+                is_image_response = False,
+                is_free_response = False,
+                image = None
+            )          
+
+        # сохранение если все ок при создании
+        with transaction.atomic():
+            answer_option.save()
+            self.answer_options.add(answer_option)
+            return True
+        
+
+    
 
     def add_answer_options(self, options):
         answer_options = []
@@ -118,10 +231,20 @@ class Poll(models.Model):
         return len(profiles)   
    
     @property
-    def opened_for_voting(self):
-        if self.duration:     # доступно ли для голосования по времени
+    def opened_for_voting(self):   # доступно ли для голосования по времени
+        if self.duration:     
             return timezone.now() < self.created_date + self.duration
         else: return True
 
 
+    def __check_file(self, file):
+        mime = magic.Magic(mime=True)
+        file_mime = mime.from_buffer(file.read())
+        if not file_mime.startswith('image'):
+            return False
 
+        # Проверяем размер файла
+        if isinstance(file, InMemoryUploadedFile) and file.size > 100 * 1024 * 1024: 
+            return False
+
+        return True
