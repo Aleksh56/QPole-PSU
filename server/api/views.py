@@ -40,16 +40,16 @@ def my_profile(request):
         current_user_profile = Profile.objects.filter(user=current_user).first()
 
         if current_user_profile:
-            serializer = ProfileSerializer(current_user_profile)
+            profile_serializer = ProfileSerializer(current_user_profile)
             user_polls = Poll.objects.filter(author=current_profile)
-            if user_polls:
-                serializer.data['polls'] = user_polls
-            else:
-                serializer.data['polls'] = []
+            user_polls_serializer = PollSerializer(user_polls, many=True)
 
-            print(serializer.data)
-            print(type(serializer.data))
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            response_data = {
+                'profile': profile_serializer.data,
+                'user_polls': user_polls_serializer.data
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
         else:
             return Response({'message': "Профиль не найден!"}, status=status.HTTP_404_NOT_FOUND)
 
