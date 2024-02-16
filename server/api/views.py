@@ -133,7 +133,7 @@ def my_poll(request):
         
         poll = None
         if poll_id:
-            poll = Poll.objects.get(id=poll_id)
+            poll = Poll.objects.get(poll_id=poll_id)
         else:
             return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
 
@@ -153,7 +153,7 @@ def my_poll(request):
 
         poll = None
         if poll_id:
-            poll = Poll.objects.get(id=poll_id)
+            poll = Poll.objects.get(poll_id=poll_id)
         else:
             return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
 
