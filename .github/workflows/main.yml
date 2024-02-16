@@ -30,6 +30,8 @@ jobs:
           port: 22
           script: |
             docker container stop $(docker container ls -q)
+            apt-get clean
+            docker image prune -f
             docker container prune
             cd /home/db
             docker-compose up -d
