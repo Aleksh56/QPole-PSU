@@ -16,7 +16,7 @@ import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
 
-const AppHeader = () => {
+const AppHeader = ({ userData = {} }) => {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
 
@@ -32,7 +32,7 @@ const AppHeader = () => {
         <AppHeaderNavigationOutput itemsData={AppHeaderData} />
         <Dropdown>
           <StyledHeaderProfile>
-            takvot56@gmail.com
+            {userData?.user?.email ?? ''}
             <ArrowDropDownIcon fontSize="small" />
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>

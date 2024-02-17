@@ -17,7 +17,7 @@ const CreatePoleModal = ({ isOpen, onClose, title, buttons }) => {
   const handlePoleTypeSelect = async (poleType) => {
     const newPoleId = v4();
     await createPole(poleType, newPoleId);
-    navigate(`/app/tests/${newPoleId}/main`);
+    navigate(`/app/tests/${newPoleId}/main`, { state: { isNewPole: true } });
   };
 
   return (

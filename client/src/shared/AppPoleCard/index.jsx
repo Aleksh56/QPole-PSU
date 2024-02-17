@@ -1,30 +1,22 @@
 import React from 'react';
 import { Card, CardContent, CardMedia, Typography, Chip } from '@mui/material';
+import { StyledCard, StyledChip, StyledTypographyName } from './styled';
 
-const AppPoleCard = React.memo(({ imageUrl, pollData }) => {
+const AppPoleCard = React.memo(({ pollData }) => {
   return (
-    <Card>
-      <CardMedia sx={{ height: '140px' }} image={imageUrl} title="Poll Image">
-        <Chip
-          label={pollData.poll_type}
-          sx={{
-            position: 'absolute',
-            top: '10px',
-            left: '10px',
-            color: 'white',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}
-        />
+    <StyledCard>
+      <CardMedia sx={{ height: '140px' }} image={pollData.image ?? ''} title="Poll Image">
+        <StyledChip label={pollData.poll_type ?? '[]'} />
       </CardMedia>
       <CardContent>
-        <Typography gutterBottom variant="h5" component="h2">
-          {pollData.poll_type ?? ''}
-        </Typography>
+        <StyledTypographyName gutterBottom variant="body1" component="h2">
+          {pollData.name ?? 'Опрос'}
+        </StyledTypographyName>
         <Typography variant="body2" color="textSecondary" component="p">
           {pollData.poll_type ?? ''}
         </Typography>
       </CardContent>
-    </Card>
+    </StyledCard>
   );
 });
 
