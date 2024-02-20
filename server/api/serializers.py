@@ -61,6 +61,13 @@ class AnswerOptionSerializer(serializers.ModelSerializer):
     answers = PollParticipantSerializer(many=True)
 
 
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PollQuestion
+        fields = '__all__'
+
+    answer_options = AnswerOptionSerializer(many=True)
+
 
 class PollTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -78,7 +85,7 @@ class UserRoleSerializer(serializers.ModelSerializer):
 class PollSerializer(serializers.ModelSerializer):
     poll_type = serializers.CharField(source='poll_type.name', read_only=True)
     author = ProfileSerializer()
-    answer_options = AnswerOptionSerializer(many=True)
+    questions = QuestionSerializer(many=True)
 
     members_quantity = serializers.IntegerField()
     opened_for_voting = serializers.BooleanField()
