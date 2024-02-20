@@ -31,7 +31,7 @@ def register(request):
                 auth_login(request, user)
                 user_profile = Profile.objects.create(
                     user=user, 
-                    role='Администратор'
+                    role=UserRole.objects.get(role='Администратор')
                 )
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({'auth_token': token.key, 'user_data': serializer.data})
