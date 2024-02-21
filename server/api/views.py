@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
+
+from .exсeptions import *
 from .serializers import *
 from .models import *
 
@@ -97,107 +99,214 @@ def my_profile(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_poll(request):
-    current_user = request.user
-
-    if request.method == 'GET':
-        poll_id = request.GET.get('poll_id', None)
-        if poll_id:
-            poll = get_object_or_404(Poll.objects.filter(author__user=current_user), poll_id=poll_id)
-            serializer = PollSerializer(poll)
-            return Response(serializer.data)
-        else:
-            polls = Poll.objects.filter(author__user=current_user)
-            serializer = PollSerializer(polls, many=True)
-            return Response(serializer.data)
-
-    elif request.method == 'POST':
+    try:
         current_user = request.user
-        data = request.data
 
-        poll_id = data.get('poll_id', None)
-        author_profile = Profile.objects.get(user=current_user)
-        poll_type, _ = PollType.objects.get_or_create(name=data['poll_type'])
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+            if poll_id:
+                poll = get_object_or_404(Poll.objects.filter(author__user=current_user), poll_id=poll_id)
+                serializer = PollSerializer(poll)
+                return Response(serializer.data)
+            else:
+                polls = Poll.objects.filter(author__user=current_user)
+                serializer = PollSerializer(polls, many=True)
+                return Response(serializer.data)
 
-        poll = Poll(
-            poll_id=poll_id,
-            author=author_profile,
-            poll_type=poll_type,
-        )
+        elif request.method == 'POST':
+            current_user = request.user
+            author_profile = Profile.objects.get(user=current_user)
+            data = request.data
 
-        poll.save()
-        return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            poll_type_name = data.get('poll_type', None)
+            if not poll_type_name:
+                raise MissingFieldException(field_name='poll_type')
+            
+            poll_type = PollType.objects.filter(name=poll_type_name)
+            if not poll_type:
+                raise ObjectNotFoundException(model='PollType')
 
-    elif request.method == 'PATCH':
-        data = request.data
-        poll_id = data.get('poll_id', None)
-        
-        poll = None
-        if poll_id:
+            poll = Poll(
+                poll_id=poll_id,
+                author=author_profile,
+                poll_type=poll_type,
+            )
+
+            poll.save()
+            return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
+
+        elif request.method == 'PATCH':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
-                return Response("Не удалось найти опрос по данному poll_id", status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
+                raise ObjectNotFoundException(model='Poll')
 
-        for key, value in data.items():
-            if key == 'duration':
-                try:
-                    poll.set_duration(data['duration'])
-                except ValueError as ve:
-                    return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
+
+            for key, value in data.items():
+                if key == 'duration':
+                    try:
+                        poll.set_duration(data['duration'])
+                    except ValueError as ve:
+                        return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    setattr(poll, key, value)
+
+            poll.save()
+            return Response("Опрос успешно изменен", status=status.HTTP_200_OK)
+
+        elif request.method == 'PUT':
+            data = request.data
+            poll_id = data.get('poll_id', None)
+            is_free_response = data.get('is_free_response', False)
+            name = data.get('name', None)
+            is_correct = data.get('is_correct', None)
+            
+            image = request.FILES.get('image')
+
+            poll = None
+            if poll_id:
+                poll = Poll.objects.filter(poll_id=poll_id).first()
+                if not poll:
+                    return Response("Не удалось найти опрос по данному poll_id", status=status.HTTP_404_NOT_FOUND)
             else:
-                setattr(poll, key, value)
+                return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
 
-        poll.save()
-        return Response("Опрос успешно изменен", status=status.HTTP_200_OK)
+            try:
+                if poll.add_answer_option(is_free_response=True, image=image, name='name2'):
+                    return Response("Вариант ответа успешно добавлен.", status=status.HTTP_200_OK)
+                else:
+                    return Response(f"Не удалось добавить вариант ответа.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except ValueError as ve:
+                return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
 
+        elif request.method == 'DELETE':
+            data = request.data
+            poll_id = data.get('poll_id', None)
 
-    elif request.method == 'PUT':
-        data = request.data
-        poll_id = data.get('poll_id', None)
-        is_free_response = data.get('is_free_response', False)
-        name = data.get('name', None)
-        is_correct = data.get('is_correct', None)
+            poll = None
+            if poll_id:
+                poll = Poll.objects.filter(poll_id=poll_id).first()
+                if not poll:
+                    return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
+
+            poll.delete()
+
+            return Response("Опрос успешно удален", status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            return Response(f"Неподдерживаемый тип запроса", status=status.HTTP_400_BAD_REQUEST)
         
-        image = request.FILES.get('image')
+    except MissingFieldException as ex:
+        return Response(f"{ex}", status=status.HTTP_404_NOT_FOUND)
+      
+    except ObjectNotFoundException as ex:
+        return Response(f"{ex}", status=status.HTTP_404_NOT_FOUND)
 
-        poll = None
-        if poll_id:
-            poll = Poll.objects.filter(poll_id=poll_id).first()
+    except Exception as ex:
+        return Response(f"Внутренняя ошибка сервера: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def poll_question(request):
+    try:
+        current_user = request.user
+
+        if request.method == 'POST':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            author = Profile.objects.get(user=current_user)
+            poll = Poll.objects.filter(author=author, poll_id=poll_id).first()
             if not poll:
-                return Response("Не удалось найти опрос по данному poll_id", status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
+                raise ObjectNotFoundException(model='Poll')
 
-        try:
-            if poll.add_answer_option(is_free_response=True, image=image, name='name2'):
-                return Response("Вариант ответа успешно добавлен.", status=status.HTTP_200_OK)
+
+            question = PollQuestion(
+                name = ""
+            )
+
+            question.save()
+            poll.add_question(question)
+            
+            return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
+
+        elif request.method == 'PATCH':
+            data = request.data
+            poll_id = data.get('poll_id', None)
+            
+            poll = None
+            if poll_id:
+                poll = Poll.objects.filter(poll_id=poll_id).first()
+                if not poll:
+                    return Response("Не удалось найти опрос по данному poll_id", status=status.HTTP_404_NOT_FOUND)
             else:
-                return Response(f"Не удалось добавить вариант ответа.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except ValueError as ve:
-            return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
+                return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
 
-        
+            for key, value in data.items():
+                if key == 'duration':
+                    try:
+                        poll.set_duration(data['duration'])
+                    except ValueError as ve:
+                        return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    setattr(poll, key, value)
+
+            poll.save()
+            return Response("Опрос успешно изменен", status=status.HTTP_200_OK)
+
+        elif request.method == 'PUT':
+            data = request.data
+            poll_id = data.get('poll_id', None)
+            is_free_response = data.get('is_free_response', False)
+            name = data.get('name', None)
+            is_correct = data.get('is_correct', None)
+            
+            image = request.FILES.get('image')
+
+            poll = None
+            if poll_id:
+                poll = Poll.objects.filter(poll_id=poll_id).first()
+                if not poll:
+                    return Response("Не удалось найти опрос по данному poll_id", status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                if poll.add_answer_option(is_free_response=True, image=image, name='name2'):
+                    return Response("Вариант ответа успешно добавлен.", status=status.HTTP_200_OK)
+                else:
+                    return Response(f"Не удалось добавить вариант ответа.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except ValueError as ve:
+                return Response(f"{ve}", status=status.HTTP_400_BAD_REQUEST)
+
+    except MissingFieldException as ex:
+        logger.error(f"Отсутствует необходимый аргумент: {ex}")
+        return Response(f"Отсутствует необходимый аргумент: {ex}", status=status.HTTP_400_BAD_REQUEST)
     
-
-    elif request.method == 'DELETE':
-        data = request.data
-        poll_id = data.get('poll_id', None)
-
-        poll = None
-        if poll_id:
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                return Response("Не удалось найти опрос по данному id", status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
-
-        poll.delete()
-
-        return Response("Опрос успешно удален", status=status.HTTP_204_NO_CONTENT)
-
-    else:
-        return Response({'message': "Unsupported request method!"}, status=status.HTTP_400_BAD_REQUEST)
+    except ObjectNotFoundException as ex:
+        logger.error(f"Ошибка нахождения объекта модели: {ex=}")
+        return Response(f"Ошибка нахождения объекта модели: {ex}", status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as ex:
+        logger.error(f"Ошибка при добавлении вопроса в опрос: {ex}")
+        return Response(f"Внутренняя ошибка сервера: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 @api_view(['PATCH'])
 @authentication_classes([TokenAuthentication])

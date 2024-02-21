@@ -7,6 +7,8 @@ from datetime import timedelta
 import imghdr
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
+from .exсeptions import *
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=50, blank=True, null=True)
@@ -21,7 +23,9 @@ class Profile(models.Model):
 
 
     def __str__(self):
-        return self.name + ' ' + self.surname
+        if self.name and self.surname:
+            return self.name + ' ' + self.surname
+        else: return f"Профиль {self.user.username}"
     
 
 class UserRole(models.Model):
@@ -35,25 +39,32 @@ class PollType(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=50, default="", blank=True)
 
+    
+
     def __str__(self):
         return self.name
     
 
 
-class PollParticipant(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='participants_poll')
-    comment = models.CharField(max_length=150, blank=True, null=True)
+
+class PollAnswer(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    answer_option = models.ForeignKey('AnswerOption', on_delete=models.DO_NOTHING)
+    text = models.CharField(max_length=100, default=None, null=True)
+    image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
+
+
     voting_date = models.DateTimeField(auto_now_add=True)
-    
+
 
     def __str__(self):
-        return f"{self.profile.user.username} participated in poll"
+        return f"Ответ на {self.answer_option} от {self.profile}"
 
 
 class AnswerOption(models.Model):
     name = models.CharField(max_length=100, default=None, null=True)
-    image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
-    answers = models.ManyToManyField(PollParticipant, related_name='answeroption_participants', blank=True, null=True)
+    image = models.ImageField(verbose_name='Фото варианта ответ', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
+    answers = models.ManyToManyField(PollAnswer, related_name='answeroption_pollanswers', blank=True, null=True)
 
     is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
     is_text_response = models.BooleanField(default=True, null=True)    # текст ли как ответ
@@ -94,7 +105,56 @@ class PollQuestion(models.Model):
         else:
             return f"Вопрос №{self.id}"
 
-    
+    def set_name(self, name):
+        if not isinstance(name, str):
+            raise WrongFieldTypeException(field_name='name', expected_type='str')
+        if len(name) > 100:
+            raise ValueError("Параметр 'name' не может быть длинее 100 символов")
+        self.name = name
+        self.save()
+
+    def set_info(self, info):
+        if not isinstance(info, str):
+            raise WrongFieldTypeException(field_name='info', expected_type='str')
+        if len(info) > 500:
+            raise ValueError("Параметр 'name' не может быть длинее 500 символов")
+        self.info = info
+        self.save()
+
+    def set_image(self, image):
+        if not isinstance(image, InMemoryUploadedFile):
+            raise WrongFieldTypeException(field_name='image', expected_type='InMemoryUploadedFile')
+        is_img_ok, details = self.__check_file(image)
+        if is_img_ok:
+            self.image = image
+            self.save()
+        else:
+            raise ValueError(f"Файл не прошел проверку: {details}") 
+        
+    def set_is_free(self, is_free):
+        if not isinstance(is_free, bool):
+            raise WrongFieldTypeException(field_name='is_free', expected_type='bool')
+        self.is_free = is_free
+        self.save()
+
+    def set_is_available(self, is_available):
+        if not isinstance(is_available, bool):
+            raise WrongFieldTypeException(field_name='is_available', expected_type='bool')
+        self.is_available = is_available
+        self.save()
+
+    def set_is_text(self, is_text):
+        if not isinstance(is_text, bool):
+            raise WrongFieldTypeException(field_name='is_text', expected_type='bool')
+        self.is_text = is_text
+        self.save()
+
+    def set_is_image(self, is_image):
+        if not isinstance(is_image, bool):
+            raise WrongFieldTypeException(field_name='is_image', expected_type='bool')
+        self.is_image = is_image
+        self.save()
+        
     def add_answer_option(self, is_free_response=None, image=None, **kwargs):
         """
             is_free_response - свободная форма ответа
@@ -105,61 +165,7 @@ class PollQuestion(models.Model):
 
         answer_option = None
 
-        if is_free_response:
-            if image:
-                if self.__check_file(image):
-                    answer_option = AnswerOption(
-                        name=None,
-                        is_correct=None,
-                        is_text_response = False,
-                        is_image_response = True,
-                        is_free_response = True,
-                        image = image
-                    )
-                else:
-                    raise ValueError(f"Файл не прошел проверку!")     
-            else:
-                name = kwargs.get('name', None)
-                if not name or len(name) == 0:
-                    raise ValueError(f"Параметр 'name' не указан или пустой.")
-                # проверка на то что такой вариант ответа уже есть
-                if name in [option.name for option in self.answer_options.all()]:
-                    raise ValueError(f"Вариант '{name}' уже имеется среди вариантов ответа.")
-                
-                answer_option = AnswerOption(
-                    name=name,
-                    is_correct=None,
-                    is_text_response = True,
-                    is_image_response = False,
-                    is_free_response = True,
-                    image = None
-                )          
-        else:
-            is_correct = kwargs.get('is_correct', None)
-            if is_correct is not None and not isinstance(is_correct, bool):
-                raise ValueError("'is_correct' должен быть в формате bool или None.")
-
-            name = kwargs.get('name', None)
-            if not isinstance(name, str):
-                raise ValueError(f"'name' должен быть в формате str.")
-            
-            if not name or len(name) == 0:
-                raise ValueError(f"Параметр 'name' не указан или пустой.")
-            
-            # проверка на то что такой вариант ответа уже есть
-            if name in [option.name for option in self.answer_options.all()]:
-                raise ValueError(f"Вариант '{name}' уже имеется среди вариантов ответа.")
-
-
-            answer_option = AnswerOption(
-                name=name,
-                is_correct=is_correct,
-                is_text_response = True,
-                is_image_response = False,
-                is_free_response = False,
-                image = None
-            )          
-
+        
         # сохранение если все ок при создании
         with transaction.atomic():
             answer_option.save()
@@ -237,20 +243,34 @@ class Poll(models.Model):
         self.duration = duration
 
 
+
+    def set_is_free(self, is_free):
+        if is_free is not None and not isinstance(is_free, bool):
+            raise WrongFieldTypeException(field_name='is_free_response', expected_type='bool или None')
+        
+        self.is_free = is_free
+        self.save()
+
+    def set_is_name(self, name):
+        if name is not None and not isinstance(name, str):
+            raise WrongFieldTypeException(field_name='name', expected_type='str')
+        
+        self.name = name
+        self.save()
+
     def add_question(self, is_free=None, image=None, **kwargs):
         """
             is_free_response - свободная форма вопроса;
             name - наименование вопроса;
             image - фото к вопросу;
         """
-        if is_free is not None and not isinstance(is_free, bool):
-            raise ValueError("'is_free_response' должен быть указан в формате bool или None")
+        
 
         question = None
 
         if is_free:
             if image:
-                if self.__check_file(image):
+                if self.__check_file(image)[0]:
                     question = PollQuestion(
                         name=None,
                         is_text = False,
@@ -331,10 +351,10 @@ class Poll(models.Model):
         
         # Проверяем, является ли файл изображением
         if file_type not in ['jpeg', 'png', 'gif', 'bmp', 'pdf']:
-            return False
+            return False, "Неподдерживаемый формат файла."
 
         # Проверяем размер файла
         if file.size > 100 * 1024 * 1024: 
-            return False
+            return False, "Первышен допустимый размер файла."
 
-        return True
+        return True, "ОК"

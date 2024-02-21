@@ -45,9 +45,9 @@ class MiniProfileSerializer(serializers.ModelSerializer):
         fields = ('name', 'surname', 'user')
 
 
-class PollParticipantSerializer(serializers.ModelSerializer):
+class PollAnswerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PollParticipant
+        model = PollAnswer
         fields = '__all__'
 
     profile = MiniProfileSerializer()
@@ -58,7 +58,7 @@ class AnswerOptionSerializer(serializers.ModelSerializer):
         model = AnswerOption
         fields = '__all__'
 
-    answers = PollParticipantSerializer(many=True)
+    answers = PollAnswerSerializer(many=True)
 
 
 class QuestionSerializer(serializers.ModelSerializer):
