@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 
 from .serializers import UserSerializer, PasswordChangeSerializer
+from api.exсeptions import InvalidFieldException, MissingFieldException
+from api.serializers import ProfileSerializer
 from .utils import *
 from api.models import *
 
@@ -19,27 +21,60 @@ from api.models import *
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
-    data = request.data
-    email = data['email']
-    check_email = User.objects.filter(email=email).exists()
-
-    if not check_email:
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            with transaction.atomic():
-                user = serializer.save()
-                auth_login(request, user)
-                user_profile = Profile.objects.create(
-                    user=user, 
-                    role=UserRole.objects.get(role='Администратор')
-                )
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({'auth_token': token.key, 'user_data': serializer.data})
+    # try:
+        data = request.data
+        email = data.get('email', None)
+        if not email:
+            raise MissingFieldException(field_name='email')
+        role = data.get('role', None)
+        if not role:
+            raise MissingFieldException(field_name='role')
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response({'message': "Данная почта уже занята"}, status=status.HTTP_400_BAD_REQUEST)
+            role = UserRole.objects.filter(role=role).first()
+            if not role:
+                raise ObjectNotFoundException(model='UserRole')
 
+
+        check_email = User.objects.filter(email=email).exists()
+        username = email.split('@')[0]
+        username_already_occupied = User.objects.filter(username=username).exists()
+
+        if not check_email and not username_already_occupied:
+            serializer = UserSerializer(data=request.data)
+            if serializer.is_valid():
+                with transaction.atomic():
+                    user = serializer.save()
+                    auth_login(request, user)
+                    user_profile = {
+                        'user': user.id,
+                        'email': email,
+                        'role': role.id,
+                    }
+                    serializer = ProfileSerializer(data=user_profile)
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
+                    token, _ = Token.objects.get_or_create(user=user)
+                    return Response({'auth_token': token.key, 'user_data': serializer.data})
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("Данная почта уже занята", status=status.HTTP_400_BAD_REQUEST)
+        
+
+    # except InvalidFieldException as ex:
+    #     return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    
+    # except MissingFieldException as ex:
+    #     return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    
+    # except ObjectNotFoundException as ex:
+    #     return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    
+    # except Exception as ex:
+    #     return Response(f"Внутренняя ошибка сервера в register: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

@@ -17,7 +17,7 @@ class ObjectNotFoundException(APIException):
     status_code = 404
     default_code = 'object_not_found'
 
-    def __init__(self, model, detail=None):
+    def __init__(self, model=None, detail=None):
         if detail is None:
             detail = f"Объект модели '{model}' не найден."
         self.detail = detail
@@ -25,7 +25,15 @@ class ObjectNotFoundException(APIException):
     def __str__(self):
         return self.detail
     
+class ProfileAlreadyExistsException(APIException):
+    status_code = 400
+    default_code = 'profile_already_exists'
 
+    def __init__(self, detail=None):
+        if detail is None:
+            detail = 'Профиль данного пользователя уже существует.'
+        self.detail = detail
+    
 
 class AccessDeniedException(APIException):
     status_code = 403 
@@ -41,6 +49,17 @@ class WrongFieldTypeException(APIException):
     def __init__(self, field_name, expected_type, detail=None):
         if detail is None:
             detail = f"Поле '{field_name}' должно быть типа '{expected_type}'."
+        self.detail = detail
+
+
+
+class InvalidFieldException(APIException):
+    status_code = 400
+    default_code = 'invalid_field'
+
+    def __init__(self, field, detail=None):
+        if detail is None:
+            detail = f"Поле '{field}' введено некорректно"
         self.detail = detail
 
 

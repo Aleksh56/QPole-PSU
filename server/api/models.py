@@ -11,10 +11,11 @@ from .exсeptions import *
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    email = models.EmailField(blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     surname = models.CharField(max_length=50, blank=True, null=True)
     patronymic = models.CharField(max_length=50, default='Не указано', blank=True, null=True)
-    sex = models.CharField(max_length=1, blank=False, null=False)
+    sex = models.CharField(max_length=1, blank=True, null=True)
     number = models.CharField(max_length=50, blank=True, null=True) 
 
     joining_date = models.DateField(auto_now_add=True)
@@ -62,7 +63,7 @@ class PollAnswer(models.Model):
 
 
 class AnswerOption(models.Model):
-    name = models.CharField(max_length=100, default=None, null=True)
+    name = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото варианта ответ', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
     answers = models.ManyToManyField(PollAnswer, related_name='answeroption_pollanswers', blank=True, null=True)
 
@@ -74,12 +75,9 @@ class AnswerOption(models.Model):
     def __str__(self):
         if self.is_free_response:
             if not self.is_image_response:
-                return f"Свободный ответ: '{self.name}'"
+                return f"Свободный вариант ответа'"
             else:
-                if self.name:
-                    return f"Свободный ответ с фотографией: '{self.name}'"
-                else:
-                    return f"Свободный ответ: '{self.name}'"
+                return f"Свободный вариант ответа с фотографией"
         else:
             if self.name:
                 return f"Вариант ответа '{self.name}'"

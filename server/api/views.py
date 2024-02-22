@@ -36,12 +36,17 @@ def get_my_profile(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_profile(request):
-    current_user = request.user
-    current_profile = Profile.objects.get(user=current_user)
-    if request.method == 'GET':
-        current_user_profile = Profile.objects.filter(user=current_user).first()
+    try:
+        current_user = request.user
+        current_profile = Profile.objects.get(user=current_user)
 
-        if current_user_profile:
+        if request.method == 'GET':
+            current_user_profile = Profile.objects.filter(user=current_user).first()
+
+            if not current_user_profile:
+                raise ObjectNotFoundException('Profile')
+
+
             profile_serializer = ProfileSerializer(current_user_profile)
             user_polls = Poll.objects.filter(author=current_profile)
             user_polls_serializer = PollSerializer(user_polls, many=True)
@@ -52,25 +57,25 @@ def my_profile(request):
             }
 
             return Response(response_data, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': "Профиль не найден!"}, status=status.HTTP_404_NOT_FOUND)
 
-    elif request.method == 'POST':
-        current_user_profile = Profile.objects.filter(user=current_user).first()
-        request.data['user'] = current_user.id
-        if current_user_profile:
-            return Response({'message': "Профиль уже существует!"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            serializer = ProfileSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(user=current_user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == 'POST':
+            current_user_profile = Profile.objects.filter(user=current_user).first()
+            request.data['user'] = current_user.id
+            if current_user_profile:
+                return Response("Профиль данного пользователя уже существует.", status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                serializer = ProfileSerializer(data=request.data)
+                if serializer.is_valid():
+                    serializer.save(user=current_user)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'PATCH':
-        current_user_profile = Profile.objects.filter(user=current_user).first()
-        if current_user_profile:
+        elif request.method == 'PATCH':
+            current_user_profile = Profile.objects.filter(user=current_user).first()
+            if not current_profile:
+                raise ObjectNotFoundException('Profile')
+            
             request.data['user'] = current_user.id
             serializer = ProfileSerializer(current_user_profile, data=request.data)
     
@@ -79,20 +84,28 @@ def my_profile(request):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'message': "Профиль не найден!"}, status=status.HTTP_404_NOT_FOUND)
 
-    elif request.method == 'DELETE':
-        current_user_profile = Profile.objects.filter(user=current_user).first()
-        if current_user_profile:
+        elif request.method == 'DELETE':
+            current_user_profile = Profile.objects.filter(user=current_user).first()
+            if not current_profile:
+                raise ObjectNotFoundException('Profile')
+            
             current_user_profile.delete()
-            return Response({'message': "Профиль успешно удален!"}, status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response({'message': "Профиль не найден!"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(f"Профиль успешно удален.", status=status.HTTP_204_NO_CONTENT)
+      
 
-    else:
-        return Response({'message': "Неподдерживаемый метод запроса!"}, status=status.HTTP_400_BAD_REQUEST)
+    except MissingFieldException as ex:
+        return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    
+    except InvalidFieldException as ex:
+        return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    
+    except ObjectNotFoundException as ex:
+        return Response(f"{ex}", status=status.HTTP_404_NOT_FOUND)
 
+    except Exception as ex:
+        return Response(f"Внутренняя ошибка сервера в my_profile: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
@@ -208,7 +221,7 @@ def my_poll(request):
             return Response(f"Неподдерживаемый тип запроса", status=status.HTTP_400_BAD_REQUEST)
         
     except MissingFieldException as ex:
-        return Response(f"{ex}", status=status.HTTP_404_NOT_FOUND)
+        return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
       
     except ObjectNotFoundException as ex:
         return Response(f"{ex}", status=status.HTTP_404_NOT_FOUND)
