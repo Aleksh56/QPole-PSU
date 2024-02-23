@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from .models import *
 from .exсeptions import *
+from .utils import check_file
 
 def validate_age(value):
     if value < 14:
@@ -15,20 +16,32 @@ class MiniUserSerializer(serializers.ModelSerializer):
         fields = ['email', 'username']
     
 
-class ProfileSerializer(serializers.ModelSerializer):
-    # user = MiniUserSerializer()
-    # role = UserRoleSerializer()
-    
+class GetProfileSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
+    def get_user(self, obj):
+        return obj.user.username if obj.user else None
+
+    def get_role(self, obj):
+        return obj.role.role if obj.role else None
+
+
+class ProfileSerializer(serializers.ModelSerializer):   
     class Meta:
         model = Profile
         fields = '__all__'
 
     def is_valid(self, raise_exception=False):
 
-        name = self.initial_data.get('name', None)
-        if name:
-            if len(name) > 50:
-                raise InvalidFieldException(field='name', detail=f"Имя не можеть быть длинее 50 символов.")
+        value = self.initial_data.get('value', None)
+        if value:
+            if len(value) > 50:
+                raise InvalidFieldException(field='value', detail=f"Имя не можеть быть длинее 50 символов.")
             
         surname = self.initial_data.get('surname', None)
         if surname:
@@ -116,7 +129,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class MiniProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('name', 'surname', 'user')
+        fields = ('value', 'surname', 'user')
 
 
 class PollAnswerSerializer(serializers.ModelSerializer):
@@ -157,13 +170,211 @@ class UserRoleSerializer(serializers.ModelSerializer):
 
 
 class PollSerializer(serializers.ModelSerializer):
-    poll_type = serializers.CharField(source='poll_type.name', read_only=True)
+    poll_type = serializers.CharField(source='poll_type.value', read_only=True)
     author = ProfileSerializer()
     questions = QuestionSerializer(many=True)
 
     members_quantity = serializers.IntegerField()
     opened_for_voting = serializers.BooleanField()
 
+    
     class Meta:
         model = Poll
         fields = '__all__'  
+
+
+class UpdatePollSerializer(serializers.ModelSerializer):
+
+    def set_has_multiple_choices(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='has_multiple_choices', expected_type='bool или None')
+        
+        self.has_multiple_choices = value
+
+    def set_has_correct_answer(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='has_correct_answer', expected_type='bool или None')
+        
+        self.has_correct_answer = value
+
+    def set_is_anonymous(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='is_anonymous', expected_type='bool или None')
+        
+        self.is_anonymous = value
+
+    def set_can_cancel_vote(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='can_cancel_vote', expected_type='bool или None')
+        
+        self.can_cancel_vote = value
+
+    def set_is_closed(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='is_closed', expected_type='bool или None')
+        
+        self.is_closed = value
+    
+    def set_is_paused(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='is_paused', expected_type='bool или None')
+        
+        self.is_paused = value
+
+    def set_duration(self, duration:str):
+        try:
+            days, time = duration.split(' ')
+            duration_parts = time.split(':')
+        except ValueError:
+            raise WrongFieldTypeException(detail="Неверный формат времени. Ожидается дни часы:минуты:секунды")
+        try:
+            days = int(days)
+            if days < 0:
+                raise InvalidFieldException(detail="Количество дней должно быть неотрицательным")
+            hours = int(duration_parts[0])
+            if not 0 <= hours < 24:
+                raise InvalidFieldException(detail="Количество часов должно быть от 0 до 23")
+            minutes = int(duration_parts[1])
+            if not 0 <= minutes < 60:
+                raise InvalidFieldException(detail="Количество минут должно быть от 0 до 59")
+            seconds = int(duration_parts[2])
+            if not 0 <= seconds < 60:
+                raise InvalidFieldException(detail="Количество секунд должно быть от 0 до 59")
+        except ValueError as e:
+            raise WrongFieldTypeException(detail="Неверный формат времени. Ожидается целое число для каждой части") from e
+
+        duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+        self.duration = duration
+
+    def set_image(self, image):
+        if image == '' or image is None:
+            self.image = None
+            return
+        
+        if not isinstance(image, (InMemoryUploadedFile)):
+            raise WrongFieldTypeException(field_name='image', expected_type='InMemoryUploadedFile')
+        is_img_ok, details = check_file(image)
+        if is_img_ok:
+            self.image = image
+        else:
+            raise InvalidFieldException(detail=f"Файл не прошел проверку: {details}") 
+        
+    def is_valid(self, raise_exception=False):
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+
+        return super().is_valid(raise_exception=raise_exception)
+
+
+    class Meta:
+        model = Poll
+        fields = '__all__'
+
+
+
+class UpdatePollQuestionSerializer(serializers.ModelSerializer):
+    def set_image(self, image):
+        if image == '' or image is None:
+            self.image = None
+            return
+        
+        if not isinstance(image, (InMemoryUploadedFile)):
+            raise WrongFieldTypeException(field_name='image', expected_type='InMemoryUploadedFile')
+        is_img_ok, details = check_file(image)
+        if is_img_ok:
+            self.image = image
+        else:
+            raise InvalidFieldException(detail=f"Файл не прошел проверку: {details}") 
+
+
+    def is_valid(self, raise_exception=False):
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+
+        return super().is_valid(raise_exception=raise_exception)
+
+
+    class Meta:
+        model = PollQuestion
+        fields = '__all__'
+
+
+
+
+
+class PollQuestionSerializer(serializers.ModelSerializer):
+    answer_options = AnswerOptionSerializer(many=True)
+
+    def set_name(self, value):
+        if value is not None and not isinstance(value, str):
+            raise WrongFieldTypeException(field_name='name', expected_type='str или None')
+        
+        if len(value) > 100:
+            raise InvalidFieldException(detail="Поле 'name' не может быть длинее 100 символов.")
+
+        self.name = value
+    
+    def set_info(self, value):
+        if value is not None and not isinstance(value, str):
+            raise WrongFieldTypeException(field_name='info', expected_type='str или None')
+        
+        if len(value) > 500:
+            raise InvalidFieldException(detail="Поле 'info' не может быть длинее 500 символов.")
+
+        self.name = value
+
+    def set_is_available(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='is_available', expected_type='bool или None')
+  
+        self.is_available = value
+
+    def set_is_text(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='is_text', expected_type='bool или None')
+  
+        self.is_text = value
+
+    def set_is_image(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='is_image', expected_type='bool или None')
+  
+        self.is_image = value
+
+    def set_is_free(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='is_free', expected_type='bool или None')
+  
+        self.is_free = value
+
+
+    def set_image(self, image):
+        if image == '' or image is None:
+            self.image = None
+            return
+        
+        if not isinstance(image, (InMemoryUploadedFile)):
+            raise WrongFieldTypeException(field_name='image', expected_type='InMemoryUploadedFile')
+        is_img_ok, details = check_file(image)
+        if is_img_ok:
+            self.image = image
+        else:
+            raise InvalidFieldException(detail=f"Файл не прошел проверку: {details}") 
+        
+
+    def is_valid(self, raise_exception=False):
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+
+        return super().is_valid(raise_exception=raise_exception)
+    
+    class Meta:
+        model = PollQuestion
+        fields = '__all__'  
+

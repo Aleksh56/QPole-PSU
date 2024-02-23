@@ -21,7 +21,7 @@ from api.models import *
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
-    # try:
+    try:
         data = request.data
         email = data.get('email', None)
         if not email:
@@ -64,17 +64,17 @@ def register(request):
             return Response("Данная почта уже занята", status=status.HTTP_400_BAD_REQUEST)
         
 
-    # except InvalidFieldException as ex:
-    #     return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    except InvalidFieldException as ex:
+        return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
     
-    # except MissingFieldException as ex:
-    #     return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    except MissingFieldException as ex:
+        return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
     
-    # except ObjectNotFoundException as ex:
-    #     return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
+    except ObjectNotFoundException as ex:
+        return Response(f"{ex}", status=status.HTTP_400_BAD_REQUEST)
     
-    # except Exception as ex:
-    #     return Response(f"Внутренняя ошибка сервера в register: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        return Response(f"Внутренняя ошибка сервера в register: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -101,7 +101,7 @@ def logout(request):
 
     auth_logout(request)
 
-    return Response({'message':"Вы были успешно разлогинены"})
+    return Response(f"Вы были успешно разлогинены")
 
 
 @api_view(['POST'])
@@ -122,7 +122,7 @@ def change_password(request):
         user.save()
         auth_login(request, user)
 
-        return Response({"Пароль успешно изменен."}, status=status.HTTP_200_OK)
+        return Response(f"Пароль успешно изменен.", status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -138,11 +138,11 @@ def send_reset_code(request):
             reset_code = generate_random_code()
             send_reset_code_email(email, reset_code)
             store_reset_code_in_cache(email, reset_code)
-            return Response({'message': 'Код восстановления отправлен на почту.'})
+            return Response('Код восстановления отправлен на почту.')
         else:
-            return Response({'error': 'Пользователь не найден.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response('Пользователь не найден.', status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response({'error': 'Недостимый метод запроса.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response('Недостимый метод запроса.', status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -154,7 +154,7 @@ def check_reset_code(request):
             reset_code = request.data.get('reset_code')
 
             if not email or not reset_code:
-                return Response({'error': 'Пожалуйста, предоставьте электронную почту и код сброса пароля.'},
+                return Response('Пожалуйста, предоставьте электронную почту и код сброса пароля.',
                                  status=status.HTTP_400_BAD_REQUEST)
 
             user_exists = User.objects.filter(email=email).exists()
@@ -170,13 +170,13 @@ def check_reset_code(request):
                     return Response({'message': 'Код верный, введите новый пароль.',
                                      'reset_token': reset_token})
                 else:
-                    return Response({'error': 'Неверный код, повторите попытку.'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response('Неверный код, повторите попытку.', status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({'error': 'Пользователь не найден.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response('Пользователь не найден.', status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({'error': 'Недостимый метод запроса.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response('Недостимый метод запроса.', status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(f"Внутренняя ошибка сервера в check_reset_code: {str(e)}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

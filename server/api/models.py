@@ -87,7 +87,7 @@ class AnswerOption(models.Model):
 
 
 class PollQuestion(models.Model):
-    name = models.CharField(max_length=100, default=None, null=True)
+    name = models.CharField(max_length=100, default=None, null=True, blank=True)
     info = models.CharField(max_length=500, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото вопроса', upload_to=f'images/poll_questions/', blank=True, null=True, default=None)
     answer_options = models.ManyToManyField(AnswerOption, related_name='pollquestion_answeroptions', blank=True, null=True)
@@ -107,7 +107,7 @@ class PollQuestion(models.Model):
         if not isinstance(name, str):
             raise WrongFieldTypeException(field_name='name', expected_type='str')
         if len(name) > 100:
-            raise ValueError("Параметр 'name' не может быть длинее 100 символов")
+            raise InvalidFieldException(detail="Параметр 'name' не может быть длинее 100 символов")
         self.name = name
         self.save()
 
@@ -115,20 +115,11 @@ class PollQuestion(models.Model):
         if not isinstance(info, str):
             raise WrongFieldTypeException(field_name='info', expected_type='str')
         if len(info) > 500:
-            raise ValueError("Параметр 'name' не может быть длинее 500 символов")
+            raise InvalidFieldException(detail="Параметр 'name' не может быть длинее 500 символов")
         self.info = info
         self.save()
 
-    def set_image(self, image):
-        if not isinstance(image, InMemoryUploadedFile):
-            raise WrongFieldTypeException(field_name='image', expected_type='InMemoryUploadedFile')
-        is_img_ok, details = self.__check_file(image)
-        if is_img_ok:
-            self.image = image
-            self.save()
-        else:
-            raise ValueError(f"Файл не прошел проверку: {details}") 
-        
+            
     def set_is_free(self, is_free):
         if not isinstance(is_free, bool):
             raise WrongFieldTypeException(field_name='is_free', expected_type='bool')
@@ -214,48 +205,6 @@ class Poll(models.Model):
                 answer.delete()
             question.delete()
 
-    def set_duration(self, duration:str):
-        duration_parts = duration.split(':')
-
-        if len(duration_parts) != 4:
-            raise ValueError("Неверный формат времени. Ожидается дни:часы:минуты:секунды")
-
-        try:
-            days = int(duration_parts[0])
-            if days < 0:
-                raise ValueError("Количество дней должно быть неотрицательным")
-            hours = int(duration_parts[1])
-            if not 0 <= hours < 24:
-                raise ValueError("Количество часов должно быть от 0 до 23")
-            minutes = int(duration_parts[2])
-            if not 0 <= minutes < 60:
-                raise ValueError("Количество минут должно быть от 0 до 59")
-            seconds = int(duration_parts[3])
-            if not 0 <= seconds < 60:
-                raise ValueError("Количество секунд должно быть от 0 до 59")
-        except ValueError as e:
-            raise ValueError("Неверный формат времени. Ожидается целое число для каждой части") from e
-
-
-        duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
-        self.duration = duration
-
-
-
-    def set_is_free(self, is_free):
-        if is_free is not None and not isinstance(is_free, bool):
-            raise WrongFieldTypeException(field_name='is_free_response', expected_type='bool или None')
-        
-        self.is_free = is_free
-        self.save()
-
-    def set_is_name(self, name):
-        if name is not None and not isinstance(name, str):
-            raise WrongFieldTypeException(field_name='name', expected_type='str')
-        
-        self.name = name
-        self.save()
-
     def add_question(self, is_free=None, image=None, **kwargs):
         """
             is_free_response - свободная форма вопроса;
@@ -339,13 +288,11 @@ class Poll(models.Model):
         else: return True
 
 
-
-
     def __check_file(self, file):
         # Проверяем тип файла с помощью imghdr
         file_type = imghdr.what(file)
         if not file_type:
-            return False
+            return False, "Неподдерживаемый формат файла."
         
         # Проверяем, является ли файл изображением
         if file_type not in ['jpeg', 'png', 'gif', 'bmp', 'pdf']:
