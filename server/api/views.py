@@ -99,12 +99,32 @@ def my_poll(request):
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
+
             if poll_id:
                 poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
                 serializer = PollSerializer(poll)
                 return Response(serializer.data)
+            
             else:
-                polls = Poll.objects.filter(author__user=current_user)
+                poll_type = request.GET.get('poll_type', None)
+                is_anonymous = request.GET.get('is_anonymous', None)
+                is_paused = request.GET.get('is_paused', None)
+                is_closed = request.GET.get('is_closed', None)
+
+                filters = Q(author__user=current_user)
+                if poll_type:
+                    poll_type = PollType.objects.filter(name=poll_type).first()
+                    if not poll_type:
+                        raise ObjectNotFoundException(model='PollType')
+                    filters &= Q(poll_type=poll_type)
+                if is_anonymous:
+                    filters &= Q(is_anonymous=is_anonymous)
+                if is_paused:
+                    filters &= Q(is_paused=is_paused)
+                if is_closed:
+                    filters &= Q(is_closed=is_closed)
+
+                polls = Poll.objects.filter(filters)
                 serializer = PollSerializer(polls, many=True)
                 return Response(serializer.data)
 
