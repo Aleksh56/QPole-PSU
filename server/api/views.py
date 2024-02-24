@@ -163,7 +163,22 @@ def my_poll(request):
 
             poll.delete()
 
-            return Response({'message':f"Опрос успешно удален"}, status=status.HTTP_204_NO_CONTENT)
+            current_user_profile = Profile.objects.filter(user=current_user).first()
+
+            if not current_user_profile:
+                raise ObjectNotFoundException('Profile')
+
+
+            profile_serializer = GetProfileSerializer(current_user_profile)
+            user_polls = Poll.objects.filter(author=current_user_profile)
+            user_polls_serializer = PollSerializer(user_polls, many=True)
+
+            response_data = {
+                'profile': profile_serializer.data,
+                'user_polls': user_polls_serializer.data
+            }
+
+            return Response({'message':f"Опрос успешно удален", 'data':response_data}, status=status.HTTP_204_NO_CONTENT)
 
     except InvalidFieldException as ex:
         return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
