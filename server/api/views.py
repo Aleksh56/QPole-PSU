@@ -100,7 +100,7 @@ def my_poll(request):
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
             if poll_id:
-                poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id))
+                poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
                 serializer = PollSerializer(poll)
                 return Response(serializer.data)
             else:
