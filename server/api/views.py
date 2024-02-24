@@ -152,7 +152,7 @@ def my_poll(request):
 
         elif request.method == 'DELETE':
             data = request.data
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
             
