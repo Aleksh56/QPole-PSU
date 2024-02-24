@@ -8,6 +8,7 @@ import { getAllPoles, getProfileData } from './api/apiRequests';
 import { Link } from 'react-router-dom';
 import { StyledAppContentWrapper } from './styled';
 import { _settings } from './config/settings';
+import { CircularProgress } from '@mui/material';
 
 const AppPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState();
@@ -15,14 +16,15 @@ const AppPage = () => {
   const [userData, setUserData] = useState();
   const [pollData, setPollData] = useState([]);
 
+  const fetchData = async () => {
+    setLoading(true);
+    const [pollResponse, userResponse] = await Promise.all([getAllPoles(), getProfileData()]);
+    setPollData(pollResponse.data);
+    setUserData(userResponse.data);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const [pollResponse, userResponse] = await Promise.all([getAllPoles(), getProfileData()]);
-      setPollData(pollResponse.data);
-      setUserData(userResponse.data);
-      setLoading(false);
-    };
     fetchData();
   }, []);
 
@@ -30,18 +32,24 @@ const AppPage = () => {
     <>
       <AppHeader userData={userData} />
       <AppPolesFilters handleCreateModalOpen={setIsCreateModalOpen} />
-      {pollData.length === 0 && (
+
+      {!loading && pollData.length === 0 ? (
         <AppCreateFirstPole settings={_settings} handleOpenCreatePoleModal={setIsCreateModalOpen} />
+      ) : (
+        ''
       )}
       <StyledAppContentWrapper>
-        {pollData.length > 0 &&
+        {!loading && pollData.length > 0 ? (
           pollData.map((item) => {
             return (
               <Link to={`/app/tests/${item.poll_id}/main`}>
-                <AppPoleCard pollData={item} />
+                <AppPoleCard pollData={item} fetchData={fetchData} />
               </Link>
             );
-          })}
+          })
+        ) : (
+          <CircularProgress />
+        )}
       </StyledAppContentWrapper>
       <CreatePoleModal
         isOpen={isCreateModalOpen}

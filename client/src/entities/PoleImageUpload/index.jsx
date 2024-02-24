@@ -1,28 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { InvisibleInput, StyledImageButton } from './styled';
 import { Box, IconButton } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const PoleImageUpload = ({ onFileSelect }) => {
+const BASE_IMAGE_URL = import.meta.env.VITE_BASE_URL || '';
+
+const PoleImageUpload = ({ image = '', onFileSelect }) => {
   const [preview, setPreview] = useState('');
+
+  useEffect(() => {
+    if (image) {
+      setPreview(`${BASE_IMAGE_URL}${image}`);
+    }
+  }, [image]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);
-        console.log(file);
         onFileSelect(file);
       };
+      console.log(reader);
       reader.readAsDataURL(file);
     }
   };
 
   const handleFileClear = () => {
     setPreview('');
-    onFileClear();
+    if (onFileClear) {
+      onFileClear();
+    }
   };
 
   return (

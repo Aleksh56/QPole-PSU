@@ -44,7 +44,10 @@ const PoleMainSettingsPage = () => {
     <Box sx={{ display: 'flex', backgroundColor: '#f9fafb' }}>
       <MainSettingsContentWrapper>
         <PoleInfoContainer>
-          <PoleImageUpload onFileSelect={(e) => handleFieldChange('image', e)} />
+          <PoleImageUpload
+            image={poleData?.image}
+            onFileSelect={(e) => handleFieldChange('image', e)}
+          />
           <InvisibleLabeledField
             label="Название теста"
             placeholder="Введите название"

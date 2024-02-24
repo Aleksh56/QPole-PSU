@@ -1,37 +1,49 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import PoleCreateFirstQuestion from '@/features/PoleCreateFirstQuestion';
 import { Box } from '@mui/material';
 import PoleQuestionsList from '@/features/PoleQuestionsList';
 import PoleQuestionEditForm from '@/features/PoleQuestionEditForm';
+import {
+  handleCreateQuestionRequest,
+  handleGetAllQuestionRequest,
+  handleGetQuestionInfoRequest,
+} from './api/apiRequests';
+import { useParams } from 'react-router-dom';
+
+const _settings = {
+  title: 'Вы не создали ни одного вопроса',
+  buttonCaption: 'Создать вопрос',
+};
 
 const PoleQuestionsPage = () => {
+  const { id } = useParams();
   const [questions, setQuestions] = useState([]);
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
-  const _settings = {
-    title: 'Вы не создали ни одного вопроса',
-    buttonCaption: 'Создать вопрос',
-  };
+  const [selectedQuestion, setSelectedQuestion] = useState({});
 
-  const handleCreateQuestion = useCallback(() => {
-    const newQuestion = {
-      id: Math.random().toString(36).substr(2, 9),
-      title: 'Новый вопрос',
-    };
+  useEffect(() => {
+    handleGetAllQuestionRequest(id).then((res) => setQuestions(res.data));
+  }, [id]);
 
-    setQuestions((prevQuestions) => [...prevQuestions, newQuestion]);
-  }, []);
+  const handleCreateQuestion = useCallback(async () => {
+    await handleCreateQuestionRequest(id).then(() =>
+      handleGetAllQuestionRequest(id).then((res) => setQuestions(res.data))
+    );
+  }, [id]);
 
-  const handleSelectQuestion = useCallback((question) => {
-    setSelectedQuestion(question);
-  }, []);
-
-  const questionsContent = useMemo(() => {
-    if (questions.length === 0) {
-      return (
-        <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
+  const handleSelectQuestion = useCallback(
+    async (question_id) => {
+      await handleGetQuestionInfoRequest(id, question_id).then((res) =>
+        setSelectedQuestion(res.data)
       );
-    } else {
-      return (
+    },
+    [id]
+  );
+
+  return (
+    <div>
+      {questions.length === 0 ? (
+        <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
+      ) : (
         <Box
           sx={{
             display: 'flex',
@@ -48,17 +60,16 @@ const PoleQuestionsPage = () => {
               onSelectQuestion={handleSelectQuestion}
               onAddQuestion={handleCreateQuestion}
               selectedQuestion={selectedQuestion}
+              setQuestions={setQuestions}
             />
           </Box>
           <Box sx={{ width: '75%' }}>
             {selectedQuestion && <PoleQuestionEditForm question={selectedQuestion} />}
           </Box>
         </Box>
-      );
-    }
-  }, [questions, selectedQuestion, handleCreateQuestion, handleSelectQuestion]);
-
-  return <div>{questionsContent}</div>;
+      )}
+    </div>
+  );
 };
 
 export default PoleQuestionsPage;

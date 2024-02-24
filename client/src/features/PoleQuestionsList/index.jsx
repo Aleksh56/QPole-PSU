@@ -1,70 +1,69 @@
 import React from 'react';
-import { Card, CardContent, Typography, IconButton, Box, Button } from '@mui/material';
+import { Typography, IconButton, Box } from '@mui/material';
 import CopyIcon from '@mui/icons-material/FileCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { designTokens } from '@/constants/designTokens';
+import { StyledAddButton, StyledCard, StyledCardContent, StyledContentWrapper } from './styled';
+import { deleteQuestionRequest } from './api/apiRequests';
+import { useParams } from 'react-router-dom';
 
-const PoleQuestionsList = ({ questions, onSelectQuestion, onAddQuestion, selectedQuestion }) => {
+const PoleQuestionsList = ({
+  questions,
+  onSelectQuestion,
+  onAddQuestion,
+  selectedQuestion,
+  setQuestions,
+}) => {
+  const { id } = useParams();
+  const handleCopyQuestion = (e, question) => {
+    e.stopPropagation();
+    // onCopyQuestion(question);
+  };
+
+  const handleDeleteQuestion = async (e, q_id) => {
+    e.stopPropagation();
+    await deleteQuestionRequest(id, q_id).then(() => {
+      if (q_id === selectedQuestion?.id) {
+        onSelectQuestion('');
+      }
+      const newQuestions = questions.filter((que) => que.id !== q_id);
+      setQuestions(newQuestions);
+    });
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
-      <Button
-        onClick={onAddQuestion}
-        variant="outlined"
-        style={{
-          marginBottom: '10px',
-          width: '100%',
-          padding: '10px',
-          borderColor: designTokens.colors.primaryBlue,
-          color: designTokens.colors.primaryBlue,
-        }}
-      >
+      <StyledAddButton onClick={onAddQuestion} variant="outlined">
         Добавить вопрос
-      </Button>
+      </StyledAddButton>
       <Box>
-        {questions.map((question, index) => (
-          <Card
-            key={index}
-            sx={{
-              marginBottom: 2,
-              boxShadow: selectedQuestion?.id === question.id ? 'none' : 3,
-              border: selectedQuestion?.id === question.id ? '1px solid blue' : 'none',
-              cursor: 'pointer',
-            }}
-            onClick={() => onSelectQuestion(question)}
+        {questions.map((question) => (
+          <StyledCard
+            key={question.id}
+            selected={selectedQuestion?.id === question.id}
+            onClick={() => onSelectQuestion(question.id)}
           >
-            <CardContent
-              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            >
-              <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+            <StyledCardContent>
+              <StyledContentWrapper>
                 <Typography variant="subtitle1" component="div">
-                  Вопрос #{index + 1}
+                  Вопрос #{question?.id}
                 </Typography>
                 <Typography variant="body2" component="div">
-                  {question.title || 'Любой текст, если заголовка нет'}
+                  {question.title || ''}
                 </Typography>
-              </Box>
+              </StyledContentWrapper>
               <Box>
-                <IconButton
-                  aria-label="copy"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCopyQuestion(question);
-                  }}
-                >
+                <IconButton aria-label="copy" onClick={(e) => handleCopyQuestion(e, question)}>
                   <CopyIcon />
                 </IconButton>
                 <IconButton
                   aria-label="delete"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteQuestion(question.id);
-                  }}
+                  onClick={(e) => handleDeleteQuestion(e, question.id)}
                 >
                   <DeleteIcon />
                 </IconButton>
               </Box>
-            </CardContent>
-          </Card>
+            </StyledCardContent>
+          </StyledCard>
         ))}
       </Box>
     </Box>

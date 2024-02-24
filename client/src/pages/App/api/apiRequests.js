@@ -5,5 +5,5 @@ export const getAllPoles = async () => {
 };
 
 export const getProfileData = async () => {
-  return handleRequest('get', '/api/get_my_profile/');
+  return handleRequest('get', '/api/my_profile/');
 };

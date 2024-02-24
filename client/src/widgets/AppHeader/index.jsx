@@ -32,7 +32,7 @@ const AppHeader = ({ userData = {} }) => {
         <AppHeaderNavigationOutput itemsData={AppHeaderData} />
         <Dropdown>
           <StyledHeaderProfile>
-            {userData?.user?.email ?? ''}
+            {userData?.profile?.email ?? ''}
             <ArrowDropDownIcon fontSize="small" />
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>

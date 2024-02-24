@@ -19,7 +19,7 @@ const useUserData = () => {
         };
         const { data } = await handleRequest(
           'get',
-          '/api/get_my_profile/',
+          '/api/my_profile/',
           null,
           'Загрузка данных профиля', // ToDo - Delete (Just for debugging)
           headers
