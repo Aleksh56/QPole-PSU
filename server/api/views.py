@@ -221,8 +221,8 @@ def my_poll_question(request):
             
             with transaction.atomic():
                 poll_question = PollQuestion(
-                    name=None,
-                    info=None,
+                    name="",
+                    info="",
                     image=None,
                 )
                 poll_question.save()
@@ -257,11 +257,11 @@ def my_poll_question(request):
         elif request.method == 'DELETE':
             data = request.data
 
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
             
-            poll_question_id = data.get('poll_question_id', None)
+            poll_question_id = request.GET.get('poll_question_id', None)
             if not poll_question_id:
                 raise MissingFieldException(field_name='poll_question_id')
             
@@ -349,7 +349,7 @@ def my_poll_question_option(request):
 
             with transaction.atomic():
                 question_option = AnswerOption(
-                    name=None,
+                    name="",
                     image=None,
                 )
                 question_option.save()
