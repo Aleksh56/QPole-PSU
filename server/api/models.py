@@ -103,64 +103,7 @@ class PollQuestion(models.Model):
         else:
             return f"Вопрос №{self.id}"
 
-    def set_name(self, name):
-        if not isinstance(name, str):
-            raise WrongFieldTypeException(field_name='name', expected_type='str')
-        if len(name) > 100:
-            raise InvalidFieldException(detail="Параметр 'name' не может быть длинее 100 символов")
-        self.name = name
-        self.save()
 
-    def set_info(self, info):
-        if not isinstance(info, str):
-            raise WrongFieldTypeException(field_name='info', expected_type='str')
-        if len(info) > 500:
-            raise InvalidFieldException(detail="Параметр 'name' не может быть длинее 500 символов")
-        self.info = info
-        self.save()
-
-            
-    def set_is_free(self, is_free):
-        if not isinstance(is_free, bool):
-            raise WrongFieldTypeException(field_name='is_free', expected_type='bool')
-        self.is_free = is_free
-        self.save()
-
-    def set_is_available(self, is_available):
-        if not isinstance(is_available, bool):
-            raise WrongFieldTypeException(field_name='is_available', expected_type='bool')
-        self.is_available = is_available
-        self.save()
-
-    def set_is_text(self, is_text):
-        if not isinstance(is_text, bool):
-            raise WrongFieldTypeException(field_name='is_text', expected_type='bool')
-        self.is_text = is_text
-        self.save()
-
-    def set_is_image(self, is_image):
-        if not isinstance(is_image, bool):
-            raise WrongFieldTypeException(field_name='is_image', expected_type='bool')
-        self.is_image = is_image
-        self.save()
-        
-    def add_answer_option(self, is_free_response=None, image=None, **kwargs):
-        """
-            is_free_response - свободная форма ответа
-            name - наименование варианта ответа
-        """
-        if is_free_response is not None and not isinstance(is_free_response, bool):
-            raise ValueError("'is_free_response' должен быть указан в формате bool или None")
-
-        answer_option = None
-
-        
-        # сохранение если все ок при создании
-        with transaction.atomic():
-            answer_option.save()
-            self.answer_options.add(answer_option)
-            return True
-        
 
 
 
@@ -205,72 +148,6 @@ class Poll(models.Model):
                 answer.delete()
             question.delete()
 
-    def add_question(self, is_free=None, image=None, **kwargs):
-        """
-            is_free_response - свободная форма вопроса;
-            name - наименование вопроса;
-            image - фото к вопросу;
-        """
-        
-
-        question = None
-
-        if is_free:
-            if image:
-                if self.__check_file(image)[0]:
-                    question = PollQuestion(
-                        name=None,
-                        is_text = False,
-                        is_image = True,
-                        is_free= True,
-                        image = image
-                    )
-                else:
-                    raise ValueError(f"Файл не прошел проверку!")     
-            else:
-                name = kwargs.get('name', None)
-                if not name or len(name) == 0:
-                    raise ValueError(f"Параметр 'name' не указан или пустой.")
-                info = kwargs.get('info', None)
-                if len(info) > 500:
-                    raise ValueError(f"Описание не может быть больше 500 символов в длину.")
-                
-                question = PollQuestion(
-                    name=name,
-                    is_text = True,
-                    is_image = False,
-                    is_free = True,
-                    image = None
-                )          
-        else:
-            is_correct = kwargs.get('is_correct', None)
-            if is_correct is not None and not isinstance(is_correct, bool):
-                raise ValueError("'is_correct' должен быть в формате bool или None.")
-
-            name = kwargs.get('name', None)
-            if not isinstance(name, str):
-                raise ValueError(f"'name' должен быть в формате str.")
-            
-            if not name or len(name) == 0:
-                raise ValueError(f"Параметр 'name' не указан или пустой.")
-        
-
-            question = PollQuestion(
-                name=name,
-                is_correct=is_correct,
-                is_text_response = True,
-                is_image_response = False,
-                is_free_response = False,
-                image = None
-            )          
-
-        # сохранение если все ок при создании
-        with transaction.atomic():
-            question.save()
-            self.questions.add(question)
-            return True
-
-    
     @property   
     def members_quantity(self):   # число участников опроса
         profiles = set()   
@@ -287,19 +164,3 @@ class Poll(models.Model):
             return timezone.now() < self.created_date + self.duration
         else: return True
 
-
-    def __check_file(self, file):
-        # Проверяем тип файла с помощью imghdr
-        file_type = imghdr.what(file)
-        if not file_type:
-            return False, "Неподдерживаемый формат файла."
-        
-        # Проверяем, является ли файл изображением
-        if file_type not in ['jpeg', 'png', 'gif', 'bmp', 'pdf']:
-            return False, "Неподдерживаемый формат файла."
-
-        # Проверяем размер файла
-        if file.size > 100 * 1024 * 1024: 
-            return False, "Первышен допустимый размер файла."
-
-        return True, "ОК"

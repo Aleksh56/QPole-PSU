@@ -134,7 +134,7 @@ def my_poll(request):
             )
 
             poll.save()
-            return Response("Опрос успешно проинициализирован", status=status.HTTP_201_CREATED)
+            return Response({'message':"Опрос успешно проинициализирован"}, status=status.HTTP_201_CREATED)
 
         elif request.method == 'PATCH':
             data = request.data
@@ -166,7 +166,7 @@ def my_poll(request):
 
             poll.delete()
 
-            return Response("Опрос успешно удален", status=status.HTTP_204_NO_CONTENT)
+            return Response({'message':f"Опрос успешно удален"}, status=status.HTTP_204_NO_CONTENT)
 
     except InvalidFieldException as ex:
         return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -181,7 +181,7 @@ def my_poll(request):
         return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
 
     except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -278,7 +278,7 @@ def my_poll_question(request):
 
             poll_question.delete()
 
-            return Response("Вопрос опроса успешно удален", status=status.HTTP_204_NO_CONTENT)
+            return Response({'message':"Вопрос опроса успешно удален"}, status=status.HTTP_204_NO_CONTENT)
 
     except InvalidFieldException as ex:
         return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -293,9 +293,155 @@ def my_poll_question(request):
         return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
 
     except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
+
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def my_poll_question_option(request):
+    try:
+        current_user = request.user
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            poll_question_id = request.GET.get('poll_question_id', None)
+            if not poll_question_id:
+                raise MissingFieldException(field_name='poll_question_id')
+             
+            
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+
+            question_option_id = request.GET.get('question_option_id', None)
+        
+            poll_question = poll.questions.filter(id=poll_question_id).first()
+
+            if question_option_id:
+                question_option = poll_question.answer_options.filter(id=poll_question_id).first()
+                serializer = PollQuestionOptionSerializer(question_option)
+            else:
+                question_options = poll_question.answer_options.all()
+                serializer = PollQuestionOptionSerializer(question_options, many=True)
+ 
+            
+            return Response(serializer.data)
+
+        elif request.method == 'POST':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            poll_question_id = data.get('poll_question_id', None)
+            if not poll_question_id:
+                raise MissingFieldException(field_name='poll_question_id')
+            
+
+            my_poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not my_poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            if not poll_question:
+                raise ObjectNotFoundException(model='PollQuestion')
+
+            with transaction.atomic():
+                question_option = AnswerOption(
+                    name=None,
+                    image=None,
+                )
+                question_option.save()
+                poll_question.answer_options.add(question_option)
+
+            return Response({'message':f"Вариант ответа в вопросе успешно проинициализирован"}, status=status.HTTP_201_CREATED)
+
+        elif request.method == 'PATCH':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            poll_question_id = data.get('poll_question_id', None)
+            if not poll_question_id:
+                raise MissingFieldException(field_name='poll_question_id')
+            
+            question_option_id = data.get('question_option_id', None)
+            if not question_option_id:
+                raise MissingFieldException(field_name='question_option_id')
+            
+            my_poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not my_poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            if not poll_question:
+                raise ObjectNotFoundException(model='PollQuestion')
+            
+            question_option = poll_question.answer_options.filter(id=question_option_id).first()
+            if not question_option:
+                raise ObjectNotFoundException(model='AnswerOption')
+            
+
+            serializer = PollQuestionOptionSerializer(instance=question_option, data=data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        elif request.method == 'DELETE':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            poll_question_id = data.get('poll_question_id', None)
+            if not poll_question_id:
+                raise MissingFieldException(field_name='poll_question_id')
+            
+            question_option_id = data.get('question_option_id', None)
+            if not question_option_id:
+                raise MissingFieldException(field_name='question_option_id')
+            
+            my_poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not my_poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            if not poll_question:
+                raise ObjectNotFoundException(model='PollQuestion')
+            
+            question_option = poll_question.answer_options.filter(id=question_option_id).first()
+            if not question_option:
+                raise ObjectNotFoundException(model='AnswerOption')
+
+
+            question_option.delete()
+
+            return Response({'message':"Вариант ответа успешно удален"}, status=status.HTTP_204_NO_CONTENT)
+
+    except InvalidFieldException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    except WrongFieldTypeException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    except MissingFieldException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+      
+    except ObjectNotFoundException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll_question_option: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    
 
 @api_view(['GET'])
 def test_api(request):
