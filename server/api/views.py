@@ -58,7 +58,7 @@ def my_profile(request):
             if not current_profile:
                 raise ObjectNotFoundException('Profile')
             
-            request.data['user'] = current_user.id
+            # request.data['user'] = current_user.id
             serializer = ProfileSerializer(current_user_profile, data=request.data, partial=True)
     
             if serializer.is_valid():
