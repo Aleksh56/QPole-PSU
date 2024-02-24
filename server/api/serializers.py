@@ -165,7 +165,7 @@ class UserRoleSerializer(serializers.ModelSerializer):
 
 
 class PollSerializer(serializers.ModelSerializer):
-    poll_type = serializers.CharField(source='poll_type.value', read_only=True)
+    poll_type = serializers.CharField(source='poll_type.name', read_only=True)
     author = ProfileSerializer()
     questions = QuestionSerializer(many=True)
 
