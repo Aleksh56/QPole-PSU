@@ -3,10 +3,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
-from django.shortcuts import get_object_or_404
 from django.db.models import Q
-
 
 
 from .exсeptions import *

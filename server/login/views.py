@@ -26,13 +26,13 @@ def register(request):
         email = data.get('email', None)
         if not email:
             raise MissingFieldException(field_name='email')
-        role = data.get('role', None)
-        if not role:
-            raise MissingFieldException(field_name='role')
-        else:
-            role = UserRole.objects.filter(role=role).first()
-            if not role:
-                raise ObjectNotFoundException(model='UserRole')
+        # role = data.get('role', None)
+        # if not role:
+        #     raise MissingFieldException(field_name='role')
+        # else:
+        #     role = UserRole.objects.filter(role=role).first()
+        #     if not role:
+        #         raise ObjectNotFoundException(model='UserRole')
 
 
         check_email = User.objects.filter(email=email).exists()
@@ -48,7 +48,6 @@ def register(request):
                     user_profile = {
                         'user': user.id,
                         'email': email,
-                        'role': role.id,
                     }
                     serializer = ProfileSerializer(data=user_profile)
                     if serializer.is_valid():

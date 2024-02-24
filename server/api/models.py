@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 
-import imghdr
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from .exсeptions import *
@@ -38,9 +38,15 @@ class UserRole(models.Model):
 
 class PollType(models.Model):
     name = models.CharField(max_length=50)
-    description = models.CharField(max_length=50, default="", blank=True)
+    description = models.CharField(max_length=500, default="", blank=True)
 
-    
+
+    is_text = models.BooleanField(default=True, null=True)    # текст ли как ответ
+    is_free = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
+    is_image = models.BooleanField(default=False, null=True)    # фото ли как ответ
+    has_multiple_choices = models.BooleanField(default=False) # множественный выбор
+    has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
+    is_anonymous = models.BooleanField(default=False) # анонимное
 
     def __str__(self):
         return self.name
@@ -114,7 +120,7 @@ class Poll(models.Model):
     name = models.CharField(max_length=50, blank=True, null=True) # имя опроса
     description = models.TextField(blank=True, null=True) # текст начать опрос
 
-    poll_type = models.ForeignKey(PollType, on_delete=models.CASCADE) # тип опроса
+    poll_type = models.ForeignKey(PollType, on_delete=models.CASCADE, blank=True, null=True) # тип опроса
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
     duration = models.DurationField(blank=True, null=True) # таймер
 

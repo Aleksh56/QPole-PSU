@@ -5,11 +5,6 @@ from .models import *
 from .exсeptions import *
 from .utils import check_file
 
-def validate_age(value):
-    if value < 14:
-        raise serializers.ValidationError("Возраст должен быть 14 или более.")
-
-
 class MiniUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
