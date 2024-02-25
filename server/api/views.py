@@ -489,7 +489,7 @@ def my_poll_question_option(request):
             objects_to_update = []
 
             options_data = data['options_data']
-            for order_number, option_data in options_data:
+            for order_number, option_data in enumerate(options_data, start=1):
                 poll_option = AnswerOption.objects.filter(id=int(option_data['id'])).first()
                 if not poll_option:
                     raise ObjectNotFoundException(model='AnswerOption')
