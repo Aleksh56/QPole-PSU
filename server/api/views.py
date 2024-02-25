@@ -501,6 +501,7 @@ def my_poll_question_option(request):
             # Выполняем один запрос к базе данных для обновления всех объектов
             AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
 
+            return Response(status=status.HTTP_200_OK)
             
 
 
