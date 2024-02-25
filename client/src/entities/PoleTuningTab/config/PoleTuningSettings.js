@@ -4,6 +4,7 @@ export const settings = [
     switchSettings: [
       { id: 'Hide votes', label: 'Скрыть количество проголосовавших', defaultChecked: false },
       { id: 'Hide percentage', label: 'Скрыть проценты у вариантов ответа', defaultChecked: false },
+      { id: 'is_anonymous', label: 'Анонимное голосование', defaultChecked: false },
     ],
   },
   {

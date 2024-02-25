@@ -21,3 +21,27 @@ export const addOptionRequest = async (id, q_id) => {
     poll_question_id: q_id,
   });
 };
+
+export const changeOptionRequest = async (id, q_id, opt_id, fieldName, value) => {
+  return handleRequest('patch', `/api/my_poll_question_option/`, {
+    poll_id: id,
+    poll_question_id: q_id,
+    question_option_id: opt_id,
+    [fieldName]: value,
+  });
+};
+
+export const deleteOptionRequest = async (id, q_id, opt_id) => {
+  return handleRequest(
+    'delete',
+    `/api/my_poll_question_option/?poll_id=${id}&poll_question_id=${q_id}&question_option_id=${opt_id}`
+  );
+};
+
+export const changeOptionOrderRequest = async (id, q_id, opt_data) => {
+  return handleRequest('put', `/api/my_poll_question_option/`, {
+    poll_id: id,
+    poll_question_id: q_id,
+    options_data: opt_data,
+  });
+};

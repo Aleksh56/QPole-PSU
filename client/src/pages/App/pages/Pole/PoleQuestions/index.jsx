@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PoleCreateFirstQuestion from '@/features/PoleCreateFirstQuestion';
 import { Box } from '@mui/material';
 import PoleQuestionsList from '@/features/PoleQuestionsList';
@@ -9,6 +9,7 @@ import {
   handleGetQuestionInfoRequest,
 } from './api/apiRequests';
 import { useParams } from 'react-router-dom';
+import { ListWrapper } from './styled';
 
 const _settings = {
   title: 'Вы не создали ни одного вопроса',
@@ -44,16 +45,7 @@ const PoleQuestionsPage = () => {
       {questions.length === 0 ? (
         <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
       ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            width: '100%',
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '20px 0',
-            columnGap: '30px',
-          }}
-        >
+        <ListWrapper>
           <Box sx={{ width: '25%' }}>
             <PoleQuestionsList
               questions={questions}
@@ -64,9 +56,11 @@ const PoleQuestionsPage = () => {
             />
           </Box>
           <Box sx={{ width: '75%' }}>
-            {selectedQuestion && <PoleQuestionEditForm question={selectedQuestion} />}
+            {Object.keys(selectedQuestion).length > 0 && (
+              <PoleQuestionEditForm question={selectedQuestion} />
+            )}
           </Box>
-        </Box>
+        </ListWrapper>
       )}
     </div>
   );

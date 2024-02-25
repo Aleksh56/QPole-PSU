@@ -76,6 +76,7 @@ const PoleMainSettingsPage = () => {
             tabValue={tabValue}
             handleTabChange={handleTabChange}
             tabsData={poleTabsButtonsData}
+            pollData={poleData}
           />
         </Box>
       </MainSettingsContentWrapper>

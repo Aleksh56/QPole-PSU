@@ -16,7 +16,7 @@ export const StyledChip = styled(Chip)(() => ({
 }));
 
 export const StyledCard = styled(Card)(() => ({
-  maxWidth: Rem(275),
+  maxWidth: Rem(300),
   position: 'relative',
   transition: 'transform 0.3s ease',
   '&:hover': {

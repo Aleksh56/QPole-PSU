@@ -36,7 +36,7 @@ const PoleQuestionsList = ({
         Добавить вопрос
       </StyledAddButton>
       <Box>
-        {questions.map((question) => (
+        {questions.map((question, index) => (
           <StyledCard
             key={question.id}
             selected={selectedQuestion?.id === question.id}
@@ -45,7 +45,7 @@ const PoleQuestionsList = ({
             <StyledCardContent>
               <StyledContentWrapper>
                 <Typography variant="subtitle1" component="div">
-                  Вопрос #{question?.id}
+                  Вопрос #{index + 1}
                 </Typography>
                 <Typography variant="body2" component="div">
                   {question.title || ''}

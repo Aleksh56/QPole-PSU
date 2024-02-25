@@ -28,7 +28,7 @@ const AppHeader = ({ userData = {} }) => {
   return (
     <StyledHeaderWrapper>
       <StyledHeaderContainer>
-        <StyledHeaderLogo to="/app">QPole</StyledHeaderLogo>
+        <StyledHeaderLogo to="/app">QPoll</StyledHeaderLogo>
         <AppHeaderNavigationOutput itemsData={AppHeaderData} />
         <Dropdown>
           <StyledHeaderProfile>
