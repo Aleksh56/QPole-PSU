@@ -246,7 +246,7 @@ def my_poll_question(request):
                 serializer = PollQuestionSerializer(my_poll_questions, many=True)
 
                 
-                return Response(serializer.data)
+            return Response(serializer.data)
 
         elif request.method == 'POST':
             data = request.data
