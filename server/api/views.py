@@ -107,6 +107,7 @@ def my_poll(request):
             
             else:
                 poll_type = request.GET.get('poll_type', None)
+                name = request.GET.get('name', None)
                 is_anonymous = request.GET.get('is_anonymous', None)
                 is_paused = request.GET.get('is_paused', None)
                 is_closed = request.GET.get('is_closed', None)
@@ -117,6 +118,8 @@ def my_poll(request):
                     if not poll_type:
                         raise ObjectNotFoundException(model='PollType')
                     filters &= Q(poll_type=poll_type)
+                if name:
+                    filters &= Q(name__startswith=name)
                 if is_anonymous:
                     filters &= Q(is_anonymous=is_anonymous)
                 if is_paused:
