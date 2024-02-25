@@ -119,7 +119,7 @@ def my_poll(request):
                         raise ObjectNotFoundException(model='PollType')
                     filters &= Q(poll_type=poll_type)
                 if name:
-                    filters &= Q(name__startswith=name)
+                    filters &= Q(name__istartswith=name)
                 if is_anonymous:
                     filters &= Q(is_anonymous=is_anonymous)
                 if is_paused:
@@ -229,21 +229,24 @@ def my_poll_question(request):
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
-            if poll_id:
-                poll_question_id = request.GET.get('poll_question_id', None)
-                my_poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
 
-                if poll_question_id:
-                    my_poll_question = my_poll.questions.filter(id=poll_question_id).first()
-                    serializer = PollQuestionSerializer(my_poll_question)
-                else:
-                    my_poll_questions = my_poll.questions.all()
-                    serializer = PollQuestionSerializer(my_poll_questions, many=True)
+            poll_question_id = request.GET.get('poll_question_id', None)
+            my_poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+
+            if not my_poll:
+                raise ObjectNotFoundException(model='Poll') 
+            
+            if poll_question_id:
+                my_poll_question = my_poll.questions.filter(id=poll_question_id).first()
+                serializer = PollQuestionSerializer(my_poll_question)
+            else:
+                my_poll_questions = my_poll.questions.all()
+                serializer = PollQuestionSerializer(my_poll_questions, many=True)
 
                 
                 return Response(serializer.data)
-            else:
-                return Response("В запросе не указан poll_id", status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'POST':
             data = request.data
@@ -430,17 +433,16 @@ def my_poll_question_option(request):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         elif request.method == 'DELETE':
-            data = request.data
-
-            poll_id = data.get('poll_id', None)
+            
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
             
-            poll_question_id = data.get('poll_question_id', None)
+            poll_question_id = request.GET.get('poll_question_id', None)
             if not poll_question_id:
                 raise MissingFieldException(field_name='poll_question_id')
             
-            question_option_id = data.get('question_option_id', None)
+            question_option_id = request.GET.get('question_option_id', None)
             if not question_option_id:
                 raise MissingFieldException(field_name='question_option_id')
             

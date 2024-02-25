@@ -103,6 +103,7 @@ class PollQuestion(models.Model):
     is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
     is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
 
+    
     def __str__(self):
         if self.name:
             return f"Вопрос '{self.name}'"
