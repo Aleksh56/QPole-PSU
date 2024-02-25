@@ -3,7 +3,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q
+from django.db.models import Q, F
 
 
 from .exсeptions import *
@@ -220,7 +220,7 @@ def my_poll(request):
 
 
 
-@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_poll_question(request):
@@ -318,6 +318,9 @@ def my_poll_question(request):
 
             return Response({'message':"Вопрос опроса успешно удален"}, status=status.HTTP_204_NO_CONTENT)
 
+        elif request.method == 'PUT':
+            pass
+
     except InvalidFieldException as ex:
         return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -335,7 +338,7 @@ def my_poll_question(request):
     
 
 
-@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_poll_question_option(request):
@@ -462,6 +465,44 @@ def my_poll_question_option(request):
             question_option.delete()
 
             return Response({'message':"Вариант ответа успешно удален"}, status=status.HTTP_204_NO_CONTENT)
+
+        elif request.method == 'PUT':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            poll_question_id = data.get('poll_question_id', None)
+            if not poll_question_id:
+                raise MissingFieldException(field_name='poll_question_id')
+            
+            my_poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not my_poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            if not poll_question:
+                raise ObjectNotFoundException(model='PollQuestion')
+
+
+            objects_to_update = []
+
+            for order_number, option_data in data:
+                poll_option = AnswerOption.objects.filter(id=int(option_data['id'])).first()
+                if not poll_option:
+                    raise ObjectNotFoundException(model='AnswerOption')
+
+                poll_option.order_id = order_number
+
+                objects_to_update.append(poll_option)
+
+            # Выполняем один запрос к базе данных для обновления всех объектов
+            AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
+
+            
+
+
 
     except InvalidFieldException as ex:
         return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)

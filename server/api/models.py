@@ -78,6 +78,8 @@ class AnswerOption(models.Model):
     is_free_response = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
     is_image_response = models.BooleanField(default=False, null=True)    # фото ли как ответ
 
+    order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в вопросе
+    
     def __str__(self):
         if self.is_free_response:
             if not self.is_image_response:
@@ -103,15 +105,13 @@ class PollQuestion(models.Model):
     is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
     is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
 
-    # question_order_id = models.PositiveIntegerField()
+    order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в опросе
 
     def __str__(self):
         if self.name:
             return f"Вопрос '{self.name}'"
         else:
             return f"Вопрос №{self.id}"
-
-
 
 
 

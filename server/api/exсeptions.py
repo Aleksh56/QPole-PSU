@@ -35,6 +35,17 @@ class ObjectAlreadyExistsException(APIException):
         self.detail = detail
     
 
+class UniqueIdException(APIException):
+    status_code = 400
+    default_code = 'id_exists'
+
+    def __init__(self, model=None, detail=None):
+        if detail is None:
+            detail = f'Id в модели {model} уже занят.'
+        self.detail = detail
+    
+    
+
 class AccessDeniedException(APIException):
     status_code = 403 
     default_detail = 'У Вас нет доступа к данному ресурсу.'
