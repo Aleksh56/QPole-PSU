@@ -365,7 +365,7 @@ def my_poll_question_option(request):
                 question_option = poll_question.answer_options.filter(id=poll_question_id).first()
                 serializer = PollQuestionOptionSerializer(question_option)
             else:
-                question_options = poll_question.answer_options.all()
+                question_options = poll_question.answer_options.all().order_by('order_id')
                 serializer = PollQuestionOptionSerializer(question_options, many=True)
  
             
