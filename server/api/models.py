@@ -1,11 +1,8 @@
 from django.db import models
-from django.db import transaction
+
 from django.contrib.auth.models import User
 from django.utils import timezone
-from datetime import timedelta
 
-
-from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from .exсeptions import *
 
@@ -56,8 +53,8 @@ class PollType(models.Model):
 
 class PollAnswer(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    answer_option = models.ForeignKey('AnswerOption', on_delete=models.DO_NOTHING)
-    text = models.CharField(max_length=100, default=None, null=True)
+    answer_option = models.ForeignKey('AnswerOption', on_delete=models.DO_NOTHING, null=True, blank=True)
+    text = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
 
 
@@ -70,7 +67,7 @@ class PollAnswer(models.Model):
 
 class AnswerOption(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
-    image = models.ImageField(verbose_name='Фото варианта ответ', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
+    image = models.ImageField(verbose_name='Фото варианта ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
     answers = models.ManyToManyField(PollAnswer, related_name='answeroption_pollanswers', blank=True, null=True)
 
     is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
@@ -93,6 +90,11 @@ class AnswerOption(models.Model):
                 return f"Вариант ответа №{self.id}"
 
 
+    def delete(self):
+        super().delete(keep_parents=False)
+
+
+
 
 class PollQuestion(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
@@ -101,7 +103,6 @@ class PollQuestion(models.Model):
     answer_options = models.ManyToManyField(AnswerOption, related_name='pollquestion_answeroptions', blank=True, null=True)
 
     is_free = models.BooleanField(default=False, null=True)   # свободная ли форма ответа
-    is_available = models.BooleanField(default=True, null=True)   # доступен ли вопрос
     is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
     is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
 
@@ -112,7 +113,10 @@ class PollQuestion(models.Model):
             return f"Вопрос '{self.name}'"
         else:
             return f"Вопрос №{self.id}"
+        
 
+    def delete(self):
+        super().delete(keep_parents=False)
 
 
 class Poll(models.Model):
@@ -128,8 +132,9 @@ class Poll(models.Model):
 
     has_multiple_choices = models.BooleanField(default=False) # множественный выбор
     has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
+    # has_duration_restriction = models.BooleanField(default=False) # есть ли ограничение по времени
     is_anonymous = models.BooleanField(default=False) # анонимное
-    can_cancel_vote = models.BooleanField(default=False) # запретить повторное.
+    can_cancel_vote = models.BooleanField(default=True) # запретить повторное.
 
     # вопросы
     questions = models.ManyToManyField(PollQuestion, related_name='poll_questions', blank=True, null=True)
@@ -145,16 +150,8 @@ class Poll(models.Model):
             return f"Опрос №{self.id}"
     
     def delete(self):
-        self.__delete_related_questions()
         super().delete(keep_parents=False)
 
-    # удаление связанных с вопросом ваританов ответа
-    def __delete_related_questions(self): 
-        questions = self.questions.all()
-        for question in questions:
-            for answer in question.answer_options.all():
-                answer.delete()
-            question.delete()
 
     @property   
     def members_quantity(self):   # число участников опроса

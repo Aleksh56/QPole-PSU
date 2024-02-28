@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from datetime import timedelta
 
 from .models import *
 from .exсeptions import *
@@ -172,26 +174,26 @@ class PollTypeSerializer(serializers.ModelSerializer):
 class PollSerializer(serializers.ModelSerializer):
     poll_type = PollTypeSerializer()
     author = ProfileSerializer()
-    # questions = QuestionSerializer(many=True)
+    questions = QuestionSerializer(many=True)
 
     members_quantity = serializers.IntegerField()
     opened_for_voting = serializers.BooleanField()
 
-    answer_options_numbered = serializers.SerializerMethodField()
+    # answer_options_numbered = serializers.SerializerMethodField()
 
 
-    def get_answer_options_numbered(self, obj):
-        questions = obj.questions.all()
-        numbered_questions = [(index + 1, question) for index, question in enumerate(questions)]
-        numbered_options_dict = {number: QuestionSerializer(question).data for number, question in numbered_questions}
+    # def get_answer_options_numbered(self, obj):
+    #     questions = obj.questions.all()
+    #     numbered_questions = [(index + 1, question) for index, question in enumerate(questions)]
+    #     numbered_options_dict = {number: QuestionSerializer(question).data for number, question in numbered_questions}
 
-        return numbered_options_dict
+    #     return numbered_options_dict
     
     class Meta:
         model = Poll
-        # fields = '__all__'  
-        extra_fields = ['answer_options_numbered']
-        exclude = ('questions', )
+        fields = '__all__'  
+        # extra_fields = ['answer_options_numbered']
+        # exclude = ('questions', )
 
 
 class UpdatePollSerializer(serializers.ModelSerializer):

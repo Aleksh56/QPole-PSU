@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q, F
+from django.db import transaction
 
 
 from .exсeptions import *
@@ -102,6 +103,9 @@ def my_poll(request):
 
             if poll_id:
                 poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+                if not poll:
+                    raise ObjectNotFoundException(model='Poll')
+                
                 serializer = PollSerializer(poll)
                 return Response(serializer.data)
             
@@ -319,7 +323,31 @@ def my_poll_question(request):
             return Response({'message':"Вопрос опроса успешно удален"}, status=status.HTTP_204_NO_CONTENT)
 
         elif request.method == 'PUT':
-            pass
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+            
+            my_poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not my_poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            objects_to_update = []
+
+            questions_data = data['questions_data']
+            for question_number, question_data in enumerate(questions_data, start=1):
+                question = PollQuestion.objects.filter(id=int(question_data['id'])).first()
+                if not question:
+                    raise ObjectNotFoundException(model='AnswerOption')
+
+                question.order_id = question_number
+
+                objects_to_update.append(question)
+
+            AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
+
+            return Response(status=status.HTTP_200_OK)
 
     except InvalidFieldException as ex:
         return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -354,18 +382,21 @@ def my_poll_question_option(request):
             if not poll_question_id:
                 raise MissingFieldException(field_name='poll_question_id')
              
-            
             poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+
+            poll_question = poll.questions.filter(id=poll_question_id).first()
+            if not poll_question:
+                raise ObjectNotFoundException(model='PollQuestion')
+            
 
             question_option_id = request.GET.get('question_option_id', None)
-        
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-
             if question_option_id:
                 question_option = poll_question.answer_options.filter(id=poll_question_id).first()
                 serializer = PollQuestionOptionSerializer(question_option)
             else:
-                question_options = poll_question.answer_options.all().order_by('order_id')
+                question_options = poll_question.answer_options.all().order_by('order_id', 'id')
                 serializer = PollQuestionOptionSerializer(question_options, many=True)
  
             
@@ -503,8 +534,6 @@ def my_poll_question_option(request):
 
             return Response(status=status.HTTP_200_OK)
             
-
-
 
     except InvalidFieldException as ex:
         return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
