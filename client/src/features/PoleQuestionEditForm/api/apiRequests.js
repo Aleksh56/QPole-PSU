@@ -43,5 +43,6 @@ export const changeOptionOrderRequest = async (id, q_id, opt_data) => {
     poll_id: id,
     poll_question_id: q_id,
     options_data: opt_data,
+    request_type: 'change_order',
   });
 };

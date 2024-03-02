@@ -2,8 +2,16 @@ export const settings = [
   {
     heading: 'Настройки опроса',
     switchSettings: [
-      { id: 'Hide votes', label: 'Скрыть количество проголосовавших', defaultChecked: false },
-      { id: 'Hide percentage', label: 'Скрыть проценты у вариантов ответа', defaultChecked: false },
+      {
+        id: 'hide_participants_quantity',
+        label: 'Скрыть количество проголосовавших',
+        defaultChecked: false,
+      },
+      {
+        id: 'hide_options_percentage',
+        label: 'Скрыть проценты у вариантов ответа',
+        defaultChecked: false,
+      },
       { id: 'is_anonymous', label: 'Анонимное голосование', defaultChecked: false },
     ],
   },
@@ -11,7 +19,7 @@ export const settings = [
     heading: 'Настройки результатов',
     switchSettings: [
       {
-        id: 'Disable 2nd chance',
+        id: 'can_cancel_vote',
         label: 'Запретить повторное прохождение теста',
         defaultChecked: false,
       },
@@ -21,12 +29,12 @@ export const settings = [
     heading: 'Защита от списывания',
     switchSettings: [
       {
-        id: 'Disable 2nd chance',
+        id: 'mix_questions',
         label: 'Перемешивать вопросы',
         defaultChecked: false,
       },
       {
-        id: 'Disable 2nd chance',
+        id: 'mix_options',
         label: 'Перемешивать варианты ответов',
         defaultChecked: false,
       },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Box } from '@mui/material';
+import { Divider, Box, Typography } from '@mui/material';
 import PoleImageUpload from '@/entities/PoleImageUpload';
 import InvisibleLabeledField from '@/shared/InvisibleLabeledField';
 import {
@@ -117,7 +117,12 @@ const PoleQuestionEditForm = ({ question }) => {
           )}
         </Droppable>
       </DragDropContext>
-      <button onClick={() => handleAddOption()}>Добавить вариант ответа</button>
+      <Box sx={{ display: 'grid', justifyContent: 'center', rowGap: '10px' }}>
+        {options.length === 0 && <Typography>Вы не создали ни одного варианта ответа</Typography>}
+        <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
+          Добавить вариант ответа
+        </button>
+      </Box>
     </div>
   );
 };

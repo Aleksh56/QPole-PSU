@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 
 const AuthContext = createContext({
   isAuthenticated: false,
@@ -17,7 +11,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedToken = localStorage.getItem('auth_token');
-
     if (storedToken) {
       setAuthState(true);
       setToken(storedToken);
@@ -44,9 +37,7 @@ export const AuthProvider = ({ children }) => {
     [isAuthenticated, setAuth]
   );
 
-  return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;

@@ -1,7 +1,7 @@
 import PoleDesignSettingsTab from '@/entities/PoleDesignSettings';
-import PoleTuningTab from '@/entities/PoleTuningTab';
+import PollTuningTab from '@/entities/Poll/PollTuningTab';
 
 export const poleTabsButtonsData = [
   { label: 'Дизайн', component: PoleDesignSettingsTab },
-  { label: 'Тонкие настройки', component: PoleTuningTab },
+  { label: 'Тонкие настройки', component: PollTuningTab },
 ];

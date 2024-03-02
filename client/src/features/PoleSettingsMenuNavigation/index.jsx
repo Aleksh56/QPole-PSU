@@ -18,6 +18,7 @@ const PoleSettingsMenuNavigation = ({ buttons }) => {
             icon={button.icon}
             label={button.label}
             page={button.page}
+            disabled={button.disabled}
           />
         ))}
       </Stack>

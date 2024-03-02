@@ -13,13 +13,14 @@ export const poleNavigationButtonsData = [
     page: 'main',
     component: PoleMainSettingsPage,
   },
-  { icon: ResultsIcon, label: 'Результаты', page: 'results', component: '2' },
+  { icon: ResultsIcon, label: 'Результаты', page: 'results', component: '2', disabled: true },
   { icon: QuestionsIcon, label: 'Вопросы', page: 'questions', component: PoleQuestionsPage },
   {
     icon: IntegrationIcon,
     label: 'Интеграции',
     page: 'integrations',
     component: '4',
+    disabled: true,
   },
-  { icon: PublishIcon, label: 'Публикация', page: 'publish', component: '5' },
+  { icon: PublishIcon, label: 'Публикация', page: 'publish', component: '5', disabled: true },
 ];

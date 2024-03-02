@@ -65,7 +65,12 @@ const PoleMainSettingsPage = () => {
             {poleSwitchData.map((setting) => (
               <StyledFormControlLabel
                 key={v4()}
-                control={<CustomSwitch focusVisibleClassName={setting.label} />}
+                control={
+                  <CustomSwitch
+                    focusVisibleClassName={setting.label}
+                    onChange={(e) => handleFieldChange('123', e.target.checked)}
+                  />
+                }
                 label={setting.label}
               />
             ))}

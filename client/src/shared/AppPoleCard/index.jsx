@@ -3,6 +3,8 @@ import { CardContent, CardMedia, Typography, IconButton, Menu, MenuItem } from '
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { StyledCard, StyledChip, StyledTypographyName } from './styled';
 import { deletePollRequest } from './api/apiRequest';
+import { closePollFx } from './model/close-poll';
+import { duplicatePollFx } from './model/duplicate-poll';
 
 const AppPoleCard = React.memo(({ pollData, fetchData }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -24,6 +26,20 @@ const AppPoleCard = React.memo(({ pollData, fetchData }) => {
     });
   };
 
+  const handleClosePoll = async (e, id) => {
+    e.preventDefault();
+    await closePollFx(id);
+    setAnchorEl(null);
+    fetchData();
+  };
+
+  const handleDuplicatePoll = async (e, id) => {
+    e.preventDefault();
+    await duplicatePollFx(id);
+    setAnchorEl(null);
+    fetchData();
+  };
+
   return (
     <StyledCard>
       <CardMedia sx={{ height: '140px' }} image={pollData.image ?? ''} title="Poll Image">
@@ -36,8 +52,8 @@ const AppPoleCard = React.memo(({ pollData, fetchData }) => {
           <MoreHorizIcon />
         </IconButton>
         <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
-          <MenuItem onClick={handleMenuClose}>Пункт 1</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Пункт 2</MenuItem>
+          <MenuItem onClick={(e) => handleDuplicatePoll(e, pollData.poll_id)}>Дублировать</MenuItem>
+          <MenuItem onClick={(e) => handleClosePoll(e, pollData.poll_id)}>Закрыть опрос</MenuItem>
           <MenuItem onClick={(e) => handleDeletePoll(e)}>Удалить</MenuItem>
         </Menu>
       </CardMedia>

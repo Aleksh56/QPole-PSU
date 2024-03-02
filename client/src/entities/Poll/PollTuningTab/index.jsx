@@ -1,28 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
 import CustomSwitch from '@/shared/Switch';
 import { StyledFormControlLabel } from '@/constants/styles';
 import { v4 } from 'uuid';
 import { settings } from './config/PoleTuningSettings';
-import { patchPollSettings } from './api/apiRequests';
-import { useParams } from 'react-router-dom';
+import usePollSettings from './hooks/usePollSettings';
 
-const PoleTuningTab = ({ pollData }) => {
-  const { id } = useParams();
-  const [localSettings, setLocalSettings] = useState(pollData);
+const PollTuningTab = ({ pollData }) => {
+  const [localSettings, handleSwitchChange] = usePollSettings(pollData);
 
-  useEffect(() => {
-    setLocalSettings(pollData);
-  }, [pollData]);
-
-  const handleSwitchChange = useCallback(
-    (s_field) => async (event) => {
-      const checked = event.target.checked;
-      await patchPollSettings(id, s_field, checked);
-      setLocalSettings((prev) => ({ ...prev, [s_field]: checked }));
-    },
-    []
-  );
   return (
     <Box spacing={2}>
       {settings.map((item) => (
@@ -47,4 +33,4 @@ const PoleTuningTab = ({ pollData }) => {
   );
 };
 
-export default PoleTuningTab;
+export default PollTuningTab;

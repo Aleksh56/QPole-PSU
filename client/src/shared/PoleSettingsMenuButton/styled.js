@@ -4,7 +4,7 @@ import { Button } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 import { designTokens } from '@/constants/designTokens';
 
-export const StyledNavLink = styled(NavLink)(() => ({
+export const StyledNavLink = styled(NavLink)(({ isDisabled }) => ({
   textDecoration: 'none',
   color: 'inherit',
   display: 'flex',
@@ -13,12 +13,12 @@ export const StyledNavLink = styled(NavLink)(() => ({
   border: `${Rem(1)} solid #dbdbdb`,
   backgroundColor: '#fff',
   borderRadius: Rem(5),
-  cursor: 'poiner',
+  cursor: !isDisabled ? 'poiner' : 'default',
   fontSize: Rem(14),
   padding: `0 ${Rem(12)}`,
   transition: 'all .3s ease',
   '&:hover': {
-    backgroundColor: '#eee',
+    backgroundColor: !isDisabled ? '#eee' : '#fff',
   },
   '&.active': {
     '& svg': {
@@ -27,10 +27,10 @@ export const StyledNavLink = styled(NavLink)(() => ({
   },
 }));
 
-export const StyledButton = styled(Button)(() => ({
+export const StyledButton = styled(Button)(({ isDisabled }) => ({
   color: '#343434',
   boxShadow: 'none',
   '&:hover': {
-    backgroundColor: 'inherit',
+    backgroundColor: !isDisabled ? 'inherit' : '#fff',
   },
 }));
