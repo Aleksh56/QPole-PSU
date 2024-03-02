@@ -3,6 +3,9 @@ from rest_framework import serializers
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from datetime import timedelta
 
+from django.db.models import Count
+
+
 from .models import *
 from .exсeptions import *
 from .utils import check_file
@@ -126,10 +129,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 class MiniProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('value', 'surname', 'user')
+        fields = ('name','surname', 'user')
 
 
-class PollAnswerSerializer(serializers.ModelSerializer):
+class MiniPollAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = PollAnswer
         fields = '__all__'
@@ -142,7 +145,7 @@ class AnswerOptionSerializer(serializers.ModelSerializer):
         model = AnswerOption
         fields = '__all__'
 
-    answers = PollAnswerSerializer(many=True)
+    answers = MiniPollAnswerSerializer(many=True)
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -176,24 +179,26 @@ class PollSerializer(serializers.ModelSerializer):
     author = ProfileSerializer()
     questions = QuestionSerializer(many=True)
 
-    members_quantity = serializers.IntegerField()
-    opened_for_voting = serializers.BooleanField()
-
-    # answer_options_numbered = serializers.SerializerMethodField()
-
-
-    # def get_answer_options_numbered(self, obj):
-    #     questions = obj.questions.all()
-    #     numbered_questions = [(index + 1, question) for index, question in enumerate(questions)]
-    #     numbered_options_dict = {number: QuestionSerializer(question).data for number, question in numbered_questions}
-
-    #     return numbered_options_dict
+    members_quantity = serializers.SerializerMethodField()
+    is_opened_for_voting = serializers.SerializerMethodField()
     
+    def get_members_quantity(self, instance):
+        profiles = set()   
+        for question in instance.questions.all():   
+            for answer_option in question.answer_options.all():   
+                for participant in answer_option.answers.all():   
+                    profiles.add(participant.profile)   
+   
+        return len(profiles)   
+
+    def get_is_opened_for_voting(self, instance):   # доступно ли для голосования по времени
+        if instance.duration:     
+            return timezone.now() < instance.created_date + instance.duration
+        else: return True
+
     class Meta:
         model = Poll
         fields = '__all__'  
-        # extra_fields = ['answer_options_numbered']
-        # exclude = ('questions', )
 
 
 class UpdatePollSerializer(serializers.ModelSerializer):
@@ -259,6 +264,31 @@ class UpdatePollSerializer(serializers.ModelSerializer):
         duration = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
         self.duration = duration
 
+    def set_hide_participants_quantity(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='hide_participants_quantity', expected_type='bool или None')
+        
+        self.hide_participants_quantity = value
+    
+    def set_mix_questions(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='mix_questions', expected_type='bool или None')
+        
+        self.mix_questions = value
+
+    def set_mix_options(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='mix_options', expected_type='bool или None')
+        
+        self.mix_options = value
+
+    def set_hide_options_percentage(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='hide_options_percentage', expected_type='bool или None')
+        
+        self.hide_options_percentage = value
+
+
     def set_image(self, image):
         if image == '' or image is None:
             self.image = None
@@ -314,8 +344,6 @@ class UpdatePollQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PollQuestion
         fields = '__all__'
-
-
 
 
 
@@ -456,3 +484,7 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 
+class PollAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PollAnswer
+        fields = '__all__'  

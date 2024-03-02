@@ -3,7 +3,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, F
+from django.db.models import Q, Prefetch
 from django.db import transaction
 
 
@@ -550,7 +550,162 @@ def my_poll_question_option(request):
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_question_option: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+
+
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def poll_voting(request):
+    try:
+        current_user = request.user
+        my_profile = Profile.objects.filter(user=current_user).first()
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+
+            if poll_id:
+                poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+                if not poll:
+                    raise ObjectNotFoundException(model='Poll')
+                
+                serializer = PollSerializer(poll)
+                return Response(serializer.data)
+            
+            else:
+                my_answers = PollAnswer.objects.filter(profile=my_profile)
+                print(my_answers)
+                my_answered_polls = Poll.objects.filter(
+                    questions__answer_options__answers__in=my_answers
+                ).distinct()
+                print(my_answered_polls)
+
+                serializer = PollSerializer(my_answered_polls, many=True)
+                return Response(serializer.data)
+
+        elif request.method == 'POST':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+           
+
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+
+            if poll.has_user_participated_in(my_profile):
+                raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+            
+            answers = data['answers']
+            with transaction.atomic():
+                for answer in answers:
+                    question = poll.questions.filter(id=answer['question_id']).first()  
+                    if not question:
+                        raise ObjectNotFoundException(model='PollQuestion')
+                    answer_option = question.answer_options.filter(id=answer['answers_option_id']).first()  
+                    if not answer_option:
+                        raise ObjectNotFoundException(model='AnswerOption')
+                    
+                    poll_answer = PollAnswer(profile=my_profile,                        
+                                             answer_option=answer_option)
+                    
+                    poll_answer.text = answer.get('text', None)
+
+                    poll_answer.save()
+                    answer_option.answers.add(poll_answer)
+
+
+
+            return Response({'message':"Вы успешно проголосовали"}, status=status.HTTP_200_OK)
+
+        elif request.method == 'PATCH':
+            data = request.data
+
+            poll_id = data.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+           
+
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+
+            if poll.can_user_vote(my_profile):
+                raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+            
+            answers = data['answers']
+            with transaction.atomic():
+                for answer in answers:
+                    question = poll.questions.filter(id=answer['question_id']).first()  
+                    if not question:
+                        raise ObjectNotFoundException(model='PollQuestion')
+                    answer_option = question.answer_options.filter(id=answer['answers_option_id']).first()  
+                    if not answer_option:
+                        raise ObjectNotFoundException(model='AnswerOption')
+                    
+                    poll_answer = PollAnswer(profile=my_profile,                        
+                                             answer_option=answer_option)
+                    
+                    poll_answer.text = answer.get('text', None)
+
+                    poll_answer.save()
+                    answer_option.answers.add(poll_answer)
+
+
+
+            return Response({'message':"Вы успешно проголосовали повторно"}, status=status.HTTP_200_OK)
+
+        elif request.method == 'DELETE':
+            poll_id = request.GET.get('poll_id', None)
+
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+           
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+
+            if not poll.has_user_participated_in(my_profile):
+                raise AccessDeniedException(detail="Вы еще не принимали участие в этом опросе.")
+
+            if not poll.can_cancel_vote(my_profile):
+                raise AccessDeniedException(detail="В данном опросе недоступно повторное голосование.")
+            
+            my_answers_to_delete = []
+            answer_options = []
+            questions = poll.questions.filter(answer_options__answers__profile=my_profile)
+            for question in questions:
+                answer_options.append(question.answer_options.filter(answers__profile=my_profile))
+
+            for answer_option in answer_options:
+                answer_option[0].answers.filter(profile=my_profile).delete()
+
+            return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
+    except AccessDeniedException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    except InvalidFieldException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    except WrongFieldTypeException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    except MissingFieldException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+      
+    except ObjectNotFoundException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 
 @api_view(['GET'])
 def test_api(request):

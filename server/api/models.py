@@ -1,8 +1,7 @@
 from django.db import models
-
+from django.db.models import Exists, OuterRef
 from django.contrib.auth.models import User
 from django.utils import timezone
-
 
 from .exсeptions import *
 
@@ -132,9 +131,12 @@ class Poll(models.Model):
 
     has_multiple_choices = models.BooleanField(default=False) # множественный выбор
     has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
-    # has_duration_restriction = models.BooleanField(default=False) # есть ли ограничение по времени
     is_anonymous = models.BooleanField(default=False) # анонимное
-    can_cancel_vote = models.BooleanField(default=True) # запретить повторное.
+    can_cancel_vote = models.BooleanField(default=True) # запретить повторное
+    mix_questions = models.BooleanField(default=True) # перемешивать вопросы
+    mix_options = models.BooleanField(default=True) # перемешивать варианты ответа
+    hide_participants_quantity = models.BooleanField(default=True) # скрыть количество участников
+    hide_options_percentage = models.BooleanField(default=True) # скрыть проценты ответов
 
     # вопросы
     questions = models.ManyToManyField(PollQuestion, related_name='poll_questions', blank=True, null=True)
@@ -151,19 +153,29 @@ class Poll(models.Model):
     
     def delete(self):
         super().delete(keep_parents=False)
-
-
-    @property   
+        
+        
+    # Проверка наличия участия пользователя в опросе
+    def has_user_participated_in(self, user_profile):
+        return self.questions.filter(
+            answer_options__answers__profile=user_profile
+        ).exists()
+    
+    def can_user_vote(self, user_profile):
+        if not (self.is_closed or self.is_paused):
+            if self.questions.filter(
+                answer_options__answers__profile=user_profile
+            ).exists():
+                if self.can_cancel_vote:
+                    return False
+                return True
+            return True
+        return False
+    
     def members_quantity(self):   # число участников опроса
-        profiles = set()   
-        for question in self.questions.all():   
-            for answer_option in question.answer_options.all():   
-                for participant in answer_option.answers.all():   
-                    profiles.add(participant.profile)   
+        return self.answer_options__answers__profile.all().distinct().count()
+
    
-        return len(profiles)   
-   
-    @property
     def opened_for_voting(self):   # доступно ли для голосования по времени
         if self.duration:     
             return timezone.now() < self.created_date + self.duration

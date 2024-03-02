@@ -52,6 +52,17 @@ class AccessDeniedException(APIException):
     default_code = 'access_denied'
 
 
+class UserHasParticipatedException(APIException):
+    status_code = 403 
+    default_detail = 'Вы уже принимали участие в этом опросе.'
+    default_code = 'user_has_participated'
+    default_message = 'Вы уже принимали участие в этом опросе.'
+
+    def __init__(self, detail=None, code=None):
+        if detail is None:
+            detail = self.default_message
+        super().__init__(detail, code)
+
 
 class WrongFieldTypeException(APIException):
     status_code = 400

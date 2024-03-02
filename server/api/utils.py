@@ -14,3 +14,14 @@ def check_file(file):
         return False, "Первышен допустимый размер файла."
 
     return True, "ОК"
+
+from rest_framework.views import exception_handler as drf_exception_handler
+from rest_framework.exceptions import APIException
+
+def custom_exception_handler(exc, context):
+    response = drf_exception_handler(exc, context)
+
+    if response is not None:
+        if isinstance(exc, APIException):
+            response.data['message'] = response.data.pop('detail', None)
+    return response

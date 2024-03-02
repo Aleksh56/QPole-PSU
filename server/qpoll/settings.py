@@ -166,6 +166,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    'EXCEPTION_HANDLER': 'api.utils.custom_exception_handler',
 }
 
 # AUTH_USER_MODEL = 'login.CustomUser'
