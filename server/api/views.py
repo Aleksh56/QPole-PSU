@@ -96,7 +96,7 @@ def my_profile(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def my_poll(request):
-    # try:
+    try:
         current_user = request.user
 
         if request.method == 'GET':
@@ -181,22 +181,47 @@ def my_poll(request):
         elif request.method == 'PUT':
             data = request.data
 
-            new_poll_id = data.get('new_poll_id', None)
-            if not new_poll_id:
-                raise MissingFieldException(field_name='new_poll_id')
+            request_type = data.get('request_type', None)
+            if not request_type:
+                raise MissingFieldException(field_name='request_type')
             
-            poll_id = data.get('poll_id', None)
-            if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
-            
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
-    
-            cloned_poll = clone_poll(poll, new_poll_id)
+            if request_type == 'change_order':
+                objects_to_update = []
 
-            serializer = PollSerializer(cloned_poll)
-            return Response(serializer.data)
+                questions_data = data['questions_data']
+                for question_number, question_data in enumerate(questions_data, start=1):
+                    question = PollQuestion.objects.filter(id=int(question_data['id'])).first()
+                    if not question:
+                        raise ObjectNotFoundException(model='AnswerOption')
+
+                    question.order_id = question_number
+
+                    objects_to_update.append(question)
+
+                AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
+
+                return Response(status=status.HTTP_200_OK)
+            
+            elif request_type == 'clone_poll':
+                new_poll_id = data.get('new_poll_id', None)
+                if not new_poll_id:
+                    raise MissingFieldException(field_name='new_poll_id')
+                
+                poll_id = data.get('poll_id', None)
+                if not poll_id:
+                    raise MissingFieldException(field_name='poll_id')
+                
+                poll = Poll.objects.filter(poll_id=poll_id).first()
+                if not poll:
+                    raise ObjectNotFoundException(model='Poll')
+        
+                cloned_poll = clone_poll(poll, new_poll_id)
+
+                serializer = PollSerializer(cloned_poll)
+                return Response(serializer.data)
+
+            else:
+                return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             data = request.data
@@ -228,20 +253,20 @@ def my_poll(request):
 
             return Response({'message':f"Опрос успешно удален", 'data':response_data}, status=status.HTTP_204_NO_CONTENT)
 
-    # except InvalidFieldException as ex:
-    #     return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    except InvalidFieldException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
     
-    # except WrongFieldTypeException as ex:
-    #     return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    except WrongFieldTypeException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # except MissingFieldException as ex:
-    #     return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    except MissingFieldException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
       
-    # except ObjectNotFoundException as ex:
-    #     return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
+    except ObjectNotFoundException as ex:
+        return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
 
-    # except Exception as ex:
-    #     return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
