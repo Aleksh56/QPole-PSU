@@ -409,7 +409,7 @@ def my_poll_question(request):
                 if not question:
                     raise ObjectNotFoundException(model='PollQuestion')
                 
-                cloned_question = clone_question(question)
+                cloned_question = clone_question(question, my_poll)
                 serializer = PollQuestionSerializer(cloned_question)
                 return Response(serializer.data)
 

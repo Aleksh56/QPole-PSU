@@ -54,7 +54,7 @@ def clone_poll(poll, new_poll_id):
     return cloned_poll
 
 
-def clone_question(question):
+def clone_question(question, poll):
     cloned_question = deepcopy(question)
     cloned_question.id = None
     if cloned_question.name:
@@ -68,4 +68,5 @@ def clone_question(question):
         new_answer_option.save()
         cloned_question.answer_options.add(new_answer_option)
 
+    poll.questions.add(cloned_question)
     return cloned_question
