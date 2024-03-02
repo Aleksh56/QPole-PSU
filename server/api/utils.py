@@ -34,7 +34,8 @@ def clone_poll(poll, new_poll_id):
     cloned_poll = deepcopy(poll)
     cloned_poll.id = None
     cloned_poll.poll_id = new_poll_id
-    cloned_poll.name = cloned_poll.name + " (копия)"
+    if cloned_poll.name:
+        cloned_poll.name = cloned_poll.name + " (копия)"
     cloned_poll.save()
     
     for question in poll.questions.all():
@@ -56,7 +57,8 @@ def clone_poll(poll, new_poll_id):
 def clone_question(question):
     cloned_question = deepcopy(question)
     cloned_question.id = None
-    cloned_question.name = cloned_question.name + " (копия)"
+    if cloned_question.name:
+        cloned_question.name = cloned_question.name + " (копия)"
     cloned_question.save()
     
 
