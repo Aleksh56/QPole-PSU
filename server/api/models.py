@@ -124,6 +124,7 @@ class Poll(models.Model):
     image = models.ImageField(verbose_name='Фото опроса', upload_to=f'images/poll_images/', blank=True, null=True) # фото 
     name = models.CharField(max_length=50, blank=True, null=True) # имя опроса
     description = models.TextField(blank=True, null=True) # текст начать опрос
+    tags = models.TextField(blank=True, null=True) # тэги
 
     poll_type = models.ForeignKey(PollType, on_delete=models.CASCADE, blank=True, null=True) # тип опроса
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
@@ -133,10 +134,12 @@ class Poll(models.Model):
     has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
     is_anonymous = models.BooleanField(default=False) # анонимное
     can_cancel_vote = models.BooleanField(default=True) # запретить повторное
-    mix_questions = models.BooleanField(default=True) # перемешивать вопросы
-    mix_options = models.BooleanField(default=True) # перемешивать варианты ответа
-    hide_participants_quantity = models.BooleanField(default=True) # скрыть количество участников
-    hide_options_percentage = models.BooleanField(default=True) # скрыть проценты ответов
+    mix_questions = models.BooleanField(default=False) # перемешивать вопросы
+    mix_options = models.BooleanField(default=False) # перемешивать варианты ответа
+    hide_participants_quantity = models.BooleanField(default=False) # скрыть количество участников
+    hide_options_percentage = models.BooleanField(default=False) # скрыть проценты ответов
+    request_contact_info = models.BooleanField(default=False) # запрашивать контактные данные
+    hide_options_percentage = models.BooleanField(default=False) # добавить теги
 
     # вопросы
     questions = models.ManyToManyField(PollQuestion, related_name='poll_questions', blank=True, null=True)

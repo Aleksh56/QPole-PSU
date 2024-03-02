@@ -25,3 +25,45 @@ def custom_exception_handler(exc, context):
         if isinstance(exc, APIException):
             response.data['message'] = response.data.pop('detail', None)
     return response
+
+
+from copy import deepcopy
+from django.db import transaction
+
+def clone_poll(poll, new_poll_id):
+    cloned_poll = deepcopy(poll)
+    cloned_poll.id = None
+    cloned_poll.poll_id = new_poll_id
+    cloned_poll.name = cloned_poll.name + " (копия)"
+    cloned_poll.save()
+    
+    for question in poll.questions.all():
+        new_question = deepcopy(question)
+        new_question.id = None
+        new_question.save()
+
+        cloned_poll.questions.add(new_question)
+
+        for answer_option in question.answer_options.all():
+            new_answer_option = deepcopy(answer_option)
+            new_answer_option.id = None
+            new_answer_option.save()
+            new_question.answer_options.add(new_answer_option)
+
+    return cloned_poll
+
+
+def clone_question(question):
+    cloned_question = deepcopy(question)
+    cloned_question.id = None
+    cloned_question.name = cloned_question.name + " (копия)"
+    cloned_question.save()
+    
+
+    for answer_option in question.answer_options.all():
+        new_answer_option = deepcopy(answer_option)
+        new_answer_option.id = None
+        new_answer_option.save()
+        cloned_question.answer_options.add(new_answer_option)
+
+    return cloned_question
