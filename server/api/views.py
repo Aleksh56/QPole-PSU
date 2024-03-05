@@ -19,6 +19,7 @@ logger = logging.getLogger('debug')
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def my_profile(request):
     try:
         current_user = request.user
@@ -95,10 +96,12 @@ def my_profile(request):
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def my_poll(request):
+@transaction.atomic
+def my_poll(request, request_type=None):
     try:
         current_user = request.user
-
+        my_profile = Profile.objects.get(user=current_user)
+        
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
 
@@ -137,7 +140,6 @@ def my_poll(request):
                 return Response(serializer.data)
 
         elif request.method == 'POST':
-            author_profile = Profile.objects.get(user=current_user)
             data = request.data
 
             poll_id = data.get('poll_id', None)
@@ -154,7 +156,7 @@ def my_poll(request):
 
             poll = Poll(
                 poll_id=poll_id,
-                author=author_profile,
+                author=my_profile,
                 poll_type=poll_type,
             )
 
@@ -168,7 +170,7 @@ def my_poll(request):
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
+            poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
     
@@ -181,7 +183,6 @@ def my_poll(request):
         elif request.method == 'PUT':
             data = request.data
 
-            request_type = data.get('request_type', None)
             if not request_type:
                 raise MissingFieldException(field_name='request_type')
             
@@ -211,10 +212,14 @@ def my_poll(request):
                 if not poll_id:
                     raise MissingFieldException(field_name='poll_id')
                 
-                poll = Poll.objects.filter(poll_id=poll_id).first()
+                poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
         
+                poll_to_clone = Poll.objects.filter(poll_id=new_poll_id).first()
+                if poll_to_clone:
+                    raise InvalidFieldException(detail='Данный poll_id уже занят.')
+                
                 cloned_poll = clone_poll(poll, new_poll_id)
 
                 serializer = PollSerializer(cloned_poll)
@@ -273,7 +278,8 @@ def my_poll(request):
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def my_poll_question(request):
+@transaction.atomic
+def my_poll_question(request, request_type=None):
     try:
         current_user = request.user
 
@@ -379,7 +385,6 @@ def my_poll_question(request):
             if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            request_type = data.get('request_type', None)
             if not request_type:
                 raise MissingFieldException(field_name='request_type')
             
@@ -435,6 +440,7 @@ def my_poll_question(request):
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def my_poll_question_option(request):
     try:
         current_user = request.user
@@ -618,9 +624,11 @@ def my_poll_question_option(request):
     
 
 
+
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def poll_voting(request):
     try:
         current_user = request.user
@@ -666,27 +674,28 @@ def poll_voting(request):
             if poll.has_user_participated_in(my_profile):
                 raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
             
-            answers = data['answers']
-            with transaction.atomic():
-                for answer in answers:
-                    question = poll.questions.filter(id=answer['question_id']).first()  
-                    if not question:
-                        raise ObjectNotFoundException(model='PollQuestion')
-                    answer_option = question.answer_options.filter(id=answer['answers_option_id']).first()  
-                    if not answer_option:
-                        raise ObjectNotFoundException(model='AnswerOption')
-                    
-                    poll_answer = PollAnswer(profile=my_profile,                        
-                                             answer_option=answer_option)
-                    
-                    poll_answer.text = answer.get('text', None)
+            answers = data.get('answers', None)
+            if not answers:
+                raise MissingFieldException(field_name='answers')
+            
+            try:
+                answers = process_answers(answers, poll, my_profile.user_id)
+            except ValueError as ex:
+                return Response({'message': f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
 
-                    poll_answer.save()
-                    answer_option.answers.add(poll_answer)
+            serializer = PollAnswerSerializer(data=answers, many=True)
+            serializer.is_valid(raise_exception=True)
+            
+            poll_answers = serializer.save(profile=my_profile)
+            serializer = PollAnswerSerializer(poll_answers, many=True)
+
+            
+            # Установка связей между вариантами ответов и ответами
+            for poll_answer in poll_answers:
+                poll_answer.question.answer_options.filter(id=poll_answer.answer_option_id).first().answers.add(poll_answer)
 
 
-
-            return Response({'message':"Вы успешно проголосовали"}, status=status.HTTP_200_OK)
+            return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK)
 
         elif request.method == 'PATCH':
             data = request.data
@@ -738,7 +747,7 @@ def poll_voting(request):
             if not poll.has_user_participated_in(my_profile):
                 raise AccessDeniedException(detail="Вы еще не принимали участие в этом опросе.")
 
-            if not poll.can_cancel_vote(my_profile):
+            if not poll.can_user_vote(my_profile):
                 raise AccessDeniedException(detail="В данном опросе недоступно повторное голосование.")
             
             my_answers_to_delete = []

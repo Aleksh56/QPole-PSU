@@ -1,4 +1,5 @@
 import imghdr
+from .exсeptions import MissingFieldException, ObjectNotFoundException
 
 def check_file(file):
     file_type = imghdr.what(file)
@@ -21,9 +22,9 @@ from rest_framework.exceptions import APIException
 def custom_exception_handler(exc, context):
     response = drf_exception_handler(exc, context)
 
-    if response is not None:
-        if isinstance(exc, APIException):
-            response.data['message'] = response.data.pop('detail', None)
+    # if response is not None:
+    #     if isinstance(exc, APIException):
+    #         response.data['message'] = response.data.pop('detail', None)
     return response
 
 
@@ -70,3 +71,37 @@ def clone_question(question, poll):
 
     poll.questions.add(cloned_question)
     return cloned_question
+
+
+def process_answers(answers, poll, my_profile_id):
+    seen_questions = set()
+    unique_answers = []
+
+    for answer in answers:
+        question_id = answer.get('question', None)
+        if not question_id:
+            raise MissingFieldException(field_name='question')
+        
+        answer_option_id = answer.get('answer_option', None)
+        if not answer_option_id:
+            raise MissingFieldException(field_name='answer_option')
+        
+        question = poll.questions.filter(id=question_id).first()  
+        if not question:
+            raise ObjectNotFoundException(model='PollQuestion')
+        answer_option = question.answer_options.filter(id=answer_option_id).first()  
+        if not answer_option:
+            raise ObjectNotFoundException(model='AnswerOption')
+        
+
+        question_id = answer['question']
+        
+        # Проверяем, был ли уже такой вопрос в списке ответов
+        if question_id not in seen_questions:
+            answer['profile'] = my_profile_id
+            unique_answers.append(answer)
+            seen_questions.add(question_id)
+        else:
+            raise ValueError("Дано два ответа на один вопрос: {}".format(answer))
+
+    return unique_answers

@@ -53,6 +53,7 @@ class PollType(models.Model):
 class PollAnswer(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     answer_option = models.ForeignKey('AnswerOption', on_delete=models.DO_NOTHING, null=True, blank=True)
+    question = models.ForeignKey('PollQuestion', on_delete=models.DO_NOTHING, null=True, blank=True)
     text = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
 
