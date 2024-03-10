@@ -17,12 +17,18 @@ const init = async () => {
   server.route({
     method: 'GET',
     path: '/{path*}',
-    handler: (request, h) => {
-      if (FILES.test(request.path)) {
-        return h.file(path.join(process.cwd(), 'dist', request.path));
-      }
+    // handler: (request, h) => {
+    //   if (FILES.test(request.path)) {
+    //     return h.file(path.join(process.cwd(), 'dist', request.path));
+    //   }
 
-      return h.file(path.join(process.cwd(), 'dist', 'index.html'));
+    //   return h.file(path.join(process.cwd(), 'dist', 'index.html'));
+    // },
+    handler: (request, h) => {
+      const filePath = FILES.test(request.path)
+        ? path.join(__dirname, 'dist', request.path)
+        : path.join(__dirname, 'dist', 'index.html');
+      return h.file(filePath).code(FILES.test(request.path) ? 200 : 404);
     },
   });
 
