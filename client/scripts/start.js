@@ -4,12 +4,12 @@ import inert from '@hapi/inert';
 
 const port = process.env.PORT || 3000;
 
-const FILES =
-  /\.(js|js.map|woff|woff2|svg|bmp|jpg|jpeg|gif|png|ico|css)(\?v=\d+\.\d+\.\d+)?$/;
+const FILES = /\.(js|js.map|woff|woff2|svg|bmp|jpg|jpeg|gif|png|ico|css)(\?v=\d+\.\d+\.\d+)?$/;
 
 const init = async () => {
   const server = Hapi.server({
     port,
+    host: '89.111.155.6',
   });
 
   await server.register(inert);
