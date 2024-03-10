@@ -1,0 +1,7 @@
+version: '3.3'
+
+services:
+  front:
+    build:
+      context: .
+    restart: always
