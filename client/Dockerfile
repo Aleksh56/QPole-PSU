@@ -10,6 +10,12 @@ RUN npm run build
 
 WORKDIR /app/dist
 
-RUN killall node
+COPY start.sh /start.sh
 
-CMD ["node", "start.js"]
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
+
+# CMD ["killall", "node"]
+
+# CMD ["node", "start.js"]
