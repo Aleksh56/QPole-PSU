@@ -512,8 +512,8 @@ def my_poll_question_option(request):
                 raise ObjectNotFoundException(model='AnswerOption')
             
             is_correct = data.get('is_correct', None)
-            data['is_correct'] = bool(data['is_correct'])
             if is_correct:
+                data['is_correct'] = bool(data.get('is_correct', None))
                 all_options = poll_question.answer_options.all()
                 for option in all_options:
                     if option.is_correct:
