@@ -29,10 +29,10 @@ const init = async () => {
       console.log(`Returning file: ${filePath}`);
 
       if (FILES.test(request.path)) {
-        return h.file(path.join(process.cwd(), 'dist', request.path));
+        return h.file(path.join(process.cwd(), request.path));
       }
 
-      return h.file(path.join(process.cwd(), 'dist', 'index.html'));
+      return h.file(path.join(process.cwd(), 'index.html'));
     },
   });
 
