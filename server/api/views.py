@@ -105,8 +105,7 @@ def my_poll(request, request_type=None):
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
-                poll.profile = my_profile
-                serializer = PollSerializer(poll)
+                serializer = PollSerializer(poll, context={'profile': my_profile})
                 return Response(serializer.data)
             
             else:
@@ -132,7 +131,7 @@ def my_poll(request, request_type=None):
                     filters &= Q(is_closed=is_closed)
 
                 polls = Poll.objects.filter(filters)
-                serializer = PollSerializer(polls, many=True)
+                serializer = PollSerializer(polls, many=True, context={'profile': my_profile})
                 return Response(serializer.data)
 
         elif request.method == 'POST':
@@ -619,11 +618,9 @@ def poll_voting(request):
             
             else:
                 my_answers = PollAnswer.objects.filter(profile=my_profile)
-                print(my_answers)
                 my_answered_polls = Poll.objects.filter(
                     questions__answer_options__answers__in=my_answers
                 ).distinct()
-                print(my_answered_polls)
 
                 serializer = PollSerializer(my_answered_polls, many=True)
                 return Response(serializer.data)
@@ -759,8 +756,7 @@ def poll(request, request_type=None):
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
-                poll.profile = my_profile
-                serializer = PollForAllSerializer(poll)
+                serializer = PollForAllSerializer(poll, context={'profile': my_profile})
                 return Response(serializer.data)
             
             else:
@@ -790,7 +786,7 @@ def poll(request, request_type=None):
                 for poll in polls:
                     poll.profile = my_profile
 
-                serializer = PollForAllSerializer(polls, many=True)
+                serializer = PollForAllSerializer(polls, many=True, context={'profile': my_profile})
                 return Response(serializer.data)
             
     except APIException as api_exception:

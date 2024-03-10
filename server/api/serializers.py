@@ -184,11 +184,6 @@ class PollForAllSerializer(serializers.ModelSerializer):
     is_opened_for_voting = serializers.SerializerMethodField()
     
     has_user_participated_in = serializers.SerializerMethodField()
-    
-    profile = serializers.SerializerMethodField(read_only=True)
-
-    def get_profile(self, instance):
-        pass
 
     def get_members_quantity(self, instance):
         profiles = set()   
@@ -205,7 +200,8 @@ class PollForAllSerializer(serializers.ModelSerializer):
         else: return True
 
     def get_has_user_participated_in(self, instance):
-        return instance.has_user_participated_in(user_profile=instance.profile)
+        profile = self.context.get("profile")
+        return instance.has_user_participated_in(user_profile=profile)
 
     class Meta:
         model = Poll
@@ -220,10 +216,6 @@ class PollSerializer(serializers.ModelSerializer):
     is_opened_for_voting = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
     
-    profile = serializers.SerializerMethodField(read_only=True)
-
-    def get_profile(self, instance):
-        pass
 
     def get_members_quantity(self, instance):
         profiles = set()   
@@ -240,9 +232,10 @@ class PollSerializer(serializers.ModelSerializer):
         else: return True
 
     def get_has_user_participated_in(self, instance):
-        return instance.has_user_participated_in(user_profile=instance.profile)
+        profile = self.context.get("profile")
+        return instance.has_user_participated_in(user_profile=profile)
 
-
+    
     class Meta:
         model = Poll
         fields = '__all__'
