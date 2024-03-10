@@ -30,11 +30,6 @@ jobs:
           port: 22
           script: |
             cd /home/client
+            docker stop my-frontend-app-container || true
+            docker rm my-frontend-app-container || true
             docker-compose up -d --build
-            # cd /home/client
-            # rm -rf /dist
-            # npm i
-            # npm run build
-            # cd /home/client/dist
-            # killall node
-            # nohup node start.js &
