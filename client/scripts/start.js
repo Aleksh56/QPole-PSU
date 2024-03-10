@@ -2,7 +2,7 @@ import path from 'path';
 import Hapi from '@hapi/hapi';
 import inert from '@hapi/inert';
 
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 
 const FILES = /\.(js|js.map|woff|woff2|svg|bmp|jpg|jpeg|gif|png|ico|css)(\?v=\d+\.\d+\.\d+)?$/;
 
