@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q, Prefetch
 from django.db import transaction
+from django.contrib.auth.models import AnonymousUser
 
 
 from .exсeptions import *
@@ -104,6 +105,7 @@ def my_poll(request, request_type=None):
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
+                poll.profile = my_profile
                 serializer = PollSerializer(poll)
                 return Response(serializer.data)
             
@@ -742,15 +744,23 @@ def poll_voting(request):
 @permission_classes([AllowAny])
 def poll(request, request_type=None):
     try:
+        current_user = request.user
+        if isinstance(current_user, AnonymousUser):
+            my_profile = None
+        else:
+            my_profile = Profile.objects.filter(user=current_user).first()
+
+
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(Q(poll_id=poll_id)).first()
+                poll = Poll.objects.filter(poll_id=poll_id).first()
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
-                serializer = PollSerializer(poll)
+                poll.profile = my_profile
+                serializer = PollForAllSerializer(poll)
                 return Response(serializer.data)
             
             else:
@@ -775,8 +785,12 @@ def poll(request, request_type=None):
                 if is_closed:
                     filters &= Q(is_closed=is_closed)
 
-                polls = Poll.objects.filter(filters)
-                serializer = PollSerializer(polls, many=True)
+
+                polls = Poll.objects.filter(filters)        
+                for poll in polls:
+                    poll.profile = my_profile
+
+                serializer = PollForAllSerializer(polls, many=True)
                 return Response(serializer.data)
             
     except APIException as api_exception:

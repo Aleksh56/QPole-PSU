@@ -161,6 +161,9 @@ class Poll(models.Model):
         
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):
+        if not user_profile:
+            return False
+        
         return self.questions.filter(
             answer_options__answers__profile=user_profile
         ).exists()

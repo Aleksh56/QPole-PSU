@@ -127,6 +127,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class MiniProfileSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+
     class Meta:
         model = Profile
         fields = ('name','surname', 'user')
@@ -173,15 +175,21 @@ class PollTypeSerializer(serializers.ModelSerializer):
         model = PollType
         fields = '__all__'  
 
-
-class PollSerializer(serializers.ModelSerializer):
+class PollForAllSerializer(serializers.ModelSerializer):
     poll_type = PollTypeSerializer()
-    author = ProfileSerializer()
+    author = MiniProfileSerializer()
     questions = QuestionSerializer(many=True)
 
     members_quantity = serializers.SerializerMethodField()
     is_opened_for_voting = serializers.SerializerMethodField()
     
+    has_user_participated_in = serializers.SerializerMethodField()
+    
+    profile = serializers.SerializerMethodField(read_only=True)
+
+    def get_profile(self, instance):
+        pass
+
     def get_members_quantity(self, instance):
         profiles = set()   
         for question in instance.questions.all():   
@@ -196,9 +204,49 @@ class PollSerializer(serializers.ModelSerializer):
             return timezone.now() < instance.created_date + instance.duration
         else: return True
 
+    def get_has_user_participated_in(self, instance):
+        return instance.has_user_participated_in(user_profile=instance.profile)
+
     class Meta:
         model = Poll
         fields = '__all__'  
+
+class PollSerializer(serializers.ModelSerializer):
+    poll_type = PollTypeSerializer()
+    author = ProfileSerializer()
+    questions = QuestionSerializer(many=True)
+
+    members_quantity = serializers.SerializerMethodField()
+    is_opened_for_voting = serializers.SerializerMethodField()
+    has_user_participated_in = serializers.SerializerMethodField()
+    
+    profile = serializers.SerializerMethodField(read_only=True)
+
+    def get_profile(self, instance):
+        pass
+
+    def get_members_quantity(self, instance):
+        profiles = set()   
+        for question in instance.questions.all():   
+            for answer_option in question.answer_options.all():   
+                for participant in answer_option.answers.all():   
+                    profiles.add(participant.profile)   
+   
+        return len(profiles)   
+
+    def get_is_opened_for_voting(self, instance):   # доступно ли для голосования по времени
+        if instance.duration:     
+            return timezone.now() < instance.created_date + instance.duration
+        else: return True
+
+    def get_has_user_participated_in(self, instance):
+        return instance.has_user_participated_in(user_profile=instance.profile)
+
+
+    class Meta:
+        model = Poll
+        fields = '__all__'
+
 
 
 class UpdatePollSerializer(serializers.ModelSerializer):
