@@ -31,5 +31,5 @@ jobs:
           script: |
             cd /home/client
             npm run build
-            cd /dist
+            cd /home/client/dist
             node start.js
