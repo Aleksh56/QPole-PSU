@@ -79,15 +79,9 @@ def my_profile(request):
             return Response(f"Профиль успешно удален.", status=status.HTTP_204_NO_CONTENT)
       
 
-    except MissingFieldException as msg:
-        return Response({'message':f"{msg}"}, status=status.HTTP_400_BAD_REQUEST)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
     
-    except InvalidFieldException as msg:
-        return Response({'message':f"{msg}"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    except ObjectNotFoundException as msg:
-        return Response({'message':f"{msg}"}, status=status.HTTP_404_NOT_FOUND)
-
     except Exception as ex:
         return Response(f"Внутренняя ошибка сервера в my_profile: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
@@ -258,18 +252,9 @@ def my_poll(request, request_type=None):
 
             return Response({'message':f"Опрос успешно удален", 'data':response_data}, status=status.HTTP_204_NO_CONTENT)
 
-    except InvalidFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
     
-    except WrongFieldTypeException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-
-    except MissingFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-      
-    except ObjectNotFoundException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
-
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -420,18 +405,9 @@ def my_poll_question(request, request_type=None):
 
 
 
-    except InvalidFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
     
-    except WrongFieldTypeException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-
-    except MissingFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-      
-    except ObjectNotFoundException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
-
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
@@ -607,17 +583,8 @@ def my_poll_question_option(request):
             return Response(status=status.HTTP_200_OK)
             
 
-    except InvalidFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    except WrongFieldTypeException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-
-    except MissingFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-      
-    except ObjectNotFoundException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
 
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_question_option: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -750,63 +717,70 @@ def poll_voting(request):
             if not poll.can_user_vote(my_profile):
                 raise AccessDeniedException(detail="В данном опросе недоступно повторное голосование.")
             
-            my_answers_to_delete = []
-            answer_options = []
-            questions = poll.questions.filter(answer_options__answers__profile=my_profile)
-            for question in questions:
-                answer_options.append(question.answer_options.filter(answers__profile=my_profile))
 
-            for answer_option in answer_options:
-                answer_option[0].answers.filter(profile=my_profile).delete()
+            questions = poll.questions.filter(answer_options__answers__profile=my_profile)
+            answers_to_delete = PollAnswer.objects.filter(
+                Q(question__in=questions) &
+                Q(profile=my_profile)
+            )
+
+            # Удаляем все найденные ответы
+            answers_to_delete.delete()
+
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
-    except AccessDeniedException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    except InvalidFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    except WrongFieldTypeException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-
-    except MissingFieldException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
-      
-    except ObjectNotFoundException as ex:
-        return Response({'message':f"{ex}"}, status=status.HTTP_404_NOT_FOUND)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
 
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
-
 @api_view(['GET'])
-def test_api(request):
-    # Получение опроса по имени (замените 'example_poll' на фактическое имя)
-    poll = Poll.objects.get(name='Чи или не чи')
+@permission_classes([AllowAny])
+def poll(request, request_type=None):
+    try:
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
 
-    # # Получение всех AnswerOption для этого опроса
-    # answer_options_for_poll = poll.answer_options.all()
+            if poll_id:
+                poll = Poll.objects.filter(Q(poll_id=poll_id)).first()
+                if not poll:
+                    raise ObjectNotFoundException(model='Poll')
+                
+                serializer = PollSerializer(poll)
+                return Response(serializer.data)
+            
+            else:
+                poll_type = request.GET.get('poll_type', None)
+                name = request.GET.get('name', None)
+                is_anonymous = request.GET.get('is_anonymous', None)
+                is_paused = request.GET.get('is_paused', None)
+                is_closed = request.GET.get('is_closed', None)
 
-    # # Создайте список для хранения всех участников
-    # all_participants = []
+                filters = Q()
+                if poll_type:
+                    poll_type = PollType.objects.filter(name=poll_type).first()
+                    if not poll_type:
+                        raise ObjectNotFoundException(model='PollType')
+                    filters &= Q(poll_type=poll_type)
+                if name:
+                    filters &= Q(name__istartswith=name)
+                if is_anonymous:
+                    filters &= Q(is_anonymous=is_anonymous)
+                if is_paused:
+                    filters &= Q(is_paused=is_paused)
+                if is_closed:
+                    filters &= Q(is_closed=is_closed)
 
-    # # Пройдите по всем AnswerOption
-    # for answer_option in answer_options_for_poll:
-    #     # Получение всех PollParticipant, которые проголосовали за этот AnswerOption
-    #     participants_for_option = PollParticipant.objects.filter(answers=answer_option)
-
-    #     # Добавление участников в общий список
-    #     all_participants.extend(participants_for_option)
-
-    # # Получение всех пользователей, проголосовавших за все AnswerOption
-    # users_voted_for_all_options = [participant.profile.user for participant in all_participants]
-
-    # # Теперь у вас есть список пользователей, проголосовавших за все AnswerOption
-    # print(users_voted_for_all_options)
-
-    poll_serializer = PollSerializer(poll)
-    return Response(poll_serializer.data)
-
+                polls = Poll.objects.filter(filters)
+                serializer = PollSerializer(polls, many=True)
+                return Response(serializer.data)
+            
+    except APIException as api_exception:
+            return Response({'message':f"{api_exception}"}, api_exception.status_code)
+        
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
