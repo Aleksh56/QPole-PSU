@@ -29,7 +29,7 @@ jobs:
           password: ${{ secrets.SERVER_PASS }}
           port: 22
           script: |
-            docker build -t my-frontend-app -f /home/client/Dockerfile
+            docker build -t my-frontend-app -f /home/client/Dockerfile /home/client
             docker stop my-frontend-app-container || true
             docker rm my-frontend-app-container || true
             docker run -d --name my-frontend-app-container -p 3000:3000 my-frontend-app
