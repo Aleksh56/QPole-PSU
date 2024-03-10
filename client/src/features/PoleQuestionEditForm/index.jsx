@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Box, Typography } from '@mui/material';
+import { Divider, Box, Typography, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import PoleImageUpload from '@/entities/PoleImageUpload';
 import InvisibleLabeledField from '@/shared/InvisibleLabeledField';
 import {
@@ -8,16 +8,31 @@ import {
   changeOptionRequest,
   deleteOptionRequest,
   getAllOptionsRequest,
+  handleChangeAnswerRequest,
   handleChangeQuestionInfoRequest,
 } from './api/apiRequests';
 import { useParams } from 'react-router-dom';
 import { DeleteOutline, DragIndicator } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import usePollType from '@/hooks/usePollType';
 
 const PoleQuestionEditForm = ({ question }) => {
   const { id } = useParams();
   const [editedQuestion, setEditedQuestion] = useState(question);
   const [options, setOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState('');
+  const { pollType } = usePollType(id);
+
+  useEffect(() => {
+    const correctOption = question.answer_options.find((option) => option.is_correct);
+    setSelectedOption(correctOption ? correctOption.id : '');
+  }, [question]);
+
+  const handleOptionSelect = async (e, q_id) => {
+    const value = e.target.value;
+    await handleChangeAnswerRequest(id, q_id, value);
+    setSelectedOption(value);
+  };
 
   const fetchOptions = async () => {
     await getAllOptionsRequest(id, question.id).then((res) => setOptions(res.data));
@@ -101,7 +116,20 @@ const PoleQuestionEditForm = ({ question }) => {
                         value={item.name || ''}
                         handleChange={(e) => handleOptionChange('name', e, item.id, question.id)}
                       />
-                      <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '5px' }}>
+                        {pollType === 'Викторина' && (
+                          <RadioGroup
+                            value={selectedOption}
+                            onChange={(e) => handleOptionSelect(e, question.id)}
+                            sx={{ width: '24px', height: '24px' }}
+                          >
+                            <FormControlLabel
+                              value={item.id.toString()}
+                              sx={{ width: '24px', height: '24px', margin: 0 }}
+                              control={<Radio sx={{ width: '24px', height: '24px' }} />}
+                            />
+                          </RadioGroup>
+                        )}
                         <DeleteOutline
                           sx={{ cursor: 'pointer' }}
                           onClick={() => handleDeleteOption(item.id, question.id)}
