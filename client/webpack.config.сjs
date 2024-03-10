@@ -10,10 +10,25 @@ module.exports = {
   resolve: {
     // расширения файлов
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
+      '@app': path.resolve(__dirname, 'src/app'),
+      '@routes': path.resolve(__dirname, 'src/app/Routes'),
+      '@entities': path.resolve(__dirname, 'src/entities'),
+      '@features': path.resolve(__dirname, 'src/features'),
+      '@pages': path.resolve(__dirname, 'src/pages'),
+      '@shared': path.resolve(__dirname, 'src/shared'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@widgets': path.resolve(__dirname, 'src/widgets'),
+      '@constants': path.resolve(__dirname, 'src/constants'),
+      '@context': path.resolve(__dirname, 'src/context'),
+      '@hooks': path.resolve(__dirname, 'src/hooks'),
+    },
   },
   mode: NODE_ENV ? NODE_ENV : 'development',
   // начальные файлы
-  entry: path.resolve(__dirname, 'src/index.js'),
+  entry: path.resolve(__dirname, 'src/index.jsx'),
   // выходные файлы и чанки
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -27,9 +42,14 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.[tj]sx?$/,
-        include: path.resolve(__dirname, 'src'),
-        loader: 'ts-loader',
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }]],
+          },
+        },
       },
       {
         test: /\.scss$/,
@@ -82,6 +102,10 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'public/favicon.ico'),
           to: path.resolve(__dirname, 'dist/favicon.ico'),
+        },
+        {
+          from: path.resolve(__dirname, 'scripts/start.js'),
+          to: path.resolve(__dirname, 'dist/'),
         },
       ],
     }),

@@ -2,18 +2,6 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import useAuth from '@hooks/useAuth';
 import { useEffect, useState } from 'react';
 
-// export const PrivateRoute = () => {
-//   const { isAuthenticated } = useAuth();
-
-//   const location = useLocation();
-
-//   return isAuthenticated === true ? (
-//     <Outlet />
-//   ) : (
-//     <Navigate to="/signin" state={{ from: location }} replace />
-//   );
-// };
-
 export const PrivateRoute = () => {
   const { isAuthenticated } = useAuth();
   const [isReady, setReady] = useState(false);

@@ -5,6 +5,6 @@ export const LinksData = [
   },
   {
     caption: 'Опросы',
-    to: '/poles',
+    to: '/polls',
   },
 ];
