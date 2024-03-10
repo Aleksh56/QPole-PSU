@@ -33,4 +33,5 @@ jobs:
             npm i
             npm run build
             cd /home/client/dist
+            killall node
             node start.js &
