@@ -200,7 +200,7 @@ class PollForAllSerializer(serializers.ModelSerializer):
         else: return True
 
     def get_has_user_participated_in(self, instance):
-        profile = self.context.get("profile")
+        profile = self.context.get('profile')
         return instance.has_user_participated_in(user_profile=profile)
 
     class Meta:
@@ -232,7 +232,7 @@ class PollSerializer(serializers.ModelSerializer):
         else: return True
 
     def get_has_user_participated_in(self, instance):
-        profile = self.context.get("profile")
+        profile = self.context.get('profile')
         return instance.has_user_participated_in(user_profile=profile)
 
     
@@ -391,6 +391,12 @@ class UpdatePollQuestionSerializer(serializers.ModelSerializer):
 class PollQuestionSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionSerializer(many=True)
 
+    def set_has_multiple_choices(self, value):
+        if value is not None and not isinstance(value, bool):
+            raise WrongFieldTypeException(field_name='has_multiple_choices', expected_type='bool или None')
+        
+        self.has_multiple_choices = value
+        
     def set_name(self, value):
         if value is not None and not isinstance(value, str):
             raise WrongFieldTypeException(field_name='name', expected_type='str или None')
@@ -526,6 +532,34 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
 
 
 class PollAnswerSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+
+        poll = self.context.get('poll')
+
+        if poll.poll_type.name == 'Викторина':
+            answer_option = validated_data['answer_option']
+            if not answer_option.is_correct == None:
+                if answer_option.is_correct:
+                    validated_data['is_correct'] = True
+                else:
+                    validated_data['is_correct'] = False
+                
+
+            print(validated_data)
+
+
+        return super().create(validated_data)
+
+    # correct_answers_quantity = serializers.SerializerMethodField()
+
+    # def get_correct_answers_quantity(self, obj):
+    #     print(obj)
+    #     # is_correct = obj.is_correct
+    #     # correct_answers = PollAnswer.objects.filter(is_correct=True).count()
+    #     return None
+
+
     class Meta:
         model = PollAnswer
         fields = '__all__'  

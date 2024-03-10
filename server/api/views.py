@@ -153,6 +153,8 @@ def my_poll(request, request_type=None):
                 poll_id=poll_id,
                 author=my_profile,
                 poll_type=poll_type,
+                has_multiple_choices=poll_type.has_multiple_choices,
+                has_correct_answer=poll_type.has_correct_answer,
             )
 
             poll.save()
@@ -301,12 +303,13 @@ def my_poll_question(request, request_type=None):
             if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            
+ 
             with transaction.atomic():
                 poll_question = PollQuestion(
                     name="",
                     info="",
                     image=None,
+                    has_correct_answer=my_poll.has_correct_answer,
                 )
                 poll_question.save()
                 my_poll.questions.add(poll_question)
@@ -482,7 +485,7 @@ def my_poll_question_option(request):
             return Response({'message':f"Вариант ответа в вопросе успешно проинициализирован"}, status=status.HTTP_201_CREATED)
 
         elif request.method == 'PATCH':
-            data = request.data
+            data = request.data.copy()
 
             poll_id = data.get('poll_id', None)
             if not poll_id:
@@ -508,6 +511,14 @@ def my_poll_question_option(request):
             if not question_option:
                 raise ObjectNotFoundException(model='AnswerOption')
             
+            is_correct = data.get('is_correct', None)
+            data['is_correct'] = bool(data['is_correct'])
+            if is_correct:
+                all_options = poll_question.answer_options.all()
+                for option in all_options:
+                    if option.is_correct:
+                        option.is_correct = False
+                        option.save()
 
             serializer = PollQuestionOptionSerializer(instance=question_option, data=data, partial=True)
             serializer.is_valid(raise_exception=True)
@@ -649,19 +660,35 @@ def poll_voting(request):
             except ValueError as ex:
                 return Response({'message': f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
 
-            serializer = PollAnswerSerializer(data=answers, many=True)
+            serializer = PollAnswerSerializer(data=answers, many=True, context={'poll': poll})
             serializer.is_valid(raise_exception=True)
             
             poll_answers = serializer.save(profile=my_profile)
             serializer = PollAnswerSerializer(poll_answers, many=True)
 
-            
+            if poll.poll_type.name == 'Викторина':
+                total = 0
+                correct = 0
+                for answer in serializer.data:
+                    total += 1
+                    if answer['is_correct'] == True:
+                        correct += 1
+                
+                result = {
+                    'total': total,
+                    'correct': correct,
+                    'wrong': total - correct,
+                    'percentage': round(float(correct / total), 2) * 100,
+                }
+                        
+
+
             # Установка связей между вариантами ответов и ответами
             for poll_answer in poll_answers:
                 poll_answer.question.answer_options.filter(id=poll_answer.answer_option_id).first().answers.add(poll_answer)
 
 
-            return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK)
+            return Response({'message':"Вы успешно проголосовали", 'data':serializer.data, 'result': result}, status=status.HTTP_200_OK)
 
         elif request.method == 'PATCH':
             data = request.data
@@ -793,4 +820,4 @@ def poll(request, request_type=None):
             return Response({'message':f"{api_exception}"}, api_exception.status_code)
         
     except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

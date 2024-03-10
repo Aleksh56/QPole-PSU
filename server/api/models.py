@@ -57,7 +57,7 @@ class PollAnswer(models.Model):
     text = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
 
-
+    is_correct = models.BooleanField(default=None, null=True)
     voting_date = models.DateTimeField(auto_now_add=True)
 
 
@@ -102,6 +102,9 @@ class PollQuestion(models.Model):
     image = models.ImageField(verbose_name='Фото вопроса', upload_to=f'images/poll_questions/', blank=True, null=True, default=None)
     answer_options = models.ManyToManyField(AnswerOption, related_name='pollquestion_answeroptions', blank=True, null=True)
 
+    has_correct_answer = models.BooleanField(default=None, null=True)   # есть ли верный ответ
+    has_multiple_choices = models.BooleanField(default=False)   # есить ли множенственный выбор
+    # points_if_correct = models.DecimalField(max_digits=10, decimal_places=2) # очки за правильный ответ
     is_free = models.BooleanField(default=False, null=True)   # свободная ли форма ответа
     is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
     is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
