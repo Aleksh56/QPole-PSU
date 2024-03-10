@@ -33,4 +33,4 @@ jobs:
             npm i
             npm run build
             cd /home/client/dist
-            node start.js
+            node start.js &
