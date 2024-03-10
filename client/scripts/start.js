@@ -9,7 +9,7 @@ const FILES = /\.(js|js.map|woff|woff2|svg|bmp|jpg|jpeg|gif|png|ico|css)(\?v=\d+
 const init = async () => {
   const server = Hapi.server({
     port,
-    host: '89.111.155.6',
+    host: '0.0.0.0',
   });
 
   await server.register(inert);
