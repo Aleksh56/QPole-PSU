@@ -19,6 +19,7 @@ const PollListCard = ({ item, isAuthenticated }) => {
         <CardContent sx={{ flexGrow: 1 }}>
           <CardTitle gutterBottom noWrap>
             {item.name ?? '[Название опроса]'}
+            {item.poll_type.name ?? '[Название опроса]'}
           </CardTitle>
           <CardDescription>{item.description ?? '[Описание опроса]'}</CardDescription>
         </CardContent>

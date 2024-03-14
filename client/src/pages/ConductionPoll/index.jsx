@@ -1,4 +1,4 @@
-import Header from '@/widgets/Header';
+import Header from '@/widgets/common/Header';
 import React, { useEffect, useState } from 'react';
 import { fetchPollQuestions } from './model/fetch-questions';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -7,7 +7,7 @@ import QuestionBlock from '@/widgets/ConductionPoll/QuestionBlock';
 import { ConductionWrapper } from './styled';
 import { useUnit } from 'effector-react';
 import { $answersStore, resetAnswers } from './store/answer-store';
-import { sendAnswersRequest } from './model/send-answers';
+import { sendAnswersRequestFx } from './model/send-answers';
 import useAuth from '@/hooks/useAuth';
 
 const ConductionPollPage = () => {
@@ -36,8 +36,10 @@ const ConductionPollPage = () => {
       answers: answers,
     };
 
-    await sendAnswersRequest(payload);
-    navigate('/polls');
+    const response = await sendAnswersRequestFx(payload);
+    if (!Object.keys(response.result).length > 0) {
+      navigate('/polls');
+    }
   };
 
   return (

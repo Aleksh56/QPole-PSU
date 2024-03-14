@@ -1,23 +1,25 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { StyledProfileAboutWrapper } from './styled';
-import ProfileUserData from '@/widgets/ProfileUserData';
-import ProfileTimezone from '@/widgets/ProfileTimezone';
-import Profile2AuthBlock from '@/widgets/Profile2Auth';
-import useUserData from '@/hooks/useUserData';
-import useFormInput from '@/hooks/useFormInput';
+import ProfileUserData from '@/widgets/profile/ProfileUserData';
+import ProfileTimezone from '@/widgets/profile/ProfileTimezone';
+import Profile2AuthBlock from '@/widgets/profile/Profile2Auth';
 import { ProfileInfoFieldsConfig } from './data/ProfileInfoFields';
+import useUserData from '@/hooks/useUserData';
+import { get } from 'lodash';
 
 const ProfileAboutPage = () => {
   const navigate = useNavigate();
   const userData = useUserData();
 
-  const ProfileInfoFields = ProfileInfoFieldsConfig.map((field) => ({
-    ...field,
-    useHook: useFormInput(field.initialValue),
-  }));
+  const profileInfoFields = userData
+    ? ProfileInfoFieldsConfig.map((field) => ({
+        ...field,
+        initialValue: get(userData, field.key, field.initialValue),
+      }))
+    : [];
 
   return (
     <StyledProfileAboutWrapper>
@@ -28,7 +30,7 @@ const ProfileAboutPage = () => {
         <ProfileUserData
           caption="Профиль"
           boxCaption="Данные аккаунта"
-          ProfileInfoFields={ProfileInfoFields}
+          ProfileInfoFields={profileInfoFields}
         />
         <ProfileTimezone caption="Язык и страна" selectCaption="Часовой пояс" />
         <Profile2AuthBlock caption="Безопасность" />

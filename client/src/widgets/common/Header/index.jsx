@@ -26,9 +26,7 @@ const Header = ({ isMainPage = true }) => {
         <StyledLogoLink to="/">QPole</StyledLogoLink>
         <HeaderNavigationOutput
           children={
-            <Box
-              sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}
-            >
+            <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}>
               <PrimaryButton caption="Создать квиз" to="/signup" />
               <PrimaryButton caption="Войти" to="/signin" />
             </Box>

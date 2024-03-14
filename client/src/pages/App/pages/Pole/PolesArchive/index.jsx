@@ -1,6 +1,5 @@
-import { getAllPoles, getProfileData } from '@/pages/App/api/apiRequests';
-import AppHeader from '@/widgets/AppHeader';
-import AppPolesFilters from '@/widgets/AppPolesFilters';
+import { getAllPoles } from '@/pages/App/api/apiRequests';
+import AppPolesFilters from '@/widgets/app/AppPolesFilters';
 import React, { useEffect, useState } from 'react';
 import { ContentWrapper, PollsGrid, StyledAppContentWrapper } from './styled';
 import { CircularProgress } from '@mui/material';
@@ -13,12 +12,10 @@ const PolesArchivePage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState();
   const [pollData, setPollData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState();
 
   const fetchData = async () => {
-    const [pollResponse, userResponse] = await Promise.all([getAllPoles(), getProfileData()]);
+    const pollResponse = await getAllPoles();
     setPollData(pollResponse.data);
-    setUserData(userResponse.data);
     setLoading(false);
   };
 
@@ -28,7 +25,6 @@ const PolesArchivePage = () => {
 
   return (
     <>
-      <AppHeader userData={userData} />
       <AppPolesFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollData} />
       {loading ? (
         <StyledAppContentWrapper>

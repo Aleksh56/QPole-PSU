@@ -1,7 +1,7 @@
 import React from 'react';
 import { OverlayWrapper, StyledAuthWrapper } from '../styled';
 import AuthIllustration from '@/features/AuthIllustration';
-import PasswordResetForm from '@/widgets/PasswordResetForm';
+import PasswordResetForm from '@/widgets/auth/PasswordResetForm';
 import { ThemeProvider, useTheme } from '@mui/material';
 
 const PasswordResetPage = () => {

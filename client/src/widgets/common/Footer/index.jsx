@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { StyledFooter, StyledFooterWrapper, StyledLogoLink } from './styled';
 

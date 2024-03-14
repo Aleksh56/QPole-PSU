@@ -1,4 +1,39 @@
-export const ServicesCardsData = [
+export const appHeaderData = [
+  { caption: 'Ваши опросы', to: '/app' },
+  { caption: 'Опросы', to: '/polls' },
+  { caption: 'На главную', to: '/' },
+];
+
+export const commonHeaderLinksData = [
+  { caption: 'Главная', to: '/' },
+  { caption: 'Опросы', to: '/polls' },
+];
+
+export const appTypesFilter = [
+  { value: 'Все типы', label: 'Все типы' },
+  { value: 'Опрос', label: 'Опрос' },
+  { value: 'Викторина', label: 'Викторина' },
+];
+
+export const appStatusesFilter = [
+  { value: 'Все статусы', label: 'Все статусы' },
+  { value: '0', label: 'Открытые' },
+  { value: '1', label: 'Закрытые' },
+];
+
+export const appGroupsFilter = [
+  { value: 'Для всех', label: 'Для всех' },
+  { value: 'Group 2', label: 'Group 2' },
+  { value: 'Group 3', label: 'Group 3' },
+];
+
+export const appFilterOptions = [
+  { label: 'Тип', name: 'poll_type', options: appTypesFilter },
+  { label: 'Статус', name: 'is_closed', options: appStatusesFilter },
+  { label: 'Группа', name: 'group', options: appGroupsFilter },
+];
+
+export const servicesCardsData = [
   {
     caption: 'Изучение клиентского опыта',
     buttons: [
@@ -49,4 +84,10 @@ export const ServicesCardsData = [
       'Оценка качества знаний',
     ],
   },
+];
+
+export const pollDesignFieldData = [
+  { label: 'Основной цвет', name: 'primaryColor' },
+  { label: 'Цвет кнопок', name: 'buttonColor' },
+  { label: 'Цвет текста кнопок', name: 'buttonTextColor' },
 ];

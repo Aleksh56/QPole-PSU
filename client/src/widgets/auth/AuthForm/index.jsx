@@ -1,30 +1,18 @@
 import React from 'react';
-import {
-  FormContainer,
-  FormGridWrapper,
-  StyledConfirmButton,
-  StyledForm,
-} from './styled';
+import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from './styled';
 import AuthFormHeading from '@/features/AuthFormHeading';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from '@mui/material';
 import LabeledInput from '@/shared/AuthLabeledInput';
 
-const AuthForm = ({
-  isSignIn,
-  handleFormSwitch = () => {},
-  handleFormSubmit = () => {},
-}) => {
+const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
   const authFormTheme = useTheme();
   const navigate = useNavigate();
   return (
     <ThemeProvider theme={authFormTheme}>
       <FormGridWrapper item>
         <FormContainer>
-          <AuthFormHeading
-            isSignIn={isSignIn}
-            handleFormSwitch={handleFormSwitch}
-          />
+          <AuthFormHeading isSignIn={isSignIn} handleFormSwitch={handleFormSwitch} />
           <StyledForm onSubmit={handleFormSubmit}>
             <LabeledInput
               label="Ваша почта"
@@ -41,9 +29,7 @@ const AuthForm = ({
               placeholder="Пароль"
               children={
                 isSignIn ? (
-                  <button onClick={() => navigate('/password-reset')}>
-                    Забыли пароль?
-                  </button>
+                  <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
                 ) : (
                   ''
                 )
@@ -58,12 +44,7 @@ const AuthForm = ({
                 placeholder="Телефон"
               />
             )}
-            <StyledConfirmButton
-              disabled={false}
-              type="submit"
-              fullWidth
-              variant="contained"
-            >
+            <StyledConfirmButton disabled={false} type="submit" fullWidth variant="contained">
               {isSignIn ? 'Войти' : 'Создать аккаунт'}
             </StyledConfirmButton>
           </StyledForm>

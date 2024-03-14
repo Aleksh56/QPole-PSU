@@ -27,8 +27,8 @@ const Hero = () => {
                 опросов и анкет
               </StyledHeroTextHeading>
               <StyledHeroTextSubHeading>
-                Бесплатно соберите ответы коллег, клиентов или потенциальной
-                аудитории всего за пару кликов!
+                Бесплатно соберите ответы коллег, клиентов или потенциальной аудитории всего за пару
+                кликов!
               </StyledHeroTextSubHeading>
               <SecondaryButton caption="Создать бесплатно" />
             </StyledHeroTextWrapper>

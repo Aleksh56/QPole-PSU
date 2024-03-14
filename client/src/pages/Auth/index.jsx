@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, registerUser } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
-import AuthForm from '@/widgets/AuthForm';
+import AuthForm from '@/widgets/auth/AuthForm';
 import AuthIllustration from '@/features/AuthIllustration';
 import { ThemeProvider, useTheme } from '@mui/material';
 
@@ -35,9 +35,7 @@ const AuthPage = () => {
         ...(isSignIn ? {} : { tel: event.target.tel.value }),
       };
 
-      const response = isSignIn
-        ? await loginUser(formData)
-        : await registerUser(formData);
+      const response = isSignIn ? await loginUser(formData) : await registerUser(formData);
 
       if (response.data.auth_token && response.data.auth_token.length > 0) {
         setAuth(response.data.auth_token);

@@ -1,4 +1,4 @@
-import Header from '@/widgets/Header';
+import Header from '@/widgets/common/Header';
 import PollFilters from '@/widgets/PollList/PollFilters';
 import React, { useEffect, useState } from 'react';
 import { PollListPageContentWrapper } from './styled';

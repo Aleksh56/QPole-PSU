@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import { StyledButton, StyledStack, StyledStackWrapper } from './styled';
 import { filterPollsRequest } from './api/apiRequests';
-import { groups, statuses, types } from './data/filtersData';
 import FilterSelect from '@/shared/FilterSelect';
+import { appFilterOptions } from '@/data/fields';
 
 const AppPolesFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => {} }) => {
   const [filters, setFilters] = useState({
@@ -12,11 +12,6 @@ const AppPolesFilters = ({ handleCreateModalOpen = () => {}, setPollData = () =>
     is_closed: 'Все статусы',
     group: 'Для всех',
   });
-  const filterOptions = [
-    { label: 'Тип', name: 'poll_type', options: types },
-    { label: 'Статус', name: 'is_closed', options: statuses },
-    { label: 'Группа', name: 'group', options: groups },
-  ];
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
@@ -45,7 +40,7 @@ const AppPolesFilters = ({ handleCreateModalOpen = () => {}, setPollData = () =>
           placeholder="Введите название"
           onChange={handleFilterChange}
         />
-        {filterOptions.map((filter) => (
+        {appFilterOptions.map((filter) => (
           <FilterSelect
             key={filter.name}
             label={filter.label}

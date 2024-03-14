@@ -14,7 +14,7 @@
       "@utils/*": ["src/utils/*"],
       "@widgets/*": ["src/widgets/*"],
       "@constants/*": ["src/constants/*"],
-      "@context/*": ["src/context/*"],
+      "@context/*": ["src/app/context/*"],
       "@hooks/*": ["src/hooks/*"]
     }
   },

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import AppCreateFirstPole from '@/features/AppCreateFirstPole';
-import AppHeader from '@/widgets/AppHeader';
-import AppPolesFilters from '@/widgets/AppPolesFilters';
+import AppPolesFilters from '@/widgets/app/AppPolesFilters';
 import CreatePoleModal from '@/widgets/CreatePoleModal';
 import AppPoleCard from '@/shared/AppPoleCard';
-import { getAllPoles, getProfileData } from './api/apiRequests';
+import { getAllPoles } from './api/apiRequests';
 import { Link } from 'react-router-dom';
 import { ContentWrapper, PollsGrid, StyledAppContentWrapper, StyledArchiveLink } from './styled';
 import { _settings } from './config/settings';
@@ -14,13 +13,11 @@ import InboxIcon from '@mui/icons-material/Inbox';
 const AppPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState();
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState();
   const [pollData, setPollData] = useState([]);
 
   const fetchData = async () => {
-    const [pollResponse, userResponse] = await Promise.all([getAllPoles(), getProfileData()]);
+    const pollResponse = await getAllPoles();
     setPollData(pollResponse.data);
-    setUserData(userResponse.data);
     setLoading(false);
   };
 
@@ -30,7 +27,6 @@ const AppPage = () => {
 
   return (
     <>
-      <AppHeader userData={userData} />
       <AppPolesFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollData} />
       {loading ? (
         <StyledAppContentWrapper>

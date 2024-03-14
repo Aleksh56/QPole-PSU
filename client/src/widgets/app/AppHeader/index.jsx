@@ -1,5 +1,4 @@
 import React from 'react';
-import { AppHeaderData } from './data/AppHeaderData';
 import AppHeaderNavigationOutput from '@/features/AppHeaderNavOutput';
 import {
   Listbox,
@@ -15,10 +14,13 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
+import useUserData from '@/hooks/useUserData';
+import { appHeaderData } from '@/data/fields';
 
-const AppHeader = ({ userData = {} }) => {
+const AppHeader = () => {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
+  const userData = useUserData();
 
   const handleLogOut = () => {
     setAuth(false);
@@ -29,7 +31,7 @@ const AppHeader = ({ userData = {} }) => {
     <StyledHeaderWrapper>
       <StyledHeaderContainer>
         <StyledHeaderLogo to="/app">QPoll</StyledHeaderLogo>
-        <AppHeaderNavigationOutput itemsData={AppHeaderData} />
+        <AppHeaderNavigationOutput itemsData={appHeaderData} />
         <Dropdown>
           <StyledHeaderProfile>
             {userData?.profile?.email ?? ''}

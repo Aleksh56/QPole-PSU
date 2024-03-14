@@ -1,5 +1,5 @@
 import React from 'react';
-import ProfileSidebar from '@/widgets/ProfileSidebar';
+import ProfileSidebar from '@/widgets/profile/ProfileSidebar';
 import { Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { SidebarLinksData } from './data/SidebarLinksData';
@@ -15,6 +15,7 @@ const ProfileAppPage = () => {
         <Routes>
           <Route path="/" element={<ProfileAboutPage />} />
           <Route path="/contributors" element={'Contributors'} />
+          <Route path="/statistics" element={'Statistics'} />
         </Routes>
       </Box>
     </Box>
