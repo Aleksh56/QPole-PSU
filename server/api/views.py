@@ -666,6 +666,7 @@ def poll_voting(request):
             poll_answers = serializer.save(profile=my_profile)
             serializer = PollAnswerSerializer(poll_answers, many=True)
 
+            result = {}
             if poll.poll_type.name == 'Викторина':
                 total = 0
                 correct = 0
