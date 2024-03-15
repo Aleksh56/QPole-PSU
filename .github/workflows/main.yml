@@ -29,7 +29,7 @@ jobs:
           password: ${{ secrets.SERVER_PASS }}
           port: 22
           script: |
-            cd /home/client
+            cd /home/client/deploy
             docker stop my-frontend-app-container || true
             docker rm my-frontend-app-container || true
             docker-compose up -d --build
