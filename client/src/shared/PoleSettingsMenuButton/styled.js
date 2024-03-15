@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Rem } from '@/utils/convertToRem';
 import { Button } from '@mui/material';
 import { NavLink } from 'react-router-dom';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledNavLink = styled(NavLink)(({ isDisabled }) => ({
   textDecoration: 'none',
@@ -22,7 +22,7 @@ export const StyledNavLink = styled(NavLink)(({ isDisabled }) => ({
   },
   '&.active': {
     '& svg': {
-      fill: designTokens.colors.primaryBlue,
+      fill: colorConfig.primaryBlue,
     },
   },
 }));

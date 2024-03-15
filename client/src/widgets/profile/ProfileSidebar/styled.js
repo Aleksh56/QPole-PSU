@@ -3,6 +3,7 @@ import { Box, ListItemText, Typography } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 import { designTokens } from '@/constants/designTokens';
 import { NavLink } from 'react-router-dom';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledProfileWrapper = styled(Box)(() => ({
   height: '100vh',
@@ -45,7 +46,7 @@ export const StyledNavItem = styled(NavLink)(() => ({
   },
   '&.active': {
     '& .MuiTypography-root, .MuiSvgIcon-root': {
-      color: designTokens.colors.primaryBlue,
+      color: colorConfig.primaryBlue,
     },
   },
 }));

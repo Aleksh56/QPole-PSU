@@ -26,6 +26,7 @@ export default defineConfig({
       '@constants': '/src/constants',
       '@context': '/src/context',
       '@hooks': '/src/hooks',
+      '@config': '/src/config',
     },
   },
 });

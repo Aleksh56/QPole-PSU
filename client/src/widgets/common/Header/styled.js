@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Box } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 import { Link } from 'react-router-dom';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledHeader = styled('header')(({ isSticky, isMainPage }) => ({
   padding: `${Rem(20)}`,
@@ -12,15 +12,14 @@ export const StyledHeader = styled('header')(({ isSticky, isMainPage }) => ({
   width: '100%',
   background: isSticky ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
   backdropFilter: isSticky ? 'blur(5px)' : 'none',
-  transition:
-    'background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out',
+  transition: 'background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out',
   boxSizing: 'border-box',
   zIndex: 100,
 }));
 
 export const StyledLogoLink = styled(Link)(() => ({
   fontSize: Rem(36),
-  color: designTokens.colors.primaryBlue,
+  color: colorConfig.primaryBlue,
 }));
 
 export const StyledContainer = styled(Box)(() => ({

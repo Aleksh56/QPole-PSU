@@ -26,6 +26,7 @@ const LabeledInput = ({
         required={required}
         fullWidth
         id={id}
+        type={id}
         placeholder={placeholder}
         name={id}
         autoComplete={autoComplete}

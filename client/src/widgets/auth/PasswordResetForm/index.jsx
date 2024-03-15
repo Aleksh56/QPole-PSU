@@ -1,24 +1,21 @@
 import React, { useState } from 'react';
 import { FormContainer, FormGridWrapper, StyledForm } from './styled';
-import PasswordResetHeading from '@/features/PasswordResetHeading';
+import PasswordResetHeading from '@/components/05_Features/PasswordResetHeading';
 import { useNavigate } from 'react-router-dom';
-import {
-  checkResetPasswordCode,
-  resetPasswordRequest,
-  sendResetPasswordCode,
-} from '@/api/api';
+import { checkResetPasswordCode, resetPasswordRequest, sendResetPasswordCode } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
 import { ThemeProvider, useTheme } from '@mui/material';
 import LabeledInput from '@/shared/AuthLabeledInput';
-import PasswordResetButtons from '@/features/PasswordResetButtons';
+import PasswordResetButtons from '@/components/05_Features/PasswordResetButtons';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const PasswordResetForm = () => {
+  usePageTitle('restore');
   const resetPasswordFormTheme = useTheme();
   const [isEmailSubmitted, setEmailSubmitted] = useState(false);
   const [isCodeSubmitted, setCodeSubmitted] = useState(false);
   const [resetAccountEmail, setResetAccountEmail] = useState('');
-  const [resetAccountPasswordToken, setResetAccountPasswordToken] =
-    useState('');
+  const [resetAccountPasswordToken, setResetAccountPasswordToken] = useState('');
   const [resetAccountCode, setResetAccountCode] = useState();
   const [resetAccountNewPassword, setResetAccountNewPassword] = useState('');
   const navigate = useNavigate();
@@ -107,7 +104,7 @@ const PasswordResetForm = () => {
               confirmCaption="Отправить"
               returnCaption="Вернуться назад"
               isConfirmDisabled={false}
-              returnClick={navigate('/signin')}
+              returnClick={() => navigate('/signin')}
             />
           </StyledForm>
         </FormContainer>

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Button, Grid } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const FormGridWrapper = styled(Grid)(({ theme }) => ({
   flexBasis: '30%',
@@ -43,7 +43,7 @@ export const StyledForm = styled('form')(() => ({
   },
   '& .css-md26zr-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
     {
-      border: `2px solid ${designTokens.colors.primaryBlue}`,
+      border: `2px solid ${colorConfig.primaryBlue}`,
     },
 }));
 
@@ -51,7 +51,7 @@ export const StyledConfirmButton = styled(Button)(({ disabled }) => ({
   marginTop: Rem(30),
   height: Rem(48),
   borderRadius: Rem(30),
-  backgroundColor: designTokens.colors.primaryBlue,
+  backgroundColor: colorConfig.primaryBlue,
   opacity: disabled ? '0.7' : '1',
   color: '#fff',
 }));

@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <StyledFooter>
       <StyledFooterWrapper>
-        <StyledLogoLink to="/">QPole</StyledLogoLink>
+        <StyledLogoLink to="/">QPoll</StyledLogoLink>
         <Box>
           <p>Vkontakte</p>
         </Box>

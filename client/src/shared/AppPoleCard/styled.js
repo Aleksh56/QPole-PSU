@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
-import { Box, Card, Chip, Typography } from '@mui/material';
+import { Card, Chip, Typography } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledChip = styled(Chip)(() => ({
   position: 'absolute',
   top: Rem(10),
   left: Rem(10),
   color: 'white',
-  backgroundColor: designTokens.colors.primaryBlue,
+  backgroundColor: colorConfig.primaryBlue,
   height: Rem(22),
   '& .MuiChip-label': {
     fontSize: Rem(10),

@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Box, TextField, Typography } from '@mui/material';
 import { designTokens } from '@/constants/designTokens';
 import { Rem } from '@/utils/convertToRem';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledTypography = styled(Typography)(() => ({
   marginBottom: Rem(5),
@@ -25,6 +26,6 @@ export const StyledPasswordWrapper = styled(Box)(() => ({
     backgroundColor: 'transparent',
     border: 0,
     cursor: 'pointer',
-    color: designTokens.colors.primaryBlue,
+    color: colorConfig.primaryBlue,
   },
 }));

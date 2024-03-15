@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 const heroBaseStyles = {
   display: 'grid',
@@ -68,7 +68,7 @@ export const StyledHeroTextSubHeading = styled('p')(() => ({
   fontSize: Rem(20),
   lineHeight: Rem(30),
   marginBottom: Rem(25),
-  color: designTokens.colors.primaryBlack,
+  color: colorConfig.primaryBlack,
   opacity: '.7',
 }));
 

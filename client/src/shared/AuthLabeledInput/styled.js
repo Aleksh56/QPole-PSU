@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledPasswordWrapper = styled(Box)(() => ({
   display: 'grid',
@@ -11,6 +11,6 @@ export const StyledPasswordWrapper = styled(Box)(() => ({
     backgroundColor: 'transparent',
     border: 0,
     cursor: 'pointer',
-    color: designTokens.colors.primaryBlue,
+    color: colorConfig.primaryBlue,
   },
 }));

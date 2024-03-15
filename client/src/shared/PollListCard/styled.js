@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Rem } from '@/utils/convertToRem';
 import { Box, Button, Card, Typography } from '@mui/material';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const CardWrapper = styled(Card)(() => ({
   display: 'flex',
@@ -33,9 +33,9 @@ export const CardDescription = styled(Typography)(() => ({
 }));
 
 export const CardButton = styled(Button)(({ isAuthenticated }) => ({
-  border: `1px solid ${isAuthenticated ? designTokens.colors.primaryBlue : '#aaa'}`,
+  border: `1px solid ${isAuthenticated ? colorConfig.primaryBlue : '#aaa'}`,
   borderRadius: Rem(20),
-  color: designTokens.colors.primaryBlue,
+  color: colorConfig.primaryBlue,
   fontSize: Rem(13),
   textTransform: 'initial',
 }));

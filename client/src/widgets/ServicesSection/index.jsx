@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyledCardsWrapper, StyledSection, StyledSectionHeading } from './styled';
-import ServicesCard from '../../entities/ServicesCard';
+import ServicesCard from '../../components/06_Entities/ServicesCard';
 import { v4 } from 'uuid';
 import { servicesCardsData } from '@/data/fields';
 

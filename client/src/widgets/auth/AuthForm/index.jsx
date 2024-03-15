@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from './styled';
-import AuthFormHeading from '@/features/AuthFormHeading';
+import AuthFormHeading from '@/components/05_Features/AuthFormHeading';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from '@mui/material';
 import LabeledInput from '@/shared/AuthLabeledInput';

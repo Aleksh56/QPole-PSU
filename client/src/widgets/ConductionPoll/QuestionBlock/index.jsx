@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
-import { updateAnswer } from '@/pages/ConductionPoll/store/answer-store';
+import { updateAnswer } from '@/components/03_Pages/Polls/ConductionPoll/store/answer-store';
 
 const QuestionBlock = ({ question }) => {
   const [value, setValue] = useState('');

@@ -1,5 +1,5 @@
 import React from 'react';
-import AppHeaderNavigationOutput from '@/features/AppHeaderNavOutput';
+import AppHeaderNavigationOutput from '@/components/05_Features/AppHeaderNavOutput';
 import {
   Listbox,
   StyledHeaderContainer,

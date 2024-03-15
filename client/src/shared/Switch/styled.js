@@ -1,4 +1,4 @@
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 import styled from '@emotion/styled';
 import { Switch } from '@mui/material';
 
@@ -14,7 +14,7 @@ export const IOSSwitch = styled(Switch)(() => ({
       transform: 'translateX(16px)',
       color: '#fff',
       '& + .MuiSwitch-track': {
-        backgroundColor: designTokens.colors.primaryBlue,
+        backgroundColor: colorConfig.primaryBlue,
         opacity: 1,
         border: 0,
       },

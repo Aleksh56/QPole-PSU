@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Box, DialogTitle, Typography } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledDialogTitle = styled(DialogTitle)(() => ({
   fontSize: Rem(14),
@@ -24,7 +25,7 @@ export const ButtonContainer = styled(Box)(() => ({
   '&:hover': {
     transform: 'translateY(-8px)',
     '& svg': {
-      fill: designTokens.colors.primaryBlue,
+      fill: colorConfig.primaryBlue,
     },
   },
 }));

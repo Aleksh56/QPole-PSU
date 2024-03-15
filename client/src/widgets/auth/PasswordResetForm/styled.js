@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
+import { colorConfig } from '@app/template/config/color.config';
 import { Grid } from '@mui/material';
 
 export const FormGridWrapper = styled(Grid)(({ theme }) => ({
@@ -43,6 +43,6 @@ export const StyledForm = styled('form')(() => ({
   },
   '& .css-md26zr-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
     {
-      border: `2px solid ${designTokens.colors.primaryBlue}`,
+      border: `2px solid ${colorConfig.primaryBlue}`,
     },
 }));

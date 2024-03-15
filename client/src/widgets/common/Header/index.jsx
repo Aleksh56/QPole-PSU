@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyledContainer, StyledHeader, StyledLogoLink } from './styled';
 import PrimaryButton from '@/shared/PrimaryButton';
-import HeaderNavigationOutput from '@/features/HeaderNavOutput';
+import HeaderNavigationOutput from '@/components/05_Features/HeaderNavOutput';
 import { Box } from '@mui/material';
 
 const Header = ({ isMainPage = true }) => {
@@ -23,7 +23,7 @@ const Header = ({ isMainPage = true }) => {
   return (
     <StyledHeader isSticky={isSticky} isMainPage={isMainPage}>
       <StyledContainer>
-        <StyledLogoLink to="/">QPole</StyledLogoLink>
+        <StyledLogoLink to="/">QPoll</StyledLogoLink>
         <HeaderNavigationOutput
           children={
             <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}>
