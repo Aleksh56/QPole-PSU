@@ -2,7 +2,7 @@ FROM node:18
 
 WORKDIR /app
 
-COPY ../ /app/
+COPY . /app/
 
 RUN npm install
 
@@ -10,7 +10,7 @@ RUN npm run build
 
 WORKDIR /app/dist
 
-COPY ../deploy/start.sh /start.sh
+COPY start.sh /start.sh
 
 RUN chmod +x /start.sh
 
