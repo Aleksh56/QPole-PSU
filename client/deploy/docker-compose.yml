@@ -4,7 +4,7 @@ services:
   front:
     build:
       context: ../
-      dockerfile: ../docker/Dockerfile
+      dockerfile: docker/Dockerfile
     container_name: my-frontend-app-container
     ports:
       - '3000:3000'
