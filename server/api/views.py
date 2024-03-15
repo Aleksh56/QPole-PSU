@@ -18,7 +18,6 @@ logger = logging.getLogger('debug')
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_profile(request):
@@ -89,7 +88,6 @@ def my_profile(request):
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll(request, request_type=None):
@@ -264,7 +262,6 @@ def my_poll(request, request_type=None):
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_question(request, request_type=None):
@@ -418,7 +415,6 @@ def my_poll_question(request, request_type=None):
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_question_option(request):
@@ -605,7 +601,6 @@ def my_poll_question_option(request):
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
-@authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting(request):

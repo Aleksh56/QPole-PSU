@@ -105,3 +105,10 @@ def process_answers(answers, poll, my_profile_id):
             raise ValueError("Дано два ответа на один вопрос: {}".format(answer))
 
     return unique_answers
+
+
+def validation_error_wrapper(errors):
+    error_messages = [str(error[0]) for error in errors.values()]
+    error_messages = dict(enumerate(error_messages, 1))
+
+    return error_messages

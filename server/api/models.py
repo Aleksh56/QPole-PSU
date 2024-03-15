@@ -15,6 +15,7 @@ class Profile(models.Model):
     number = models.CharField(max_length=50, blank=True, null=True) 
 
     joining_date = models.DateField(auto_now_add=True)
+    # has_2auf = models.BooleanField(default=False)
 
     role = models.ForeignKey('UserRole', on_delete=models.CASCADE, related_name='profiles', blank=True, null=True)
 

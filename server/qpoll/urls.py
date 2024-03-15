@@ -6,7 +6,7 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
 
 from api.models import *
-from .views import qr_code_view
+from .views import *
 
 class OTPAdmin(OTPAdminSite):
     pass
@@ -26,8 +26,9 @@ admin_site.register(PollQuestion)
 
 
 urlpatterns = [
-    path('admin/', admin_site.urls),
+    path('admin/', admin.site.urls),
     path('qr_code_view/', qr_code_view),
+    path('verify-totp/', VerifyTOTPView.as_view(), name='verify-totp'),
     path('api/', include('api.urls')),
     path('login/', include('login.urls')),
 ]

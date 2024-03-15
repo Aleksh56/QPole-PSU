@@ -5,7 +5,7 @@ import secrets
 from django.core.mail import send_mail
 from django.core.cache import cache
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 from qpoll.settings import DEFAULT_FROM_EMAIL
 
 def generate_random_code():
@@ -23,7 +23,38 @@ def send_reset_code_email(email, code):
 
 def store_reset_code_in_cache(email, code):
     cache_key = f'reset_code:{email}'
-    cache.set(cache_key, code, timeout=300)  # Код действителен в течение 5 минут (300 секунд)
+    cache.set(cache_key, {'code': code, 'created_at': timezone.now()}, timeout=300)
+
+def check_reset_code_in_cache(email):
+    cache_key = f'reset_code:{email}'
+    reset_data = cache.get(cache_key)
+    if reset_data:
+        code = reset_data.get('code')
+        created_at = reset_data.get('created_at')
+        return code, created_at
+    return None, None
+
+def check_reset_code_times_in_cache(email):
+    cache_key_times = f'reset_code_times:{email}'
+    cache_key_reset = f'reset_code:{email}'
+
+    reset_code_times = cache.get(cache_key_times, 1)
+
+    if reset_code_times < 2:
+        cache.set(cache_key_times, reset_code_times + 1, timeout=300)
+        remaining_time = None
+    elif reset_code_times >= 2:
+        reset_code_data = cache.get(cache_key_reset)
+        if reset_code_data:
+            created_at = reset_code_data.get('created_at')
+            time_elapsed = timezone.now() - created_at
+            remaining_time = max(0, 300 - time_elapsed.total_seconds())
+        else:
+            remaining_time = None
+
+    return reset_code_times, remaining_time
+
+          
 
 def get_reset_code_from_cache(email):
     cache_key = f'reset_token:{email}'
@@ -46,3 +77,11 @@ def generate_random_token(length=32):
     random_token = ''.join(secrets.choice(characters) for _ in range(length))
 
     return random_token
+
+
+def generate_random_digits(length):
+    return ''.join(random.choices(string.digits, k=length))
+
+def generate_username(email):
+    random_digits = generate_random_digits(6)
+    return f"{email}_{random_digits}"

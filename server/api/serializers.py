@@ -31,7 +31,10 @@ class GetProfileSerializer(serializers.ModelSerializer):
         return obj.role.role if obj.role else None
 
 
-class ProfileSerializer(serializers.ModelSerializer):   
+class ProfileSerializer(serializers.ModelSerializer):  
+
+    # number = serializers.CharField(validators=[validate_number], required=False)
+
     class Meta:
         model = Profile
         fields = '__all__'
@@ -88,25 +91,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
         return True
-
-    def create(self, validated_data):
-        self.is_valid(raise_exception=True)
-        
-        instance = Profile.objects.create(**validated_data)
-        return instance
-    
-    def update(self, instance, validated_data):
-        self.is_valid(raise_exception=False)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        return instance
-    
-    def delete(self, instance):
-        instance.delete()
-
 
 
     def __is_number_valid(self, value):

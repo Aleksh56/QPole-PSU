@@ -96,3 +96,15 @@ class BadImageException(APIException):
 
 
 
+class WrongPasswordException(APIException):
+    status_code = 400
+    default_code = 'wrong_password_or_login'
+
+    def __init__(self, detail=None):
+        if detail is None:
+            detail = f"Неверный логин или пароль!"
+        self.detail = detail
+
+    def __str__(self):
+        return self.detail
+    
