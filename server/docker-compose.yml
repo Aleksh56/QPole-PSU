@@ -6,6 +6,7 @@ services:
   app:
     build:
       context: .
+    container_name: django-server-container
     restart: always
     volumes:
       - static-data:/vol/static
@@ -18,6 +19,7 @@ services:
     volumes:
       - static-data:/vol/static
       - media-data:/vol/media
+    container_name: nginx-server-container
     ports:
       - 80:80
       - 443:443

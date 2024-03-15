@@ -29,10 +29,13 @@ jobs:
           password: ${{ secrets.SERVER_PASS }}
           port: 22
           script: |
-            docker container stop $(docker container ls -q)
+            docker stop django-server-container || true
+            docker rm django-server-container || true
+            docker stop nginx-server-container || true
+            docker rm nginx-server-container || true
             apt-get clean
-            docker image prune -f
-            docker container prune
+            # docker image prune -f
+            # docker container prune
             cd /home/db
             docker-compose up -d
             cd /home/server
