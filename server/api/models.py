@@ -165,6 +165,9 @@ class Poll(models.Model):
         
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):
+        if self.can_cancel_vote == False:
+            return False
+
         if not user_profile:
             return False
         

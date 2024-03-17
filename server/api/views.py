@@ -651,6 +651,16 @@ def poll_voting(request):
                 raise MissingFieldException(field_name='answers')
             
             answers = process_answers(answers, poll, my_profile.user_id)
+            questions = poll.questions.filter(answer_options__answers__profile=my_profile)
+            previous_answers = PollAnswer.objects.filter(
+                Q(question__in=questions) &
+                Q(profile=my_profile)
+            )
+
+            # Удаляем все найденные ответы
+            print(previous_answers)
+            previous_answers.delete()
+
 
             serializer = PollAnswerSerializer(data=answers, many=True, context={'poll': poll})
             serializer.is_valid(raise_exception=True)
@@ -671,7 +681,7 @@ def poll_voting(request):
                     'total': total,
                     'correct': correct,
                     'wrong': total - correct,
-                    'percentage': round(float(correct + total), 2) * 100,
+                    'percentage': round(float(correct / total), 2) * 100,
                 }
                         
 

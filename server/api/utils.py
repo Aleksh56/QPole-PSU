@@ -100,7 +100,6 @@ def process_answers(answers, poll, my_profile_id):
         question_id = answer['question']
         
         # Проверяем, был ли уже такой вопрос в списке ответов
-
         if not poll.has_multiple_choices:
             if question_id not in seen_questions:   
                 answer['profile'] = my_profile_id
