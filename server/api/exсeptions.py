@@ -108,3 +108,16 @@ class WrongPasswordException(APIException):
     def __str__(self):
         return self.detail
     
+
+class PollAnsweringException(APIException):
+    status_code = 400
+    default_code = 'poll_answering'
+
+    def __init__(self, detail=None):
+        if not detail:
+            detail = f"Ошибка при ответе на опрос"
+        self.detail = detail
+
+    def __str__(self):
+        return self.detail
+    

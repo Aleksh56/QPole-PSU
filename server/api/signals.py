@@ -25,5 +25,6 @@ def poll_questions_post_delete_handler(sender, instance, **kwargs):
 def options_anwsers_post_delete_handler(sender, instance, **kwargs):
     answers = instance.answers.all()
     instance.answers.all().delete()
+    print(answers)
     answers.delete()
     

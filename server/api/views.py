@@ -634,7 +634,7 @@ def poll_voting(request):
         elif request.method == 'POST':
             data = request.data
 
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
            
@@ -650,10 +650,7 @@ def poll_voting(request):
             if not answers:
                 raise MissingFieldException(field_name='answers')
             
-            try:
-                answers = process_answers(answers, poll, my_profile.user_id)
-            except ValueError as ex:
-                return Response({'message': f"{ex}"}, status=status.HTTP_400_BAD_REQUEST)
+            answers = process_answers(answers, poll, my_profile.user_id)
 
             serializer = PollAnswerSerializer(data=answers, many=True, context={'poll': poll})
             serializer.is_valid(raise_exception=True)
@@ -674,7 +671,7 @@ def poll_voting(request):
                     'total': total,
                     'correct': correct,
                     'wrong': total - correct,
-                    'percentage': round(float(correct / total), 2) * 100,
+                    'percentage': round(float(correct + total), 2) * 100,
                 }
                         
 
@@ -689,7 +686,7 @@ def poll_voting(request):
         elif request.method == 'PATCH':
             data = request.data
 
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
            
@@ -756,7 +753,7 @@ def poll_voting(request):
         return Response({'message':f"{api_exception}"}, api_exception.status_code)
 
     except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 
@@ -817,3 +814,41 @@ def poll(request, request_type=None):
         
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def my_poll_votes(request):
+    try:
+        current_user = request.user
+        my_profile = Profile.objects.filter(user=current_user).first()
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingFieldException(field_name='poll_id')
+
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
+                raise ObjectNotFoundException('Poll')
+
+            my_answers = poll.objects.filter(profile=my_profile)
+            my_answered_polls = Poll.objects.filter(
+                questions__answer_options__answers__in=my_answers
+            ).distinct()
+
+            serializer = PollSerializer(my_answered_polls, many=True)
+            return Response(serializer.data)
+
+
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+   
+

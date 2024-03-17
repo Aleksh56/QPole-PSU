@@ -53,8 +53,8 @@ class PollType(models.Model):
 
 class PollAnswer(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    answer_option = models.ForeignKey('AnswerOption', on_delete=models.DO_NOTHING, null=True, blank=True)
-    question = models.ForeignKey('PollQuestion', on_delete=models.DO_NOTHING, null=True, blank=True)
+    answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE, null=True, blank=True)
+    question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE, null=True, blank=True)
     text = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
 
@@ -69,7 +69,7 @@ class PollAnswer(models.Model):
 class AnswerOption(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото варианта ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
-    answers = models.ManyToManyField(PollAnswer, related_name='answeroption_pollanswers', blank=True, null=True)
+    answers = models.ManyToManyField(PollAnswer, related_name='answeroption', blank=True, null=True)
 
     is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
     is_text_response = models.BooleanField(default=True, null=True)    # текст ли как ответ
@@ -104,7 +104,7 @@ class PollQuestion(models.Model):
     answer_options = models.ManyToManyField(AnswerOption, related_name='pollquestion_answeroptions', blank=True, null=True)
 
     has_correct_answer = models.BooleanField(default=None, null=True)   # есть ли верный ответ
-    has_multiple_choices = models.BooleanField(default=False)   # есить ли множенственный выбор
+    has_multiple_choices = models.BooleanField(default=False)   # есть ли множенственный выбор
     # points_if_correct = models.DecimalField(max_digits=10, decimal_places=2) # очки за правильный ответ
     is_free = models.BooleanField(default=False, null=True)   # свободная ли форма ответа
     is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
