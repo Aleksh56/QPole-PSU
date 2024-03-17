@@ -5,6 +5,7 @@ import IntegrationIcon from '@mui/icons-material/SettingsEthernet';
 import PublishIcon from '@mui/icons-material/Public';
 import PoleMainSettingsPage from '../../Pole/PoleMainSettings';
 import PoleQuestionsPage from '../../Pole/PoleQuestions';
+import PollResultsPage from '../../Pole/PollResults';
 
 export const poleNavigationButtonsData = [
   {
@@ -13,7 +14,13 @@ export const poleNavigationButtonsData = [
     page: 'main',
     component: PoleMainSettingsPage,
   },
-  { icon: ResultsIcon, label: 'Результаты', page: 'results', component: '2', disabled: true },
+  {
+    icon: ResultsIcon,
+    label: 'Результаты',
+    page: 'results',
+    component: PollResultsPage,
+    disabled: false,
+  },
   { icon: QuestionsIcon, label: 'Вопросы', page: 'questions', component: PoleQuestionsPage },
   {
     icon: IntegrationIcon,

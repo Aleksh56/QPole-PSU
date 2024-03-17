@@ -21,7 +21,6 @@ const AppPageRoutes = () => {
         >
           <Route index element={<AppPage />} />
           <Route path="polls-archive" element={<PolesArchivePage />} />
-          <Route path="tests/stats/:id/*" element={'stats'} />
           <Route path="tests/:id/*" element={<PolePage />} />
         </Route>
 

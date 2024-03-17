@@ -22,7 +22,7 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
           />
         ))}
       </Stack>
-      <IconButton onClick={() => navigate(`/app/tests/stats/${id}`)}>
+      <IconButton onClick={() => navigate(`/app`)}>
         <CloseIcon />
       </IconButton>
     </StyledNavContainer>

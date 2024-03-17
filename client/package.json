@@ -16,6 +16,7 @@
     "@hapi/inert": "^7.1.0",
     "@mui/icons-material": "^5.15.5",
     "@mui/material": "^5.15.5",
+    "@mui/x-charts": "^6.19.5",
     "axios": "^1.6.5",
     "effector": "^23.2.0",
     "effector-react": "^23.2.0",
