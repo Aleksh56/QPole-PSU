@@ -107,6 +107,7 @@ export const pollTuningSettings = [
         defaultChecked: false,
       },
       { id: 'is_anonymous', label: 'Анонимное голосование', defaultChecked: false },
+      { id: 'has_multiple_choices', label: 'Множественный выбор в вопросе', defaultChecked: false },
     ],
   },
   {

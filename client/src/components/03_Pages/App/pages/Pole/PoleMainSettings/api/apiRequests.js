@@ -18,7 +18,7 @@ export const changePoleData = async (field, value, id) => {
       { poll_id: id, [field]: value },
       {
         headers: {
-          Authorization: `Token ${localStorage.getItem('auth_token') ?? ''}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
           'content-type': 'multipart/form-data',
         },
       }

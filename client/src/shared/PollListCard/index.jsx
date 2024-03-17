@@ -27,9 +27,12 @@ const PollListCard = ({ item, isAuthenticated }) => {
           <CardButton
             disabled={!isAuthenticated || item.has_user_participated_in}
             isAuthenticated={isAuthenticated}
+            participated={item.has_user_participated_in}
             onClick={() => handleConductPoll()}
           >
-            Пройти опрос
+            {!isAuthenticated || item.has_user_participated_in
+              ? 'Посмотреть результаты'
+              : 'Пройти опрос'}
           </CardButton>
         </CardActions>
       </CardContentWrapper>

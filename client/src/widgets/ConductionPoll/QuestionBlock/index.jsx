@@ -1,14 +1,47 @@
-import React, { useState } from 'react';
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
-import { updateAnswer } from '@/components/03_Pages/Polls/ConductionPoll/store/answer-store';
+import React, { useEffect, useState } from 'react';
+import {
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Checkbox,
+} from '@mui/material';
+import {
+  updateAnswer,
+  updateMultipleAnswer,
+} from '@/components/03_Pages/Polls/ConductionPoll/store/answer-store';
+import { shuffleArray } from '@/utils/js/shuffleArray';
 
-const QuestionBlock = ({ question }) => {
-  const [value, setValue] = useState('');
+const QuestionBlock = ({ question, isMixed }) => {
+  const [selectedValue, setSelectedValue] = useState('');
+  const [selectedValues, setSelectedValues] = useState([]);
+  const [options, setOptions] = useState(question.answer_options ?? []);
+
+  useEffect(() => {
+    if (isMixed) {
+      setOptions(shuffleArray(question.answer_options));
+    }
+  }, [question]);
 
   const handleChange = (event) => {
-    console.log(event);
-    setValue(event.target.value);
-    updateAnswer({ answer_option: parseInt(event.target.value, 10), question: question.id });
+    const optionId = parseInt(event.target.value, 10);
+    const existingIndex = selectedValues.findIndex((id) => id === optionId);
+
+    if (question.has_multiple_choices) {
+      if (existingIndex !== -1) {
+        const newValues = [...selectedValues];
+        newValues.splice(existingIndex, 1);
+        setSelectedValues(newValues);
+        updateMultipleAnswer({ answer_option: optionId, question: question.id, selected: false });
+      } else {
+        setSelectedValues([...selectedValues, optionId]);
+        updateMultipleAnswer({ answer_option: optionId, question: question.id, selected: true });
+      }
+    } else {
+      setSelectedValue(optionId);
+      updateAnswer({ answer_option: optionId, question: question.id });
+    }
   };
 
   return (
@@ -20,14 +53,23 @@ const QuestionBlock = ({ question }) => {
       <RadioGroup
         aria-label={question.name}
         name="radio-buttons-group"
-        value={value}
+        value={selectedValues}
         onChange={(e) => handleChange(e)}
       >
-        {question?.answer_options?.map((option) => (
+        {options.map((option) => (
           <FormControlLabel
             key={option.id}
             value={option.id}
-            control={<Radio />}
+            control={
+              question.has_multiple_choices ? (
+                <Checkbox
+                  checked={selectedValues.includes(option.id)}
+                  onChange={(e) => handleChange(e)}
+                />
+              ) : (
+                <Radio checked={selectedValue === option.id} />
+              )
+            }
             label={option.name}
           />
         ))}

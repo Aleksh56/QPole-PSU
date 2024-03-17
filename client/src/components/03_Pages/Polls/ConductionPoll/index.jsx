@@ -9,6 +9,7 @@ import { useUnit } from 'effector-react';
 import { $answersStore, resetAnswers } from './store/answer-store';
 import { sendAnswersRequestFx } from './model/send-answers';
 import useAuth from '@/hooks/useAuth';
+import { shuffleArray } from '@/utils/js/shuffleArray';
 
 const ConductionPollPage = () => {
   const { id } = useParams();
@@ -25,6 +26,9 @@ const ConductionPollPage = () => {
         navigate('/polls');
         return;
       }
+      if (data.mix_questions) {
+        data.questions = shuffleArray(data.questions);
+      }
       setPollData(data);
     };
     pollDataRequest();
@@ -32,11 +36,10 @@ const ConductionPollPage = () => {
 
   const handleSubmit = async () => {
     const payload = {
-      poll_id: id,
       answers: answers,
     };
 
-    const response = await sendAnswersRequestFx(payload);
+    const response = await sendAnswersRequestFx({ answers, id });
     if (!Object.keys(response.result).length > 0) {
       navigate('/polls');
     }
@@ -48,7 +51,7 @@ const ConductionPollPage = () => {
       <ConductionWrapper>
         <ConductionHeader title={pollData.name} />
         {pollData?.questions?.map((item) => (
-          <QuestionBlock question={item} />
+          <QuestionBlock question={item} isMixed={pollData?.mix_options} />
         ))}
         <button onClick={() => handleSubmit()}>Send</button>
       </ConductionWrapper>

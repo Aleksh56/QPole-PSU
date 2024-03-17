@@ -13,6 +13,7 @@ export const CardContentWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   width: '50%',
+  height: Rem(150),
 }));
 
 export const CardTitle = styled(Typography)(() => ({
@@ -32,8 +33,8 @@ export const CardDescription = styled(Typography)(() => ({
   color: '#aaa',
 }));
 
-export const CardButton = styled(Button)(({ isAuthenticated }) => ({
-  border: `1px solid ${isAuthenticated ? colorConfig.primaryBlue : '#aaa'}`,
+export const CardButton = styled(Button)(({ isAuthenticated, participated }) => ({
+  border: `1px solid ${isAuthenticated && !participated ? colorConfig.primaryBlue : '#aaa'}`,
   borderRadius: Rem(20),
   color: colorConfig.primaryBlue,
   fontSize: Rem(13),

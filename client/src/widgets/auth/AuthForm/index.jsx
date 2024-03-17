@@ -4,9 +4,11 @@ import AuthFormHeading from '@/components/05_Features/AuthFormHeading';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from '@mui/material';
 import LabeledInput from '@/shared/AuthLabeledInput';
+import { useTranslation } from 'react-i18next';
 
 const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
   const authFormTheme = useTheme();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   return (
     <ThemeProvider theme={authFormTheme}>
@@ -45,7 +47,7 @@ const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = ()
               />
             )}
             <StyledConfirmButton disabled={false} type="submit" fullWidth variant="contained">
-              {isSignIn ? 'Войти' : 'Создать аккаунт'}
+              {isSignIn ? t('button.login') : t('button.signup')}
             </StyledConfirmButton>
           </StyledForm>
         </FormContainer>

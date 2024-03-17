@@ -11,10 +11,10 @@ const usePollSettings = (initialSettings) => {
   }, [initialSettings]);
 
   const handleSwitchChange = useCallback(
-    (s_field) => async (event) => {
-      const checked = event.target.checked;
-      await pathcPollSettingsFx({ id, checked, s_field });
-      setSettings((prev) => ({ ...prev, [s_field]: checked }));
+    (field) => async (event) => {
+      const value = event.target.checked;
+      pathcPollSettingsFx({ id, value, field });
+      setSettings((prev) => ({ ...prev, [field]: value }));
     },
     []
   );

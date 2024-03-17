@@ -47,7 +47,7 @@ const PasswordResetForm = () => {
       reset_token: resetAccountPasswordToken,
     });
     if (successReset.ok) {
-      setAuth(successReset.data.auth_token || '');
+      setAuth(successReset.data.access_token || '');
       navigate('/app');
     }
   };

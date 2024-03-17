@@ -3,9 +3,13 @@ import { StyledContainer, StyledHeader, StyledLogoLink } from './styled';
 import PrimaryButton from '@/shared/PrimaryButton';
 import HeaderNavigationOutput from '@/components/05_Features/HeaderNavOutput';
 import { Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import useAuth from '@/hooks/useAuth';
 
 const Header = ({ isMainPage = true }) => {
+  const { t } = useTranslation();
   const [isSticky, setIsSticky] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,8 +31,11 @@ const Header = ({ isMainPage = true }) => {
         <HeaderNavigationOutput
           children={
             <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}>
-              <PrimaryButton caption="Создать квиз" to="/signup" />
-              <PrimaryButton caption="Войти" to="/signin" />
+              <PrimaryButton caption={t('button.createQuiz')} to="/signup" />
+              <PrimaryButton
+                caption={isAuthenticated ? t('button.profile') : t('button.login')}
+                to="/signin"
+              />
             </Box>
           }
         />

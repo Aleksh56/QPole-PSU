@@ -15,13 +15,16 @@ import { useParams } from 'react-router-dom';
 import { DeleteOutline, DragIndicator } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import usePollType from '@/hooks/usePollType';
+import CustomSwitch from '@/shared/Switch';
+import { toggleMultipleFx } from './model/toggle-multiple';
 
 const PollQuestionEditForm = ({ question }) => {
   const { id } = useParams();
   const [editedQuestion, setEditedQuestion] = useState(question);
+  const [switchState, setSwitchState] = useState(false);
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
-  const { pollType } = usePollType(id);
+  const { pollType, isMultiple } = usePollType(id);
 
   useEffect(() => {
     const correctOption = question.answer_options.find((option) => option.is_correct);
@@ -44,6 +47,7 @@ const PollQuestionEditForm = ({ question }) => {
 
   useEffect(() => {
     setEditedQuestion(question);
+    setSwitchState(question.has_multiple_choices);
   }, [question]);
 
   const handleFieldChange = async (fieldName, value, q_id) => {
@@ -80,6 +84,12 @@ const PollQuestionEditForm = ({ question }) => {
     await changeOptionOrderRequest(id, question.id, items);
   };
 
+  const toggleMultipleChoice = (q_id) => {
+    const value = !switchState;
+    toggleMultipleFx({ id, q_id, value });
+    setSwitchState((prev) => !prev);
+  };
+
   return (
     <div>
       <PoleImageUpload onFileSelect={(e) => handleFieldChange('image', e)} />
@@ -90,6 +100,21 @@ const PollQuestionEditForm = ({ question }) => {
         handleChange={(e) => handleFieldChange('name', e, question.id)}
       />
       <Divider style={{ margin: '20px 0' }} />
+      {isMultiple && (
+        <>
+          <FormControlLabel
+            control={
+              <CustomSwitch
+                focusVisibleClassName={'.Mui-focusVisible'}
+                onChange={() => toggleMultipleChoice(question.id)}
+                checked={switchState}
+              />
+            }
+            label="Множественный выбор"
+          />
+          <Divider style={{ margin: '20px 0' }} />
+        </>
+      )}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="options">
           {(provided) => (

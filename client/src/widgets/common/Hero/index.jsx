@@ -11,9 +11,11 @@ import {
 } from './styled';
 import { ThemeProvider, useTheme } from '@mui/material';
 import SurveyImage from '@assets/survey.svg';
+import { useTranslation } from 'react-i18next';
 
 const Hero = () => {
   const muiTheme = useTheme();
+  const { t } = useTranslation();
   return (
     <>
       <Header />
@@ -30,7 +32,7 @@ const Hero = () => {
                 Бесплатно соберите ответы коллег, клиентов или потенциальной аудитории всего за пару
                 кликов!
               </StyledHeroTextSubHeading>
-              <SecondaryButton caption="Создать бесплатно" />
+              <SecondaryButton caption={t('button.createForFree')} />
             </StyledHeroTextWrapper>
             <StyledHeroImage src={SurveyImage} alt="Hero Image" />
           </StyledHero>
