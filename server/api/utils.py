@@ -78,6 +78,7 @@ def process_answers(answers, poll, my_profile_id):
     poll_questions_count = len(poll.questions.all())
     answered_questions_count = []
     unique_answers = []
+    unique_answer_options = []
 
     for answer in answers:
         question_id = answer.get('question', None)
@@ -98,6 +99,7 @@ def process_answers(answers, poll, my_profile_id):
         
 
         question_id = answer['question']
+        answer_option_id = answer['answer_option']
         
         # Проверяем, был ли уже такой вопрос в списке ответов
         if not poll.has_multiple_choices:
@@ -105,17 +107,22 @@ def process_answers(answers, poll, my_profile_id):
                 answer['profile'] = my_profile_id
                 unique_answers.append(answer)
                 seen_questions.append(question_id)
+                unique_answer_options.append(answer_option_id)
             else:
                 raise PollAnsweringException(detail=f"Дано два ответа на один вопрос: №{answer['question']}")
         else:
             answer['profile'] = my_profile_id
             unique_answers.append(answer)
             seen_questions.append(question_id)
+            unique_answer_options.append(answer_option_id)
 
             
     answered_questions_count = len(answered_questions_count)
     if answered_questions_count < poll_questions_count:
         raise PollAnsweringException(detail=f"Количество ответов меньше количества вопросов: {answered_questions_count} vs {poll_questions_count}")
+    
+    if not unique_answer_options == list(set(unique_answer_options)):
+        raise PollAnsweringException(detail=f"Один вариант ответа был выбран несколько раз")
     
     return unique_answers
 

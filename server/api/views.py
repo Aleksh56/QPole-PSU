@@ -178,6 +178,7 @@ def my_poll(request, request_type=None):
         elif request.method == 'PUT':
             data = request.data
 
+            request_type = request.GET.get('request_type', None)
             if not request_type:
                 raise MissingFieldException(field_name='request_type')
             
@@ -264,8 +265,8 @@ def my_poll(request, request_type=None):
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
-def my_poll_question(request, request_type=None):
-    try:
+def my_poll_question(request):
+    # try:
         current_user = request.user
 
         if request.method == 'GET':
@@ -371,6 +372,7 @@ def my_poll_question(request, request_type=None):
             if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
             
+            request_type = request.GET.get('request_type', None)
             if not request_type:
                 raise MissingFieldException(field_name='request_type')
             
@@ -406,11 +408,11 @@ def my_poll_question(request, request_type=None):
 
 
 
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception}"}, api_exception.status_code)
     
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # except Exception as ex:
+    #     return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 
@@ -846,7 +848,7 @@ def my_poll_votes(request):
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-            my_answers = poll.objects.filter(profile=my_profile)
+            my_answers = PollAnswer.objects.filter(profile=my_profile)
             my_answered_polls = Poll.objects.filter(
                 questions__answer_options__answers__in=my_answers
             ).distinct()
