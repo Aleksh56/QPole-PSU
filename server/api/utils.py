@@ -74,14 +74,14 @@ def clone_question(question, poll):
 
 
 def process_answers(answers, poll, my_profile_id):
-    seen_questions = set()
+    seen_questions = []
     poll_questions_count = len(poll.questions.all())
-    answered_questions_count = set()
+    answered_questions_count = []
     unique_answers = []
 
     for answer in answers:
         question_id = answer.get('question', None)
-        answered_questions_count.add(question_id)
+        answered_questions_count.append(question_id)
         if not question_id:
             raise MissingFieldException(field_name='question')
         
@@ -100,21 +100,24 @@ def process_answers(answers, poll, my_profile_id):
         question_id = answer['question']
         
         # Проверяем, был ли уже такой вопрос в списке ответов
-        if question_id not in seen_questions:
-            if poll.has_multiple_choices:
+
+        if not poll.has_multiple_choices:
+            if question_id not in seen_questions:   
                 answer['profile'] = my_profile_id
                 unique_answers.append(answer)
-                seen_questions.add(question_id)
+                seen_questions.append(question_id)
             else:
                 raise PollAnsweringException(detail=f"Дано два ответа на один вопрос: №{answer['question']}")
+        else:
+            answer['profile'] = my_profile_id
+            unique_answers.append(answer)
+            seen_questions.append(question_id)
+
             
     answered_questions_count = len(answered_questions_count)
-    if not answered_questions_count == poll_questions_count:
-        raise PollAnsweringException(detail=f"Количество ответов не совпадает с количеством вопросов: {answered_questions_count} vs {poll_questions_count}")
+    if answered_questions_count < poll_questions_count:
+        raise PollAnsweringException(detail=f"Количество ответов меньше количества вопросов: {answered_questions_count} vs {poll_questions_count}")
     
-    print(unique_answers)
-    print(answered_questions_count)
-    print(poll_questions_count)
     return unique_answers
 
 
