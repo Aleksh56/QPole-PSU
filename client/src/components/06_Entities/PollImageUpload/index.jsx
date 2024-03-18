@@ -3,6 +3,7 @@ import { InvisibleInput, StyledImageButton } from './styled';
 import { Box, IconButton } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
+import config from '@/config';
 
 const BASE_IMAGE_URL = import.meta.env.VITE_BASE_URL || '';
 
@@ -42,7 +43,11 @@ const PollImageUpload = ({ image = '', onFileSelect }) => {
     >
       {preview ? (
         <>
-          <img src={preview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px' }} />
+          <img
+            src={config.imageApiUrl + preview}
+            alt="Preview"
+            style={{ maxWidth: '100%', maxHeight: '200px' }}
+          />
           <IconButton onClick={handleFileClear} color="error">
             <DeleteIcon />
           </IconButton>

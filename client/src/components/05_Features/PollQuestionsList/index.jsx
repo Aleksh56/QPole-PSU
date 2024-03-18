@@ -19,7 +19,6 @@ const PollQuestionsList = ({
   const handleCopyQuestion = async (e, q_id) => {
     e.stopPropagation();
     const requestData = {
-      request_type: 'copy_question',
       poll_id: id,
       question_id: q_id,
     };

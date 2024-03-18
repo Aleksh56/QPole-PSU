@@ -34,7 +34,7 @@ const Header = ({ isMainPage = true }) => {
               <PrimaryButton caption={t('button.createQuiz')} to="/signup" />
               <PrimaryButton
                 caption={isAuthenticated ? t('button.profile') : t('button.login')}
-                to="/signin"
+                to={isAuthenticated ? '/app' : '/signin'}
               />
             </Box>
           }
