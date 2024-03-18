@@ -170,7 +170,7 @@ def my_poll(request, request_type=None):
             serializer = PollSerializer(instance=poll, data=data, partial=True)
 
             if serializer.is_valid():
-                serializer.save(user=current_user)
+                serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
@@ -334,7 +334,7 @@ def my_poll_question(request):
             
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
             if serializer.is_valid():
-                serializer.save(user=current_user)
+                serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -522,7 +522,7 @@ def my_poll_question_option(request):
             serializer = PollQuestionOptionSerializer(instance=question_option, data=data, partial=True)
 
             if serializer.is_valid():
-                serializer.save(user=current_user)
+                serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -664,17 +664,16 @@ def poll_voting(request):
             )
 
             # Удаляем все найденные ответы
-            print(previous_answers)
             previous_answers.delete()
 
 
             serializer = PollAnswerSerializer(data=answers, many=True, context={'poll': poll})
             if serializer.is_valid():
-                serializer.save(user=current_user)
+                poll_answers = serializer.save()
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-            poll_answers = serializer.save(profile=my_profile)
+            
             serializer = PollAnswerSerializer(poll_answers, many=True)
 
             result = {}
