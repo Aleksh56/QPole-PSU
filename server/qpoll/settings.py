@@ -158,12 +158,15 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# пути до всех медиа и статических файлов
+STATIC_URL = 'static/'   
+MEDIA_URL = 'media/'     
+STATIC_ROOT = '/vol/static'
+MEDIA_ROOT = '/vol/media'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  
+]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
