@@ -1,5 +1,4 @@
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -93,7 +92,7 @@ def my_profile(request):
 def my_poll(request, request_type=None):
     try:
         current_user = request.user
-        my_profile = Profile.objects.get(user=current_user)
+        my_profile = Profile.objects.filter(user=current_user).first()
         
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
@@ -133,30 +132,29 @@ def my_poll(request, request_type=None):
                 return Response(serializer.data)
 
         elif request.method == 'POST':
-            data = request.data
-
+            data = request.data.copy()
             poll_id = data.get('poll_id', None)
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
+            data['poll_id'] = poll_id 
             
             poll_type_name = data.get('poll_type', None)
             if not poll_type_name:
                 raise MissingFieldException(field_name='poll_type')
-            
             poll_type = PollType.objects.filter(name=poll_type_name).first()
             if not poll_type:
                 raise ObjectNotFoundException(model='PollType')
+            
+            data['poll_type'] = poll_type.id
+            data['author'] = my_profile
 
-            poll = Poll(
-                poll_id=poll_id,
-                author=my_profile,
-                poll_type=poll_type,
-                has_multiple_choices=poll_type.has_multiple_choices,
-                has_correct_answer=poll_type.has_correct_answer,
-            )
 
-            poll.save()
-            return Response({'message':"Опрос успешно проинициализирован"}, status=status.HTTP_201_CREATED)
+            serializer = CreatePollSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
             data = request.data
@@ -169,13 +167,15 @@ def my_poll(request, request_type=None):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
     
-            serializer = UpdatePollSerializer(instance=poll, data=data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = PollSerializer(instance=poll, data=data, partial=True)
 
-        elif request.method == 'PUT':
+            if serializer.is_valid():
+                serializer.save(user=current_user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+
+        elif request.method == 'PUT':   
             data = request.data
 
             request_type = request.GET.get('request_type', None)
@@ -266,7 +266,7 @@ def my_poll(request, request_type=None):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_question(request):
-    # try:
+    try:
         current_user = request.user
 
         if request.method == 'GET':
@@ -333,10 +333,11 @@ def my_poll_question(request):
                 raise ObjectNotFoundException(model='PollQuestion')
             
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if serializer.is_valid():
+                serializer.save(user=current_user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             data = request.data
@@ -408,11 +409,11 @@ def my_poll_question(request):
 
 
 
-    # except APIException as api_exception:
-    #     return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
     
-    # except Exception as ex:
-    #     return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 
@@ -519,10 +520,13 @@ def my_poll_question_option(request):
                         option.save()
 
             serializer = PollQuestionOptionSerializer(instance=question_option, data=data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            
-            return Response(serializer.data, status=status.HTTP_200_OK)
+
+            if serializer.is_valid():
+                serializer.save(user=current_user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
         elif request.method == 'DELETE':
             
@@ -665,7 +669,10 @@ def poll_voting(request):
 
 
             serializer = PollAnswerSerializer(data=answers, many=True, context={'poll': poll})
-            serializer.is_valid(raise_exception=True)
+            if serializer.is_valid():
+                serializer.save(user=current_user)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
             poll_answers = serializer.save(profile=my_profile)
             serializer = PollAnswerSerializer(poll_answers, many=True)

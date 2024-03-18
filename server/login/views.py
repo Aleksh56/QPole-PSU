@@ -1,18 +1,13 @@
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
-from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.core.cache import cache
 from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import APIException, AuthenticationFailed
+from rest_framework.exceptions import APIException
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import serializers
 
