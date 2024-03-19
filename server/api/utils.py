@@ -121,8 +121,8 @@ def process_answers(answers, poll, my_profile_id):
     if answered_questions_count < poll_questions_count:
         raise PollAnsweringException(detail=f"Количество ответов меньше количества вопросов: {answered_questions_count} vs {poll_questions_count}")
     
-    if not unique_answer_options == list(set(unique_answer_options)):
-        raise PollAnsweringException(detail=f"Один вариант ответа был выбран несколько раз")
+    # if not unique_answer_options == list(set(unique_answer_options)):
+    #     raise PollAnsweringException(detail=f"Один вариант ответа был выбран несколько раз")
     
     return unique_answers
 
