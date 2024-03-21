@@ -35,6 +35,9 @@ export const StyledHero = styled(Box)(({ theme }) => ({
     ...heroBaseStyles,
     gridTemplateColumns: '1fr 1fr',
   },
+  '@media (max-width: 899px)': {
+    paddingTop: Rem(70),
+  },
 }));
 
 export const StyledHeroTextWrapper = styled(Box)(({ theme }) => ({
@@ -76,4 +79,11 @@ export const StyledHeroImage = styled('img')(() => ({
   maxWidth: '100%',
   height: 'auto',
   justifySelf: 'end',
+  '@media (max-width: 899px)': {
+    maxWidth: '90%',
+    justifySelf: 'center',
+  },
+  '@media (max-width: 600px)': {
+    maxWidth: '100%',
+  },
 }));

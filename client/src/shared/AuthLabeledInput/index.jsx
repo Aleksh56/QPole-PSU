@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyledPasswordWrapper } from './styled';
 import { TextField, Typography } from '@mui/material';
+import InputMask from 'react-input-mask';
 
 const LabeledInput = ({
   label = '',
@@ -11,7 +12,14 @@ const LabeledInput = ({
   value,
   handleChange,
   children,
+  errorMessage = '',
 }) => {
+  const [error, setError] = useState(!!errorMessage);
+
+  useEffect(() => {
+    setError(!!errorMessage);
+  }, [errorMessage]);
+
   return (
     <>
       <StyledPasswordWrapper>
@@ -20,6 +28,7 @@ const LabeledInput = ({
         </Typography>
         {children}
       </StyledPasswordWrapper>
+
       <TextField
         variant="outlined"
         margin="normal"
@@ -31,8 +40,10 @@ const LabeledInput = ({
         name={id}
         autoComplete={autoComplete}
         autoFocus
+        error={error}
         value={value}
-        onChange={(e) => handleChange && handleChange(e.target.value)}
+        onChange={(e) => handleChange(e)}
+        helperText={error ? errorMessage : ''}
       />
     </>
   );

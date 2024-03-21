@@ -74,7 +74,7 @@ const PasswordResetForm = () => {
                 autoComplete="email"
                 placeholder="example@mail.ru"
                 value={resetAccountEmail}
-                handleChange={setResetAccountEmail}
+                handleChange={(e) => setResetAccountEmail(e.target.value)}
               />
             )}
             {isEmailSubmitted && !isCodeSubmitted && (
@@ -85,7 +85,7 @@ const PasswordResetForm = () => {
                 autoComplete="one-time-code"
                 placeholder="000-000"
                 value={resetAccountCode}
-                handleChange={setResetAccountCode}
+                handleChange={(e) => setResetAccountCode(e.target.value)}
               />
             )}
             {isCodeSubmitted && (
@@ -96,7 +96,7 @@ const PasswordResetForm = () => {
                 autoComplete="new-password"
                 placeholder="Пароль"
                 value={resetAccountNewPassword}
-                handleChange={setResetAccountNewPassword}
+                handleChange={(e) => setResetAccountNewPassword(e.target.value)}
               />
             )}
 
