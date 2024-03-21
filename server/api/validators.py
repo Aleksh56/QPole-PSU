@@ -5,19 +5,30 @@ from math import ceil
 
 class BaseValidator:
 
-    def name(value):
-        if len(value) > 50:
-            raise ValidationError("Название должно содержать не более 50 символов.")
+    def name(value, chars=None):
+        if len(value) < 3:
+            raise ValidationError("Название должно содержать не менее 3 символов.")
+        if not chars:
+            if len(value) > 50:
+                raise ValidationError("Название должно содержать менее 50 символов.")
+        else:
+            if len(value) > chars:
+                raise ValidationError(f"Название должно содержать менее {chars} символов.")
         
-    def info(value):
+    def info(value, chars=None):
         if value:
-            if len(value) > 500:
-                raise ValidationError("Описание должно содержать не более 500 символов.")
+            if not chars:
+                if len(value) > 500:
+                    raise ValidationError("Описание должно содержать не более 500 символов.")
+            else:
+                if len(value) > chars:
+                    raise ValidationError("Описание должно содержать не более 500 символов.")
 
-    def description(value):
-        if value:
-            if len(value) > 1000:
-                raise ValidationError("Описание должно содержать не более 500 символов.")
+    def description(value, chars=None):
+        if value and not value == "":
+            if value and len(value) > 1000:
+                raise ValidationError("Описание должно содержать более 1000 символов.")
+
              
     def bolean(value):
         if not isinstance(value, bool):
@@ -77,11 +88,7 @@ class PollValidator(BaseValidator):
 
     def duration(value):
         pass
-        # hours = value.hour
-        # days = ceil(hours // 24)
-        # if days > 365:
-        #     raise ValidationError("Нельзя сделать опрос открытым более чем на год")
-
+        
 
 
 

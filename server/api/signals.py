@@ -4,6 +4,7 @@ from django.dispatch import receiver
 
 from .models import Poll, PollQuestion, AnswerOption
 
+import os
 
 @receiver(pre_delete, sender=Poll)
 def poll_post_delete_handler(sender, instance, **kwargs):
@@ -25,6 +26,20 @@ def poll_questions_post_delete_handler(sender, instance, **kwargs):
 def options_anwsers_post_delete_handler(sender, instance, **kwargs):
     answers = instance.answers.all()
     instance.answers.all().delete()
-    print(answers)
     answers.delete()
     
+
+@receiver(post_delete, sender=Poll)
+def poll_delete_handler(sender, instance, **kwargs):
+    if instance.image:
+        file_path = str(instance.image.path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
+@receiver(post_delete, sender=PollQuestion)
+def poll_question_delete_handler(sender, instance, **kwargs):
+    if instance.image:
+        file_path = str(instance.image.path)
+        if os.path.exists(file_path):
+            os.remove(file_path)

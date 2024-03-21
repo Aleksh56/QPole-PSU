@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, Prefetch
+from django.db.models import Q
 from django.db import transaction
 from django.contrib.auth.models import AnonymousUser
 
@@ -224,7 +224,9 @@ def my_poll(request, request_type=None):
                 return Response(serializer.data)
 
             elif request_type == 'delete_image':
-                image_path = poll.image.path
+                image_path = None
+                if poll.image:
+                    image_path = poll.image.path
                 poll.image = None
                 poll.save()
                 if os.path.exists(image_path):
@@ -419,9 +421,13 @@ def my_poll_question(request):
                 return Response(serializer.data)
 
             elif request_type == 'delete_image':
+                image_path = None
+                if poll_question.image:
+                    image_path = poll_question.image.path
                 poll_question.image = None
                 poll_question.save()
-
+                if os.path.exists(image_path):
+                    os.remove(image_path)
                 serializer = PollQuestionSerializer(poll_question)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -490,13 +496,12 @@ def my_poll_question_option(request):
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
 
-            with transaction.atomic():
-                question_option = AnswerOption(
-                    name="",
-                    image=None,
-                )
-                question_option.save()
-                poll_question.answer_options.add(question_option)
+            question_option = AnswerOption(
+                name="",
+                image=None,
+            )
+            question_option.save()
+            poll_question.answer_options.add(question_option)
 
             return Response({'message':f"Вариант ответа в вопросе успешно проинициализирован"}, status=status.HTTP_201_CREATED)
 
@@ -543,7 +548,6 @@ def my_poll_question_option(request):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
         elif request.method == 'DELETE':
             
@@ -794,7 +798,7 @@ def poll_voting(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def poll(request, request_type=None):
+def poll(request):
     try:
         current_user = request.user
         if isinstance(current_user, AnonymousUser):

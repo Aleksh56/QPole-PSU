@@ -1,12 +1,10 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from datetime import timedelta
+from functools import partial
 
 from .validators import *
 from .models import *
 from .exсeptions import *
-from .utils import check_file
 
 class MiniUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -226,64 +224,10 @@ class PollQuestionSerializer(serializers.ModelSerializer):
 
 
 class PollQuestionOptionSerializer(serializers.ModelSerializer):
-    
+    name = serializers.CharField(validators=[partial(BaseValidator.name, chars=100)], required=False)
+    info = serializers.CharField(validators=[partial(BaseValidator.info, chars=500)], required=False)
+    image = serializers.ImageField(validators=[BaseValidator.image], required=False)
 
-    def set_name(self, value):
-        if value is not None and not isinstance(value, str):
-            raise WrongFieldTypeException(field_name='name', expected_type='str или None')
-        
-        if len(value) > 100:
-            raise InvalidFieldException(detail="Поле 'name' не может быть длинее 100 символов.")
-
-        self.name = value
-    
-    def set_is_correct(self, value):
-        if value is not None and not isinstance(value, bool):
-            raise WrongFieldTypeException(field_name='is_correct', expected_type='bool или None')
-  
-        self.is_correct = value
-
-    def set_is_free_response(self, value):
-        if value is not None and not isinstance(value, bool):
-            raise WrongFieldTypeException(field_name='is_free_response', expected_type='bool или None')
-  
-        self.is_free_response = value
-
-    def set_is_text_response(self, value):
-        if value is not None and not isinstance(value, bool):
-            raise WrongFieldTypeException(field_name='is_text_response', expected_type='bool или None')
-  
-        self.is_text_response = value
-
-    def set_is_image_response(self, value):
-        if value is not None and not isinstance(value, bool):
-            raise WrongFieldTypeException(field_name='is_image_response', expected_type='bool или None')
-  
-        self.is_image_response = value
-
-
-    def set_image(self, image):
-        if image == '' or image is None:
-            self.image = None
-            return
-        
-        if not isinstance(image, (InMemoryUploadedFile)):
-            raise WrongFieldTypeException(field_name='image', expected_type='InMemoryUploadedFile')
-        is_img_ok, details = check_file(image)
-        if is_img_ok:
-            self.image = image
-        else:
-            raise InvalidFieldException(detail=f"Файл не прошел проверку: {details}") 
-        
-
-    def is_valid(self, raise_exception=False):
-        for attr, value in self.initial_data.items():
-            setter_name = f"set_{attr}"
-            if hasattr(self, setter_name):
-                getattr(self, setter_name)(value)
-
-        return super().is_valid(raise_exception=raise_exception)
-    
     class Meta:
         model = AnswerOption
         fields = '__all__'  

@@ -22,6 +22,7 @@ from api.utils import validation_error_wrapper
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@transaction.atomic
 def register(request):
     try:
         data = request.data
@@ -135,6 +136,7 @@ def logout(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def change_password(request):
     try:
         user = request.user
