@@ -6,6 +6,8 @@ import { deletePollRequest } from './api/apiRequest';
 import { closePollFx } from './model/close-poll';
 import { duplicatePollFx } from './model/duplicate-poll';
 
+const BASE_IMAGE_URL = 'http://89.111.155.6';
+
 const AppPoleCard = React.memo(({ pollData, fetchData }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -42,7 +44,11 @@ const AppPoleCard = React.memo(({ pollData, fetchData }) => {
 
   return (
     <StyledCard>
-      <CardMedia sx={{ height: '140px' }} image={pollData.image ?? ''} title="Poll Image">
+      <CardMedia
+        sx={{ height: '140px', backgroundSize: 'contain' }}
+        image={BASE_IMAGE_URL + pollData.image ?? ''}
+        title="Poll Image"
+      >
         <StyledChip label={pollData.poll_type.name ?? ''} />
         <IconButton
           sx={{ position: 'absolute', right: 8, top: 8 }}

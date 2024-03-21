@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 const BASE_IMAGE_URL = 'http://89.111.155.6';
 
-const PollImageUpload = ({ image = '', onFileSelect }) => {
+const PollImageUpload = ({ image = '', onFileSelect, handleDelete }) => {
   const [preview, setPreview] = useState('');
 
   useEffect(() => {
@@ -24,12 +24,12 @@ const PollImageUpload = ({ image = '', onFileSelect }) => {
         setPreview(reader.result);
         onFileSelect(file);
       };
-      console.log(reader);
       reader.readAsDataURL(file);
     }
   };
 
   const handleFileClear = () => {
+    handleDelete();
     setPreview('');
     if (onFileClear) {
       onFileClear();

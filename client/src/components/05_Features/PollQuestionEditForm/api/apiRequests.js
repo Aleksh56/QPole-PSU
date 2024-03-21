@@ -1,4 +1,5 @@
 import { handleRequest } from '@/api/api';
+import axios from 'axios';
 
 export const handleChangeAnswerRequest = async (id, q_id, opt_id) => {
   return handleRequest('patch', `/api/my_poll_question_option/`, {
@@ -10,9 +11,21 @@ export const handleChangeAnswerRequest = async (id, q_id, opt_id) => {
 };
 
 export const handleChangeQuestionInfoRequest = async (fieldName, value, id, q_id) => {
-  return handleRequest('patch', `/api/my_poll_question/`, {
-    poll_id: id,
-    poll_question_id: q_id,
+  if (fieldName === 'image') {
+    axios.patch(
+      `http://89.111.155.6/api/my_poll_question/?poll_id=${id}&poll_question_id=${q_id}`,
+      { [fieldName]: value },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
+          'content-type': 'multipart/form-data',
+        },
+      }
+    );
+    return;
+  }
+
+  return handleRequest('patch', `/api/my_poll_question/?poll_id=${id}&poll_question_id=${q_id}`, {
     [fieldName]: value,
   });
 };

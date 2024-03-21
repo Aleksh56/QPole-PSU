@@ -18,11 +18,7 @@ const PollQuestionsList = ({
 
   const handleCopyQuestion = async (e, q_id) => {
     e.stopPropagation();
-    const requestData = {
-      poll_id: id,
-      question_id: q_id,
-    };
-    const newQue = await copyQuestionFx(requestData);
+    const newQue = await copyQuestionFx({ id, q_id });
     setQuestions((prev) => [...prev, newQue]);
   };
 

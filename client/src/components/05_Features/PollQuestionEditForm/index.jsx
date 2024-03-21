@@ -17,6 +17,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import usePollType from '@/hooks/usePollType';
 import CustomSwitch from '@/shared/Switch';
 import { toggleMultipleFx } from './model/toggle-multiple';
+import { deleteImageFx } from './model/delete-image';
 
 const PollQuestionEditForm = ({ question }) => {
   const { id } = useParams();
@@ -90,9 +91,17 @@ const PollQuestionEditForm = ({ question }) => {
     setSwitchState((prev) => !prev);
   };
 
+  const handleImageDelete = (q_id) => {
+    deleteImageFx({ id, q_id });
+  };
+
   return (
     <div>
-      <PoleImageUpload onFileSelect={(e) => handleFieldChange('image', e)} />
+      <PoleImageUpload
+        image={question?.image}
+        onFileSelect={(e) => handleFieldChange('image', e, question.id)}
+        handleDelete={() => handleImageDelete(question.id)}
+      />
       <InvisibleLabeledField
         label="Заголовок вопроса"
         placeholder="Введите заголовок"

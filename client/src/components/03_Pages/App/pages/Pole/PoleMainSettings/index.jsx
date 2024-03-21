@@ -12,6 +12,7 @@ import { poleTabsButtonsData } from './data/PoleTabsButtonsData';
 import { StyledFormControlLabel } from '@/constants/styles';
 import { useLocation, useParams } from 'react-router-dom';
 import { changePoleData, getInfoAboutPole } from './api/apiRequests';
+import { deleteImageFx } from './model/image-delete';
 
 const PoleMainSettingsPage = () => {
   const { id } = useParams();
@@ -21,23 +22,24 @@ const PoleMainSettingsPage = () => {
   const location = useLocation();
   const isNewPole = location.state?.isNewPole;
 
+  const fetchPoleData = async () => {
+    const responseData = await getInfoAboutPole(id);
+    setPoleData(responseData.data);
+  };
+
   useEffect(() => {
-    const fetchPoleData = async () => {
-      const responseData = await getInfoAboutPole(id);
-      setPoleData(responseData.data);
-    };
     if (!isNewPole) {
       fetchPoleData();
     }
   }, [isNewPole]);
 
   const handleFieldChange = async (fieldName, value) => {
-    const response = changePoleData(fieldName, value, id);
-    console.log('Response - ', response.data);
-    setPoleData((prevData) => ({
-      ...prevData,
-      [fieldName]: value,
-    }));
+    changePoleData(fieldName, value, id);
+    fetchPoleData();
+  };
+
+  const handleImageDelete = () => {
+    deleteImageFx({ id });
   };
 
   return (
@@ -47,6 +49,7 @@ const PoleMainSettingsPage = () => {
           <PoleImageUpload
             image={poleData?.image}
             onFileSelect={(e) => handleFieldChange('image', e)}
+            handleDelete={handleImageDelete}
           />
           <InvisibleLabeledField
             label="Название теста"

@@ -3,6 +3,8 @@ import { CardMedia, CardContent, CardActions } from '@mui/material';
 import { CardButton, CardContentWrapper, CardDescription, CardTitle, CardWrapper } from './styled';
 import { useNavigate } from 'react-router-dom';
 
+const BASE_IMAGE_URL = 'http://89.111.155.6';
+
 const PollListCard = ({ item, isAuthenticated }) => {
   const navigate = useNavigate();
 
@@ -10,11 +12,9 @@ const PollListCard = ({ item, isAuthenticated }) => {
     navigate(`/conduct-poll/${item.poll_id}`);
   };
 
-  console.log(item);
-
   return (
     <CardWrapper>
-      <CardMedia component="img" sx={{ width: '50%' }} image="/path/to/your/image.jpg" />
+      <CardMedia component="img" sx={{ width: '50%' }} image={BASE_IMAGE_URL + item.image} />
       <CardContentWrapper>
         <CardContent sx={{ flexGrow: 1 }}>
           <CardTitle gutterBottom noWrap>
