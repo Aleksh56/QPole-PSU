@@ -384,12 +384,12 @@ def my_poll_question(request):
             if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            question_id = request.GET.get('question_id', None)
-            if not question_id:
-                raise MissingParameterException(field_name='question_id')
+            poll_question_id = request.GET.get('poll_question_id', None)
+            if not poll_question_id:
+                raise MissingParameterException(field_name='poll_question_id')
             
-            poll_question = PollQuestion.objects.filter(id=question_id).first()
-            if not question:
+            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            if not poll_question:
                 raise ObjectNotFoundException(model='Question')
             
             request_type = request.GET.get('request_type', None)
@@ -401,28 +401,20 @@ def my_poll_question(request):
 
                 questions_data = data['questions_data']
                 for question_number, question_data in enumerate(questions_data, start=1):
-                    question = PollQuestion.objects.filter(id=int(question_data['id'])).first()
-                    if not question:
-                        raise ObjectNotFoundException(model='AnswerOption')
+                    poll_question = my_poll.questions.filter(id=int(question_data['id'])).first()
+                    if not poll_question:
+                        raise ObjectNotFoundException(model='PollQuestion')
 
-                    question.order_id = question_number
+                    poll_question.order_id = question_number
 
-                    objects_to_update.append(question)
+                    objects_to_update.append(poll_question)
 
                 AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
 
                 return Response(status=status.HTTP_200_OK)
             
-            elif request_type == 'copy_question':
-                question_id = data.get('question_id', None)
-                if not question_id:
-                    raise MissingFieldException('question_id')
-                
-                question = PollQuestion.objects.filter(id=question_id).first()
-                if not question:
-                    raise ObjectNotFoundException(model='PollQuestion')
-                
-                cloned_question = clone_question(question, my_poll)
+            elif request_type == 'copy_question':               
+                cloned_question = clone_question(poll_question, my_poll)
                 serializer = PollQuestionSerializer(cloned_question)
                 return Response(serializer.data)
 
