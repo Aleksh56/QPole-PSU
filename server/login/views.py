@@ -216,6 +216,11 @@ def check_reset_code(request):
         if not reset_code:
             raise MissingFieldException(field_name='reset_code')
          
+        reset_code = str()
+        if not '-' in reset_code:
+            raise InvalidFieldException(field='reset_code')
+        reset_code = reset_code.replace('-', '')
+
         user_exists = User.objects.filter(email=email).exists()
         if not user_exists:
             raise ObjectNotFoundException(name=email, model=User)
