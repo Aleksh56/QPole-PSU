@@ -12,6 +12,8 @@ from .serializers import *
 from .models import *
 from .utils import *
 
+import os
+
 import logging
 logger = logging.getLogger('debug') 
 
@@ -222,9 +224,11 @@ def my_poll(request, request_type=None):
                 return Response(serializer.data)
 
             elif request_type == 'delete_image':
+                image_path = poll.image.path
                 poll.image = None
                 poll.save()
-
+                if os.path.exists(image_path):
+                    os.remove(image_path)
                 serializer = PollSerializer(poll)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -379,6 +383,14 @@ def my_poll_question(request):
             my_poll = Poll.objects.filter(poll_id=poll_id).first()
             if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
+            
+            question_id = request.GET.get('question_id', None)
+            if not question_id:
+                raise MissingParameterException(field_name='question_id')
+            
+            poll_question = PollQuestion.objects.filter(id=question_id).first()
+            if not question:
+                raise ObjectNotFoundException(model='Question')
             
             request_type = request.GET.get('request_type', None)
             if not request_type:
