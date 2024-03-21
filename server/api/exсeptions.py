@@ -6,13 +6,25 @@ class MissingFieldException(APIException):
 
     def __init__(self, field_name, detail=None):
         if detail is None:
-            detail = f"Поле '{field_name}' требуется передать в запросе."
+            detail = f"Поле '{field_name}' требуется передать в теле запроса."
         self.detail = detail
 
     def __str__(self):
         return self.detail
 
 
+class MissingParameterException(APIException):
+    status_code = 400
+    default_code = 'missing_parameter'
+
+    def __init__(self, field_name, detail=None):
+        if detail is None:
+            detail = f"Поле '{field_name}' требуется передать в параметрах запроса."
+        self.detail = detail
+
+    def __str__(self):
+        return self.detail
+    
 class ObjectNotFoundException(APIException):
     status_code = 404
     default_code = 'object_not_found'

@@ -159,9 +159,9 @@ def my_poll(request, request_type=None):
         elif request.method == 'PATCH':
             data = request.data
 
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
             poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
             if not poll:
@@ -180,7 +180,15 @@ def my_poll(request, request_type=None):
 
             request_type = request.GET.get('request_type', None)
             if not request_type:
-                raise MissingFieldException(field_name='request_type')
+                raise MissingParameterException(field_name='request_type')
+            
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+                
+            poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
             
             if request_type == 'change_order':
                 objects_to_update = []
@@ -204,14 +212,6 @@ def my_poll(request, request_type=None):
                 if not new_poll_id:
                     raise MissingFieldException(field_name='new_poll_id')
                 
-                poll_id = data.get('poll_id', None)
-                if not poll_id:
-                    raise MissingFieldException(field_name='poll_id')
-                
-                poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
-                if not poll:
-                    raise ObjectNotFoundException(model='Poll')
-        
                 poll_to_clone = Poll.objects.filter(poll_id=new_poll_id).first()
                 if poll_to_clone:
                     raise InvalidFieldException(detail='Данный poll_id уже занят.')
@@ -221,6 +221,13 @@ def my_poll(request, request_type=None):
                 serializer = PollSerializer(cloned_poll)
                 return Response(serializer.data)
 
+            elif request_type == 'delete_image':
+                poll.image = None
+                poll.save()
+
+                serializer = PollSerializer(poll)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
             else:
                 return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)
 
@@ -228,7 +235,7 @@ def my_poll(request, request_type=None):
             data = request.data
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
@@ -272,7 +279,7 @@ def my_poll_question(request):
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
 
             poll_question_id = request.GET.get('poll_question_id', None)
             my_poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
@@ -317,13 +324,13 @@ def my_poll_question(request):
         elif request.method == 'PATCH':
             data = request.data
 
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
-            poll_question_id = data.get('poll_question_id', None)
+            poll_question_id = request.GET.get('poll_question_id', None)
             if not poll_question_id:
-                raise MissingFieldException(field_name='poll_question_id')
+                raise MissingParameterException(field_name='poll_question_id')
             
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
@@ -344,11 +351,11 @@ def my_poll_question(request):
 
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
             poll_question_id = request.GET.get('poll_question_id', None)
             if not poll_question_id:
-                raise MissingFieldException(field_name='poll_question_id')
+                raise MissingParameterException(field_name='poll_question_id')
             
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
@@ -365,9 +372,9 @@ def my_poll_question(request):
         elif request.method == 'PUT':
             data = request.data
 
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
             my_poll = Poll.objects.filter(poll_id=poll_id).first()
             if not my_poll:
@@ -375,7 +382,7 @@ def my_poll_question(request):
             
             request_type = request.GET.get('request_type', None)
             if not request_type:
-                raise MissingFieldException(field_name='request_type')
+                raise MissingParameterException(field_name='request_type')
             
             if request_type == 'change_order':
                 objects_to_update = []
@@ -407,6 +414,12 @@ def my_poll_question(request):
                 serializer = PollQuestionSerializer(cloned_question)
                 return Response(serializer.data)
 
+            elif request_type == 'delete_image':
+                poll_question.image = None
+                poll_question.save()
+
+                serializer = PollQuestionSerializer(poll_question)
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
 
     except APIException as api_exception:
@@ -427,11 +440,11 @@ def my_poll_question_option(request):
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
             poll_question_id = request.GET.get('poll_question_id', None)
             if not poll_question_id:
-                raise MissingFieldException(field_name='poll_question_id')
+                raise MissingParameterException(field_name='poll_question_id')
              
             poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
             if not poll:
@@ -532,15 +545,15 @@ def my_poll_question_option(request):
             
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
             poll_question_id = request.GET.get('poll_question_id', None)
             if not poll_question_id:
-                raise MissingFieldException(field_name='poll_question_id')
+                raise MissingParameterException(field_name='poll_question_id')
             
             question_option_id = request.GET.get('question_option_id', None)
             if not question_option_id:
-                raise MissingFieldException(field_name='question_option_id')
+                raise MissingParameterException(field_name='question_option_id')
             
             my_poll = Poll.objects.filter(poll_id=poll_id).first()
             if not my_poll:
@@ -642,7 +655,7 @@ def poll_voting(request):
 
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
            
 
             poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
@@ -706,7 +719,7 @@ def poll_voting(request):
 
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
            
 
             poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
@@ -742,7 +755,7 @@ def poll_voting(request):
             poll_id = request.GET.get('poll_id', None)
 
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
            
             poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
             if not poll:
@@ -848,7 +861,7 @@ def my_poll_votes(request):
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
 
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
