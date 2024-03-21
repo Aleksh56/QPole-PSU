@@ -91,7 +91,7 @@ def login(request):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            raise ObjectNotFoundException(model='User', name=email)
+            raise ObjectNotFoundException(model='User')
             
         if not user.check_password(password):
             raise WrongPasswordException()
