@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Exists, OuterRef
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -10,7 +9,7 @@ class Profile(models.Model):
     email = models.EmailField(blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     surname = models.CharField(max_length=50, blank=True, null=True)
-    patronymic = models.CharField(max_length=50, default='Не указано', blank=True, null=True)
+    patronymic = models.CharField(max_length=50, default='Не указано', null=True)
     sex = models.CharField(max_length=1, blank=True, null=True)
     number = models.CharField(max_length=50, blank=True, null=True) 
 
