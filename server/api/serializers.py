@@ -4,6 +4,7 @@ from functools import partial
 
 from .validators import *
 from .models import *
+from .utils import *
 from .exсeptions import *
 
 class MiniUserSerializer(serializers.ModelSerializer):
@@ -155,6 +156,8 @@ class PollSerializer(serializers.ModelSerializer):
     hide_options_percentage = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_paused = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_closed = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)    
+    qrcode_img = serializers.SerializerMethodField()
+
 
     def get_members_quantity(self, instance):
         profiles = set()   
@@ -174,7 +177,14 @@ class PollSerializer(serializers.ModelSerializer):
         profile = self.context.get('profile')
         return instance.has_user_participated_in(user_profile=profile)
 
-    
+    def get_qrcode_img(self, instance):
+        qrcode_path = instance.qrcode
+        
+        if qrcode_path:
+            return get_qrcode_img_bytes(qrcode_path.path)
+
+        return None
+
     class Meta:
         model = Poll
         fields = '__all__'
@@ -196,7 +206,13 @@ class CreatePollSerializer(serializers.ModelSerializer):
     is_paused = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_closed = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)    
 
+    def create(self, validated_data):
+        poll = super().create(validated_data)
+        poll = generate_poll_qr(poll)
 
+        return poll
+    
+    
     class Meta:
         model = Poll
         fields = '__all__'

@@ -151,6 +151,7 @@ class Poll(models.Model):
     is_paused = models.BooleanField(default=False) # приостановлено
     is_closed = models.BooleanField(default=False) # завершено
 
+    qrcode = models.ImageField(verbose_name='Qrcode опроса', upload_to=f'images/poll_qrcodes/', blank=True, null=True) # qr 
 
     def __str__(self):
         if self.name:

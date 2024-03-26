@@ -132,3 +132,54 @@ def validation_error_wrapper(errors):
     error_messages = dict(enumerate(error_messages, 1))
 
     return error_messages
+
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import qrcode
+from qpoll.settings import SERVER_URL
+
+
+def generate_poll_qr(poll):
+    # Генерация QR-кода на основе poll_id
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(SERVER_URL + str(poll.poll_id))
+        qr.make(fit=True)
+        
+        # Создание изображения QR-кода
+        qr_image = qr.make_image(fill_color="black", back_color="white")
+        
+        # Сохранение изображения в памяти
+        qr_image_buffer = BytesIO()
+        qr_image.save(qr_image_buffer, format="PNG")
+        
+        # Создание объекта InMemoryUploadedFile для изображения QR-кода
+        qr_image_file = InMemoryUploadedFile(
+            qr_image_buffer,
+            None,
+            f'qrcode_poll_{poll.poll_id}.png',
+            'image/png',
+            qr_image.tell,
+            None
+        )
+        
+        # Сохранение изображения QR-кода в поле qrcode
+        poll.qrcode.save(f'qrcode_poll_{poll.poll_id}.png', qr_image_file)
+        
+        return poll
+
+
+import base64
+
+def get_qrcode_img_bytes(qrcode_path):
+    with open(qrcode_path, 'rb') as f:
+        qr_image_bytes = f.read()
+        
+        qr_image_base64 = base64.b64encode(qr_image_bytes).decode()
+        return qr_image_base64
+
+

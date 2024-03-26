@@ -16,6 +16,7 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
+SERVER_URL = 'http://188.225.45.226:3000/pre-register/'
 
 LOGGING = {
     'version': 1,
@@ -159,10 +160,15 @@ USE_I18N = True
 USE_TZ = True
 
 # пути до всех медиа и статических файлов
-STATIC_URL = 'static/'   
-MEDIA_URL = 'media/'     
-STATIC_ROOT = '/vol/static'
-MEDIA_ROOT = '/vol/media'
+STATIC_URL = 'static/'
+MEDIA_URL = 'media/'    
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+if not DEBUG:   
+    STATIC_ROOT = '/vol/static'
+    MEDIA_ROOT = '/vol/media'
+
 STATICFILES_DIRS = [
     BASE_DIR / 'static',  
 ]
