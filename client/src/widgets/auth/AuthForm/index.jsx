@@ -19,6 +19,7 @@ const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = ()
   const [formValues, setFormValues] = useState({
     email: '',
     password: '',
+    number: '',
   });
 
   const handleSubmit = (e) => {
@@ -86,6 +87,7 @@ const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = ()
                 required={true}
                 autoComplete="tel"
                 id="number"
+                handleChange={handleInputChange}
                 placeholder="Телефон"
               />
             )}

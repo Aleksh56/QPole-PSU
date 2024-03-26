@@ -29,10 +29,11 @@ const AuthPage = () => {
 
   const handleFormSubmit = useCallback(
     async (event) => {
+      console.log(event);
       const formData = {
         email: event.email,
         password: event.password,
-        ...(isSignIn ? {} : { number: event.target.number.value }),
+        ...(isSignIn ? {} : { number: event.number }),
       };
 
       const response = isSignIn ? await loginUser(formData) : await registerUser(formData);
