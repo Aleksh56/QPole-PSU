@@ -6,8 +6,6 @@ from math import ceil
 class BaseValidator:
 
     def name(value, chars=None):
-        if len(value) < 3:
-            raise ValidationError("Название должно содержать не менее 3 символов.")
         if not chars:
             if len(value) > 50:
                 raise ValidationError("Название должно содержать менее 50 символов.")
