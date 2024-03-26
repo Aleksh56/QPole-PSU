@@ -2,8 +2,7 @@ import { handleRequest } from '@/api/api';
 import axios from 'axios';
 
 export const handleChangeAnswerRequest = async (id, q_id, opt_id) => {
-  return handleRequest('patch', `/api/my_poll_question_option/`, {
-    poll_id: id,
+  return handleRequest('patch', `/api/my_poll_question_option/?poll_id=${id}`, {
     poll_question_id: q_id,
     question_option_id: opt_id,
     is_correct: 1,
@@ -61,8 +60,7 @@ export const deleteOptionRequest = async (id, q_id, opt_id) => {
 };
 
 export const changeOptionOrderRequest = async (id, q_id, opt_data) => {
-  return handleRequest('put', `/api/my_poll_question_option/`, {
-    poll_id: id,
+  return handleRequest('put', `/api/my_poll_question_option/?poll_id=${id}`, {
     poll_question_id: q_id,
     options_data: opt_data,
     request_type: 'change_order',

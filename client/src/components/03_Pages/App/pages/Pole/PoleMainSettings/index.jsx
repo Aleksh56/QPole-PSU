@@ -18,6 +18,8 @@ const PoleMainSettingsPage = () => {
   const { id } = useParams();
   const [tabValue, handleTabChange] = useTabs();
   const [poleData, setPoleData] = useState();
+  const [pendingChanges, setPendingChanges] = useState({});
+  const [timeoutHandlers, setTimeoutHandlers] = useState({});
 
   const location = useLocation();
   const isNewPole = location.state?.isNewPole;
@@ -33,9 +35,28 @@ const PoleMainSettingsPage = () => {
     }
   }, [isNewPole]);
 
-  const handleFieldChange = async (fieldName, value) => {
-    changePoleData(fieldName, value, id);
-    fetchPoleData();
+  const handleFieldChange = (fieldName, value) => {
+    setPendingChanges((prevState) => ({
+      ...prevState,
+      [fieldName]: value,
+    }));
+
+    if (timeoutHandlers[fieldName]) {
+      clearTimeout(timeoutHandlers[fieldName]);
+    }
+
+    const handler = setTimeout(async () => {
+      await changePoleData(fieldName, value, id, fetchPoleData);
+      setPendingChanges((prevState) => ({
+        ...prevState,
+        [fieldName]: undefined,
+      }));
+    }, 1500);
+
+    setTimeoutHandlers((prevState) => ({
+      ...prevState,
+      [fieldName]: handler,
+    }));
   };
 
   const handleImageDelete = () => {
@@ -54,13 +75,19 @@ const PoleMainSettingsPage = () => {
           <InvisibleLabeledField
             label="Название теста"
             placeholder="Введите название"
-            value={poleData?.name || ''}
+            value={
+              pendingChanges['name'] !== undefined ? pendingChanges['name'] : poleData?.name || ''
+            }
             handleChange={(e) => handleFieldChange('name', e)}
           />
           <InvisibleLabeledField
             label="Описание"
             placeholder="Введите описание"
-            value={poleData?.description || ''}
+            value={
+              pendingChanges['description'] !== undefined
+                ? pendingChanges['description']
+                : poleData?.description || ''
+            }
             handleChange={(e) => handleFieldChange('description', e)}
           />
           <Divider sx={{ my: 2 }} />

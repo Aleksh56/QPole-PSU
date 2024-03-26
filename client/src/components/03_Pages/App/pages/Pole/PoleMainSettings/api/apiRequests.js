@@ -7,7 +7,7 @@ export const getInfoAboutPole = async (id) => {
   return handleRequest('get', `/api/my_poll/?poll_id=${id}`);
 };
 
-export const changePoleData = async (field, value, id) => {
+export const changePoleData = async (field, value, id, fetchPoleData) => {
   if (timeouts[field]) {
     clearTimeout(timeouts[field]);
   }
@@ -26,7 +26,9 @@ export const changePoleData = async (field, value, id) => {
   }
 
   timeouts[field] = setTimeout(() => {
-    handleRequest('patch', `/api/my_poll/`, { poll_id: id, [field]: value });
+    handleRequest('patch', `/api/my_poll/?poll_id=${id}`, { [field]: value }).then(() =>
+      fetchPoleData()
+    );
     delete timeouts[field];
-  }, 1500);
+  }, 0);
 };
