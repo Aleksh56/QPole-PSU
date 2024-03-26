@@ -6,7 +6,7 @@ import { deletePollRequest } from './api/apiRequest';
 import { closePollFx } from './model/close-poll';
 import { duplicatePollFx } from './model/duplicate-poll';
 
-const BASE_IMAGE_URL = 'http://89.111.155.6';
+const BASE_IMAGE_URL = 'http://188.225.45.226';
 
 const AppPoleCard = React.memo(({ pollData, fetchData }) => {
   const [anchorEl, setAnchorEl] = useState(null);

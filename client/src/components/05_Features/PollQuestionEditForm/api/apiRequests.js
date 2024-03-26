@@ -13,7 +13,7 @@ export const handleChangeAnswerRequest = async (id, q_id, opt_id) => {
 export const handleChangeQuestionInfoRequest = async (fieldName, value, id, q_id) => {
   if (fieldName === 'image') {
     axios.patch(
-      `http://89.111.155.6/api/my_poll_question/?poll_id=${id}&poll_question_id=${q_id}`,
+      `http://188.225.45.226/api/my_poll_question/?poll_id=${id}&poll_question_id=${q_id}`,
       { [fieldName]: value },
       {
         headers: {

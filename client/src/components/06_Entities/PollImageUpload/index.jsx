@@ -4,7 +4,7 @@ import { Box, IconButton } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const BASE_IMAGE_URL = 'http://89.111.155.6';
+const BASE_IMAGE_URL = 'http://188.225.45.226';
 
 const PollImageUpload = ({ image = '', onFileSelect, handleDelete }) => {
   const [preview, setPreview] = useState('');

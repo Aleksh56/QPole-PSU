@@ -3,7 +3,7 @@ import { CardMedia, CardContent, CardActions } from '@mui/material';
 import { CardButton, CardContentWrapper, CardDescription, CardTitle, CardWrapper } from './styled';
 import { useNavigate } from 'react-router-dom';
 
-const BASE_IMAGE_URL = 'http://89.111.155.6';
+const BASE_IMAGE_URL = 'http://188.225.45.226';
 
 const PollListCard = ({ item, isAuthenticated }) => {
   const navigate = useNavigate();
