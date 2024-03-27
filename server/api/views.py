@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q
@@ -583,9 +584,9 @@ def my_poll_question_option(request):
         elif request.method == 'PUT':
             data = request.data
 
-            poll_id = data.get('poll_id', None)
+            poll_id = request.GET.get('poll_id', None)
             if not poll_id:
-                raise MissingFieldException(field_name='poll_id')
+                raise MissingParameterException(field_name='poll_id')
             
             poll_question_id = data.get('poll_question_id', None)
             if not poll_question_id:
@@ -855,11 +856,12 @@ def poll(request):
         return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_votes(request):
-    try:
+    # try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -875,19 +877,24 @@ def my_poll_votes(request):
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-            my_answers = PollAnswer.objects.filter(profile=my_profile)
-            my_answered_polls = Poll.objects.filter(
-                questions__answer_options__answers__in=my_answers
-            ).distinct()
-
-            serializer = PollSerializer(my_answered_polls, many=True)
-            return Response(serializer.data)
+            page = int(request.GET.get('page', 1))
+            page_size = int(request.GET.get('page_size', 10))  
 
 
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+            all_answers = poll.answers.all().order_by('-voting_date')
+            print(all_answers)
+            paginator = PageNumberPagination()
+            paginator.page_size = page_size  # Устанавливаем количество элементов на странице
+            paginated_result = paginator.paginate_queryset(all_answers, request)
 
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-   
+            # Устанавливаем номер текущей страницы в пагинаторе
+            paginator.page.number = page
 
+            serializer = PollSerializer(paginated_result, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+    # except APIException as api_exception:
+    #     return Response({'message': f"{api_exception}"}, api_exception.status_code)
+
+    # except Exception as ex:
+    #     return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

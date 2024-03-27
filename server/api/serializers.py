@@ -83,16 +83,10 @@ class PollTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
         fields = '__all__'
-
-class PollTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PollType
-        fields = '__all__'  
 
 
 class MyProfileSerializer(serializers.ModelSerializer):  
@@ -100,6 +94,8 @@ class MyProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = '__all__'
 
+
+# сериализаторы опросов
 
 class BasePollSerializer(serializers.ModelSerializer):
     name = serializers.CharField(validators=[BaseValidator.name], required=False)
@@ -120,22 +116,21 @@ class BasePollSerializer(serializers.ModelSerializer):
 
 
     members_quantity = serializers.SerializerMethodField()
+    questions_quantity = serializers.SerializerMethodField()
     is_opened_for_voting = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
 
     def get_members_quantity(self, instance):
-        profiles = set()   
-        for question in instance.questions.all():   
-            for answer_option in question.answer_options.all():   
-                for participant in answer_option.answers.all():   
-                    profiles.add(participant.profile)   
-   
-        return len(profiles)   
+        return instance.members_quantity
 
+
+    def get_questions_quantity(self, instance):
+        return instance.questions_quantity
+
+    
     def get_is_opened_for_voting(self, instance):   
-        if instance.duration:     
-            return timezone.now() < instance.created_date + instance.duration
-        else: return True
+        return instance.opened_for_voting
+
 
     def get_has_user_participated_in(self, instance):
         profile = self.context.get('profile')
@@ -177,6 +172,7 @@ class MiniPollSerializer(BasePollSerializer):
         exclude = ['qrcode', 'questions']
 
 
+# сериализаторы воросов
 
 class PollQuestionSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionSerializer(many=True)
@@ -198,6 +194,8 @@ class PollQuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# сериализаторы вариантов ответа
+        
 class PollQuestionOptionSerializer(serializers.ModelSerializer):
     name = serializers.CharField(validators=[partial(BaseValidator.name, chars=100)], required=False)
     info = serializers.CharField(validators=[partial(BaseValidator.info, chars=500)], required=False)
@@ -208,6 +206,8 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 
+# сериализаторы ответов
+        
 class PollAnswerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):

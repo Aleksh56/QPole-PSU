@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models import Count
 
 from .exсeptions import *
 
@@ -52,6 +53,7 @@ class PollType(models.Model):
 
 class PollAnswer(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    poll = models.ForeignKey('Poll', related_name='answers', on_delete=models.CASCADE, default=None)
     answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE, null=True, blank=True)
     question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE, null=True, blank=True)
     text = models.CharField(max_length=100, default=None, null=True, blank=True)
@@ -176,11 +178,8 @@ class Poll(models.Model):
         
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):
-        if self.can_cancel_vote == False:
-            return False
-
         if not user_profile:
-            return False
+            return None
         
         return self.questions.filter(
             answer_options__answers__profile=user_profile
@@ -197,13 +196,15 @@ class Poll(models.Model):
             return True
         return False
     
+    @property
     def members_quantity(self):   # число участников опроса
-        return self.answer_options__answers__profile.all().distinct().count()
+        return self.questions.aggregate(members=Count('answer_options__answers__profile', distinct=True))['members'] or 0
 
+    @property
     def questions_quantity(self):   # число вопросов опроса
-        return self.answer_options__answers__profile.all().distinct().count()
+        return self.questions.count()
 
-   
+    @property
     def opened_for_voting(self):   # доступно ли для голосования по времени
         if self.duration:     
             return timezone.now() < self.created_date + self.duration
