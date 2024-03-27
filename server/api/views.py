@@ -92,7 +92,7 @@ def my_profile(request):
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
-def my_poll(request, request_type=None):
+def my_poll(request):
     try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
@@ -122,7 +122,7 @@ def my_poll(request, request_type=None):
                         raise ObjectNotFoundException(model='PollType')
                     filters &= Q(poll_type=poll_type)
                 if name:
-                    filters &= Q(name__istartswith=name)
+                    filters &= Q(name__icontains=name)
                 if is_anonymous:
                     filters &= Q(is_anonymous=is_anonymous)
                 if is_paused:
@@ -273,6 +273,40 @@ def my_poll(request, request_type=None):
     
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def my_poll_stats(request):
+    try:
+        current_user = request.user
+        my_profile = Profile.objects.filter(user=current_user).first()
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
+                raise ObjectNotFoundException('Poll')
+
+
+            stats = {
+                'total_members': poll.members_quantity,
+                'total_members': poll.members_quantity,
+            }
+            return Response(stats)
+
+    except APIException as api_exception:
+        return Response({'message': f"{api_exception}"}, api_exception.status_code)
+
+    except Exception as ex:
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -632,7 +666,7 @@ def my_poll_question_option(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting(request):
-    try:
+    # try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -678,7 +712,7 @@ def poll_voting(request):
             if not answers:
                 raise MissingFieldException(field_name='answers')
             
-            answers = process_answers(answers, poll, my_profile.user_id)
+            answers = process_answers(answers, poll, my_profile)
             questions = poll.questions.filter(answer_options__answers__profile=my_profile)
             previous_answers = PollAnswer.objects.filter(
                 Q(question__in=questions) &
@@ -777,11 +811,7 @@ def poll_voting(request):
                 raise AccessDeniedException(detail="В данном опросе недоступно повторное голосование.")
             
 
-            questions = poll.questions.filter(answer_options__answers__profile=my_profile)
-            answers_to_delete = PollAnswer.objects.filter(
-                Q(question__in=questions) &
-                Q(profile=my_profile)
-            )
+            answers_to_delete = poll.answers.all().filter(profile=my_profile)
 
             # Удаляем все найденные ответы
             answers_to_delete.delete()
@@ -789,11 +819,11 @@ def poll_voting(request):
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception}"}, api_exception.status_code)
 
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    # except Exception as ex:
+    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 
@@ -897,3 +927,5 @@ def my_poll_votes(request):
 
     except Exception as ex:
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

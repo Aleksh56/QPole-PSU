@@ -207,9 +207,8 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
 
 
 # сериализаторы ответов
-        
 class PollAnswerSerializer(serializers.ModelSerializer):
-    profile = MiniProfileSerializer()
+    author = serializers.SerializerMethodField()
 
     def create(self, validated_data):
 
@@ -225,10 +224,10 @@ class PollAnswerSerializer(serializers.ModelSerializer):
                     validated_data['is_correct'] = False
                 
 
-
-
         return super().create(validated_data)
 
+    def get_author(self, instance):
+        return MiniProfileSerializer(instance=instance.profile).data
 
     class Meta:
         model = PollAnswer
