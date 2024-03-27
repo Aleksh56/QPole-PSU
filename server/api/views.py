@@ -295,12 +295,13 @@ def my_poll_stats(request):
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-
+            
             stats = {
                 'total_members': poll.members_quantity,
                 'total_members': poll.members_quantity,
             }
-            return Response(stats)
+            stats = PollStatsSerializer(poll)
+            return Response(stats.data)
 
     except APIException as api_exception:
         return Response({'message': f"{api_exception}"}, api_exception.status_code)
@@ -666,7 +667,7 @@ def my_poll_question_option(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting(request):
-    # try:
+    try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -819,11 +820,11 @@ def poll_voting(request):
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
-    # except APIException as api_exception:
-    #     return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
 
-    # except Exception as ex:
-    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 

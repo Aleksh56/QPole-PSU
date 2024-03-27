@@ -12,6 +12,7 @@ urlpatterns = [
     path('my_poll_question_option/', my_poll_question_option, name='my_poll_question_option'),
     path('poll_voting/', poll_voting, name='poll_voting'),
     path('my_poll_votes/', my_poll_votes, name='my_poll_votes'),
+    path('my_poll_stats/', my_poll_stats, name='my_poll_stats'),
     path('poll/', poll, name='poll'),
 
 ]

@@ -232,3 +232,47 @@ class PollAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = PollAnswer
         exclude = ['poll', 'image', 'is_correct']
+
+
+
+
+class AnswerOptionStatsSerializer(serializers.ModelSerializer):
+    votes_quantity = serializers.SerializerMethodField()
+
+    def get_votes_quantity(self, instance):
+        return len(instance.answers.all())
+
+    class Meta:
+        model = AnswerOption
+        fields = ['name', 'votes_quantity']
+
+
+class PollQuestionStatsSerializer(serializers.ModelSerializer):
+    answer_options = AnswerOptionStatsSerializer(many=True)
+
+    class Meta:
+        model = PollQuestion
+        fields = ['answer_options', ]
+
+
+class PollStatsSerializer(serializers.ModelSerializer):
+    members_quantity = serializers.SerializerMethodField()
+    questions_quantity = serializers.SerializerMethodField()
+
+    questions = PollQuestionStatsSerializer(many=True)
+
+    def get_members_quantity(self, instance):
+        return instance.members_quantity
+
+
+    def get_questions_quantity(self, instance):
+        return instance.questions_quantity
+
+
+    class Meta:
+        model = Poll
+        fields = ['members_quantity', 'questions_quantity', 'questions']
+
+
+
+
