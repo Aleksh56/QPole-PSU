@@ -94,37 +94,6 @@ class PollTypeSerializer(serializers.ModelSerializer):
         model = PollType
         fields = '__all__'  
 
-class PollForAllSerializer(serializers.ModelSerializer):
-    poll_type = PollTypeSerializer()
-    author = MiniProfileSerializer()
-    questions = QuestionSerializer(many=True)
-
-    members_quantity = serializers.SerializerMethodField()
-    is_opened_for_voting = serializers.SerializerMethodField()
-    
-    has_user_participated_in = serializers.SerializerMethodField()
-
-    def get_members_quantity(self, instance):
-        profiles = set()   
-        for question in instance.questions.all():   
-            for answer_option in question.answer_options.all():   
-                for participant in answer_option.answers.all():   
-                    profiles.add(participant.profile)   
-   
-        return len(profiles)   
-
-    def get_is_opened_for_voting(self, instance):   # доступно ли для голосования по времени
-        if instance.duration:     
-            return timezone.now() < instance.created_date + instance.duration
-        else: return True
-
-    def get_has_user_participated_in(self, instance):
-        profile = self.context.get('profile')
-        return instance.has_user_participated_in(user_profile=profile)
-
-    class Meta:
-        model = Poll
-        fields = '__all__'  
 
 class MyProfileSerializer(serializers.ModelSerializer):  
     class Meta:
@@ -132,20 +101,12 @@ class MyProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PollSerializer(serializers.ModelSerializer):
-    poll_type = PollTypeSerializer(required=True)
-    author = MyProfileSerializer(required=True)
-    questions = QuestionSerializer(many=True, required=False)
-
-    members_quantity = serializers.SerializerMethodField()
-    is_opened_for_voting = serializers.SerializerMethodField()
-    has_user_participated_in = serializers.SerializerMethodField()
-    
+class BasePollSerializer(serializers.ModelSerializer):
     name = serializers.CharField(validators=[BaseValidator.name], required=False)
     description = serializers.CharField(validators=[BaseValidator.description], required=False)
     tags = serializers.CharField(validators=[BaseValidator.description], required=False)
     image = serializers.ImageField(validators=[BaseValidator.image], required=False)
-    duration = serializers.TimeField(validators=[PollValidator.duration], required=False)
+    duration = serializers.DurationField(validators=[PollValidator.duration], required=False)
     has_correct_answer = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     has_multiple_choices = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_anonymous = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
@@ -156,8 +117,11 @@ class PollSerializer(serializers.ModelSerializer):
     hide_options_percentage = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_paused = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_closed = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)    
-    qrcode_img = serializers.SerializerMethodField()
 
+
+    members_quantity = serializers.SerializerMethodField()
+    is_opened_for_voting = serializers.SerializerMethodField()
+    has_user_participated_in = serializers.SerializerMethodField()
 
     def get_members_quantity(self, instance):
         profiles = set()   
@@ -168,7 +132,7 @@ class PollSerializer(serializers.ModelSerializer):
    
         return len(profiles)   
 
-    def get_is_opened_for_voting(self, instance):   # доступно ли для голосования по времени
+    def get_is_opened_for_voting(self, instance):   
         if instance.duration:     
             return timezone.now() < instance.created_date + instance.duration
         else: return True
@@ -176,6 +140,25 @@ class PollSerializer(serializers.ModelSerializer):
     def get_has_user_participated_in(self, instance):
         profile = self.context.get('profile')
         return instance.has_user_participated_in(user_profile=profile)
+
+
+    class Meta:
+        model = Poll
+        fields = '__all__'
+
+    def create(self, validated_data):
+        poll = super().create(validated_data)
+        poll = generate_poll_qr(poll)
+
+        return poll
+
+class PollSerializer(BasePollSerializer):
+    poll_type = PollTypeSerializer(required=True)
+    author = MyProfileSerializer(required=True)
+    questions = QuestionSerializer(many=True, required=False)
+
+    
+    qrcode_img = serializers.SerializerMethodField()
 
     def get_qrcode_img(self, instance):
         qrcode_path = instance.qrcode
@@ -185,37 +168,13 @@ class PollSerializer(serializers.ModelSerializer):
 
         return None
 
+class MiniPollSerializer(BasePollSerializer):
+    poll_type = serializers.CharField(source='poll_type.name')
+    author = MiniProfileSerializer()
+
     class Meta:
         model = Poll
-        fields = '__all__'
-
-class CreatePollSerializer(serializers.ModelSerializer):   
-    name = serializers.CharField(validators=[BaseValidator.name], required=False)
-    description = serializers.CharField(validators=[BaseValidator.description], required=False)
-    tags = serializers.CharField(validators=[BaseValidator.description], required=False)
-    image = serializers.ImageField(validators=[BaseValidator.image], required=False)
-    duration = serializers.TimeField(validators=[PollValidator.duration], required=False)
-    has_correct_answer = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    has_multiple_choices = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    is_anonymous = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    can_cancel_vote = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    mix_questions = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    mix_options = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    hide_participants_quantity = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    hide_options_percentage = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    is_paused = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    is_closed = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)    
-
-    def create(self, validated_data):
-        poll = super().create(validated_data)
-        poll = generate_poll_qr(poll)
-
-        return poll
-    
-    
-    class Meta:
-        model = Poll
-        fields = '__all__'
+        exclude = ['qrcode', 'questions']
 
 
 

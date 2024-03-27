@@ -35,7 +35,7 @@ class UserRole(models.Model):
 class PollType(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=500, default="", blank=True)
-
+    duration = models.DurationField(default=timezone.timedelta(hours=1))
 
     is_text = models.BooleanField(default=True, null=True)    # текст ли как ответ
     is_free = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
@@ -94,8 +94,6 @@ class AnswerOption(models.Model):
         super().delete(keep_parents=False)
 
 
-
-
 class PollQuestion(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     info = models.CharField(max_length=500, default=None, null=True, blank=True)
@@ -137,6 +135,7 @@ class Poll(models.Model):
     has_multiple_choices = models.BooleanField(default=False) # множественный выбор
     has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
     is_anonymous = models.BooleanField(default=False) # анонимное
+
     can_cancel_vote = models.BooleanField(default=True) # запретить повторное
     mix_questions = models.BooleanField(default=False) # перемешивать вопросы
     mix_options = models.BooleanField(default=False) # перемешивать варианты ответа
@@ -151,7 +150,8 @@ class Poll(models.Model):
     is_paused = models.BooleanField(default=False) # приостановлено
     is_closed = models.BooleanField(default=False) # завершено
 
-    qrcode = models.ImageField(verbose_name='Qrcode опроса', upload_to=f'images/poll_qrcodes/', blank=True, null=True) # qr 
+    # qr код ссылки на опрос
+    qrcode = models.ImageField(verbose_name='Qrcode опроса', upload_to=f'images/poll_qrcodes/', blank=True, null=True) 
 
     def __str__(self):
         if self.name:
@@ -159,6 +159,17 @@ class Poll(models.Model):
         else:
             return f"Опрос №{self.id}"
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.poll_type:
+            self.has_multiple_choices = self.poll_type.has_multiple_choices
+            self.has_correct_answer = self.poll_type.has_correct_answer
+            self.is_anonymous = self.poll_type.is_anonymous
+
+            if self.poll_type.name == 'Летучка':
+                self.duration = self.poll_type.duration
+
+
     def delete(self):
         super().delete(keep_parents=False)
         
@@ -187,6 +198,9 @@ class Poll(models.Model):
         return False
     
     def members_quantity(self):   # число участников опроса
+        return self.answer_options__answers__profile.all().distinct().count()
+
+    def questions_quantity(self):   # число вопросов опроса
         return self.answer_options__answers__profile.all().distinct().count()
 
    

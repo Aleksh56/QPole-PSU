@@ -130,7 +130,7 @@ def my_poll(request, request_type=None):
                     filters &= Q(is_closed=is_closed)
 
                 polls = Poll.objects.filter(filters)
-                serializer = PollSerializer(polls, many=True, context={'profile': my_profile})
+                serializer = MiniPollSerializer(polls, many=True, context={'profile': my_profile})
                 return Response(serializer.data)
 
         elif request.method == 'POST':
@@ -151,7 +151,7 @@ def my_poll(request, request_type=None):
             data['author'] = my_profile
 
 
-            serializer = CreatePollSerializer(data=data)
+            serializer = BasePollSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -815,7 +815,7 @@ def poll(request):
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
-                serializer = PollForAllSerializer(poll, context={'profile': my_profile})
+                serializer = PollSerializer(poll, context={'profile': my_profile})
                 return Response(serializer.data)
             
             else:
@@ -845,7 +845,7 @@ def poll(request):
                 for poll in polls:
                     poll.profile = my_profile
 
-                serializer = PollForAllSerializer(polls, many=True, context={'profile': my_profile})
+                serializer = MiniPollSerializer(polls, many=True, context={'profile': my_profile})
                 return Response(serializer.data)
             
     except APIException as api_exception:
