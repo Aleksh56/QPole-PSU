@@ -857,11 +857,11 @@ def poll(request):
 
 
 
-@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_votes(request):
-    # try:
+    try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -878,11 +878,10 @@ def my_poll_votes(request):
                 raise ObjectNotFoundException('Poll')
 
             page = int(request.GET.get('page', 1))
-            page_size = int(request.GET.get('page_size', 10))  
+            page_size = int(request.GET.get('page_size', 20))  
 
 
             all_answers = poll.answers.all().order_by('-voting_date')
-            print(all_answers)
             paginator = PageNumberPagination()
             paginator.page_size = page_size  # Устанавливаем количество элементов на странице
             paginated_result = paginator.paginate_queryset(all_answers, request)
@@ -890,11 +889,11 @@ def my_poll_votes(request):
             # Устанавливаем номер текущей страницы в пагинаторе
             paginator.page.number = page
 
-            serializer = PollSerializer(paginated_result, many=True)
+            serializer = PollAnswerSerializer(paginated_result, many=True)
             return paginator.get_paginated_response(serializer.data)
 
-    # except APIException as api_exception:
-    #     return Response({'message': f"{api_exception}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message': f"{api_exception}"}, api_exception.status_code)
 
-    # except Exception as ex:
-    #     return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

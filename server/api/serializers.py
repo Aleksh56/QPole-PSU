@@ -209,11 +209,13 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
 # сериализаторы ответов
         
 class PollAnswerSerializer(serializers.ModelSerializer):
+    profile = MiniProfileSerializer()
 
     def create(self, validated_data):
 
         poll = self.context.get('poll')
 
+        validated_data['poll_id'] = poll.id
         if poll.poll_type.name == 'Викторина':
             answer_option = validated_data['answer_option']
             if not answer_option.is_correct == None:
@@ -230,4 +232,4 @@ class PollAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PollAnswer
-        fields = '__all__'  
+        exclude = ['poll', 'image', 'is_correct']
