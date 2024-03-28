@@ -133,3 +133,18 @@ class PollAnsweringException(APIException):
     def __str__(self):
         return self.detail
     
+
+class TooManyInstancesException(APIException):
+    status_code = 400
+    default_code = 'too_many_instances'
+
+    def __init__(self, model=None, limit=None, detail=None):
+        if not detail:
+            detail = f"Слишком много объектов модели '{model}'."
+            if limit:
+                detail += f" Максимально допустимое количество = {limit}"
+        self.detail = detail
+
+    def __str__(self):
+        return self.detail
+    

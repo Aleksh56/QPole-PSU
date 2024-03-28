@@ -70,7 +70,7 @@ class PollAnswer(models.Model):
 class AnswerOption(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото варианта ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
-    answers = models.ManyToManyField(PollAnswer, related_name='answeroption', blank=True, null=True)
+    answers = models.ManyToManyField(PollAnswer, blank=True, null=True)
 
     is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
     is_text_response = models.BooleanField(default=True, null=True)    # текст ли как ответ
@@ -100,7 +100,7 @@ class PollQuestion(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     info = models.CharField(max_length=500, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото вопроса', upload_to=f'images/poll_questions/', blank=True, null=True, default=None)
-    answer_options = models.ManyToManyField(AnswerOption, related_name='pollquestion_answeroptions', blank=True, null=True)
+    answer_options = models.ManyToManyField(AnswerOption, blank=True, null=True)
 
     has_correct_answer = models.BooleanField(default=None, null=True)   # есть ли верный ответ
     has_multiple_choices = models.BooleanField(default=False)   # есть ли множенственный выбор
@@ -116,15 +116,11 @@ class PollQuestion(models.Model):
             return f"Вопрос '{self.name}'"
         else:
             return f"Вопрос №{self.id}"
-        
-
-    def delete(self):
-        super().delete(keep_parents=False)
 
 
 class Poll(models.Model):
     poll_id = models.CharField(max_length=100, unique=True) # уникальный id
-    author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='authored_polls') # автор опроса
+    author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='my_polls') # автор опроса
     image = models.ImageField(verbose_name='Фото опроса', upload_to=f'images/poll_images/', blank=True, null=True) # фото 
     name = models.CharField(max_length=50, blank=True, null=True) # имя опроса
     description = models.TextField(blank=True, null=True) # текст начать опрос
@@ -147,10 +143,12 @@ class Poll(models.Model):
     hide_options_percentage = models.BooleanField(default=False) # добавить теги
 
     # вопросы
-    questions = models.ManyToManyField(PollQuestion, related_name='poll_questions', blank=True, null=True)
+    questions = models.ManyToManyField(PollQuestion, blank=True, null=True)
     
     is_paused = models.BooleanField(default=False) # приостановлено
     is_closed = models.BooleanField(default=False) # завершено
+
+    is_in_production = models.BooleanField(default=False) # готов к прохождению
 
     # qr код ссылки на опрос
     qrcode = models.ImageField(verbose_name='Qrcode опроса', upload_to=f'images/poll_qrcodes/', blank=True, null=True) 

@@ -64,9 +64,9 @@ class MiniPollAnswerSerializer(serializers.ModelSerializer):
 class AnswerOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerOption
-        fields = '__all__'
+        exclude = ['answers']
 
-    answers = MiniPollAnswerSerializer(many=True)
+    # answers = MiniPollAnswerSerializer(many=True, required=False)
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -113,6 +113,8 @@ class BasePollSerializer(serializers.ModelSerializer):
     hide_options_percentage = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_paused = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
     is_closed = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)    
+    
+    is_in_production = serializers.BooleanField(validators=[PollValidator.is_in_production], required=False)    
 
 
     members_quantity = serializers.SerializerMethodField()
@@ -175,7 +177,7 @@ class MiniPollSerializer(BasePollSerializer):
 # сериализаторы воросов
 
 class PollQuestionSerializer(serializers.ModelSerializer):
-    answer_options = AnswerOptionSerializer(many=True)
+    answer_options = AnswerOptionSerializer(many=True, required=False)
     name = serializers.CharField(validators=[BaseValidator.name], required=False)
 
     has_correct_answer = serializers.CharField(validators=[BaseValidator.bolean], required=False)
@@ -247,12 +249,14 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
         fields = ['name', 'votes_quantity']
 
 
+# сериализаторы статистики опросов
+        
 class PollQuestionStatsSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionStatsSerializer(many=True)
-
+    
     class Meta:
         model = PollQuestion
-        fields = ['answer_options', ]
+        fields = ['answer_options', 'name']
 
 
 class PollStatsSerializer(serializers.ModelSerializer):

@@ -135,6 +135,11 @@ def my_poll(request):
                 return Response(serializer.data)
 
         elif request.method == 'POST':
+
+            if not my_profile.user.is_staff:
+                if len(my_profile.my_polls.all()) > 10:
+                    raise TooManyInstancesException(detail=f"Вы не можете создавать более {10} опросов.")
+
             data = request.data.copy()
             poll_id = data.get('poll_id', None)
             if not poll_id:
@@ -295,11 +300,7 @@ def my_poll_stats(request):
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-            
-            stats = {
-                'total_members': poll.members_quantity,
-                'total_members': poll.members_quantity,
-            }
+
             stats = PollStatsSerializer(poll)
             return Response(stats.data)
 
@@ -307,7 +308,7 @@ def my_poll_stats(request):
         return Response({'message': f"{api_exception}"}, api_exception.status_code)
 
     except Exception as ex:
-        return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_stats: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -350,19 +351,20 @@ def my_poll_question(request):
             if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
             
- 
-            with transaction.atomic():
-                poll_question = PollQuestion(
-                    name="",
-                    info="",
-                    image=None,
-                    has_correct_answer=my_poll.has_correct_answer,
-                )
-                poll_question.save()
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
+
+            if len(my_poll.questions.all()) > 50:
+                raise TooManyInstancesException(model='PollQuestion', limit=50)
+
+            poll_question = PollQuestionSerializer(data=data)
+            if poll_question.is_valid():
+                poll_question = poll_question.save()
                 my_poll.questions.add(poll_question)
-
-            return Response("Вопрос в опросе успешно проинициализирован", status=status.HTTP_201_CREATED)
-
+                return Response("Вопрос в опросе успешно проинициализирован", status=status.HTTP_201_CREATED)
+            else:
+                return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
+            
         elif request.method == 'PATCH':
             data = request.data
 
@@ -374,12 +376,15 @@ def my_poll_question(request):
             if not poll_question_id:
                 raise MissingParameterException(field_name='poll_question_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
+            my_poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
-            poll_question = PollQuestion.objects.filter(id=poll_question_id).first()
+            poll_question = my_poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
+            
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
             if serializer.is_valid():
@@ -399,14 +404,16 @@ def my_poll_question(request):
             if not poll_question_id:
                 raise MissingParameterException(field_name='poll_question_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
+            my_poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not my_poll:
                 raise ObjectNotFoundException(model='Poll')
-            poll_question = PollQuestion.objects.filter(id=poll_question_id).first()
+            poll_question = my_poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
 
-
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
+            
             poll_question.delete()
 
             return Response({'message':"Вопрос опроса успешно удален"}, status=status.HTTP_204_NO_CONTENT)
@@ -433,6 +440,9 @@ def my_poll_question(request):
             request_type = request.GET.get('request_type', None)
             if not request_type:
                 raise MissingParameterException(field_name='request_type')
+            
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             if request_type == 'change_order':
                 objects_to_update = []
@@ -532,15 +542,20 @@ def my_poll_question_option(request):
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
 
-            question_option = AnswerOption(
-                name="",
-                image=None,
-            )
-            question_option.save()
-            poll_question.answer_options.add(question_option)
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
+            
+            if len(poll_question.answer_options.all()) > 10:
+                raise TooManyInstancesException(model='PollQuestion', limit=10)
 
-            return Response({'message':f"Вариант ответа в вопросе успешно проинициализирован"}, status=status.HTTP_201_CREATED)
-
+            answer_option_serializer = AnswerOptionSerializer(data=data)
+            if answer_option_serializer.is_valid():
+                answer_option = answer_option_serializer.save()
+                poll_question.answer_options.add(answer_option)
+                return Response("Вариант ответа в вопросе успешно проинициализирован", status=status.HTTP_201_CREATED)
+            else:
+                return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
+            
         elif request.method == 'PATCH':
             data = request.data.copy()
 
@@ -567,6 +582,9 @@ def my_poll_question_option(request):
             question_option = poll_question.answer_options.filter(id=question_option_id).first()
             if not question_option:
                 raise ObjectNotFoundException(model='AnswerOption')
+            
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             is_correct = data.get('is_correct', None)
             if is_correct:
@@ -611,7 +629,9 @@ def my_poll_question_option(request):
             if not question_option:
                 raise ObjectNotFoundException(model='AnswerOption')
 
-
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
+            
             question_option.delete()
 
             return Response({'message':"Вариант ответа успешно удален"}, status=status.HTTP_204_NO_CONTENT)
@@ -635,7 +655,9 @@ def my_poll_question_option(request):
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
 
-
+            if my_poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
+            
             objects_to_update = []
 
             options_data = data['options_data']

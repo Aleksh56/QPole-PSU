@@ -8,7 +8,6 @@ urlpatterns = [
     path('my_poll/', my_poll, name='my_poll'),
     path('my_poll/', my_poll, name='my_poll'),
     path('my_poll_question/', my_poll_question, name='my_poll_question'),
-    path('my_poll_question/', my_poll_question, name='my_poll_question'),
     path('my_poll_question_option/', my_poll_question_option, name='my_poll_question_option'),
     path('poll_voting/', poll_voting, name='poll_voting'),
     path('my_poll_votes/', my_poll_votes, name='my_poll_votes'),

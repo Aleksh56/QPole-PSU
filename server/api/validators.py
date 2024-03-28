@@ -87,7 +87,9 @@ class PollValidator(BaseValidator):
     def duration(value):
         pass
         
-
+    def is_in_production(value):
+        if value == False:
+            raise ValidationError("Нельзя убрать опрос из продакшена, можно только удалить сам опрос.")
 
 
 def is_number_valid(value):
