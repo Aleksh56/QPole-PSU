@@ -9,7 +9,7 @@ import {
   StyledAuthContentWrapper,
   StyledImage,
 } from './styled';
-import CustomSwitch from '@/shared/Switch';
+import CustomSwitch from '@/components/07_Shared/Switch';
 import { connect2AuthFx } from './model/connect-2auth';
 
 const Profile2AuthBlock = ({ caption = '' }) => {

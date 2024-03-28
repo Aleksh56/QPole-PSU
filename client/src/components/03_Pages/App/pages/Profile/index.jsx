@@ -1,5 +1,5 @@
 import React from 'react';
-import ProfileSidebar from '@/widgets/profile/ProfileSidebar';
+import ProfileSidebar from '@/components/04_Widgets/profile/ProfileSidebar';
 import { Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { SidebarLinksData } from './data/SidebarLinksData';

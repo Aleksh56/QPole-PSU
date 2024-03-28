@@ -5,7 +5,7 @@ import { commonHeaderLinksData } from '@/data/fields';
 import { IconButton, Drawer, List, ListItem, ListItemText, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import PrimaryButton from '@/shared/PrimaryButton';
+import PrimaryButton from '@/components/07_Shared/PrimaryButton';
 import { useTranslation } from 'react-i18next';
 import useAuth from '@/hooks/useAuth';
 

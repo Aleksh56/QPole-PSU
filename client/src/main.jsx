@@ -4,10 +4,15 @@ import './app/template/__init__.css';
 import App from './App';
 import { AuthProvider } from '@/app/context/AuthProvider';
 import '@/locale/i18n';
+import { AlertProvider } from './app/context/AlertProvider';
+import AlertPopup from './components/04_Widgets/alert';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <AuthProvider>
-    <App />
-  </AuthProvider>
+  <AlertProvider>
+    <AuthProvider>
+      <AlertPopup />
+      <App />
+    </AuthProvider>
+  </AlertProvider>
 );

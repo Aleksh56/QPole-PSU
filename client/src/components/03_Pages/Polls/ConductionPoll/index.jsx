@@ -1,4 +1,4 @@
-import Header from '@/widgets/common/Header';
+import Header from '@/components/04_Widgets/common/Header';
 import React, { useEffect, useState } from 'react';
 import { fetchPollQuestions } from './model/fetch-questions';
 import { useNavigate, useParams } from 'react-router-dom';

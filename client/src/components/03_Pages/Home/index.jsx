@@ -1,6 +1,6 @@
-import Hero from '@/widgets/common/Hero';
+import Hero from '@/components/04_Widgets/common/Hero';
 import ServicesSection from '@widgets/ServicesSection';
-import Footer from '@/widgets/common/Footer';
+import Footer from '@/components/04_Widgets/common/Footer';
 import usePageTitle from '@/hooks/usePageTitle';
 
 const HomePage = () => {

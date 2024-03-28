@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Divider, Box, Typography, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
-import InvisibleLabeledField from '@/shared/InvisibleLabeledField';
+import InvisibleLabeledField from '@/components/07_Shared/InvisibleLabeledField';
 import {
   addOptionRequest,
   changeOptionOrderRequest,
@@ -15,7 +15,7 @@ import { useParams } from 'react-router-dom';
 import { DeleteOutline, DragIndicator } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import usePollType from '@/hooks/usePollType';
-import CustomSwitch from '@/shared/Switch';
+import CustomSwitch from '@/components/07_Shared/Switch';
 import { toggleMultipleFx } from './model/toggle-multiple';
 import { deleteImageFx } from './model/delete-image';
 

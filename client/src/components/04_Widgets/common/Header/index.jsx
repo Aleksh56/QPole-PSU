@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyledContainer, StyledHeader, StyledLogoLink } from './styled';
-import PrimaryButton from '@/shared/PrimaryButton';
+import PrimaryButton from '@/components/07_Shared/PrimaryButton';
 import HeaderNavigationOutput from '@/components/05_Features/HeaderNavOutput';
 import { Box, useMediaQuery } from '@mui/material';
 import { useTranslation } from 'react-i18next';

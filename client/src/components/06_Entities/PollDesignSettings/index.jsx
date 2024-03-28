@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Grid } from '@mui/material';
-import ColorPicker from '@/shared/ColorPicker';
+import ColorPicker from '@/components/07_Shared/ColorPicker';
 import { pollDesignFieldData } from '@/data/fields';
 
 const PollDesignSettingsTab = () => {

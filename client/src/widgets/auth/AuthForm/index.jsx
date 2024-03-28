@@ -7,9 +7,11 @@ import LabeledInput from '@/shared/AuthLabeledInput';
 import { useTranslation } from 'react-i18next';
 import { pattern } from '@/config/validation.patterns';
 import { validateField } from '@/utils/js/validateField';
+import { useAlert } from '@/app/context/AlertProvider';
 
 const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
   const authFormTheme = useTheme();
+  const { showAlert } = useAlert();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({
@@ -24,6 +26,7 @@ const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = ()
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    showAlert('Это сообщение об успехе тест', 'success');
 
     const emailError = validateField(
       formValues.email,
