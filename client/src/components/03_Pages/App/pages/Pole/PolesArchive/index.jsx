@@ -1,10 +1,10 @@
 import { getAllPoles } from '@/components/03_Pages/App/api/apiRequests';
-import AppPolesFilters from '@/widgets/app/AppPolesFilters';
+import AppPolesFilters from '@/components/04_Widgets/app/AppPolesFilters';
 import React, { useEffect, useState } from 'react';
 import { ContentWrapper, PollsGrid, StyledAppContentWrapper } from './styled';
 import { CircularProgress } from '@mui/material';
-import AppPoleCard from '@/shared/AppPoleCard';
-import CreatePoleModal from '@/widgets/CreatePoleModal';
+import AppPoleCard from '@/components/07_Shared/AppPoleCard';
+import CreatePoleModal from '@/components/04_Widgets/CreatePoleModal';
 import { _settings } from '@/components/03_Pages/App/config/settings';
 import { Link } from 'react-router-dom';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconButton, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import PoleSettingsMenuButton from '@/shared/PoleSettingsMenuButton';
+import PoleSettingsMenuButton from '@/components/07_Shared/PoleSettingsMenuButton';
 import { StyledNavContainer } from './styled';
 import { useNavigate, useParams } from 'react-router-dom';
 

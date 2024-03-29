@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, registerUser } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
-import AuthForm from '@/widgets/auth/AuthForm';
+import AuthForm from '@/components/04_Widgets/auth/AuthForm';
 import AuthIllustration from '@/components/05_Features/AuthIllustration';
 import { ThemeProvider, useTheme } from '@mui/material';
 import usePageTitle from '@/hooks/usePageTitle';

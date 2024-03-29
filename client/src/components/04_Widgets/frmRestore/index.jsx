@@ -1,6 +1,6 @@
 import React from 'react';
 import AuthIllustration from '@/components/05_Features/AuthIllustration';
-import PasswordResetForm from '@/widgets/auth/PasswordResetForm';
+import PasswordResetForm from '@/components/04_Widgets/auth/PasswordResetForm';
 import { ThemeProvider, useTheme } from '@mui/material';
 import { OverlayWrapper, StyledAuthWrapper } from '@/components/03_Pages/Auth/styled';
 

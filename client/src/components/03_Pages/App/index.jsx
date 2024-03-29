@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AppCreateFirstPoll from '@/components/05_Features/AppCreateFirstPoll';
-import AppPolesFilters from '@/widgets/app/AppPolesFilters';
-import CreatePoleModal from '@/widgets/CreatePoleModal';
-import AppPoleCard from '@/shared/AppPoleCard';
+import AppPolesFilters from '@/components/04_Widgets/app/AppPolesFilters';
+import CreatePoleModal from '@/components/04_Widgets/CreatePoleModal';
+import AppPoleCard from '@/components/07_Shared/AppPoleCard';
 import { getAllPoles } from './api/apiRequests';
 import { Link } from 'react-router-dom';
 import { ContentWrapper, PollsGrid, StyledAppContentWrapper, StyledArchiveLink } from './styled';

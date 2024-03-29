@@ -1,4 +1,4 @@
-import PollListCard from '@/shared/PollListCard';
+import PollListCard from '@/components/07_Shared/PollListCard';
 import React from 'react';
 import { Grid } from '@mui/material';
 import { PollListGridContainer } from './styled';

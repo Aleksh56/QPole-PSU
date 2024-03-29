@@ -6,7 +6,7 @@ import {
   StyledProfileAvatar,
   StyledProfileContainer,
 } from './styled';
-import ProfileAccountField from '@/shared/ProfileAccountField';
+import ProfileAccountField from '@/components/07_Shared/ProfileAccountField';
 import { StyledProfileFieldsBox } from '@/constants/styles';
 
 const ProfileUserData = ({ caption = '', boxCaption = '', ProfileInfoFields = [] }) => {

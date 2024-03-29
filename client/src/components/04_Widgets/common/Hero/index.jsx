@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from '../Header';
-import SecondaryButton from '@/shared/SecondaryButton';
+import SecondaryButton from '@/components/07_Shared/SecondaryButton';
 import {
   StyledHero,
   StyledHeroContainer,

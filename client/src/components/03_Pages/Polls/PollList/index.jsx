@@ -1,8 +1,8 @@
 import Header from '@/components/04_Widgets/common/Header';
-import PollFilters from '@/widgets/PollList/PollFilters';
+import PollFilters from '@/components/04_Widgets/PollList/PollFilters';
 import React, { useEffect, useState } from 'react';
 import { PollListPageContentWrapper } from './styled';
-import PollListOutput from '@/widgets/PollList/PollListOutput';
+import PollListOutput from '@/components/04_Widgets/PollList/PollListOutput';
 import { fetchAllPolls } from './model/fetch-polls';
 import { CircularProgress } from '@mui/material';
 

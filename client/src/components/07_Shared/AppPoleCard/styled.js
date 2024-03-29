@@ -4,19 +4,22 @@ import { Rem } from '@/utils/convertToRem';
 import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledChip = styled(Chip)(() => ({
-  position: 'absolute',
-  top: Rem(10),
-  left: Rem(10),
   color: 'white',
   backgroundColor: colorConfig.primaryBlue,
   height: Rem(22),
   '& .MuiChip-label': {
-    fontSize: Rem(10),
+    fontSize: Rem(12),
   },
 }));
 
 export const StyledCard = styled(Card)(() => ({
-  maxWidth: Rem(300),
+  height: Rem(280),
+  width: Rem(550),
+  borderRadius: Rem(16),
+  boxShadow: 'none',
+  display: 'grid',
+  gridTemplateColumns: '0.9fr 1fr',
+  border: `1px solid ${colorConfig.primaryGray}`,
   position: 'relative',
   transition: 'transform 0.3s ease',
   '&:hover': {
@@ -25,8 +28,7 @@ export const StyledCard = styled(Card)(() => ({
 }));
 
 export const StyledTypographyName = styled(Typography)(() => ({
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  width: '100%',
+  color: '#aaa',
+  fontSize: Rem(12),
+  marginBottom: Rem(10),
 }));

@@ -1,5 +1,5 @@
 import React from 'react';
-import ServicesLabel from '@shared/ServicesLabel';
+import ServicesLabel from '@/components/07_Shared/ServicesLabel';
 import { StyledCard, StyledCardHeading, StyledLabelWrapper } from './styled';
 
 const ServicesCard = ({ caption = '', buttons = [] }) => {
