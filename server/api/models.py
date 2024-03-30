@@ -78,7 +78,7 @@ class AnswerOption(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото варианта ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
     answers = models.ManyToManyField(PollAnswer, blank=True, null=True)
-
+    
     is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
     is_text_response = models.BooleanField(default=True, null=True)    # текст ли как ответ
     is_free_response = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
@@ -117,6 +117,12 @@ class PollQuestion(models.Model):
     is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
 
     order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в опросе
+
+
+    @property
+    def votes_quantity(self):   # число ответов на вопрос
+        return self.answer_options.aggregate(members=Count('answers__profile', distinct=True))['members'] or 0
+   
 
     def __str__(self):
         if self.name:
