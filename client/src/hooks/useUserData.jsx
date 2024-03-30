@@ -26,7 +26,7 @@ const useUserData = () => {
           'Загрузка данных профиля', // ToDo - Delete (Just for debugging)
           headers
         );
-        setUserRole(data.profile.role);
+        setUserRole(data.role);
         setUserData(data);
       } catch (error) {
         setUserData({});
