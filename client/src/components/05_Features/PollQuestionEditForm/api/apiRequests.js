@@ -2,7 +2,8 @@ import { handleRequest } from '@/api/api';
 import axios from 'axios';
 
 export const handleChangeAnswerRequest = async (id, q_id, opt_id) => {
-  return handleRequest('patch', `/api/my_poll_question_option/?poll_id=${id}`, {
+  return handleRequest('patch', `/api/my_poll_question_option/`, {
+    poll_id: id,
     poll_question_id: q_id,
     question_option_id: opt_id,
     is_correct: 1,

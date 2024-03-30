@@ -11,14 +11,7 @@ const PollResultsPage = () => {
   useEffect(() => {
     const fetchResults = async () => {
       const data = await getPollResultsFx({ id });
-      const modifiedData = data.map((item) => ({
-        ...item,
-        answer_options: item.answer_options.map((option) => ({
-          ...option,
-          answersCount: option.answers.length,
-        })),
-      }));
-      setQuestions(modifiedData);
+      setQuestions(data.questions);
     };
     fetchResults();
   }, []);

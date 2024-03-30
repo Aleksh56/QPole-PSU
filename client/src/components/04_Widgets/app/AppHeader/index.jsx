@@ -16,8 +16,10 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
 import useUserData from '@/hooks/useUserData';
 import { appHeaderData } from '@/data/fields';
+import { useUserRole } from '@/app/context/UserRoleProvider';
 
 const AppHeader = () => {
+  const { role } = useUserRole();
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const userData = useUserData();
@@ -34,7 +36,7 @@ const AppHeader = () => {
         <AppHeaderNavigationOutput itemsData={appHeaderData} />
         <Dropdown>
           <StyledHeaderProfile>
-            {userData?.profile?.email ?? ''}
+            {userData?.profile?.email ?? ''}({role})
             <ArrowDropDownIcon fontSize="small" />
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>

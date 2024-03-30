@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { handleRequest } from '@/api/api';
 import useAuth from './useAuth';
+import { useUserRole } from '@/app/context/UserRoleProvider';
 
 const useUserData = () => {
   const [userData, setUserData] = useState(null);
+  const { setUserRole } = useUserRole();
   const { isAuthenticated, token } = useAuth();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ const useUserData = () => {
           'Загрузка данных профиля', // ToDo - Delete (Just for debugging)
           headers
         );
-        console.log(data);
+        setUserRole(data.profile.role);
         setUserData(data);
       } catch (error) {
         setUserData({});

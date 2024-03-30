@@ -6,12 +6,14 @@ import {
   FormControlLabel,
   Radio,
   Checkbox,
+  Typography,
 } from '@mui/material';
 import {
   updateAnswer,
   updateMultipleAnswer,
 } from '@/components/03_Pages/Polls/ConductionPoll/store/answer-store';
 import { shuffleArray } from '@/utils/js/shuffleArray';
+import { StyledFormControl } from './styled';
 
 const QuestionBlock = ({ question, isMixed }) => {
   const [selectedValue, setSelectedValue] = useState('');
@@ -45,11 +47,8 @@ const QuestionBlock = ({ question, isMixed }) => {
   };
 
   return (
-    <FormControl
-      component="fieldset"
-      sx={{ border: '1px solid black', padding: '20px', width: '100%' }}
-    >
-      <FormLabel component="legend">{question.name} ?</FormLabel>
+    <StyledFormControl component="fieldset">
+      <Typography>{question.name}</Typography>
       <RadioGroup
         aria-label={question.name}
         name="radio-buttons-group"
@@ -74,7 +73,7 @@ const QuestionBlock = ({ question, isMixed }) => {
           />
         ))}
       </RadioGroup>
-    </FormControl>
+    </StyledFormControl>
   );
 };
 

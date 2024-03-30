@@ -35,10 +35,6 @@ const ConductionPollPage = () => {
   }, []);
 
   const handleSubmit = async () => {
-    const payload = {
-      answers: answers,
-    };
-
     const response = await sendAnswersRequestFx({ answers, id });
     if (!Object.keys(response.result).length > 0) {
       navigate('/polls');
@@ -49,7 +45,7 @@ const ConductionPollPage = () => {
     <>
       <Header isMainPage={false} />
       <ConductionWrapper>
-        <ConductionHeader title={pollData.name} />
+        <ConductionHeader data={pollData} />
         {pollData?.questions?.map((item) => (
           <QuestionBlock question={item} isMixed={pollData?.mix_options} />
         ))}

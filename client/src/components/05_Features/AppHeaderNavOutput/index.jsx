@@ -1,12 +1,11 @@
 import React from 'react';
-import {
-  StyledNavLink,
-  StyledNavigation,
-  StyledNavigationList,
-} from './styled';
+import { StyledNavLink, StyledNavigation, StyledNavigationList } from './styled';
 import { v4 } from 'uuid';
+import { useUserRole } from '@/app/context/UserRoleProvider';
 
 const AppHeaderNavigationOutput = ({ itemsData = [] }) => {
+  const { role } = useUserRole();
+
   return (
     <StyledNavigation>
       <StyledNavigationList>
@@ -24,6 +23,18 @@ const AppHeaderNavigationOutput = ({ itemsData = [] }) => {
             </StyledNavLink>
           );
         })}
+        {role === 'Админ' && (
+          <StyledNavLink
+            end
+            key={v4()}
+            to="/admin-panel"
+            className={({ isActive, isPending }) =>
+              isPending ? 'pending' : isActive ? 'active' : ''
+            }
+          >
+            Админ-панель
+          </StyledNavLink>
+        )}
       </StyledNavigationList>
     </StyledNavigation>
   );

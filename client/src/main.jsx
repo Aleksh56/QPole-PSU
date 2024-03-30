@@ -6,13 +6,16 @@ import { AuthProvider } from '@/app/context/AuthProvider';
 import '@/locale/i18n';
 import { AlertProvider } from './app/context/AlertProvider';
 import AlertPopup from './components/04_Widgets/alert';
+import { UserRoleProvider } from './app/context/UserRoleProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <AlertProvider>
     <AuthProvider>
-      <AlertPopup />
-      <App />
+      <UserRoleProvider>
+        <AlertPopup />
+        <App />
+      </UserRoleProvider>
     </AuthProvider>
   </AlertProvider>
 );
