@@ -49,6 +49,13 @@ class PollType(models.Model):
         return self.name
     
 
+# class PollAnswer(models.Model):
+#     poll_answer = models.ForeignKey('PollAnswer', related_name='answers', on_delete=models.CASCADE)
+#     answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE)
+#     question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE)
+#     is_correct = models.BooleanField(default=None, null=True)
+#     text = models.CharField(max_length=100, default=None, null=True, blank=True)
+#     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
 
 
 class PollAnswer(models.Model):
@@ -64,7 +71,7 @@ class PollAnswer(models.Model):
 
 
     def __str__(self):
-        return f"Ответ на {self.answer_option} от {self.profile}"
+        return f"Ответ на {self.poll} от {self.profile}"
 
 
 class AnswerOption(models.Model):

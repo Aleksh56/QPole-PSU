@@ -32,3 +32,9 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('login/', include('login.urls')),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+# Добавляем URL-шаблоны для медиа-файлов и статических файлов
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

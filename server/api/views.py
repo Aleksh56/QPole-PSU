@@ -12,6 +12,7 @@ from .exсeptions import *
 from .serializers import *
 from .models import *
 from .utils import *
+from .pollvoting import pollvoting
 
 import os
 
@@ -36,7 +37,7 @@ def my_profile(request):
 
             profile_serializer = GetProfileSerializer(current_user_profile)
             user_polls = Poll.objects.filter(author=current_profile)
-            user_polls_serializer = PollSerializer(user_polls, many=True)
+            user_polls_serializer = MiniPollSerializer(user_polls, many=True)
 
             response_data = {
                 'profile': profile_serializer.data,
@@ -264,7 +265,7 @@ def my_poll(request):
 
             profile_serializer = GetProfileSerializer(current_user_profile)
             user_polls = Poll.objects.filter(author=current_user_profile)
-            user_polls_serializer = PollSerializer(user_polls, many=True)
+            user_polls_serializer = MiniPollSerializer(user_polls, many=True)
 
             response_data = {
                 'profile': profile_serializer.data,
@@ -461,7 +462,10 @@ def my_poll_question(request):
 
                 return Response(status=status.HTTP_200_OK)
             
-            elif request_type == 'copy_question':               
+            elif request_type == 'copy_question':
+                if len(my_poll.questions.all()) > 50:
+                    raise TooManyInstancesException(model='PollQuestion', limit=50)
+                         
                 cloned_question = clone_question(poll_question, my_poll)
                 serializer = PollQuestionSerializer(cloned_question)
                 return Response(serializer.data)
@@ -689,7 +693,7 @@ def my_poll_question_option(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting(request):
-    try:
+    # try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -735,7 +739,7 @@ def poll_voting(request):
             if not answers:
                 raise MissingFieldException(field_name='answers')
             
-            answers = process_answers(answers, poll, my_profile)
+            answers = pollvoting(answers, poll, my_profile)
             questions = poll.questions.filter(answer_options__answers__profile=my_profile)
             previous_answers = PollAnswer.objects.filter(
                 Q(question__in=questions) &
@@ -842,11 +846,11 @@ def poll_voting(request):
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception}"}, api_exception.status_code)
 
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    # except Exception as ex:
+    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 

@@ -233,7 +233,7 @@ class PollAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PollAnswer
-        exclude = ['poll', 'image', 'is_correct']
+        exclude = ['poll', 'image']
 
 
 
