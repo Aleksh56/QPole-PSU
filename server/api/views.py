@@ -36,15 +36,15 @@ def my_profile(request):
 
 
             profile_serializer = GetProfileSerializer(current_user_profile)
-            user_polls = Poll.objects.filter(author=current_profile)
-            user_polls_serializer = MiniPollSerializer(user_polls, many=True)
+            # user_polls = Poll.objects.filter(author=current_profile)
+            # user_polls_serializer = MiniPollSerializer(user_polls, many=True)
 
-            response_data = {
-                'profile': profile_serializer.data,
-                'user_polls': user_polls_serializer.data
-            }
+            # response_data = {
+            #     'profile': profile_serializer.data,
+            #     'user_polls': user_polls_serializer.data
+            # }
 
-            return Response(response_data, status=status.HTTP_200_OK)
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
         elif request.method == 'POST':
             current_user_profile = Profile.objects.filter(user=current_user).first()

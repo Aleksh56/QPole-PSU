@@ -18,6 +18,8 @@ class Profile(models.Model):
     # has_2auf = models.BooleanField(default=False)
 
     role = models.ForeignKey('UserRole', on_delete=models.CASCADE, related_name='profiles', blank=True, null=True)
+    
+    is_banned = models.BooleanField(default=False)
 
 
     def __str__(self):

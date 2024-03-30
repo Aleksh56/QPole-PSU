@@ -30,6 +30,7 @@ urlpatterns = [
     path('qr_code_view/', qr_code_view),
     path('verify-totp/', VerifyTOTPView.as_view(), name='verify-totp'),
     path('api/', include('api.urls')),
+    path('admin_api/', include('admin_api.urls')),
     path('login/', include('login.urls')),
 ]
 

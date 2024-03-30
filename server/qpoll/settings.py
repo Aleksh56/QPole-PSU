@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'api.apps.ApiConfig',
+    'admin_api.apps.AdminApiConfig',
     'login.apps.LoginConfig',
 ]
 
