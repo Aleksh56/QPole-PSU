@@ -342,7 +342,7 @@ def my_poll_question(request):
             return Response(serializer.data)
 
         elif request.method == 'POST':
-            data = request.data
+            data = request.data.copy()
 
             poll_id = data.get('poll_id', None)
             if not poll_id:
@@ -358,11 +358,12 @@ def my_poll_question(request):
             if len(my_poll.questions.all()) > 50:
                 raise TooManyInstancesException(model='PollQuestion', limit=50)
 
+            data['poll'] = my_poll.id
             poll_question = PollQuestionSerializer(data=data)
             if poll_question.is_valid():
                 poll_question = poll_question.save()
-                my_poll.questions.add(poll_question)
-                return Response("Вопрос в опросе успешно проинициализирован", status=status.HTTP_201_CREATED)
+                # my_poll.questions.add(poll_question)
+                return Response(f"Вопрос {poll_question} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
                 return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
             
@@ -527,7 +528,7 @@ def my_poll_question_option(request):
             return Response(serializer.data)
 
         elif request.method == 'POST':
-            data = request.data
+            data = request.data.copy()
 
             poll_id = data.get('poll_id', None)
             if not poll_id:
@@ -552,13 +553,14 @@ def my_poll_question_option(request):
             if len(poll_question.answer_options.all()) > 10:
                 raise TooManyInstancesException(model='PollQuestion', limit=10)
 
+            data['question'] = poll_question.id
             answer_option_serializer = AnswerOptionSerializer(data=data)
             if answer_option_serializer.is_valid():
                 answer_option = answer_option_serializer.save()
-                poll_question.answer_options.add(answer_option)
-                return Response("Вариант ответа в вопросе успешно проинициализирован", status=status.HTTP_201_CREATED)
+                # poll_question.answer_options.add(answer_option)
+                return Response(f"Вариант ответа {answer_option} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
-                return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(answer_option_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
         elif request.method == 'PATCH':
             data = request.data.copy()
@@ -704,24 +706,19 @@ def poll_voting(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
-                if not poll:
-                    raise ObjectNotFoundException(model='Poll')
-                
-                serializer = PollSerializer(poll)
+                my_answers = PollAnswerGroup.objects.filter(
+                    Q(profile=my_profile) & Q(poll__poll_id=poll_id)
+                )
+                serializer = PollAnswerGroupSerializer(my_answers, many=True)
                 return Response(serializer.data)
             
             else:
-                my_answers = PollAnswer.objects.filter(profile=my_profile)
-                my_answered_polls = Poll.objects.filter(
-                    questions__answer_options__answers__in=my_answers
-                ).distinct()
-
-                serializer = PollSerializer(my_answered_polls, many=True)
+                my_answers = PollAnswerGroup.objects.filter(profile=my_profile)
+                serializer = PollAnswerGroupSerializer(my_answers, many=True)
                 return Response(serializer.data)
 
         elif request.method == 'POST':
-            data = request.data
+            data = request.data.copy()
 
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
@@ -740,24 +737,37 @@ def poll_voting(request):
                 raise MissingFieldException(field_name='answers')
             
             answers = pollvoting(answers, poll, my_profile)
-            questions = poll.questions.filter(answer_options__answers__profile=my_profile)
-            previous_answers = PollAnswer.objects.filter(
-                Q(question__in=questions) &
-                Q(profile=my_profile)
-            )
+            previous_answer = PollAnswerGroup.objects.filter(
+                Q(poll=poll) & Q(profile=my_profile)      
+            ).first()
 
             # Удаляем все найденные ответы
-            previous_answers.delete()
+            if previous_answer:
+                previous_answer.delete()
 
-
-            serializer = PollAnswerSerializer(data=answers, many=True, context={'poll': poll})
-            if serializer.is_valid():
-                poll_answers = serializer.save()
+            poll_answer_group_data = {
+                'profile': my_profile.user_id,
+                'poll': poll.id,
+            }
+            poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
+            if poll_answer_group.is_valid():
+                poll_answer_group = poll_answer_group.save()
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST)
             
+
+            data = data['answers']
+            for answer in data:
+                answer['poll_answer_group'] = poll_answer_group.id
+       
+
+            answers = PollAnswerSerializer(data=data, many=True)
+            if answers.is_valid():
+                answers = answers.save()
+            else:
+                return Response(answers.errors, status=status.HTTP_400_BAD_REQUEST)
             
-            serializer = PollAnswerSerializer(poll_answers, many=True)
+            serializer = PollAnswerSerializer(answers, many=True)
 
             result = {}
             if poll.poll_type.name == 'Викторина':
@@ -776,50 +786,7 @@ def poll_voting(request):
                 }
                         
 
-
-            # Установка связей между вариантами ответов и ответами
-            for poll_answer in poll_answers:
-                poll_answer.question.answer_options.filter(id=poll_answer.answer_option_id).first().answers.add(poll_answer)
-
-
             return Response({'message':"Вы успешно проголосовали", 'data':serializer.data, 'result': result}, status=status.HTTP_200_OK)
-
-        elif request.method == 'PATCH':
-            data = request.data
-
-            poll_id = request.GET.get('poll_id', None)
-            if not poll_id:
-                raise MissingParameterException(field_name='poll_id')
-           
-
-            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
-
-            if poll.can_user_vote(my_profile):
-                raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
-            
-            answers = data['answers']
-            with transaction.atomic():
-                for answer in answers:
-                    question = poll.questions.filter(id=answer['question_id']).first()  
-                    if not question:
-                        raise ObjectNotFoundException(model='PollQuestion')
-                    answer_option = question.answer_options.filter(id=answer['answers_option_id']).first()  
-                    if not answer_option:
-                        raise ObjectNotFoundException(model='AnswerOption')
-                    
-                    poll_answer = PollAnswer(profile=my_profile,                        
-                                             answer_option=answer_option)
-                    
-                    poll_answer.text = answer.get('text', None)
-
-                    poll_answer.save()
-                    answer_option.answers.add(poll_answer)
-
-
-
-            return Response({'message':"Вы успешно проголосовали повторно"}, status=status.HTTP_200_OK)
 
         elif request.method == 'DELETE':
             poll_id = request.GET.get('poll_id', None)

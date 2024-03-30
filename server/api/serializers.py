@@ -64,9 +64,7 @@ class MiniPollAnswerSerializer(serializers.ModelSerializer):
 class AnswerOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerOption
-        exclude = ['answers']
-
-    # answers = MiniPollAnswerSerializer(many=True, required=False)
+        fields = '__all__'
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -92,6 +90,53 @@ class UserRoleSerializer(serializers.ModelSerializer):
 class MyProfileSerializer(serializers.ModelSerializer):  
     class Meta:
         model = Profile
+        fields = '__all__'
+
+
+# сериализаторы ответов
+        
+class PollAnswerSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+
+    def create(self, validated_data):
+
+        poll = self.context.get('poll')
+
+        validated_data['poll_id'] = poll.id
+        if poll.poll_type.name == 'Викторина':
+            answer_option = validated_data['answer_option']
+            if not answer_option.is_correct == None:
+                if answer_option.is_correct:
+                    validated_data['is_correct'] = True
+                else:
+                    validated_data['is_correct'] = False
+                
+
+        return super().create(validated_data)
+
+    def get_author(self, instance):
+        return MiniProfileSerializer(instance=instance.profile).data
+
+    class Meta:
+        model = PollAnswer
+        exclude = ['poll', 'image']
+
+
+class PollAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PollAnswer
+        fields = '__all__'
+
+class PollAnswerGroupSerializer(serializers.ModelSerializer):
+    answers = PollAnswerSerializer(many=True, read_only=True)
+    author = serializers.SerializerMethodField()
+
+
+    def get_author(self, instance):
+        return MiniProfileSerializer(instance=instance.profile).data
+    
+    class Meta:
+        model = PollAnswerGroup
         fields = '__all__'
 
 
@@ -152,9 +197,10 @@ class BasePollSerializer(serializers.ModelSerializer):
 class PollSerializer(BasePollSerializer):
     poll_type = PollTypeSerializer(required=True)
     author = MyProfileSerializer(required=True)
-    questions = QuestionSerializer(many=True, required=False)
 
-    
+    questions = QuestionSerializer(many=True, required=False)
+    # user_answers = PollAnswerGroupSerializer(many=True, required=False)
+
     qrcode_img = serializers.SerializerMethodField()
 
     def get_qrcode_img(self, instance):
@@ -171,7 +217,7 @@ class MiniPollSerializer(BasePollSerializer):
 
     class Meta:
         model = Poll
-        exclude = ['qrcode', 'questions']
+        exclude = ['qrcode']
 
 
 # сериализаторы воросов
@@ -208,61 +254,23 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         fields = '__all__'  
 
 
-# сериализаторы ответов
-class PollAnswerSerializer(serializers.ModelSerializer):
-    author = serializers.SerializerMethodField()
 
-    def create(self, validated_data):
-
-        poll = self.context.get('poll')
-
-        validated_data['poll_id'] = poll.id
-        if poll.poll_type.name == 'Викторина':
-            answer_option = validated_data['answer_option']
-            if not answer_option.is_correct == None:
-                if answer_option.is_correct:
-                    validated_data['is_correct'] = True
-                else:
-                    validated_data['is_correct'] = False
-                
-
-        return super().create(validated_data)
-
-    def get_author(self, instance):
-        return MiniProfileSerializer(instance=instance.profile).data
-
-    class Meta:
-        model = PollAnswer
-        exclude = ['poll', 'image']
-
-
-
+# сериализаторы статистики опросов
 
 class AnswerOptionStatsSerializer(serializers.ModelSerializer):
-    votes_quantity = serializers.SerializerMethodField()
-
-    def get_votes_quantity(self, instance):
-        return len(instance.answers.all())
 
     class Meta:
         model = AnswerOption
-        fields = ['id', 'name', 'votes_quantity']
+        fields = ['id', 'name']
 
 
-# сериализаторы статистики опросов
-        
 class PollQuestionStatsSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionStatsSerializer(many=True)
-    votes_quantity = serializers.SerializerMethodField()
 
-
-    def get_votes_quantity(self, instance):
-        return instance.votes_quantity
-    
 
     class Meta:
         model = PollQuestion
-        fields = ['answer_options', 'name', 'votes_quantity']
+        fields = ['answer_options', 'name']
 
 
 class PollStatsSerializer(serializers.ModelSerializer):

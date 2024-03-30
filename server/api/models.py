@@ -19,6 +19,10 @@ class Profile(models.Model):
 
     role = models.ForeignKey('UserRole', on_delete=models.CASCADE, related_name='profiles', blank=True, null=True)
     
+    
+    is_banned = models.BooleanField(default=False)
+
+
     is_banned = models.BooleanField(default=False)
 
 
@@ -51,36 +55,33 @@ class PollType(models.Model):
         return self.name
     
 
-# class PollAnswer(models.Model):
-#     poll_answer = models.ForeignKey('PollAnswer', related_name='answers', on_delete=models.CASCADE)
-#     answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE)
-#     question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE)
-#     is_correct = models.BooleanField(default=None, null=True)
-#     text = models.CharField(max_length=100, default=None, null=True, blank=True)
-#     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
-
-
 class PollAnswer(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    poll = models.ForeignKey('Poll', related_name='answers', on_delete=models.CASCADE, default=None)
-    answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE, null=True, blank=True)
-    question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE, null=True, blank=True)
+    poll_answer_group = models.ForeignKey('PollAnswerGroup', related_name='answers', on_delete=models.CASCADE)
+    answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE)
+    question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE)
+    is_correct = models.BooleanField(default=None, null=True)
     text = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
 
-    is_correct = models.BooleanField(default=None, null=True)
+    def __str__(self):
+        return f"Ответ на {self.question}"
+    
+
+class PollAnswerGroup(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
     voting_date = models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
-        return f"Ответ на {self.poll} от {self.profile}"
+        return f"Группа ответов на {self.poll} от {self.profile}"
 
 
 class AnswerOption(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото варианта ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
-    answers = models.ManyToManyField(PollAnswer, blank=True, null=True)
-    
+    question = models.ForeignKey('PollQuestion', related_name='answer_options', on_delete=models.CASCADE) # связь с вариантом вопросом
+
     is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
     is_text_response = models.BooleanField(default=True, null=True)    # текст ли как ответ
     is_free_response = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
@@ -109,7 +110,7 @@ class PollQuestion(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     info = models.CharField(max_length=500, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото вопроса', upload_to=f'images/poll_questions/', blank=True, null=True, default=None)
-    answer_options = models.ManyToManyField(AnswerOption, blank=True, null=True)
+    poll = models.ForeignKey('Poll', related_name='questions', on_delete=models.CASCADE) # связь с опросом
 
     has_correct_answer = models.BooleanField(default=None, null=True)   # есть ли верный ответ
     has_multiple_choices = models.BooleanField(default=False)   # есть ли множенственный выбор
@@ -121,9 +122,9 @@ class PollQuestion(models.Model):
     order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в опросе
 
 
-    @property
-    def votes_quantity(self):   # число ответов на вопрос
-        return self.answer_options.aggregate(members=Count('answers__profile', distinct=True))['members'] or 0
+    # @property
+    # def votes_quantity(self):   # число ответов на вопрос
+    #     return self.answer_options.aggregate(members=Count('answers__profile', distinct=True))['members'] or 0
    
 
     def __str__(self):
@@ -157,9 +158,6 @@ class Poll(models.Model):
     request_contact_info = models.BooleanField(default=False) # запрашивать контактные данные
     hide_options_percentage = models.BooleanField(default=False) # добавить теги
 
-    # вопросы
-    questions = models.ManyToManyField(PollQuestion, blank=True, null=True)
-    
     is_paused = models.BooleanField(default=False) # приостановлено
     is_closed = models.BooleanField(default=False) # завершено
 
@@ -184,24 +182,20 @@ class Poll(models.Model):
             if self.poll_type.name == 'Летучка':
                 self.duration = self.poll_type.duration
 
-
-    def delete(self):
-        super().delete(keep_parents=False)
-        
         
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):
         if not user_profile:
             return None
         
-        return self.questions.filter(
-            answer_options__answers__profile=user_profile
+        return self.user_answers.filter(
+            profile=user_profile
         ).exists()
     
     def can_user_vote(self, user_profile):
         if not (self.is_closed or self.is_paused):
-            if self.questions.filter(
-                answer_options__answers__profile=user_profile
+            if self.filter(
+            user_answers__profile=user_profile
             ).exists():
                 if self.can_cancel_vote:
                     return False
@@ -211,7 +205,7 @@ class Poll(models.Model):
     
     @property
     def members_quantity(self):   # число участников опроса
-        return self.questions.aggregate(members=Count('answer_options__answers__profile', distinct=True))['members'] or 0
+        return self.user_answers.aggregate(members=Count('profile', distinct=True))['members'] or 0
 
     @property
     def questions_quantity(self):   # число вопросов опроса
