@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAllUsersFx } from './models/get-users';
-import { getAdminUsersTableColumns } from '@/data/fields';
 import CustomTable from '@/components/04_Widgets/table';
+import { getAdminUsersTableColumns } from '@/data/fields';
 
 const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);

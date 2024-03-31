@@ -47,7 +47,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData }) => {
     <StyledCard>
       <CardMedia
         sx={{ backgroundSize: 'contain', padding: '25px', borderRadius: '16px' }}
-        image={config.serverUrl.main + pollData.image ?? ''}
+        image={config.serverUrl.main + pollData.image}
         title="Poll Image"
       />
       <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
