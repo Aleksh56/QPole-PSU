@@ -4,7 +4,7 @@ import { fetchPollQuestions } from './model/fetch-questions';
 import { useNavigate, useParams } from 'react-router-dom';
 import ConductionHeader from '@/components/04_Widgets/ConductionPoll/ConductionHeader';
 import QuestionBlock from '@/components/04_Widgets/ConductionPoll/QuestionBlock';
-import { ConductionWrapper } from './styled';
+import { ConductionBackgroundWrapper, ConductionWrapper } from './styled';
 import { useUnit } from 'effector-react';
 import { $answersStore, resetAnswers } from './store/answer-store';
 import { sendAnswersRequestFx } from './model/send-answers';
@@ -42,7 +42,7 @@ const ConductionPollPage = () => {
   };
 
   return (
-    <>
+    <ConductionBackgroundWrapper>
       <Header isMainPage={false} />
       <ConductionWrapper>
         <ConductionHeader data={pollData} />
@@ -51,7 +51,7 @@ const ConductionPollPage = () => {
         ))}
         <button onClick={() => handleSubmit()}>Send</button>
       </ConductionWrapper>
-    </>
+    </ConductionBackgroundWrapper>
   );
 };
 

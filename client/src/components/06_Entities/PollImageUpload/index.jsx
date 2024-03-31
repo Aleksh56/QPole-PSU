@@ -3,15 +3,14 @@ import { InvisibleInput, StyledImageButton } from './styled';
 import { Box, IconButton } from '@mui/material';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-const BASE_IMAGE_URL = 'http://188.225.45.226';
+import config from '@/config';
 
 const PollImageUpload = ({ image = '', onFileSelect, handleDelete }) => {
   const [preview, setPreview] = useState('');
 
   useEffect(() => {
     if (image) {
-      setPreview(`${BASE_IMAGE_URL}${image}`);
+      setPreview(config.serverUrl.main + image);
     }
   }, [image]);
 

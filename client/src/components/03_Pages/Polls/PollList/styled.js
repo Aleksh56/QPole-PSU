@@ -7,7 +7,7 @@ export const PollListPageContentWrapper = styled(Box)(() => ({
   gridTemplateColumns: '1fr 3fr',
   columnGap: Rem(30),
   alignItems: 'start',
-  maxWidth: Rem(1200),
+  maxWidth: Rem(1500),
   margin: '0 auto',
   padding: `${Rem(70)} ${Rem(15)}`,
 }));

@@ -1,7 +1,9 @@
+import BlockIcon from '@mui/icons-material/Block';
+import SettingsIcon from '@mui/icons-material/Settings';
+
 export const appHeaderData = [
   { caption: 'Ваши опросы', to: '/app' },
-  { caption: 'Опросы', to: '/polls' },
-  { caption: 'На главную', to: '/' },
+  { caption: 'Общедоступные опросы', to: '/polls' },
 ];
 
 export const commonHeaderLinksData = [
@@ -134,5 +136,48 @@ export const pollTuningSettings = [
         defaultChecked: false,
       },
     ],
+  },
+];
+
+export const getAdminUsersTableColumns = (handleBlockUser, handleChangeStatus) => [
+  { id: 1, key: 'id', caption: 'ID' },
+  { id: 2, key: 'name', caption: 'Имя', render: (name) => name ?? '-' },
+  { id: 3, key: 'email', caption: 'Email' },
+  { id: 4, key: 'role', caption: 'Роль', render: (role) => role ?? '-' },
+  {
+    id: 5,
+    key: 'is_banned',
+    caption: 'Статус',
+    render: (isBanned) => (
+      <span
+        style={{
+          color: isBanned ? '#EF3826' : '#00B69B',
+          backgroundColor: isBanned ? 'rgba(239, 56, 38, .2)' : 'rgba(0, 182, 155, .3)',
+          padding: '6px 16px',
+          borderRadius: '5px',
+          fontWeight: 500,
+        }}
+      >
+        {isBanned ? 'Заблокирован' : 'Активен'}
+      </span>
+    ),
+  },
+  {
+    id: 6,
+    key: 'actions',
+    caption: 'Действия',
+    render: (_, user) => (
+      <>
+        <BlockIcon
+          onClick={() => handleBlockUser(user.id)}
+          color="error"
+          sx={{ cursor: 'pointer' }}
+        />
+        <SettingsIcon
+          onClick={() => handleChangeStatus(user.id)}
+          sx={{ ml: 1, cursor: 'pointer' }}
+        />
+      </>
+    ),
   },
 ];

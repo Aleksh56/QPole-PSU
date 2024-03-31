@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { MenuButton } from '@mui/base/MenuButton';
 
 export const StyledHeaderWrapper = styled('header')(() => ({
-  backgroundColor: '#ebebeb',
+  backgroundColor: '#EAEDFE',
 }));
 
 export const StyledHeaderContainer = styled(Box)(() => ({

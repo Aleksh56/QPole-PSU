@@ -1,0 +1,17 @@
+import useAuth from '@/hooks/useAuth';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useUserRole } from '../context/UserRoleProvider';
+
+const AdminPrivateRoute = () => {
+  const { isAuthenticated } = useAuth();
+  const { role } = useUserRole();
+  const location = useLocation();
+
+  return isAuthenticated === true && role === 'Админ' ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/app" state={{ from: location }} replace />
+  );
+};
+
+export default AdminPrivateRoute;

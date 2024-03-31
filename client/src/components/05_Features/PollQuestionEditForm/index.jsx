@@ -30,6 +30,8 @@ const PollQuestionEditForm = ({ question }) => {
   useEffect(() => {
     const correctOption = question.answer_options.find((option) => option.is_correct);
     setSelectedOption(correctOption ? correctOption.id : '');
+    setEditedQuestion(question);
+    setSwitchState(question.has_multiple_choices);
   }, [question]);
 
   const handleOptionSelect = async (e, q_id) => {
@@ -45,11 +47,6 @@ const PollQuestionEditForm = ({ question }) => {
   useEffect(() => {
     fetchOptions();
   }, [id, question.id]);
-
-  useEffect(() => {
-    setEditedQuestion(question);
-    setSwitchState(question.has_multiple_choices);
-  }, [question]);
 
   const handleFieldChange = async (fieldName, value, q_id) => {
     const updatedQuestion = { ...editedQuestion, [fieldName]: value };
@@ -179,11 +176,19 @@ const PollQuestionEditForm = ({ question }) => {
           )}
         </Droppable>
       </DragDropContext>
-      <Box sx={{ display: 'grid', justifyContent: 'center', rowGap: '10px' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', columnGap: '10px' }}>
         {options.length === 0 && <Typography>Вы не создали ни одного варианта ответа</Typography>}
         <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
           Добавить вариант ответа
         </button>
+        {pollType === 'Опрос' && (
+          <>
+            <span>или</span>
+            <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
+              Добавить вариант другое
+            </button>
+          </>
+        )}
       </Box>
     </div>
   );

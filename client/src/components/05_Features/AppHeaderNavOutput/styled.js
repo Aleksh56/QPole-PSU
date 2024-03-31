@@ -10,6 +10,10 @@ export const StyledNavigationList = styled('ul')(() => ({
   display: 'flex',
   alignItems: 'center',
   columnGap: Rem(15),
+  '& a:not(:last-child)': {
+    paddingRight: Rem(15),
+    borderRight: '2px solid #D4D4D4',
+  },
 }));
 
 export const StyledNavLink = styled(NavLink)(() => ({

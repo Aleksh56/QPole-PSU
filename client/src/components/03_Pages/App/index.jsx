@@ -10,6 +10,7 @@ import { _settings } from './config/settings';
 import { CircularProgress } from '@mui/material';
 import InboxIcon from '@mui/icons-material/Inbox';
 import usePageTitle from '@/hooks/usePageTitle';
+import config from '@/config';
 
 const AppPage = () => {
   usePageTitle('app');

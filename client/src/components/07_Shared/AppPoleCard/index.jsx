@@ -5,11 +5,12 @@ import { StyledCard, StyledChip, StyledTypographyName } from './styled';
 import { deletePollRequest } from './api/apiRequest';
 import { closePollFx } from './model/close-poll';
 import { duplicatePollFx } from './model/duplicate-poll';
-
-const BASE_IMAGE_URL = 'http://188.225.45.226';
+import config from '@/config';
+import PrimaryButton from '../PrimaryButton';
 
 const AppPoleCard = React.memo(({ pollData, fetchData }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const cardButton = <PrimaryButton caption="Пройти" to={`/conduct-poll/${pollData.poll_id}`} />;
 
   const handleMenuOpen = (e) => {
     e.preventDefault();
@@ -46,22 +47,9 @@ const AppPoleCard = React.memo(({ pollData, fetchData }) => {
     <StyledCard>
       <CardMedia
         sx={{ backgroundSize: 'contain', padding: '25px', borderRadius: '16px' }}
-        image={BASE_IMAGE_URL + pollData.image ?? ''}
+        image={config.serverUrl.main + pollData.image ?? ''}
         title="Poll Image"
       />
-      {/* <IconButton
-          sx={{ position: 'absolute', right: 8, top: 8 }}
-          aria-label="settings"
-          onClick={handleMenuOpen}
-        >
-          <MoreHorizIcon />
-        </IconButton> */}
-      {/* <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
-          <MenuItem onClick={(e) => handleDuplicatePoll(e, pollData.poll_id)}>Дублировать</MenuItem>
-          <MenuItem onClick={(e) => handleClosePoll(e, pollData.poll_id)}>Закрыть опрос</MenuItem>
-          <MenuItem onClick={(e) => handleDeletePoll(e)}>Удалить</MenuItem>
-        </Menu> */}
-      {/* </CardMedia> */}
       <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
         <Box sx={{ marginBottom: '20px' }}>
           <StyledChip label={!pollData.is_closed ? 'Открыт' : 'Закрыт'} />
@@ -73,6 +61,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData }) => {
           {pollData.description ??
             'Lorem Ipsum - это текст-"рыба", часто используемый в печати и вэб-дизайне. Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века.'}
         </Typography>
+        {cardButton}
       </CardContent>
     </StyledCard>
   );

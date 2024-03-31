@@ -1,5 +1,6 @@
 import { handleRequest } from '@/api/api';
 import axios from 'axios';
+import config from '@/config';
 
 const timeouts = {};
 
@@ -14,7 +15,7 @@ export const changePoleData = async (field, value, id, fetchPoleData) => {
 
   if (field === 'image') {
     axios.patch(
-      `http://188.225.45.226/api/my_poll/?poll_id=${id}`,
+      `${config.serverUrl.main}/api/my_poll/?poll_id=${id}`,
       { [field]: value },
       {
         headers: {

@@ -10,7 +10,7 @@ import {
 import { Dropdown } from '@mui/base/Dropdown';
 import { Menu } from '@mui/base/Menu';
 import { MenuItem } from '@mui/base/MenuItem';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
@@ -32,12 +32,12 @@ const AppHeader = () => {
   return (
     <StyledHeaderWrapper>
       <StyledHeaderContainer>
-        <StyledHeaderLogo to="/app">QPoll</StyledHeaderLogo>
+        <StyledHeaderLogo to="/">QPoll</StyledHeaderLogo>
         <AppHeaderNavigationOutput itemsData={appHeaderData} />
         <Dropdown>
           <StyledHeaderProfile>
             {userData?.email ?? ''}({role})
-            <ArrowDropDownIcon fontSize="small" />
+            <AccountCircleIcon fontSize="small" />
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>
             <MenuItem>

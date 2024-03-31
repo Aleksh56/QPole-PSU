@@ -7,6 +7,7 @@ import PollListPage from '@/components/03_Pages/Polls/PollList';
 import ConductionPollPage from './components/03_Pages/Polls/ConductionPoll';
 import FrmRestore from '@/components/04_Widgets/frmRestore';
 import AdminPanelPage from './components/03_Pages/Admin';
+import AdminPrivateRoute from './app/Routes/AdminPrivateRoute';
 
 const App = () => {
   return (
@@ -18,8 +19,10 @@ const App = () => {
         <Route path="/signin" element={<AuthPage />} />
         <Route path="/signup" element={<AuthPage />} />
         <Route path="/password-reset" element={<FrmRestore />} />
-        <Route path="/admin-panel/*" element={<AdminPanelPage />} />
         <Route element={<PrivateRoute />}>
+          <Route element={<AdminPrivateRoute />}>
+            <Route path="/admin-panel/*" element={<AdminPanelPage />} />
+          </Route>
           <Route path="/app/*" element={<AppPageRoutes />} />
         </Route>
       </Routes>

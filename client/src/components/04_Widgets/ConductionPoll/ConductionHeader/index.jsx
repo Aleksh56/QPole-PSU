@@ -9,13 +9,13 @@ import {
   StyledImage,
   StyledTitle,
 } from './styled';
+import config from '@/config';
 
 const ConductionHeader = ({ data }) => {
-  const BASE_URL = `http://188.225.45.226`;
   return (
     <HeaderWrapper>
       <ImageWrapper>
-        <StyledImage src={BASE_URL + data.image} />
+        <StyledImage src={config.serverUrl.main + data.image} />
       </ImageWrapper>
       <DescriptionWrapper>
         <DescriptionTagsWrapper>

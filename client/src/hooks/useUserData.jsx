@@ -11,7 +11,7 @@ const useUserData = () => {
   useEffect(() => {
     async function fetchUserData() {
       if (!isAuthenticated) {
-        console.log('Пользователь не аутентифицирован'); // ToDo - rewrite to Notification Snackbar
+        console.log('Пользователь не аутентифицирован');
         return;
       }
 
@@ -19,13 +19,7 @@ const useUserData = () => {
         const headers = {
           Authorization: `Token ${token}`,
         };
-        const { data } = await handleRequest(
-          'get',
-          '/api/my_profile/',
-          null,
-          'Загрузка данных профиля', // ToDo - Delete (Just for debugging)
-          headers
-        );
+        const { data } = await handleRequest('get', '/api/my_profile/', null, headers);
         setUserRole(data.role);
         setUserData(data);
       } catch (error) {

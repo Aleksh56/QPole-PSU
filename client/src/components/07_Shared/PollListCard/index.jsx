@@ -2,8 +2,7 @@ import React from 'react';
 import { CardMedia, CardContent, CardActions } from '@mui/material';
 import { CardButton, CardContentWrapper, CardDescription, CardTitle, CardWrapper } from './styled';
 import { useNavigate } from 'react-router-dom';
-
-const BASE_IMAGE_URL = 'http://188.225.45.226';
+import config from '@/config';
 
 const PollListCard = ({ item, isAuthenticated }) => {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ const PollListCard = ({ item, isAuthenticated }) => {
 
   return (
     <CardWrapper>
-      <CardMedia component="img" sx={{ width: '50%' }} image={BASE_IMAGE_URL + item.image} />
+      <CardMedia component="img" sx={{ width: '50%' }} image={config.serverUrl.main + item.image} />
       <CardContentWrapper>
         <CardContent sx={{ flexGrow: 1 }}>
           <CardTitle gutterBottom noWrap>
