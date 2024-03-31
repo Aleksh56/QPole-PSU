@@ -258,19 +258,33 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
 # сериализаторы статистики опросов
 
 class AnswerOptionStatsSerializer(serializers.ModelSerializer):
+    votes_quantity = serializers.SerializerMethodField()
+
+    def get_votes_quantity(self, instance):
+        user_answers = self.context.get('user_answers').filter(answer_option__id=instance.id)
+        user_answers = PollAnswerSerializer(user_answers, many=True).data
+        return len(user_answers)
+
 
     class Meta:
         model = AnswerOption
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'votes_quantity']
 
 
 class PollQuestionStatsSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionStatsSerializer(many=True)
 
+    votes_quantity = serializers.SerializerMethodField()
+
+    def get_votes_quantity(self, instance):
+        user_answers = self.context.get('user_answers').filter(question__id=instance.id)
+        user_answers = PollAnswerSerializer(user_answers, many=True).data
+        return len(user_answers)
 
     class Meta:
         model = PollQuestion
-        fields = ['answer_options', 'name']
+        fields = ['answer_options', 'name', 'votes_quantity']
+
 
 
 class PollStatsSerializer(serializers.ModelSerializer):

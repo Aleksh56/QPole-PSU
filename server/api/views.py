@@ -301,8 +301,8 @@ def my_poll_stats(request):
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-
-            stats = PollStatsSerializer(poll)
+            user_answers = PollAnswer.objects.filter(poll_answer_group__poll__poll_id=poll.poll_id)
+            stats = PollStatsSerializer(poll, context={'user_answers': user_answers})
             return Response(stats.data)
 
     except APIException as api_exception:
