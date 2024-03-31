@@ -47,7 +47,8 @@ def register(request):
                     user = serializer.save()
                     user_profile = {
                         'user': user.id,
-                        'email': email
+                        'email': email,
+                        'role': 2
                     }
                     serializer = ProfileSerializer(data=user_profile)
                     if serializer.is_valid():

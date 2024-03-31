@@ -1,5 +1,4 @@
 import imghdr
-from .exсeptions import MissingFieldException, ObjectNotFoundException, PollAnsweringException
 
 def check_file(file):
     file_type = imghdr.what(file)
@@ -17,7 +16,7 @@ def check_file(file):
     return True, "ОК"
 
 from rest_framework.views import exception_handler as drf_exception_handler
-from rest_framework.exceptions import APIException
+
 
 def custom_exception_handler(exc, context):
     response = drf_exception_handler(exc, context)
@@ -29,7 +28,7 @@ def custom_exception_handler(exc, context):
 
 
 from copy import deepcopy
-from django.db import transaction
+
 
 def clone_poll(poll, new_poll_id):
     cloned_poll = deepcopy(poll)
@@ -66,10 +65,12 @@ def clone_question(question, poll):
     for answer_option in question.answer_options.all():
         new_answer_option = deepcopy(answer_option)
         new_answer_option.id = None
+        new_answer_option.image = None
         new_answer_option.save()
         cloned_question.answer_options.add(new_answer_option)
 
     poll.questions.add(cloned_question)
+    cloned_question.image = None
     return cloned_question
 
 

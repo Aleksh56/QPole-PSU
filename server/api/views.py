@@ -36,13 +36,6 @@ def my_profile(request):
 
 
             profile_serializer = GetProfileSerializer(current_user_profile)
-            # user_polls = Poll.objects.filter(author=current_profile)
-            # user_polls_serializer = MiniPollSerializer(user_polls, many=True)
-
-            # response_data = {
-            #     'profile': profile_serializer.data,
-            #     'user_polls': user_polls_serializer.data
-            # }
 
             return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
@@ -729,9 +722,10 @@ def poll_voting(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
-            if poll.has_user_participated_in(my_profile):
-                raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
-            
+            if poll.is_revote_allowed:
+                if poll.has_user_participated_in(my_profile):
+                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+                
             answers = data.get('answers', None)
             if not answers:
                 raise MissingFieldException(field_name='answers')
@@ -808,7 +802,8 @@ def poll_voting(request):
             answers_to_delete = poll.answers.all().filter(profile=my_profile)
 
             # Удаляем все найденные ответы
-            answers_to_delete.delete()
+            if answers_to_delete:
+                answers_to_delete.delete()
 
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)

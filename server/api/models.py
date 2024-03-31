@@ -23,9 +23,6 @@ class Profile(models.Model):
     is_banned = models.BooleanField(default=False)
 
 
-    is_banned = models.BooleanField(default=False)
-
-
     def __str__(self):
         if self.name and self.surname:
             return self.name + ' ' + self.surname
@@ -150,7 +147,7 @@ class Poll(models.Model):
     has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
     is_anonymous = models.BooleanField(default=False) # анонимное
 
-    can_cancel_vote = models.BooleanField(default=True) # запретить повторное
+    is_revote_allowed = models.BooleanField(default=False) # разрешить повторное
     mix_questions = models.BooleanField(default=False) # перемешивать вопросы
     mix_options = models.BooleanField(default=False) # перемешивать варианты ответа
     hide_participants_quantity = models.BooleanField(default=False) # скрыть количество участников
@@ -195,11 +192,11 @@ class Poll(models.Model):
     def can_user_vote(self, user_profile):
         if not (self.is_closed or self.is_paused):
             if self.filter(
-            user_answers__profile=user_profile
+                user_answers__profile=user_profile
             ).exists():
-                if self.can_cancel_vote:
-                    return False
-                return True
+                if self.is_revote_allowed:
+                    return True
+                return False
             return True
         return False
     

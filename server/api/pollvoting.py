@@ -35,7 +35,10 @@ def pollvoting(answers, poll, my_profile_id):
                 answer['profile'] = my_profile_id
                 unique_answers.append(answer)
                 seen_questions.append(question_id)
-                unique_answer_options.append(answer_option_id)
+                if not answer_option_id in unique_answer_options:
+                    unique_answer_options.append(answer_option_id)
+                else:
+                    raise PollAnsweringException(detail=f"Выбрано два однинаковых варианта ответа")
             else:
                 raise PollAnsweringException(detail=f"Дано два ответа на один вопрос: №{answer['question']}")
         else:

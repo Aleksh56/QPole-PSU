@@ -59,8 +59,9 @@ class ProfileValidator(BaseValidator):
             raise ValidationError("Отчество должно содержать менее 50 символов.")
         
     def number(value):
-        if not is_number_valid(value):
-            raise ValidationError(f"Номер телефона '{value}' введен некорректно.")
+        pass
+        # if not is_number_valid(value):
+        #     raise ValidationError(f"Номер телефона '{value}' введен некорректно.")
             
     def email(value):
         if not is_email_valid(value):
