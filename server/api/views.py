@@ -905,7 +905,7 @@ def my_poll_votes(request):
             page_size = int(request.GET.get('page_size', 20))  
 
 
-            all_answers = poll.answers.all().order_by('-voting_date')
+            all_answers = poll.user_answers.all().order_by('-voting_date')
             paginator = PageNumberPagination()
             paginator.page_size = page_size  # Устанавливаем количество элементов на странице
             paginated_result = paginator.paginate_queryset(all_answers, request)
@@ -913,7 +913,7 @@ def my_poll_votes(request):
             # Устанавливаем номер текущей страницы в пагинаторе
             paginator.page.number = page
 
-            serializer = PollAnswerSerializer(paginated_result, many=True)
+            serializer = PollAnswerGroupSerializer(paginated_result, many=True)
             return paginator.get_paginated_response(serializer.data)
 
     except APIException as api_exception:
