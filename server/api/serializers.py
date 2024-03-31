@@ -7,22 +7,20 @@ from .models import *
 from .utils import *
 from .exсeptions import *
 
+
 class MiniUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'username']
+        fields = ['id', 'email', 'username']
     
 
 class GetProfileSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
+    user = MiniUserSerializer()
     role = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = '__all__'
-
-    def get_user(self, obj):
-        return obj.user.username if obj.user else None
 
     def get_role(self, obj):
         return obj.role.role if obj.role else None
