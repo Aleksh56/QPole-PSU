@@ -2,19 +2,20 @@ export const ProfileInfoFieldsConfig = [
   {
     id: 'Profile name field',
     label: 'Имя',
-    key: 'profile.name',
-    initialValue: 'Александр Алесандрович Попов',
+    key: 'name',
+    initialValue: '',
   },
   {
     label: 'Эл. почта',
     id: 'Profile email field',
-    key: 'profile.email',
+    key: 'email',
     initialValue: '',
+    disabled: true,
   },
   {
     label: 'Телефон',
     id: 'Profile phone field',
-    key: 'profile.number',
+    key: 'number',
     initialValue: '',
   },
 ];

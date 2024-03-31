@@ -41,8 +41,10 @@ const ConductionPollPage = () => {
     }
   };
 
+  const handleContextMenu = (e) => e.preventDefault();
+
   return (
-    <ConductionBackgroundWrapper>
+    <ConductionBackgroundWrapper onContextMenu={handleContextMenu}>
       <Header isMainPage={false} />
       <ConductionWrapper>
         <ConductionHeader data={pollData} />

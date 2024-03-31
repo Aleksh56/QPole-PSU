@@ -8,7 +8,6 @@ import ProfileTimezone from '@/components/04_Widgets/profile/ProfileTimezone';
 import Profile2AuthBlock from '@/components/04_Widgets/profile/Profile2Auth';
 import { ProfileInfoFieldsConfig } from './data/ProfileInfoFields';
 import useUserData from '@/hooks/useUserData';
-import { get } from 'lodash';
 
 const ProfileAboutPage = () => {
   const navigate = useNavigate();
@@ -17,7 +16,7 @@ const ProfileAboutPage = () => {
   const profileInfoFields = userData
     ? ProfileInfoFieldsConfig.map((field) => ({
         ...field,
-        initialValue: get(userData, field.key, field.initialValue),
+        initialValue: userData[field.key],
       }))
     : [];
 
@@ -31,6 +30,7 @@ const ProfileAboutPage = () => {
           caption="Профиль"
           boxCaption="Данные аккаунта"
           ProfileInfoFields={profileInfoFields}
+          user_id={userData?.user.id}
         />
         <ProfileTimezone caption="Язык и страна" selectCaption="Часовой пояс" />
         <Profile2AuthBlock caption="Безопасность" />

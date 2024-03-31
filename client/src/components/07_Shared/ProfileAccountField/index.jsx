@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  StyledPasswordWrapper,
-  StyledTextField,
-  StyledTypography,
-} from './styled';
+import { StyledPasswordWrapper, StyledTextField, StyledTypography } from './styled';
 import { Box } from '@mui/material';
 
 const ProfileAccountField = ({
@@ -15,6 +11,8 @@ const ProfileAccountField = ({
   handleChange,
   disabled = false,
   children,
+  fieldKey,
+  isDisabled = false,
 }) => {
   return (
     <>
@@ -36,7 +34,8 @@ const ProfileAccountField = ({
           name={id}
           autoFocus
           value={value}
-          onChange={(e) => handleChange && handleChange(e.target.value)}
+          disabled={isDisabled}
+          onChange={(e) => handleChange && handleChange(fieldKey, e.target.value)}
         />
       </Box>
     </>

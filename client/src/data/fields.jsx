@@ -1,6 +1,4 @@
 import React from 'react';
-import BlockIcon from '@mui/icons-material/Block';
-import SettingsIcon from '@mui/icons-material/Settings';
 
 export const appHeaderData = [
   { caption: 'Ваши опросы', to: '/app' },

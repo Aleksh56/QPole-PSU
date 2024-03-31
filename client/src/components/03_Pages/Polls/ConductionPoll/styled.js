@@ -15,4 +15,7 @@ export const ConductionWrapper = styled(Box)(() => ({
   maxWidth: Rem(700),
   margin: '0 auto',
   padding: `${Rem(70)} ${Rem(15)}`,
+  userSelect: 'none',
+  WebkitUserSelect: 'none',
+  msUserSelect: 'none',
 }));
