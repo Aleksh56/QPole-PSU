@@ -266,7 +266,7 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerOption
-        fields = ['id', 'name', 'votes_quantity']
+        fields = ['id', 'name', 'votes_quantity', 'is_free_response']
 
 
 class PollQuestionStatsSerializer(serializers.ModelSerializer):
@@ -281,7 +281,7 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PollQuestion
-        fields = ['answer_options', 'name', 'votes_quantity']
+        fields = ['id', 'answer_options', 'name', 'votes_quantity', 'has_multiple_choices']
 
 
 

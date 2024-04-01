@@ -54,8 +54,8 @@ class PollType(models.Model):
 
 class PollAnswer(models.Model):
     poll_answer_group = models.ForeignKey('PollAnswerGroup', related_name='answers', on_delete=models.CASCADE)
-    answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE)
     question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE)
+    answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE)
     is_correct = models.BooleanField(default=None, null=True)
     text = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
@@ -65,7 +65,7 @@ class PollAnswer(models.Model):
     
 
 class PollAnswerGroup(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, related_name='answer_groups', on_delete=models.CASCADE)
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
     voting_date = models.DateTimeField(auto_now_add=True)
 
@@ -118,6 +118,7 @@ class PollQuestion(models.Model):
 
     order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в опросе
 
+    is_required = models.BooleanField(default=True)    # обязателен ли ответ
 
     # @property
     # def votes_quantity(self):   # число ответов на вопрос
@@ -126,7 +127,13 @@ class PollQuestion(models.Model):
 
     def __str__(self):
         if self.name:
-            return f"Вопрос '{self.name}'"
+            return f"Вопрос №{self.id} '{self.name}'"
+        else:
+            return f"Вопрос №{self.id}"
+
+    def __repr__(self):
+        if self.name:
+            return f"Вопрос №{self.id} '{self.name}'"
         else:
             return f"Вопрос №{self.id}"
 
@@ -191,8 +198,8 @@ class Poll(models.Model):
     
     def can_user_vote(self, user_profile):
         if not (self.is_closed or self.is_paused):
-            if self.filter(
-                user_answers__profile=user_profile
+            if self.user_answers.filter(
+                profile=user_profile
             ).exists():
                 if self.is_revote_allowed:
                     return True

@@ -33,6 +33,7 @@ from copy import deepcopy
 def clone_poll(poll, new_poll_id):
     cloned_poll = deepcopy(poll)
     cloned_poll.id = None
+    cloned_poll.image = None
     cloned_poll.poll_id = new_poll_id
     if cloned_poll.name:
         cloned_poll.name = cloned_poll.name + " (копия)"
@@ -41,6 +42,7 @@ def clone_poll(poll, new_poll_id):
     for question in poll.questions.all():
         new_question = deepcopy(question)
         new_question.id = None
+        new_question.image = None
         new_question.save()
 
         cloned_poll.questions.add(new_question)
@@ -48,6 +50,7 @@ def clone_poll(poll, new_poll_id):
         for answer_option in question.answer_options.all():
             new_answer_option = deepcopy(answer_option)
             new_answer_option.id = None
+            new_answer_option.image = None
             new_answer_option.save()
             new_question.answer_options.add(new_answer_option)
 
@@ -59,6 +62,7 @@ def clone_question(question, poll):
     cloned_question.id = None
     if cloned_question.name:
         cloned_question.name = cloned_question.name + " (копия)"
+    cloned_question.image = None
     cloned_question.save()
     
 
@@ -70,7 +74,6 @@ def clone_question(question, poll):
         cloned_question.answer_options.add(new_answer_option)
 
     poll.questions.add(cloned_question)
-    cloned_question.image = None
     return cloned_question
 
 

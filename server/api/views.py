@@ -12,7 +12,7 @@ from .exсeptions import *
 from .serializers import *
 from .models import *
 from .utils import *
-from .pollvoting import pollvoting
+from .pollvoting import basic_poll_voting
 
 import os
 
@@ -319,16 +319,16 @@ def my_poll_question(request):
                 raise MissingParameterException(field_name='poll_id')
 
             poll_question_id = request.GET.get('poll_question_id', None)
-            my_poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
 
-            if not my_poll:
+            if not poll:
                 raise ObjectNotFoundException(model='Poll') 
             
             if poll_question_id:
-                my_poll_question = my_poll.questions.filter(id=poll_question_id).first()
+                my_poll_question = poll.questions.filter(id=poll_question_id).first()
                 serializer = PollQuestionSerializer(my_poll_question)
             else:
-                my_poll_questions = my_poll.questions.all()
+                my_poll_questions = poll.questions.all()
                 serializer = PollQuestionSerializer(my_poll_questions, many=True)
 
                 
@@ -341,21 +341,21 @@ def my_poll_question(request):
             if not poll_id:
                 raise MissingFieldException(field_name='poll_id')
             
-            my_poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
-            if not my_poll:
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
 
-            if len(my_poll.questions.all()) > 50:
+            if len(poll.questions.all()) > 50:
                 raise TooManyInstancesException(model='PollQuestion', limit=50)
 
-            data['poll'] = my_poll.id
+            data['poll'] = poll.id
             poll_question = PollQuestionSerializer(data=data)
             if poll_question.is_valid():
                 poll_question = poll_question.save()
-                # my_poll.questions.add(poll_question)
+                # poll.questions.add(poll_question)
                 return Response(f"Вопрос {poll_question} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
                 return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -371,14 +371,14 @@ def my_poll_question(request):
             if not poll_question_id:
                 raise MissingParameterException(field_name='poll_question_id')
             
-            my_poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not my_poll:
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
-            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            poll_question = poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
             
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
@@ -399,14 +399,14 @@ def my_poll_question(request):
             if not poll_question_id:
                 raise MissingParameterException(field_name='poll_question_id')
             
-            my_poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not my_poll:
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
-            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            poll_question = poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
 
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             poll_question.delete()
@@ -420,15 +420,15 @@ def my_poll_question(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
             
-            my_poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not my_poll:
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
             poll_question_id = request.GET.get('poll_question_id', None)
             if not poll_question_id:
                 raise MissingParameterException(field_name='poll_question_id')
             
-            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            poll_question = poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='Question')
             
@@ -436,7 +436,7 @@ def my_poll_question(request):
             if not request_type:
                 raise MissingParameterException(field_name='request_type')
             
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             if request_type == 'change_order':
@@ -444,7 +444,7 @@ def my_poll_question(request):
 
                 questions_data = data['questions_data']
                 for question_number, question_data in enumerate(questions_data, start=1):
-                    poll_question = my_poll.questions.filter(id=int(question_data['id'])).first()
+                    poll_question = poll.questions.filter(id=int(question_data['id'])).first()
                     if not poll_question:
                         raise ObjectNotFoundException(model='PollQuestion')
 
@@ -457,10 +457,10 @@ def my_poll_question(request):
                 return Response(status=status.HTTP_200_OK)
             
             elif request_type == 'copy_question':
-                if len(my_poll.questions.all()) > 50:
+                if len(poll.questions.all()) > 50:
                     raise TooManyInstancesException(model='PollQuestion', limit=50)
                          
-                cloned_question = clone_question(poll_question, my_poll)
+                cloned_question = clone_question(poll_question, poll)
                 serializer = PollQuestionSerializer(cloned_question)
                 return Response(serializer.data)
 
@@ -532,15 +532,15 @@ def my_poll_question_option(request):
                 raise MissingFieldException(field_name='poll_question_id')
             
 
-            my_poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
-            if not my_poll:
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            poll_question = poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
 
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             if len(poll_question.answer_options.all()) > 10:
@@ -570,11 +570,11 @@ def my_poll_question_option(request):
             if not question_option_id:
                 raise MissingFieldException(field_name='question_option_id')
             
-            my_poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not my_poll:
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            poll_question = poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
             
@@ -582,7 +582,7 @@ def my_poll_question_option(request):
             if not question_option:
                 raise ObjectNotFoundException(model='AnswerOption')
             
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             is_correct = data.get('is_correct', None)
@@ -616,11 +616,11 @@ def my_poll_question_option(request):
             if not question_option_id:
                 raise MissingParameterException(field_name='question_option_id')
             
-            my_poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not my_poll:
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            poll_question = poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
             
@@ -628,7 +628,7 @@ def my_poll_question_option(request):
             if not question_option:
                 raise ObjectNotFoundException(model='AnswerOption')
 
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             question_option.delete()
@@ -646,15 +646,15 @@ def my_poll_question_option(request):
             if not poll_question_id:
                 raise MissingFieldException(field_name='poll_question_id')
             
-            my_poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not my_poll:
+            poll = Poll.objects.filter(poll_id=poll_id).first()
+            if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            poll_question = my_poll.questions.filter(id=poll_question_id).first()
+            poll_question = poll.questions.filter(id=poll_question_id).first()
             if not poll_question:
                 raise ObjectNotFoundException(model='PollQuestion')
 
-            if my_poll.is_in_production:
+            if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             objects_to_update = []
@@ -730,7 +730,9 @@ def poll_voting(request):
             if not answers:
                 raise MissingFieldException(field_name='answers')
             
-            answers = pollvoting(answers, poll, my_profile)
+            # валидация и парсинг ответов
+            answers = basic_poll_voting(answers, poll)
+
             previous_answer = PollAnswerGroup.objects.filter(
                 Q(poll=poll) & Q(profile=my_profile)      
             ).first()
@@ -750,7 +752,7 @@ def poll_voting(request):
                 return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST)
             
 
-            data = data['answers']
+            data = answers
             for answer in data:
                 answer['poll_answer_group'] = poll_answer_group.id
        
@@ -799,7 +801,7 @@ def poll_voting(request):
                 raise AccessDeniedException(detail="В данном опросе недоступно повторное голосование.")
             
 
-            answers_to_delete = poll.answers.all().filter(profile=my_profile)
+            answers_to_delete = poll.user_answers.filter(profile=my_profile).first()
 
             # Удаляем все найденные ответы
             if answers_to_delete:
