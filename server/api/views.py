@@ -547,10 +547,10 @@ def my_poll_question_option(request):
                 raise TooManyInstancesException(model='PollQuestion', limit=10)
 
             data['question'] = poll_question.id
-            answer_option_serializer = AnswerOptionSerializer(data=data)
+            has_free_option = poll_question.answer_options.filter(is_free_response=True).exists()
+            answer_option_serializer = PollQuestionOptionSerializer(data=data, context={'has_free_option': has_free_option})
             if answer_option_serializer.is_valid():
                 answer_option = answer_option_serializer.save()
-                # poll_question.answer_options.add(answer_option)
                 return Response(f"Вариант ответа {answer_option} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
                 return Response(answer_option_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

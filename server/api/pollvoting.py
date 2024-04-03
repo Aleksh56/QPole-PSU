@@ -2,7 +2,7 @@ from .exсeptions import *
 
 
 def basic_poll_voting(answers, poll):
-    asked_questions = {question for question in poll.questions.all() if question.is_required}
+    required_questions = {question for question in poll.questions.all() if question.is_required}
     answered_questions = set()
 
     parsed_answers = []
@@ -54,9 +54,9 @@ def basic_poll_voting(answers, poll):
             # добавление ответа с набор отвеченных вопросов
             answered_questions.add(question)
 
-    # проверка на то, что на все обязательнык вопросы были даны ответы
-    if not asked_questions.issubset(answered_questions):
-        difference = list(asked_questions.difference(answered_questions))
+    # проверка на то, что на все обязательные вопросы были даны ответы
+    if not required_questions.issubset(answered_questions):
+        difference = list(required_questions.difference(answered_questions))
         raise PollAnsweringException(detail=f"Вы ответили не на все обязятельные вопросы: {difference}")
 
     return parsed_answers

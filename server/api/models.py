@@ -112,9 +112,9 @@ class PollQuestion(models.Model):
     has_correct_answer = models.BooleanField(default=None, null=True)   # есть ли верный ответ
     has_multiple_choices = models.BooleanField(default=False)   # есть ли множенственный выбор
     # points_if_correct = models.DecimalField(max_digits=10, decimal_places=2) # очки за правильный ответ
-    is_free = models.BooleanField(default=False, null=True)   # свободная ли форма ответа
-    is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
-    is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
+    # is_free = models.BooleanField(default=False, null=True)   # свободная ли форма ответа
+    # is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
+    # is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
 
     order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в опросе
 

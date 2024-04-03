@@ -148,3 +148,14 @@ class TooManyInstancesException(APIException):
     def __str__(self):
         return self.detail
     
+
+class ValidationError(APIException):
+    status_code = 400
+    default_code = 'validation_error'
+
+    def __init__(self, detail):
+        self.detail = detail
+
+    def __str__(self):
+        return self.detail
+    

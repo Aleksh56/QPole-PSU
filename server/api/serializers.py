@@ -249,7 +249,15 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerOption
-        fields = '__all__'  
+        fields = '__all__'
+
+    def create(self, validated_data):
+        if validated_data['is_free_response']:
+            if self.context.get('has_free_option', None):
+                raise ValidationError(detail="В данном вопросе уже есть свободная форма ответа")
+
+        
+        return super().create(validated_data)  
 
 
 
@@ -257,16 +265,23 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
 
 class AnswerOptionStatsSerializer(serializers.ModelSerializer):
     votes_quantity = serializers.SerializerMethodField()
+    free_answers = serializers.SerializerMethodField()
+
 
     def get_votes_quantity(self, instance):
         user_answers = self.context.get('user_answers').filter(answer_option__id=instance.id)
         user_answers = PollAnswerSerializer(user_answers, many=True).data
         return len(user_answers)
 
-
+    def get_free_answers(self, instance):
+        if instance.is_free_response:
+            user_answers = self.context.get('user_answers').filter(answer_option__id=instance.id)
+            answer_texts = user_answers.values_list('text', flat=True)
+            return list(answer_texts)
+             
     class Meta:
         model = AnswerOption
-        fields = ['id', 'name', 'votes_quantity', 'is_free_response']
+        fields = ['id', 'name', 'votes_quantity', 'is_free_response', 'free_answers']
 
 
 class PollQuestionStatsSerializer(serializers.ModelSerializer):
