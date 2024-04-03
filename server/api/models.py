@@ -111,19 +111,11 @@ class PollQuestion(models.Model):
 
     has_correct_answer = models.BooleanField(default=None, null=True)   # есть ли верный ответ
     has_multiple_choices = models.BooleanField(default=False)   # есть ли множенственный выбор
-    # points_if_correct = models.DecimalField(max_digits=10, decimal_places=2) # очки за правильный ответ
-    # is_free = models.BooleanField(default=False, null=True)   # свободная ли форма ответа
-    # is_text = models.BooleanField(default=True, null=True)    # текст ли как вопрос
-    # is_image = models.BooleanField(default=False, null=True)    # фото ли как вопрос
 
     order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в опросе
 
     is_required = models.BooleanField(default=True)    # обязателен ли ответ
 
-    # @property
-    # def votes_quantity(self):   # число ответов на вопрос
-    #     return self.answer_options.aggregate(members=Count('answers__profile', distinct=True))['members'] or 0
-   
 
     def __str__(self):
         if self.name:
@@ -177,14 +169,15 @@ class Poll(models.Model):
             return f"Опрос №{self.id}"
     
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.poll_type:
-            self.has_multiple_choices = self.poll_type.has_multiple_choices
-            self.has_correct_answer = self.poll_type.has_correct_answer
-            self.is_anonymous = self.poll_type.is_anonymous
+        # if self.poll_type:
+        #     self.has_multiple_choices = self.poll_type.has_multiple_choices
+        #     self.has_correct_answer = self.poll_type.has_correct_answer
+        #     self.is_anonymous = self.poll_type.is_anonymous
 
-            if self.poll_type.name == 'Летучка':
-                self.duration = self.poll_type.duration
+        #     if self.poll_type.name == 'Летучка':
+        #         self.duration = self.poll_type.duration
+        
+        super().__init__(*args, **kwargs)
 
         
     # Проверка наличия участия пользователя в опросе
@@ -221,3 +214,18 @@ class Poll(models.Model):
             return timezone.now() < self.created_date + self.duration
         else: return True
 
+
+    def is_valid(self, value, max_len=None, min_len=None):
+        if not min_len:
+            if len(value) < 5:
+                raise MyValidationError("'name' должно содержать не менее 5 символов.")
+        else:
+            if len(value) < min_len:
+                raise MyValidationError(f"'name' должно содержать более {min_len - 1} символов.")
+            
+        if not max_len:
+            if len(value) > 50:
+                raise MyValidationError("'name' должно содержать менее 50 символов.")
+        else:
+            if len(value) > max_len:
+                raise MyValidationError(f"'name' должно содержать менее {max_len} символов.")

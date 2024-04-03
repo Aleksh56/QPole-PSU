@@ -4,7 +4,7 @@ from functools import partial
 
 from .validators import *
 from .models import *
-from .utils import *
+from .utils import generate_poll_qr, get_qrcode_img_bytes 
 from .exсeptions import *
 
 
@@ -252,9 +252,9 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        if validated_data['is_free_response']:
+        if validated_data.get('is_free_response'):
             if self.context.get('has_free_option', None):
-                raise ValidationError(detail="В данном вопросе уже есть свободная форма ответа")
+                raise MyValidationError(detail="В данном вопросе уже есть свободная форма ответа")
 
         
         return super().create(validated_data)  
@@ -317,7 +317,5 @@ class PollStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Poll
         fields = ['members_quantity', 'questions_quantity', 'questions']
-
-
 
 

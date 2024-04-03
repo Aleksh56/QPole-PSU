@@ -109,3 +109,101 @@ def is_email_valid(value):
     if re.match(pattern, value):
         return True
     return False
+
+
+class ReleasePollValidator(PollValidator):
+
+    @staticmethod
+    def name(instance, max_len=None, min_len=None):
+        value = getattr(instance, "name", None)
+        
+        if not value:
+            raise ValidationError(f"Заголовок '{instance}' ответа не должен быть пустым.")
+        
+
+        if not min_len:
+            if len(value) < 5:
+                raise ValidationError(f"Заголовок '{instance}' должен содержать не менее 5 символов.")
+        else:
+            if len(value) < min_len:
+                raise ValidationError(f"Заголовок '{instance}' должен содержать более {min_len - 1} символов.")
+            
+        if not max_len:
+            if len(value) > 50:
+                raise ValidationError(f"Заголовок '{instance}' должен содержать менее 50 символов.")
+        else:
+            if len(value) > max_len:
+                raise ValidationError(f"Заголовок '{instance}' должен содержать менее {max_len} символов.")
+
+
+class ReleaseQuestionValidator():
+
+    @staticmethod
+    def name(instance, max_len=None, min_len=None):
+        value = getattr(instance, "name", None)
+
+        if not value:
+            raise ValidationError(f"Текст '{instance}' не должен быть пустым.")
+
+        if not min_len:
+            if len(value) < 5:
+                raise ValidationError(f"Текст '{instance}' должен содержать не менее 5 символов.")
+        else:
+            if len(value) < min_len:
+                raise ValidationError(f"Текст '{instance}' должен содержать более {min_len - 1} символов.")
+            
+        if not max_len:
+            if len(value) > 50:
+                raise ValidationError(f"Текст '{instance}' должен содержать менее 50 символов.")
+        else:
+            if len(value) > max_len:
+                raise ValidationError(f"Текст '{instance}' должен содержать менее {max_len} символов.")
+            
+
+class ReleaseOptionValidator():
+
+    @staticmethod
+    def name(instance, max_len=None, min_len=None):
+        value = getattr(instance, "name", None)
+
+        if not value:
+            raise ValidationError(f"Текст '{instance}' не должен быть пустым.")
+        
+        if not min_len:
+            if len(value) < 1:
+                raise ValidationError(f"Текст '{instance}' должен содержать не менее 1 символа.")
+        else:
+            if len(value) < min_len:
+                raise ValidationError(f"Текст '{instance}' должен содержать более {min_len - 1} символов.")
+            
+        if not max_len:
+            if len(value) > 50:
+                raise ValidationError(f"Текст '{instance}' должен содержать менее 50 символов.")
+        else:
+            if len(value) > max_len:
+                raise ValidationError(f"Текст '{instance}' должен содержать менее {max_len} символов.")
+            
+ 
+def is_poll_valid(poll):
+    poll_validator = ReleasePollValidator()
+    poll_validator.name(instance=poll, max_len=50, min_len=5)
+
+    all_questions = poll.questions.all()
+    if len(all_questions) == 0:
+        raise ValidationError(detail=f"'{poll}' должен содержать хотя бы 1 вопрос.")
+    
+    for question in all_questions:
+        poll_question_validator = ReleaseQuestionValidator()
+        poll_question_validator.name(instance=question, max_len=50, min_len=5)
+        
+        all_options = question.answer_options.all()
+        if len(all_options) == 0:
+            raise ValidationError(detail=f"'{question}' должен содержать хотя бы 1 вариант ответа.")
+    
+        for option in all_options:
+            poll_option_validator = ReleaseOptionValidator()
+            poll_option_validator.name(instance=option, max_len=50, min_len=5)
+            
+    return True
+
+

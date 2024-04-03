@@ -87,7 +87,7 @@ def my_profile(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll(request):
-    try:
+    # try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
         
@@ -234,6 +234,14 @@ def my_poll(request):
                 serializer = PollSerializer(poll)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
+            if request_type == 'deploy_to_production':
+                if is_poll_valid(poll):
+                    poll.is_in_production = True
+                    poll.save()
+
+                    return Response(f"{poll} выпущен в продакшен, редактирование опроса заблокировано", 
+                                                                             status=status.HTTP_200_OK)
+            
             else:
                 return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)
 
@@ -267,11 +275,11 @@ def my_poll(request):
 
             return Response({'message':f"Опрос успешно удален", 'data':response_data}, status=status.HTTP_204_NO_CONTENT)
 
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception}"}, api_exception.status_code)
     
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # except Exception as ex:
+    #     return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])

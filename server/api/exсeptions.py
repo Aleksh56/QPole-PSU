@@ -149,7 +149,7 @@ class TooManyInstancesException(APIException):
         return self.detail
     
 
-class ValidationError(APIException):
+class MyValidationError(APIException):
     status_code = 400
     default_code = 'validation_error'
 
