@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q
+from django.db.models import Q, Subquery, Prefetch
 from django.db import transaction
 from django.contrib.auth.models import AnonymousUser
 
@@ -29,7 +29,7 @@ def my_profile(request):
         current_profile = Profile.objects.get(user=current_user)
 
         if request.method == 'GET':
-            current_user_profile = Profile.objects.filter(user=current_user).first()
+            current_user_profile = Profile.objects.filter(user=current_user).select_related('role').first()
 
             if not current_user_profile:
                 raise ObjectNotFoundException('Profile')
@@ -40,7 +40,7 @@ def my_profile(request):
             return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
         elif request.method == 'POST':
-            current_user_profile = Profile.objects.filter(user=current_user).first()
+            current_user_profile = Profile.objects.filter(user=current_user).select_related('role').first()
             request.data['user'] = current_user.id
             if current_user_profile:
                 return Response("Профиль данного пользователя уже существует.", status=status.HTTP_400_BAD_REQUEST)
@@ -95,7 +95,9 @@ def my_poll(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+                poll = Poll.objects.filter(
+                        Q(author__user=current_user) and Q(poll_id=poll_id)
+                        ).select_related('author', 'poll_type').first()
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
@@ -124,7 +126,7 @@ def my_poll(request):
                 if is_closed:
                     filters &= Q(is_closed=is_closed)
 
-                polls = Poll.objects.filter(filters)
+                polls = Poll.objects.filter(filters).select_related('author', 'poll_type')
                 serializer = MiniPollSerializer(polls, many=True, context={'profile': my_profile})
                 return Response(serializer.data)
 
@@ -298,13 +300,49 @@ def my_poll_stats(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
 
-            poll = Poll.objects.filter(poll_id=poll_id).first()
+            poll = Poll.objects.filter(poll_id=poll_id).prefetch_related(
+                Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                    'answer_options'
+                ).all())
+            ).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-            user_answers = PollAnswer.objects.filter(poll_answer_group__poll__poll_id=poll.poll_id)
-            stats = PollStatsSerializer(poll, context={'user_answers': user_answers})
+
+            question_answers_count = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll__poll_id=poll_id)
+                .values('question_id')
+                .annotate(quantity=Count('poll_answer_group__profile_id', distinct=True))
+            )
+            question_answers_count = list(question_answers_count)
+
+            options_answers_count = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll=poll)
+                .values('answer_option')
+                .annotate(quantity=Count('id'))
+            )
+            options_answers_count = list(options_answers_count)
+
+            free_answers = PollAnswer.objects.filter(
+                poll_answer_group__poll__poll_id=poll_id,
+                text__isnull=False
+            ).values('text', 'question_id')
+            free_answers = list(free_answers)
+
+
+            context = {
+                'question_answers_count': question_answers_count,
+                'options_answers_count': options_answers_count,
+                'free_answers': free_answers,
+            }
+
+
+            stats = PollStatsSerializer(poll, context=context)
             return Response(stats.data)
+
+
 
     except APIException as api_exception:
         return Response({'message': f"{api_exception}"}, api_exception.status_code)
@@ -841,7 +879,7 @@ def poll(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(poll_id=poll_id).first()
+                poll = Poll.objects.filter(poll_id=poll_id).select_related('author', 'poll_type').first()
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 

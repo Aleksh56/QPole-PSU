@@ -6,21 +6,21 @@ from django.db.models import Count
 from .exсeptions import *
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    email = models.EmailField(blank=True, null=True)
-    name = models.CharField(max_length=50, blank=True, null=True)
-    surname = models.CharField(max_length=50, blank=True, null=True)
-    patronymic = models.CharField(max_length=50, default='Не указано', null=True)
-    sex = models.CharField(max_length=1, blank=True, null=True)
-    number = models.CharField(max_length=50, blank=True, null=True) 
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, verbose_name='Пользователь')
+    email = models.EmailField('Почта', blank=True, null=True)
+    name = models.CharField('Имя', max_length=50, blank=True, null=True)
+    surname = models.CharField('Фамилия', max_length=50, blank=True, null=True)
+    patronymic = models.CharField('Отчество', max_length=50, default='Не указано', null=True)
+    sex = models.CharField('Пол', max_length=1, blank=True, null=True)
+    number = models.CharField('Номер телефона', max_length=50, blank=True, null=True) 
 
     joining_date = models.DateField(auto_now_add=True)
     # has_2auf = models.BooleanField(default=False)
 
-    role = models.ForeignKey('UserRole', on_delete=models.CASCADE, related_name='profiles', blank=True, null=True)
+    role = models.ForeignKey('UserRole', on_delete=models.CASCADE, related_name='profiles', verbose_name='Роль')
     
     
-    is_banned = models.BooleanField(default=False)
+    is_banned = models.BooleanField('Заблокирован', default=False)
 
 
     def __str__(self):
@@ -30,16 +30,16 @@ class Profile(models.Model):
     
 
 class UserRole(models.Model):
-    role = models.CharField(max_length=50, unique=True)
+    role = models.CharField('Роль', max_length=50, unique=True)
 
     def __str__(self):
         return self.role
     
 
 class PollType(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.CharField(max_length=500, default="", blank=True)
-    duration = models.DurationField(default=timezone.timedelta(hours=1))
+    name = models.CharField('Название типа', max_length=50)
+    description = models.CharField('Описание', max_length=500, default="", blank=True)
+    duration = models.DurationField('Длительность', default=timezone.timedelta(hours=1))
 
     is_text = models.BooleanField(default=True, null=True)    # текст ли как ответ
     is_free = models.BooleanField(default=False, null=True)    # свободная ли форма ответа

@@ -269,20 +269,29 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
 
 
     def get_votes_quantity(self, instance):
-        user_answers = self.context.get('user_answers').filter(answer_option__id=instance.id)
-        user_answers = PollAnswerSerializer(user_answers, many=True).data
-        return len(user_answers)
+        option_id = instance.id
+        options_answers_count = self.context.get('options_answers_count', [])
+        for item in options_answers_count:
+            if item['answer_option'] == option_id:
+                return item['quantity']
+        return 0
+
 
     def get_free_answers(self, instance):
         if instance.is_free_response:
-            user_answers = self.context.get('user_answers').filter(answer_option__id=instance.id)
-            answer_texts = user_answers.values_list('text', flat=True)
-            return list(answer_texts)
+            free_answers = []
+            question_id = instance.question.id
+            user_answers = self.context.get('free_answers', [])
+            for item in user_answers:
+                if item['question_id'] == question_id:
+                    free_answers.append(item['text']) 
+
+            return free_answers
              
     class Meta:
         model = AnswerOption
-        fields = ['id', 'name', 'votes_quantity', 'is_free_response', 'free_answers']
-
+        fields = ['id', 'name', 'votes_quantity', 'is_free_response', 'free_answers'] 
+            
 
 class PollQuestionStatsSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionStatsSerializer(many=True)
@@ -290,9 +299,13 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
     votes_quantity = serializers.SerializerMethodField()
 
     def get_votes_quantity(self, instance):
-        user_answers = self.context.get('user_answers').filter(question__id=instance.id)
-        user_answers = PollAnswerSerializer(user_answers, many=True).data
-        return len(user_answers)
+        question_id = instance.id
+        question_answers_count = self.context.get('question_answers_count', {})
+
+        for item in question_answers_count:
+            if item['question_id'] == question_id:
+                return item['quantity']
+        return 0
 
     class Meta:
         model = PollQuestion

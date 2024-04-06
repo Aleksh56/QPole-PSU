@@ -30,7 +30,7 @@ def users(request):
             user_id = request.GET.get('user_id', None)
 
             if user_id:
-                user = Profile.objects.filter(user_id=user_id).first()
+                user = Profile.objects.filter(user_id=user_id).select_related('role').first()
                 if not user:
                     raise ObjectNotFoundException('Profile')
                 serializer = ProfileSerializer(user)
@@ -38,7 +38,7 @@ def users(request):
                 page = int(request.GET.get('page', 1))
                 page_size = int(request.GET.get('page_size', 20))  
 
-                users = Profile.objects.all().order_by('-joining_date')
+                users = Profile.objects.all().order_by('-joining_date').select_related('role')
                 paginator = PageNumberPagination()
                 paginator.page_size = page_size
                 paginated_result = paginator.paginate_queryset(users, request)
@@ -129,7 +129,7 @@ def polls(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(poll_id=poll_id).first()
+                poll = Poll.objects.filter(poll_id=poll_id).select_related('author', 'poll_type').first()
                 if not poll:
                     raise ObjectNotFoundException('Poll')
                 serializer = PollSerializer(poll)
@@ -137,7 +137,7 @@ def polls(request):
                 page = int(request.GET.get('page', 1))
                 page_size = int(request.GET.get('page_size', 20))  
 
-                polls = Poll.objects.all().order_by('-created_date')
+                polls = Poll.objects.all().order_by('-created_date').select_related('author', 'poll_type')
                 paginator = PageNumberPagination()
                 paginator.page_size = page_size
                 paginated_result = paginator.paginate_queryset(polls, request)
