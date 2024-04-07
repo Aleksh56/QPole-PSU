@@ -131,12 +131,22 @@ def my_poll(request):
 
                 polls = Poll.objects.filter(filters).select_related('author', 'poll_type')
                 
+                page = int(request.GET.get('page', 1))
+                page_size = int(request.GET.get('page_size', 3))  
+
                 paginator = PageNumberPagination()
                 paginator.page_size = page_size 
                 paginated_result = paginator.paginate_queryset(polls, request)
                 paginator.page.number = page
+                total_items = polls.count()
+                total_pages = paginator.page.paginator.num_pages
                 serializer = MiniPollSerializer(paginated_result, many=True)
-                return paginator.get_paginated_response(serializer.data)
+                pagination_data = {
+                    'total_items': total_items,
+                    'total_pages': total_pages,
+                    'results': serializer.data 
+                }
+                return Response(pagination_data)
 
 
         elif request.method == 'POST':
@@ -958,15 +968,21 @@ def poll(request):
 
 
                 page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 20))  
-
+                page_size = int(request.GET.get('page_size', 3))  
 
                 paginator = PageNumberPagination()
                 paginator.page_size = page_size 
                 paginated_result = paginator.paginate_queryset(polls, request)
                 paginator.page.number = page
+                total_items = polls.count()
+                total_pages = paginator.page.paginator.num_pages
                 serializer = MiniPollSerializer(paginated_result, many=True)
-                return paginator.get_paginated_response(serializer.data)
+                pagination_data = {
+                    'total_items': total_items,
+                    'total_pages': total_pages,
+                    'results': serializer.data 
+                }
+                return Response(pagination_data)
 
             
     except APIException as api_exception:
