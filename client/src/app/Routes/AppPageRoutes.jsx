@@ -4,7 +4,7 @@ import AppPage from '@/components/03_Pages/App';
 import ProfileAppPage from '@/components/03_Pages/App/pages/Profile';
 import PolePage from '@/components/03_Pages/App/pages/PoleSettings';
 import PolesArchivePage from '@/components/03_Pages/App/pages/Pole/PolesArchive';
-import AppHeader from '@/components/04_Widgets/app/AppHeader';
+import AppHeader from '@/components/04_Widgets/Navigation/Menus/appHeader';
 
 const AppPageRoutes = () => {
   return (

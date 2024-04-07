@@ -11,7 +11,7 @@ import { v4 } from 'uuid';
 import { createPole } from './api/apiRequests';
 import { useNavigate } from 'react-router-dom';
 
-const CreatePoleModal = ({ isOpen, onClose, title, buttons }) => {
+const FrmCreatePoll = ({ isOpen, onClose, title, buttons }) => {
   const navigate = useNavigate();
 
   const handlePoleTypeSelect = async (poleType) => {
@@ -38,4 +38,4 @@ const CreatePoleModal = ({ isOpen, onClose, title, buttons }) => {
   );
 };
 
-export default CreatePoleModal;
+export default FrmCreatePoll;

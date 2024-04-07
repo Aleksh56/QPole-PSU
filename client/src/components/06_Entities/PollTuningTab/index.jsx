@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import CustomSwitch from '@/components/07_Shared/Switch';
+import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import { StyledFormControlLabel } from '@/constants/styles';
 import { v4 } from 'uuid';
 import usePollSettings from './hooks/usePollSettings';

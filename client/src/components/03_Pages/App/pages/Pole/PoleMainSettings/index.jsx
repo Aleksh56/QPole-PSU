@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Divider } from '@mui/material';
-import CustomSwitch from '@/components/07_Shared/Switch';
+import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import { v4 } from 'uuid';
-import InvisibleLabeledField from '@/components/07_Shared/InvisibleLabeledField';
+import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
 import useTabs from '@/hooks/useTabs';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import PollMainSettingsTabs from '@/components/06_Entities/PollMainSettingsTabs';

@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from '../Header';
-import SecondaryButton from '@/components/07_Shared/SecondaryButton';
+import Header from '../../Navigation/Menus/mainHeader';
+import SecondaryButton from '@/components/07_Shared/UIComponents/Buttons/secBtn';
 import {
   StyledHero,
   StyledHeroContainer,

@@ -1,32 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import AppCreateFirstPoll from '@/components/05_Features/AppCreateFirstPoll';
 import AppPolesFilters from '@/components/04_Widgets/app/AppPolesFilters';
-import CreatePoleModal from '@/components/04_Widgets/CreatePoleModal';
-import AppPoleCard from '@/components/07_Shared/AppPoleCard';
+import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
+import AppPoleCard from '@/components/07_Shared/DataDisplay/Cards/appPoleCard';
 import { getAllPoles } from './api/apiRequests';
 import { Link } from 'react-router-dom';
 import { ContentWrapper, PollsGrid, StyledAppContentWrapper, StyledArchiveLink } from './styled';
 import { _settings } from './config/settings';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Box } from '@mui/material';
 import InboxIcon from '@mui/icons-material/Inbox';
 import usePageTitle from '@/hooks/usePageTitle';
-import config from '@/config';
+import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
+import usePagination from '@/hooks/usePagination';
 
 const AppPage = () => {
   usePageTitle('app');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState();
   const [loading, setLoading] = useState(true);
   const [pollData, setPollData] = useState([]);
+  const { pageSize, currPage, totalPages, setTotalPages, handlePageSizeChange, handlePageChange } =
+    usePagination();
 
   const fetchData = async () => {
-    const pollResponse = await getAllPoles();
-    setPollData(pollResponse.data);
+    const pollResponse = await getAllPoles({ currPage, pageSize });
+    setPollData(pollResponse.results);
+    setTotalPages(pollResponse.total_pages);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currPage, pageSize]);
 
   return (
     <>
@@ -44,20 +48,36 @@ const AppPage = () => {
               <InboxIcon />
               Архив
             </StyledArchiveLink>
-            <PollsGrid>
-              {pollData &&
-                pollData
-                  .filter((item) => item.is_closed !== true)
-                  .map((item) => (
-                    <Link key={item.poll_id} to={`/app/tests/${item.poll_id}/main`}>
-                      <AppPoleCard pollData={item} fetchData={fetchData} />
-                    </Link>
-                  ))}
-            </PollsGrid>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                rowGap: '30px',
+              }}
+            >
+              <PollsGrid>
+                {pollData &&
+                  pollData
+                    .filter((item) => item.is_closed !== true)
+                    .map((item) => (
+                      <Link key={item.poll_id} to={`/app/tests/${item.poll_id}/main`}>
+                        <AppPoleCard pollData={item} fetchData={fetchData} />
+                      </Link>
+                    ))}
+              </PollsGrid>
+              <CustomPagination
+                pageSize={pageSize}
+                totalPages={totalPages}
+                currentPage={currPage}
+                handlePageChange={handlePageChange}
+                handlePageSizeChange={handlePageSizeChange}
+              />
+            </Box>
           </ContentWrapper>
         </StyledAppContentWrapper>
       )}
-      <CreatePoleModal
+      <FrmCreatePoll
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title={_settings.survey.popUpTitle}

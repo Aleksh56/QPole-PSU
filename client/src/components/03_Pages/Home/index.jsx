@@ -1,5 +1,5 @@
 import Hero from '@/components/04_Widgets/common/Hero';
-import ServicesSection from '@/components/04_Widgets/ServicesSection';
+import ServSection from '@/components/04_Widgets/Content/Display/servSection';
 import Footer from '@/components/04_Widgets/common/Footer';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useEffect, useState } from 'react';
@@ -20,7 +20,7 @@ const HomePage = () => {
   return (
     <>
       <Hero />
-      <ServicesSection />
+      <ServSection />
       <Footer />
     </>
   );

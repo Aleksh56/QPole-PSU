@@ -2,8 +2,8 @@ import React from 'react';
 import { Grid } from '@mui/material';
 import { PollListGridContainer } from './styled';
 import useAuth from '@/hooks/useAuth';
-import AppPoleCard from '@/components/07_Shared/AppPoleCard';
-import PrimaryButton from '@/components/07_Shared/PrimaryButton';
+import AppPoleCard from '@/components/07_Shared/DataDisplay/Cards/appPoleCard';
+import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 
 const PollListOutput = ({ polls = [] }) => {
   const { isAuthenticated } = useAuth();

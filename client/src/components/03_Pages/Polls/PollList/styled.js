@@ -11,3 +11,10 @@ export const PollListPageContentWrapper = styled(Box)(() => ({
   margin: '0 auto',
   padding: `${Rem(70)} ${Rem(15)}`,
 }));
+
+export const ContentWrapper = styled(Box)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  rowGap: '30px',
+}));

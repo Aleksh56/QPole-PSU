@@ -72,14 +72,18 @@ api.interceptors.response.use(undefined, async (error) => {
   return Promise.reject(error);
 });
 
+const refreshToken = async () => {
+  handleRequest('post', '/login/token/refresh/', {
+    refresh_token: localStorage.getItem('refresh_token'),
+  });
+};
+
 export const handleRequest = async (method, url, data, successMessage) => {
   try {
     const response = await api[method](url, data);
-    // ToDo - Delete
     console.log(successMessage, response);
     return { data: response.data, ok: true };
   } catch (error) {
-    // ToDo - Rewrite to Notification Snackbar
     console.error(`${successMessage} failed:`, error?.response?.data || error.message);
     throw error;
   }

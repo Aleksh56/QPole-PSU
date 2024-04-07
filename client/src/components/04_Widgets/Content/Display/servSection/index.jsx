@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyledCardsWrapper, StyledSection, StyledSectionHeading } from './styled';
-import ServicesCard from '../../06_Entities/ServicesCard';
+import ServicesCard from '../../../../06_Entities/ServicesCard';
 import { v4 } from 'uuid';
 import { servicesCardsData } from '@/data/fields';
 
-const ServicesSection = () => {
+const ServSection = () => {
   return (
     <StyledSection className="services">
       <StyledSectionHeading variant="h4">Какие задачи решает сервис ?</StyledSectionHeading>
@@ -17,4 +17,4 @@ const ServicesSection = () => {
   );
 };
 
-export default ServicesSection;
+export default ServSection;

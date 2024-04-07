@@ -39,6 +39,7 @@ const AuthPage = () => {
       const response = isSignIn ? await loginUser(formData) : await registerUser(formData);
 
       if (response.data.access_token && response.data.access_token.length > 0) {
+        localStorage.setItem('refresh_token', response.data.refresh_token);
         setAuth(response.data.access_token);
         navigate('/app');
       }

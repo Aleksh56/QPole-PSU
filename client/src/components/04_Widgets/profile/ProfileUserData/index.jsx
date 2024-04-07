@@ -6,7 +6,7 @@ import {
   StyledProfileAvatar,
   StyledProfileContainer,
 } from './styled';
-import ProfileAccountField from '@/components/07_Shared/ProfileAccountField';
+import ProfileAccFld from '@/components/07_Shared/UIComponents/Fields/profileAccFld';
 import { StyledProfileFieldsBox } from '@/constants/styles';
 import { changeUserDataFx } from './models/change-user-data';
 
@@ -43,7 +43,7 @@ const ProfileUserData = ({ caption = '', boxCaption = '', ProfileInfoFields = []
         <ProfileFieldsWrapper>
           {ProfileInfoFields &&
             ProfileInfoFields.map(({ label, id, disabled, key }) => (
-              <ProfileAccountField
+              <ProfileAccFld
                 key={id}
                 label={label}
                 required={false}

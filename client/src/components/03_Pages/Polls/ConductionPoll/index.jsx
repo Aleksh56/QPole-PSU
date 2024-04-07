@@ -1,4 +1,4 @@
-import Header from '@/components/04_Widgets/common/Header';
+import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 import React, { useEffect, useState } from 'react';
 import { fetchPollQuestions } from './model/fetch-questions';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { $answersStore, resetAnswers } from './store/answer-store';
 import { sendAnswersRequestFx } from './model/send-answers';
 import useAuth from '@/hooks/useAuth';
 import { shuffleArray } from '@/utils/js/shuffleArray';
+import PollResult from '../PollResult';
 
 const ConductionPollPage = () => {
   const { id } = useParams();
@@ -17,6 +18,7 @@ const ConductionPollPage = () => {
   const navigate = useNavigate();
   const answers = useUnit($answersStore);
   const [pollData, setPollData] = useState({});
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     const pollDataRequest = async () => {
@@ -38,6 +40,8 @@ const ConductionPollPage = () => {
     const response = await sendAnswersRequestFx({ answers, id });
     if (!Object.keys(response.result).length > 0) {
       navigate('/polls');
+    } else {
+      setShowResults(true);
     }
   };
 
@@ -47,11 +51,17 @@ const ConductionPollPage = () => {
     <ConductionBackgroundWrapper onContextMenu={handleContextMenu}>
       <Header isMainPage={false} />
       <ConductionWrapper>
-        <ConductionHeader data={pollData} />
-        {pollData?.questions?.map((item) => (
-          <QuestionBlock question={item} isMixed={pollData?.mix_options} />
-        ))}
-        <button onClick={() => handleSubmit()}>Send</button>
+        {showResults ? (
+          <PollResult />
+        ) : (
+          <>
+            <ConductionHeader data={pollData} />
+            {pollData?.questions?.map((item) => (
+              <QuestionBlock question={item} isMixed={pollData?.mix_options} />
+            ))}
+            <button onClick={() => handleSubmit()}>Send</button>
+          </>
+        )}
       </ConductionWrapper>
     </ConductionBackgroundWrapper>
   );

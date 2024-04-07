@@ -2,7 +2,7 @@ import React from 'react';
 import { StyledPasswordWrapper, StyledTextField, StyledTypography } from './styled';
 import { Box } from '@mui/material';
 
-const ProfileAccountField = ({
+const ProfileAccFld = ({
   label = '',
   required = true,
   id = '',
@@ -42,4 +42,4 @@ const ProfileAccountField = ({
   );
 };
 
-export default ProfileAccountField;
+export default ProfileAccFld;

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { checkResetPasswordCode, resetPasswordRequest, sendResetPasswordCode } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
 import { ThemeProvider, useTheme } from '@mui/material';
-import LabeledInput from '@/components/07_Shared/AuthLabeledInput';
+import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
 import PasswordResetButtons from '@/components/05_Features/PasswordResetButtons';
 import usePageTitle from '@/hooks/usePageTitle';
 

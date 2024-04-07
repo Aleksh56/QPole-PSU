@@ -4,7 +4,7 @@ import { Routes, Route, useNavigate, NavLink } from 'react-router-dom';
 import { StyledDrawerWrapper } from './styled';
 import { adminPanelSidebarLinks } from '@/data/onboardings';
 import AdminUsersPage from './pages/AdminUsers';
-import AdmHeader from '@/components/04_Widgets/admin/admHeader';
+import AdmHeader from '@/components/04_Widgets/Navigation/Menus/admHeader';
 import { colorConfig } from '@/app/template/config/color.config';
 
 const AdminPanelPage = () => {

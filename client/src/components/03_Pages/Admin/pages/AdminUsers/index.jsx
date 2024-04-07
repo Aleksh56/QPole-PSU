@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { getAllUsersFx } from './models/get-users';
-import CustomTable from '@/components/04_Widgets/table';
+import CustomTable from '@/components/04_Widgets/Data/Vizualization/table';
 import BlockIcon from '@mui/icons-material/Block';
 import SettingsIcon from '@mui/icons-material/Settings';
-import FrmConfirm from '@/components/04_Widgets/frmConfirm';
+import FrmConfirm from '@/components/04_Widgets/Utilities/Modals/frmConfirm';
 import { banUserFx } from './models/ban-user';
 import { roleColorsConf } from '@/app/template/config/role.colors';
 import { parseAndFormatDate } from '@/utils/js/formatDate';
-import AdmUsrFilters from '@/components/04_Widgets/admin/admUsrFilters';
+import AdmUsrFilters from '@/components/04_Widgets/Content/Interactive/admUsrFilters';
 
 const AdminUsersPage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);

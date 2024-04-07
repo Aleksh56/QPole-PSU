@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import { StyledButton, StyledStack, StyledStackWrapper } from './styled';
 import { filterPollsRequest } from './api/apiRequests';
-import FilterSelect from '@/components/07_Shared/FilterSelect';
+import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appFilterOptions } from '@/data/fields';
 
 const AppPolesFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => {} }) => {

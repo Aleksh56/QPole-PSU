@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { CardContent, CardMedia, Typography, IconButton, Menu, MenuItem, Box } from '@mui/material';
+import { CardContent, CardMedia, Typography, Menu, MenuItem, Box } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { StyledCard, StyledChip, StyledTypographyName } from './styled';
-import { deletePollRequest } from './api/apiRequest';
 import { closePollFx } from './model/close-poll';
 import { duplicatePollFx } from './model/duplicate-poll';
 import config from '@/config';
+import { deletePollFx } from './model/delete-poll';
 
 const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -23,7 +23,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
 
   const handleDeletePoll = async (e) => {
     e.preventDefault();
-    await deletePollRequest(pollData?.poll_id).then(() => {
+    await deletePollFx(pollData?.poll_id).then(() => {
       fetchData();
     });
   };

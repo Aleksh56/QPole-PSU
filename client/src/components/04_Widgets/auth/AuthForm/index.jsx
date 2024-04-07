@@ -3,7 +3,7 @@ import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from 
 import AuthFormHeading from '@/components/05_Features/AuthFormHeading';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from '@mui/material';
-import LabeledInput from '@/components/07_Shared/AuthLabeledInput';
+import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
 import { useTranslation } from 'react-i18next';
 import { pattern } from '@/config/validation.patterns';
 import { validateField } from '@/utils/js/validateField';
