@@ -94,13 +94,10 @@ class MyProfileSerializer(serializers.ModelSerializer):
 # сериализаторы ответов
         
 class PollAnswerSerializer(serializers.ModelSerializer):
-    author = serializers.SerializerMethodField()
 
     def create(self, validated_data):
 
         poll = self.context.get('poll')
-
-        validated_data['poll_id'] = poll.id
         if poll.poll_type.name == 'Викторина':
             answer_option = validated_data['answer_option']
             if not answer_option.is_correct == None:
@@ -112,18 +109,11 @@ class PollAnswerSerializer(serializers.ModelSerializer):
 
         return super().create(validated_data)
 
-    def get_author(self, instance):
-        return MiniProfileSerializer(instance=instance.profile).data
 
-    class Meta:
-        model = PollAnswer
-        exclude = ['poll', 'image']
-
-
-class PollAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = PollAnswer
         fields = '__all__'
+
 
 class PollAnswerGroupSerializer(serializers.ModelSerializer):
     answers = PollAnswerSerializer(many=True, read_only=True)

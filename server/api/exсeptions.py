@@ -159,3 +159,13 @@ class MyValidationError(APIException):
     def __str__(self):
         return self.detail
     
+class MyCustomException(APIException):
+    status_code = 400
+    default_code = 'MyCustomException'
+
+    def __init__(self, detail):
+        self.detail = detail
+
+    def __str__(self):
+        return self.detail
+    

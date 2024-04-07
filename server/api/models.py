@@ -202,7 +202,7 @@ class Poll(models.Model):
     
     @property
     def members_quantity(self):   # число участников опроса
-        return self.user_answers.aggregate(members=Count('profile', distinct=True))['members'] or 0
+        return self.user_answers.count()
 
     @property
     def questions_quantity(self):   # число вопросов опроса

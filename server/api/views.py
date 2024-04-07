@@ -12,7 +12,7 @@ from .exсeptions import *
 from .serializers import *
 from .models import *
 from .utils import *
-from .pollvoting import basic_poll_voting
+from .pollvoting import *
 
 import os
 
@@ -285,15 +285,15 @@ def my_poll(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_stats(request):
     try:
-        current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
+        # current_user = request.user
+        # my_profile = Profile.objects.filter(user=current_user).first()
 
-        if not my_profile:
-            raise ObjectNotFoundException(model='Profile')
+        # if not my_profile:
+        #     raise ObjectNotFoundException(model='Profile')
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
@@ -315,7 +315,7 @@ def my_poll_stats(request):
                 .values('question_id')
                 .annotate(quantity=Count('poll_answer_group__profile_id', distinct=True))
             )
-            question_answers_count = list(question_answers_count)
+            # question_answers_count = list(question_answers_count)
 
             options_answers_count = (
                 PollAnswer.objects
@@ -323,7 +323,7 @@ def my_poll_stats(request):
                 .values('answer_option')
                 .annotate(quantity=Count('id'))
             )
-            options_answers_count = list(options_answers_count)
+            # options_answers_count = list(options_answers_count)
 
             free_answers = PollAnswer.objects.filter(
                 poll_answer_group__poll__poll_id=poll_id,
@@ -731,17 +731,18 @@ def my_poll_question_option(request):
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting(request):
-    try:
-        current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
+    # try:
+        # current_user = request.user
+        # my_profile = Profile.objects.filter(user=current_user).first()
+        my_profile = Profile.objects.filter(user__id=1).first()
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
 
-        if request.method == 'GET':
+        if request.method == 'POST':
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
@@ -756,36 +757,64 @@ def poll_voting(request):
                 serializer = PollAnswerGroupSerializer(my_answers, many=True)
                 return Response(serializer.data)
 
-        elif request.method == 'POST':
-            data = request.data.copy()
+        elif request.method == 'GET':
+            # data = request.data.copy()
+            data = {
+                "answers": [
+                    {
+                        "question": 295,
+                        "answer_option": 1495
+                    },
+                    {
+                        "question": 296,
+                        "answer_option": 1497
+                    }
+                ]
+            }
 
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
            
 
-            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            poll = (
+                Poll.objects.filter(poll_id=poll_id)
+                    .select_related('poll_type', 'author')
+                    .prefetch_related(
+                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                        'answer_options'
+                    ).all())
+                ).first()
+            )
+            
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
-            if poll.is_revote_allowed:
-                if poll.has_user_participated_in(my_profile):
+
+            if poll.has_user_participated_in(my_profile):
+                if not poll.is_revote_allowed:
                     raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+                else:
+                    previous_answer = PollAnswerGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile)      
+                    ).first()
+
+                    # Удаляем все найденные ответы
+                    if previous_answer:
+                        previous_answer.delete()
                 
+                        
             answers = data.get('answers', None)
             if not answers:
                 raise MissingFieldException(field_name='answers')
             
-            # валидация и парсинг ответов
-            answers = basic_poll_voting(answers, poll)
-
-            previous_answer = PollAnswerGroup.objects.filter(
-                Q(poll=poll) & Q(profile=my_profile)      
-            ).first()
-
-            # Удаляем все найденные ответы
-            if previous_answer:
-                previous_answer.delete()
+            # # валидация и парсинг ответов
+            # if poll.poll_type.name == 'Опрос':
+            #     answers = poll_voting_handler(answers, poll)
+            # elif poll.poll_type.name == 'Викторина':
+            #     answers = quizz_voting_handler(answers, poll)
+            # else:
+            #     raise MyCustomException(detail="Данного типа опроса не существует")
 
             poll_answer_group_data = {
                 'profile': my_profile.user_id,
@@ -803,11 +832,13 @@ def poll_voting(request):
                 answer['poll_answer_group'] = poll_answer_group.id
        
 
-            answers = PollAnswerSerializer(data=data, many=True)
-            if answers.is_valid():
-                answers = answers.save()
+            serializer = PollAnswerSerializer(data=data, many=True, context={'poll': poll})
+            if serializer.is_valid():
+                answers_data = serializer.validated_data
+                answers = [PollAnswer(**item) for item in answers_data]
+                PollAnswer.objects.bulk_create(answers)
             else:
-                return Response(answers.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
             serializer = PollAnswerSerializer(answers, many=True)
 
@@ -836,7 +867,8 @@ def poll_voting(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
            
-            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            # poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            poll = Poll.objects.filter(Q(author__user__id=1) and Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
@@ -856,11 +888,11 @@ def poll_voting(request):
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception}"}, api_exception.status_code)
 
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    # except Exception as ex:
+    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 
@@ -879,7 +911,12 @@ def poll(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(poll_id=poll_id).select_related('author', 'poll_type').first()
+                poll = (
+                    Poll.objects.filter(poll_id=poll_id)
+                    .select_related('author', 'poll_type')
+                    .prefetch_related('user_answers')
+                    .first()
+                )
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
@@ -909,12 +946,29 @@ def poll(request):
                     filters &= Q(is_closed=is_closed)
 
 
-                polls = Poll.objects.filter(filters)        
-                for poll in polls:
-                    poll.profile = my_profile
+                polls = (
+                    Poll.objects
+                    .select_related('author', 'poll_type', 'author__user')
+                    .prefetch_related('questions')
+                    .prefetch_related(
+                        Prefetch('user_answers', queryset=PollAnswerGroup.objects.prefetch_related(
+                            'answers'
+                        ).all()))
+                    .filter(filters)  
+                )
 
-                serializer = MiniPollSerializer(polls, many=True, context={'profile': my_profile})
-                return Response(serializer.data)
+
+                page = int(request.GET.get('page', 1))
+                page_size = int(request.GET.get('page_size', 20))  
+
+
+                paginator = PageNumberPagination()
+                paginator.page_size = page_size 
+                paginated_result = paginator.paginate_queryset(polls, request)
+                paginator.page.number = page
+                serializer = MiniPollSerializer(paginated_result, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
             
     except APIException as api_exception:
             return Response({'message':f"{api_exception}"}, api_exception.status_code)
