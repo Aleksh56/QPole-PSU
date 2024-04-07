@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, NavLink } from 'react-router-dom';
 import { StyledDrawerWrapper } from './styled';
 import { adminPanelSidebarLinks } from '@/data/onboardings';
 import AdminUsersPage from './pages/AdminUsers';
 import AdmHeader from '@/components/04_Widgets/admin/admHeader';
+import { colorConfig } from '@/app/template/config/color.config';
 
 const AdminPanelPage = () => {
   const navigate = useNavigate();
@@ -23,11 +24,36 @@ const AdminPanelPage = () => {
           <List>
             {adminPanelSidebarLinks.map(({ caption, link }) => (
               <ListItem key={caption} disablePadding>
-                <ListItemButton onClick={() => navigate(`/admin-panel/${link}`)}>
-                  <ListItemText primary={caption} />
-                </ListItemButton>
+                <NavLink
+                  to={`/admin-panel/${link}`}
+                  style={({ isActive }) => ({
+                    textDecoration: 'none',
+                    color: isActive ? '#fff' : '#000',
+                    backgroundColor: isActive ? colorConfig.primaryBlue : 'transparent',
+                    width: '100%',
+                  })}
+                >
+                  <ListItemButton>
+                    <ListItemText primary={caption} />
+                  </ListItemButton>
+                </NavLink>
               </ListItem>
             ))}
+            <ListItem key={'Назад'} disablePadding>
+              <NavLink
+                to={`/app`}
+                style={({ isActive }) => ({
+                  textDecoration: 'none',
+                  color: isActive ? '#fff' : '#000',
+                  backgroundColor: isActive ? colorConfig.primaryBlue : 'transparent',
+                  width: '100%',
+                })}
+              >
+                <ListItemButton>
+                  <ListItemText primary={'Назад'} />
+                </ListItemButton>
+              </NavLink>
+            </ListItem>
           </List>
         </StyledDrawerWrapper>
         <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#F5F6FA' }}>

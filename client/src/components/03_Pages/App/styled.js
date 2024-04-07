@@ -23,9 +23,6 @@ export const PollsGrid = styled(Box)({
   gridTemplateColumns: 'repeat(2, 1fr)',
   justifyContent: 'space-between',
   gap: Rem(70),
-  '& a': {
-    width: Rem(550),
-  },
 });
 
 export const StyledArchiveLink = styled(Link)({

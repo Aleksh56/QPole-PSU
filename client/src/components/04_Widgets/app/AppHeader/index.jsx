@@ -40,6 +40,11 @@ const AppHeader = () => {
             <AccountCircleIcon fontSize="small" />
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>
+            {role === 'Админ' && (
+              <MenuItem>
+                <Button onClick={() => navigate('/admin-panel')}> Админ-панель</Button>
+              </MenuItem>
+            )}
             <MenuItem>
               <Button onClick={() => navigate('/app/profile')}>Профиль</Button>
             </MenuItem>

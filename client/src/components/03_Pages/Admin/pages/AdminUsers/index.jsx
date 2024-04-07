@@ -5,6 +5,9 @@ import BlockIcon from '@mui/icons-material/Block';
 import SettingsIcon from '@mui/icons-material/Settings';
 import FrmConfirm from '@/components/04_Widgets/frmConfirm';
 import { banUserFx } from './models/ban-user';
+import { roleColorsConf } from '@/app/template/config/role.colors';
+import { parseAndFormatDate } from '@/utils/js/formatDate';
+import AdmUsrFilters from '@/components/04_Widgets/admin/admUsrFilters';
 
 const AdminUsersPage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -45,8 +48,18 @@ const AdminUsersPage = () => {
     { id: 1, key: 'id', caption: 'ID', render: (_, user) => (user.user.id ? user.user.id : '-') },
     { id: 2, key: 'name', caption: 'Имя', render: (name) => name ?? '-' },
     { id: 3, key: 'email', caption: 'Email' },
-    { id: 4, key: 'joining_date', caption: 'Дата вступления' },
-    { id: 5, key: 'role', caption: 'Роль', render: (role) => role ?? '-' },
+    {
+      id: 4,
+      key: 'joining_date',
+      caption: 'Дата вступления',
+      render: (joining_date) => parseAndFormatDate(joining_date),
+    },
+    {
+      id: 5,
+      key: 'role',
+      caption: 'Роль',
+      render: (role) => <span style={{ color: roleColorsConf[role] }}>{role}</span> ?? '-',
+    },
     {
       id: 6,
       key: 'is_banned',
@@ -87,6 +100,7 @@ const AdminUsersPage = () => {
 
   return (
     <>
+      <AdmUsrFilters />
       <CustomTable columns={getAdminUsersTableColumns(handleChangeStatus)} data={users} />
       <FrmConfirm
         open={isConfirmOpen}

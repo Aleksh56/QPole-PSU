@@ -84,8 +84,9 @@ const PasswordResetForm = () => {
                 id="code"
                 autoComplete="one-time-code"
                 placeholder="000-000"
+                mask={['9', '9', '9', '-', '9', '9', '9']}
                 value={resetAccountCode}
-                handleChange={(e) => setResetAccountCode(e.target.value)}
+                handleChange={(e) => console.log(e.target.value)}
               />
             )}
             {isCodeSubmitted && (

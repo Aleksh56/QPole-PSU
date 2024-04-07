@@ -6,11 +6,10 @@ import { deletePollRequest } from './api/apiRequest';
 import { closePollFx } from './model/close-poll';
 import { duplicatePollFx } from './model/duplicate-poll';
 import config from '@/config';
-import PrimaryButton from '../PrimaryButton';
 
-const AppPoleCard = React.memo(({ pollData, fetchData }) => {
+const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const cardButton = <PrimaryButton caption="Пройти" to={`/conduct-poll/${pollData.poll_id}`} />;
+  const open = Boolean(anchorEl);
 
   const handleMenuOpen = (e) => {
     e.preventDefault();
@@ -51,10 +50,32 @@ const AppPoleCard = React.memo(({ pollData, fetchData }) => {
         title="Poll Image"
       />
       <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
-        <Box sx={{ marginBottom: '20px' }}>
+        <Box
+          sx={{
+            marginBottom: '20px',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <StyledChip label={!pollData.is_closed ? 'Открыт' : 'Закрыт'} />
+
+          {!cardButton && (
+            <Box zIndex="tooltip">
+              <MoreHorizIcon onClick={handleMenuOpen} />
+              <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
+                <MenuItem onClick={(e) => handleClosePoll(e, pollData.poll_id)}>
+                  Close Poll
+                </MenuItem>
+                <MenuItem onClick={(e) => handleDuplicatePoll(e, pollData.poll_id)}>
+                  Duplicate Poll
+                </MenuItem>
+                <MenuItem onClick={(e) => handleDeletePoll(e)}>Delete Poll</MenuItem>
+              </Menu>
+            </Box>
+          )}
         </Box>
-        <Box></Box>
         <StyledTypographyName gutterBottom>{pollData.poll_type ?? ''}</StyledTypographyName>
         <Typography sx={{ fontSize: '14px', fontWeight: 600 }}>{pollData.name ?? ''}</Typography>
         <Typography sx={{ fontSize: '14px', fontWeight: 500, color: '#4C4C4C', marginTop: '10px' }}>

@@ -14,6 +14,7 @@ export const StyledChip = styled(Chip)(() => ({
 
 export const StyledCard = styled(Card)(() => ({
   height: Rem(280),
+  maxHeight: Rem(280),
   width: Rem(550),
   borderRadius: Rem(16),
   boxShadow: 'none',

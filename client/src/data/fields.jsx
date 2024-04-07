@@ -137,3 +137,10 @@ export const pollTuningSettings = [
     ],
   },
 ];
+
+export const admUsrsFilterCategories = [
+  { name: 'Сортировка по', options: ['Опция 1', 'Опция 2'] },
+  { name: 'Тип опроса', options: ['Опрос 1', 'Опрос 2'] },
+  { name: 'Статус', options: ['Активный', 'Неактивный'] },
+  { name: 'Группа', options: ['Группа 1', 'Группа 2'] },
+];
