@@ -112,7 +112,7 @@ class PollAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PollAnswer
-        fields = '__all__'
+        fields = ['id', 'question', 'answer_option', 'poll_answer_group', 'is_correct']
 
 
 class PollAnswerGroupSerializer(serializers.ModelSerializer):
