@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, Subquery, Prefetch
+from django.db.models import Q, Prefetch
 from django.db import transaction
 from django.contrib.auth.models import AnonymousUser
 
@@ -95,9 +95,16 @@ def my_poll(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(
-                        Q(author__user=current_user) and Q(poll_id=poll_id)
-                        ).select_related('author', 'poll_type').first()
+                poll = (
+                    Poll.objects.filter(
+                        Q(author__user=current_user) and Q(poll_id=poll_id))
+                        .select_related('author', 'poll_type')
+                        .prefetch_related(
+                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                'answer_options'
+                        ).all()))
+                        .first()
+                    )
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
@@ -209,11 +216,12 @@ def my_poll(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
                 
-            poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
             
             if request_type == 'change_order':
+                poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
+                if not poll:
+                    raise ObjectNotFoundException(model='Poll')
+            
                 objects_to_update = []
 
                 questions_data = data['questions_data']
@@ -235,12 +243,30 @@ def my_poll(request):
                 if not new_poll_id:
                     raise MissingFieldException(field_name='new_poll_id')
                 
-                poll_to_clone = Poll.objects.filter(poll_id=new_poll_id).first()
-                if poll_to_clone:
+                poll = Poll.objects.filter(poll_id=new_poll_id).exists()
+                if poll:
                     raise InvalidFieldException(detail='Данный poll_id уже занят.')
                 
-                cloned_poll = clone_poll(poll, new_poll_id)
+                poll_to_clone = Poll.objects.filter(poll_id=poll_id).prefetch_related(
+                                Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                    'answer_options'
+                                ).all())
+                            ).first()
+                if not poll_to_clone:
+                    raise ObjectNotFoundException(model='Poll')
 
+                cloned_poll = clone_poll(poll_to_clone, new_poll_id)
+                cloned_poll = (
+                        Poll.objects
+                            .filter(poll_id=cloned_poll.poll_id)
+                            .select_related('author', 'poll_type')
+                            .prefetch_related(
+                            Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                    'answer_options'
+                            ).all()))
+                            .first()
+                    )
+                
                 serializer = PollSerializer(cloned_poll)
                 return Response(serializer.data)
 
@@ -390,10 +416,14 @@ def my_poll_question(request):
                 raise ObjectNotFoundException(model='Poll') 
             
             if poll_question_id:
-                my_poll_question = poll.questions.filter(id=poll_question_id).first()
+                my_poll_question = (
+                    poll.questions.filter(id=poll_question_id)
+                        .prefetch_related('answer_options')
+                        .first()
+                )
                 serializer = PollQuestionSerializer(my_poll_question)
             else:
-                my_poll_questions = poll.questions.all()
+                my_poll_questions = poll.questions.all().prefetch_related('answer_options')
                 serializer = PollQuestionSerializer(my_poll_questions, many=True)
 
                 
@@ -525,7 +555,13 @@ def my_poll_question(request):
                 if len(poll.questions.all()) > 50:
                     raise TooManyInstancesException(model='PollQuestion', limit=50)
                          
-                cloned_question = clone_question(poll_question, poll)
+                cloned_question = clone_question(poll_question)
+                cloned_question =  (
+                    PollQuestion.objects
+                        .filter(id=cloned_question.id)
+                        .prefetch_related('answer_options')
+                        .first()
+                )
                 serializer = PollQuestionSerializer(cloned_question)
                 return Response(serializer.data)
 
@@ -921,10 +957,14 @@ def poll(request):
 
             if poll_id:
                 poll = (
-                    Poll.objects.filter(poll_id=poll_id)
-                    .select_related('author', 'poll_type')
-                    .prefetch_related('user_answers')
-                    .first()
+                    Poll.objects
+                        .filter(poll_id=poll_id)
+                        .select_related('author', 'poll_type')
+                        .prefetch_related(
+                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                'answer_options'
+                        ).all()))
+                        .first()
                 )
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
@@ -1034,4 +1074,62 @@ def my_poll_votes(request):
     except Exception as ex:
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def optimization_test(request):
+    try:
+        data = {
+            'request_type': 'clone_poll',
+            'new_poll_id': '44a958f5-5fa9-44df04564564а5',
+        }
+
+        request_type = request.GET.get('request_type', None)
+        if not request_type:
+            raise MissingParameterException(field_name='request_type')
+        poll_id = request.GET.get('poll_id', None)
+        if not poll_id:
+            raise MissingParameterException(field_name='poll_id')
+
+
+
+        if request_type == 'clone_poll':
+            new_poll_id = data.get('new_poll_id', None)
+            if not new_poll_id:
+                raise MissingFieldException(field_name='new_poll_id')
+            
+            poll = Poll.objects.filter(poll_id=new_poll_id).exists()
+            if poll:
+                raise InvalidFieldException(detail='Данный poll_id уже занят.')
+            
+            poll_to_clone = Poll.objects.filter(poll_id=poll_id).prefetch_related(
+                                Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                    'answer_options'
+                                ).all())
+                            ).first()
+            if not poll_to_clone:
+                raise ObjectNotFoundException(model='Poll')
+
+            cloned_poll = clone_poll(poll_to_clone, new_poll_id)
+            
+            cloned_poll =  (
+                    Poll.objects
+                        .filter(poll_id=cloned_poll.poll_id)
+                        .select_related('author', 'poll_type')
+                        .prefetch_related(
+                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                'answer_options'
+                        ).all()))
+                        .first()
+                )
+
+            serializer = PollSerializer(cloned_poll)
+            return Response(serializer.data)
+
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в optimization_test: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

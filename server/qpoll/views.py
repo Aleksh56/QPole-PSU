@@ -87,3 +87,191 @@ def create_totp_device(user, secret_key, name='default'):
         last_t=0,
     )
     return device
+
+
+
+
+# from django.views.decorators.http import require_POST
+# from .blockchain import web3, contract, PRIVATE_KEY
+# from web3.middleware import geth_poa_middleware
+
+# from django.http import JsonResponse
+# from web3 import Web3
+# from web3.middleware import geth_poa_middleware
+
+# # Настройка Web3
+# w3 = Web3(Web3.HTTPProvider('https://<network>.infura.io/v3/your_project_id'))
+# w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
+# @require_POST
+# def answer_survey(request):
+#     if request.method == 'POST':
+#         survey_id = request.POST.get('surveyId')
+#         answer = request.POST.get('answer')
+
+#         # Адрес смарт-контракта и ABI
+#         contract_address = '0x5c6D168dEc2f1D97a1c88B8390BbD8cE39d8Ae91'
+#         contract_abi = [
+#     {
+#       "anonymous": False,
+#       "inputs": [
+#         {
+#           "indexed": False,
+#           "internalType": "uint256",
+#           "name": "surveyId",
+#           "type": "uint256"
+#         },
+#         {
+#           "indexed": False,
+#           "internalType": "string",
+#           "name": "answer",
+#           "type": "string"
+#         }
+#       ],
+#       "name": "AnswerReceived",
+#       "type": "event"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "uint256",
+#           "name": "",
+#           "type": "uint256"
+#         },
+#         {
+#           "internalType": "uint256",
+#           "name": "",
+#           "type": "uint256"
+#         }
+#       ],
+#       "name": "answers",
+#       "outputs": [
+#         {
+#           "internalType": "string",
+#           "name": "",
+#           "type": "string"
+#         }
+#       ],
+#       "stateMutability": "view",
+#       "type": "function"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "uint256",
+#           "name": "",
+#           "type": "uint256"
+#         }
+#       ],
+#       "name": "surveys",
+#       "outputs": [
+#         {
+#           "internalType": "uint256",
+#           "name": "id",
+#           "type": "uint256"
+#         },
+#         {
+#           "internalType": "string",
+#           "name": "question",
+#           "type": "string"
+#         }
+#       ],
+#       "stateMutability": "view",
+#       "type": "function"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "string",
+#           "name": "_question",
+#           "type": "string"
+#         }
+#       ],
+#       "name": "createSurvey",
+#       "outputs": [],
+#       "stateMutability": "nonpayable",
+#       "type": "function"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "uint256",
+#           "name": "_surveyId",
+#           "type": "uint256"
+#         },
+#         {
+#           "internalType": "string",
+#           "name": "_answer",
+#           "type": "string"
+#         }
+#       ],
+#       "name": "answerSurvey",
+#       "outputs": [],
+#       "stateMutability": "nonpayable",
+#       "type": "function"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "uint256",
+#           "name": "_surveyId",
+#           "type": "uint256"
+#         }
+#       ],
+#       "name": "getSurveyQuestion",
+#       "outputs": [
+#         {
+#           "internalType": "string",
+#           "name": "",
+#           "type": "string"
+#         }
+#       ],
+#       "stateMutability": "view",
+#       "type": "function"
+#     },
+#     {
+#       "inputs": [
+#         {
+#           "internalType": "uint256",
+#           "name": "_surveyId",
+#           "type": "uint256"
+#         }
+#       ],
+#       "name": "getSurveyAnswers",
+#       "outputs": [
+#         {
+#           "internalType": "string[]",
+#           "name": "",
+#           "type": "string[]"
+#         }
+#       ],
+#       "stateMutability": "view",
+#       "type": "function"
+#     }
+#   ]  # ABI вашего контракта
+
+#         contract = w3.eth.contract(address=contract_address, abi=contract_abi)
+#         nonce = w3.eth.get_transaction_count('0x5c6D168dEc2f1D97a1c88B8390BbD8cE39d8Ae91')
+
+#         # Создание транзакции
+#         txn = contract.functions.answerSurvey(survey_id, answer).buildTransaction({
+#             'chainId': 1,
+#             'gas': 2000000,
+#             'gasPrice': w3.toWei('50', 'gwei'),
+#             'nonce': nonce,
+#         })
+
+#         # Подпись транзакции с использованием приватного ключа
+#         private_key = 'cfd2f54fc3764a2e5b8248a657aeaaf9611cfe916a9daa564f7a8d9fcdcbe9e6'
+#         signed_txn = w3.eth.account.signTransaction(txn, private_key=private_key)
+
+#         # Отправка транзакции
+#         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+#         txn_receipt = w3.eth.waitForTransactionReceipt(txn_hash)
+
+#         return JsonResponse({'status': 'success', 'txn_receipt': txn_receipt})
+#     else:
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+

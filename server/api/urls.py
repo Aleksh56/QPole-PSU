@@ -14,4 +14,7 @@ urlpatterns = [
     path('my_poll_stats/', my_poll_stats, name='my_poll_stats'),
     path('poll/', poll, name='poll'),
 
+
+    path('optimization_test/', optimization_test, name='optimization_test'),
+
 ]

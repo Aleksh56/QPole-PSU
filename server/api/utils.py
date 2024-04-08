@@ -1,4 +1,5 @@
 import imghdr
+from django.db.models import Prefetch
 
 def check_file(file):
     file_type = imghdr.what(file)
@@ -30,34 +31,61 @@ def custom_exception_handler(exc, context):
 from copy import deepcopy
 
 
+from django.db import transaction
+from .models import Poll, PollQuestion, AnswerOption
+
+
 def clone_poll(poll, new_poll_id):
-    cloned_poll = deepcopy(poll)
-    cloned_poll.id = None
-    cloned_poll.image = None
-    cloned_poll.poll_id = new_poll_id
-    if cloned_poll.name:
-        cloned_poll.name = cloned_poll.name + " (копия)"
-    cloned_poll.save()
-    
-    for question in poll.questions.all():
-        new_question = deepcopy(question)
-        new_question.id = None
-        new_question.image = None
-        new_question.save()
+    with transaction.atomic():
 
-        cloned_poll.questions.add(new_question)
+        cloned_poll = deepcopy(poll)
+        cloned_poll.id = None
+        cloned_poll.image = None
+        cloned_poll.poll_id = new_poll_id
+        if cloned_poll.name:
+            cloned_poll.name = cloned_poll.name + " (копия)"
+        cloned_poll.save()
 
-        for answer_option in question.answer_options.all():
-            new_answer_option = deepcopy(answer_option)
-            new_answer_option.id = None
-            new_answer_option.image = None
-            new_answer_option.save()
-            new_question.answer_options.add(new_answer_option)
+        new_questions = []
+        for question in poll.questions.all():
+            new_question = deepcopy(question)
+            new_question.id = None
+            new_question.image = None
+            new_questions.append(new_question)
 
+        # Bulk create новых вопросов
+        cloned_poll.questions.add(*new_questions)
+        new_questions = PollQuestion.objects.bulk_create(new_questions)
+        
+        
+        cloned_poll = (
+                    Poll.objects
+                        .filter(poll_id=cloned_poll.poll_id)
+                        .prefetch_related('questions')
+                        .first()
+                )   
+        answer_options_to_create = []
+        for i, question in enumerate(poll.questions.all(), 0):
+            new_question = cloned_poll.questions.all()[i]
+
+            answer_options_to_add = []
+            for answer_option in question.answer_options.all():
+                new_answer_option = deepcopy(answer_option)
+                new_answer_option.id = None
+                new_answer_option.image = None
+                answer_options_to_create.append(new_answer_option)
+                answer_options_to_add.append(new_answer_option)
+
+            new_question.answer_options.add(*answer_options_to_add)
+            
+        answer_options_to_create = AnswerOption.objects.bulk_create(answer_options_to_create)
+
+                
     return cloned_poll
 
 
-def clone_question(question, poll):
+
+def clone_question(question):
     cloned_question = deepcopy(question)
     cloned_question.id = None
     if cloned_question.name:
@@ -66,14 +94,16 @@ def clone_question(question, poll):
     cloned_question.save()
     
 
+    new_answer_options = []
     for answer_option in question.answer_options.all():
         new_answer_option = deepcopy(answer_option)
         new_answer_option.id = None
         new_answer_option.image = None
-        new_answer_option.save()
-        cloned_question.answer_options.add(new_answer_option)
+        new_answer_options.append(new_answer_option)
 
-    poll.questions.add(cloned_question)
+    cloned_question.answer_options.add(*new_answer_options)
+            
+    new_answer_options = AnswerOption.objects.bulk_create(new_answer_options)
     return cloned_question
 
 

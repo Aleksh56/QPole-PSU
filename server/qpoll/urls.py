@@ -28,6 +28,7 @@ from .views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('qr_code_view/', qr_code_view),
+    # path('answer_survey/', answer_survey),
     path('verify-totp/', VerifyTOTPView.as_view(), name='verify-totp'),
     path('api/', include('api.urls')),
     path('admin_api/', include('admin_api.urls')),
