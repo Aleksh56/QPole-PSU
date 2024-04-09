@@ -5,12 +5,20 @@ import { useParams } from 'react-router-dom';
 
 const PoleSettingsMenuButton = ({ icon: Icon, label, page, disabled }) => {
   const { id } = useParams();
+
+  const handleClick = (event) => {
+    if (disabled) {
+      event.preventDefault();
+    }
+  };
+
   return (
     <StyledNavLink
       end
       to={`/app/tests/${id}/${page}`}
       className={({ isActive, isPending }) => (isPending ? 'pending' : isActive ? 'active' : '')}
       isDisabled={disabled}
+      onClick={handleClick}
     >
       <StyledButton
         startIcon={<Icon />}

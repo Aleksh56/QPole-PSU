@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Divider } from '@mui/material';
+import { Box } from '@mui/material';
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import { v4 } from 'uuid';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
@@ -7,7 +7,6 @@ import useTabs from '@/hooks/useTabs';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import PollMainSettingsTabs from '@/components/06_Entities/PollMainSettingsTabs';
 import { MainSettingsContentWrapper, PoleInfoContainer, PoleInfoSwitchContainer } from './styled';
-import { poleSwitchData } from './data/PoleSwitchData';
 import { poleTabsButtonsData } from './data/PoleTabsButtonsData';
 import { StyledFormControlLabel } from '@/constants/styles';
 import { useLocation, useParams } from 'react-router-dom';
@@ -92,21 +91,6 @@ const PoleMainSettingsPage = () => {
             }
             handleChange={(e) => handleFieldChange('description', e)}
           />
-          <Divider sx={{ my: 2 }} />
-          <PoleInfoSwitchContainer>
-            {poleSwitchData.map((setting) => (
-              <StyledFormControlLabel
-                key={v4()}
-                control={
-                  <CustomSwitch
-                    focusVisibleClassName={setting.label}
-                    onChange={(e) => handleFieldChange('123', e.target.checked)}
-                  />
-                }
-                label={setting.label}
-              />
-            ))}
-          </PoleInfoSwitchContainer>
         </PoleInfoContainer>
         <Box sx={{ width: '35%' }}>
           <PollMainSettingsTabs

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Typography, IconButton, Box } from '@mui/material';
+import React, { useCallback } from 'react';
+import { Typography, Box } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import {
@@ -24,11 +24,14 @@ const PollQuestionsList = ({
 }) => {
   const { id } = useParams();
 
-  const handleCopyQuestion = async (e, q_id) => {
-    e.stopPropagation();
-    const newQue = await copyQuestionFx({ id, q_id });
-    setQuestions((prev) => [...prev, newQue]);
-  };
+  const handleCopyQuestion = useCallback(
+    async (e, q_id) => {
+      e.stopPropagation();
+      const newQue = await copyQuestionFx({ id, q_id });
+      setQuestions((prev) => [...prev, newQue]);
+    },
+    [id, setQuestions]
+  );
 
   const handleDeleteQuestion = async (e, q_id) => {
     e.stopPropagation();

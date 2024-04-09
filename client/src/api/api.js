@@ -55,9 +55,9 @@ api.interceptors.response.use(undefined, async (error) => {
     return new Promise((resolve, reject) => {
       refreshToken()
         .then((res) => {
-          localStorage.setItem('auth_token', res.data.access);
-          api.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.access;
-          processQueue(null, res.data.access);
+          localStorage.setItem('auth_token', res.data.access_token);
+          api.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.access_token;
+          processQueue(null, res.data.access_token);
           resolve(api(originalRequest));
         })
         .catch((err) => {
@@ -74,7 +74,7 @@ api.interceptors.response.use(undefined, async (error) => {
 
 const refreshToken = async () => {
   return handleRequest('post', '/login/token/refresh/', {
-    refresh: localStorage.getItem('refresh_token'),
+    refresh_token: localStorage.getItem('refresh_token'),
   });
 };
 

@@ -13,7 +13,7 @@ export const StyledNavLink = styled(NavLink)(({ isDisabled }) => ({
   border: `${Rem(1)} solid #dbdbdb`,
   backgroundColor: '#fff',
   borderRadius: Rem(5),
-  cursor: !isDisabled ? 'poiner' : 'default',
+  cursor: !isDisabled ? 'poiner' : 'not-allowed',
   fontSize: Rem(14),
   padding: `0 ${Rem(12)}`,
   transition: 'all .3s ease',
