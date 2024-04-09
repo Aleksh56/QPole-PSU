@@ -115,8 +115,8 @@ def my_poll(request):
                 poll_type = request.GET.get('poll_type', None)
                 name = request.GET.get('name', None)
                 is_anonymous = request.GET.get('is_anonymous', None)
-                is_paused = request.GET.get('is_paused', None)
-                is_closed = request.GET.get('is_closed', None)
+                is_paused = request.GET.get('is_paused', False)
+                is_closed = request.GET.get('is_closed', False)
 
                 filters = Q(author__user=current_user)
                 if poll_type:
@@ -128,10 +128,9 @@ def my_poll(request):
                     filters &= Q(name__icontains=name)
                 if is_anonymous:
                     filters &= Q(is_anonymous=is_anonymous)
-                if is_paused:
-                    filters &= Q(is_paused=is_paused)
-                if is_closed:
-                    filters &= Q(is_closed=is_closed)
+
+                filters &= Q(is_paused=is_paused)
+                filters &= Q(is_closed=is_closed)
 
                 page = int(request.GET.get('page', 1))
                 page_size = int(request.GET.get('page_size', 20))  
@@ -282,6 +281,10 @@ def my_poll(request):
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
             if request_type == 'deploy_to_production':
+                poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
+                if not poll:
+                    raise ObjectNotFoundException(model='Poll')
+                
                 if is_poll_valid(poll):
                     poll.is_in_production = True
                     poll.save()

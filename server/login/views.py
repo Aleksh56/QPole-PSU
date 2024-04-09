@@ -313,8 +313,8 @@ class EmailTokenObtainPairSerializer(serializers.Serializer):
                     raise serializers.ValidationError(self.error_messages['no_active_account'])
                 refresh = RefreshToken.for_user(user)
                 return {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                    'access_token': str(refresh.access_token),
                 }
             else:
                 raise serializers.ValidationError('Unable to log in with provided credentials.')
