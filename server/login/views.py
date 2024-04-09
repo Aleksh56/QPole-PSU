@@ -179,7 +179,7 @@ def send_reset_code(request):
             
         user_exists = User.objects.filter(email=email).exists()
         if not user_exists:
-            raise ObjectNotFoundException(name=email, model=User)
+            raise ObjectNotFoundException(model='User')
 
 
         # Проверяем, был ли уже отправлен код сброса пароля для данного пользователя
@@ -222,7 +222,7 @@ def check_reset_code(request):
 
         user_exists = User.objects.filter(email=email).exists()
         if not user_exists:
-            raise ObjectNotFoundException(name=email, model=User)
+            raise ObjectNotFoundException(model='User')
 
 
         stored_code = check_reset_code_in_cache(email)[0]
@@ -256,7 +256,7 @@ def reset_password(request):
             raise MissingFieldException(field_name='email')
         user = User.objects.filter(email=email).first()
         if not user:
-            raise ObjectNotFoundException(name=email, model=User)
+            raise ObjectNotFoundException(model='User')
         
         new_password = request.data.get('new_password')
         if not new_password:

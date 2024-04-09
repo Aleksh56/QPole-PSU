@@ -95,33 +95,58 @@ class MyProfileSerializer(serializers.ModelSerializer):
         
 class PollAnswerSerializer(serializers.ModelSerializer):
 
-    def create(self, validated_data):
+    # def create(self, validated_data):
 
-        poll = self.context.get('poll')
-        if poll.poll_type.name == 'Викторина':
-            answer_option = validated_data['answer_option']
-            if not answer_option.is_correct == None:
-                if answer_option.is_correct:
-                    validated_data['is_correct'] = True
-                else:
-                    validated_data['is_correct'] = False
+    #     poll = self.context.get('poll')
+    #     poll_answer_group = self.context.get('poll_answer_group')
+    #     validated_data['poll_answer_group'] = poll_answer_group
+    #     if poll.poll_type.name == 'Викторина':
+    #         answer_option = validated_data['answer_option']
+    #         if not answer_option.is_correct == None:
+    #             if answer_option.is_correct:
+    #                 validated_data['is_correct'] = True
+    #             else:
+    #                 validated_data['is_correct'] = False
                 
 
-        return super().create(validated_data)
+    #     return super().create(validated_data)
 
 
     class Meta:
         model = PollAnswer
-        fields = ['id', 'question', 'answer_option', 'poll_answer_group', 'is_correct']
+        # fields = ['id', 'question', 'answer_option', 'poll_answer_group', 'is_correct']
+        fields = '__all__'
 
 
 class PollAnswerGroupSerializer(serializers.ModelSerializer):
     answers = PollAnswerSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
 
+    results = serializers.SerializerMethodField()
 
     def get_author(self, instance):
         return MiniProfileSerializer(instance=instance.profile).data
+    
+    def get_results(self, instance):
+        if instance.poll.poll_type.name == 'Викторина':
+            total = 0
+            correct = 0
+            for answer in instance.answers.all():
+                total += 1
+                if answer.answer_option.is_correct == True:
+                    answer.is_correct = True
+                    correct += 1
+                else:
+                    answer.is_correct = False
+            
+            results = {
+                'total': total,
+                'correct': correct,
+                'wrong': total - correct,
+                'percentage': round(float(correct / total), 2) * 100,
+            }
+        
+            return results
     
     class Meta:
         model = PollAnswerGroup

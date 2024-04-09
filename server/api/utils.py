@@ -42,6 +42,7 @@ def clone_poll(poll, new_poll_id):
         cloned_poll.id = None
         cloned_poll.image = None
         cloned_poll.poll_id = new_poll_id
+        cloned_poll.is_in_production = False
         if cloned_poll.name:
             cloned_poll.name = cloned_poll.name + " (копия)"
         cloned_poll.save()

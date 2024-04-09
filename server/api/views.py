@@ -840,14 +840,10 @@ def poll_voting(request):
                 if not poll.is_revote_allowed:
                     raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
                 else:
-                    previous_answer = PollAnswerGroup.objects.filter(
+                    PollAnswerGroup.objects.filter(
                         Q(poll=poll) & Q(profile=my_profile)      
-                    ).first()
+                    ).first().delete()
 
-                    # Удаляем все найденные ответы
-                    if previous_answer:
-                        previous_answer.delete()
-                
                         
             answers = data.get('answers', None)
             if not answers:
@@ -865,6 +861,7 @@ def poll_voting(request):
                 'profile': my_profile.user_id,
                 'poll': poll.id,
             }
+
             poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
             if poll_answer_group.is_valid():
                 poll_answer_group = poll_answer_group.save()
@@ -873,47 +870,48 @@ def poll_voting(request):
             
 
             data = answers
+            # Получите все вопросы в один запрос
+            questions_dict = {question.id: question for question in poll.questions.all()}
+
+            # Получите все варианты ответов в один запрос
+            answer_options_dict = {
+                question.id: {answer_option.id: answer_option for answer_option in question.answer_options.all()}
+                for question in poll.questions.all()
+            }
+
             for answer in data:
-                answer['poll_answer_group'] = poll_answer_group.id
-       
+                answer['poll_answer_group'] = poll_answer_group
+                question_id = answer['question']
+                question = questions_dict.get(question_id)
+                if question:
+                    answer['question'] = question
+                    answer_option_id = answer['answer_option']
+                    answer_option = answer_options_dict.get(question_id, {}).get(answer_option_id)
 
-            serializer = PollAnswerSerializer(data=data, many=True, context={'poll': poll})
-            if serializer.is_valid():
-                answers_data = serializer.validated_data
-                answers = [PollAnswer(**item) for item in answers_data]
-                PollAnswer.objects.bulk_create(answers)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                              
-            serializer = PollAnswerSerializer(answers, many=True)
+                    if poll.poll_type.name == 'Викторина':
+                        if not answer_option.is_correct == None:
+                            if answer_option.is_correct:
+                                answer['is_correct'] = True
+                            else:
+                                answer['is_correct'] = False
 
-            result = {}
-            if poll.poll_type.name == 'Викторина':
-                total = 0
-                correct = 0
-                for answer in serializer.data:
-                    total += 1
-                    if answer['is_correct'] == True:
-                        correct += 1
-                
-                result = {
-                    'total': total,
-                    'correct': correct,
-                    'wrong': total - correct,
-                    'percentage': round(float(correct / total), 2) * 100,
-                }
-                        
+                    answer['answer_option'] = answer_option
 
-            return Response({'message':"Вы успешно проголосовали", 'data':serializer.data, 'result': result}, status=status.HTTP_200_OK)
+            poll_answers = PollAnswer.objects.bulk_create([
+                PollAnswer(**item) for item in data
+            ])
+            serializer = PollAnswerGroupSerializer(poll_answer_group)
+        
 
+            return Response({'message':"Вы успешно проголосовали", 'data':serializer.data,}, status=status.HTTP_200_OK)
+    
         elif request.method == 'DELETE':
             poll_id = request.GET.get('poll_id', None)
 
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
            
-            # poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
-            poll = Poll.objects.filter(Q(author__user__id=1) and Q(poll_id=poll_id)).first()
+            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
@@ -1073,63 +1071,4 @@ def my_poll_votes(request):
 
     except Exception as ex:
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def optimization_test(request):
-    try:
-        data = {
-            'request_type': 'clone_poll',
-            'new_poll_id': '44a958f5-5fa9-44df04564564а5',
-        }
-
-        request_type = request.GET.get('request_type', None)
-        if not request_type:
-            raise MissingParameterException(field_name='request_type')
-        poll_id = request.GET.get('poll_id', None)
-        if not poll_id:
-            raise MissingParameterException(field_name='poll_id')
-
-
-
-        if request_type == 'clone_poll':
-            new_poll_id = data.get('new_poll_id', None)
-            if not new_poll_id:
-                raise MissingFieldException(field_name='new_poll_id')
-            
-            poll = Poll.objects.filter(poll_id=new_poll_id).exists()
-            if poll:
-                raise InvalidFieldException(detail='Данный poll_id уже занят.')
-            
-            poll_to_clone = Poll.objects.filter(poll_id=poll_id).prefetch_related(
-                                Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                                    'answer_options'
-                                ).all())
-                            ).first()
-            if not poll_to_clone:
-                raise ObjectNotFoundException(model='Poll')
-
-            cloned_poll = clone_poll(poll_to_clone, new_poll_id)
-            
-            cloned_poll =  (
-                    Poll.objects
-                        .filter(poll_id=cloned_poll.poll_id)
-                        .select_related('author', 'poll_type')
-                        .prefetch_related(
-                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                                'answer_options'
-                        ).all()))
-                        .first()
-                )
-
-            serializer = PollSerializer(cloned_poll)
-            return Response(serializer.data)
-
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
-    
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в optimization_test: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

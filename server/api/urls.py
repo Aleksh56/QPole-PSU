@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from .views import *
+from .tests import *
 
 urlpatterns = [
     path('my_profile/', my_profile, name='my_profile'),
@@ -16,5 +17,6 @@ urlpatterns = [
 
 
     path('optimization_test/', optimization_test, name='optimization_test'),
+    path('poll_voting_test/', poll_voting_test, name='poll_voting_test'),
 
 ]
