@@ -4,10 +4,19 @@ import { Rem } from '@/utils/convertToRem';
 
 export const Wrapper = styled(Box)(() => ({
   display: 'flex',
+  flexDirection: 'column',
   width: '100%',
   maxWidth: Rem(1200),
   margin: `${Rem(24)} auto`,
   columnGap: Rem(30),
+}));
+
+export const SettingsWrapper = styled(Box)(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  columnGap: Rem(15),
+  width: '100%',
+  marginBottom: Rem(20),
 }));
 
 export const ResultsGridWrapper = styled(Box)(() => ({

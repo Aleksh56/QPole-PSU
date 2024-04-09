@@ -17,6 +17,7 @@
     "@mui/icons-material": "^5.15.5",
     "@mui/material": "^5.15.5",
     "@mui/x-charts": "^6.19.5",
+    "@react-pdf/renderer": "^3.4.2",
     "@types/react-input-mask": "^2.0.4",
     "axios": "^1.6.5",
     "effector": "^23.2.0",

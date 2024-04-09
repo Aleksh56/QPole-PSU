@@ -1,8 +1,16 @@
 import React from 'react';
 import { Typography, IconButton, Box } from '@mui/material';
-import CopyIcon from '@mui/icons-material/FileCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { StyledAddButton, StyledCard, StyledCardContent, StyledContentWrapper } from './styled';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import {
+  IconsWrapper,
+  ListWrapper,
+  StyledAddButton,
+  StyledCard,
+  StyledCardContent,
+  StyledContentWrapper,
+  StyledQueCount,
+} from './styled';
 import { deleteQuestionRequest } from './api/apiRequests';
 import { useParams } from 'react-router-dom';
 import { copyQuestionFx } from './model/copy-question';
@@ -34,10 +42,11 @@ const PollQuestionsList = ({
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <ListWrapper>
       <StyledAddButton onClick={onAddQuestion} variant="outlined">
         Добавить вопрос
       </StyledAddButton>
+      <StyledQueCount>Количество вопросов - {questions.length}</StyledQueCount>
       <Box>
         {questions.map((question, index) => (
           <StyledCard
@@ -48,28 +57,21 @@ const PollQuestionsList = ({
             <StyledCardContent>
               <StyledContentWrapper>
                 <Typography variant="subtitle1" component="div">
-                  Вопрос #{index + 1}
+                  №{index + 1}
                 </Typography>
                 <Typography variant="body2" component="div">
-                  {question.title || ''}
+                  {question.name || 'Без заголовка'}
                 </Typography>
               </StyledContentWrapper>
-              <Box>
-                <IconButton aria-label="copy" onClick={(e) => handleCopyQuestion(e, question.id)}>
-                  <CopyIcon />
-                </IconButton>
-                <IconButton
-                  aria-label="delete"
-                  onClick={(e) => handleDeleteQuestion(e, question.id)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
+              <IconsWrapper>
+                <ContentCopyIcon onClick={(e) => handleCopyQuestion(e, question.id)} />
+                <DeleteOutlineIcon onClick={(e) => handleDeleteQuestion(e, question.id)} />
+              </IconsWrapper>
             </StyledCardContent>
           </StyledCard>
         ))}
       </Box>
-    </Box>
+    </ListWrapper>
   );
 };
 

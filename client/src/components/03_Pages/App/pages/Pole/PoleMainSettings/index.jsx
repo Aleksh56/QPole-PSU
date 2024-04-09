@@ -13,9 +13,11 @@ import { StyledFormControlLabel } from '@/constants/styles';
 import { useLocation, useParams } from 'react-router-dom';
 import { changePoleData, getInfoAboutPole } from './api/apiRequests';
 import { deleteImageFx } from './model/image-delete';
+import { useAlert } from '@/app/context/AlertProvider';
 
 const PoleMainSettingsPage = () => {
   const { id } = useParams();
+  const { showAlert } = useAlert();
   const [tabValue, handleTabChange] = useTabs();
   const [poleData, setPoleData] = useState();
   const [pendingChanges, setPendingChanges] = useState({});
@@ -46,7 +48,7 @@ const PoleMainSettingsPage = () => {
     }
 
     const handler = setTimeout(async () => {
-      await changePoleData(fieldName, value, id, fetchPoleData);
+      await changePoleData(fieldName, value, id, fetchPoleData, showAlert);
       setPendingChanges((prevState) => ({
         ...prevState,
         [fieldName]: undefined,

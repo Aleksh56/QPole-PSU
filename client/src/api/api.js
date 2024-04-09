@@ -54,10 +54,10 @@ api.interceptors.response.use(undefined, async (error) => {
 
     return new Promise((resolve, reject) => {
       refreshToken()
-        .then(({ token }) => {
-          localStorage.setItem('auth_token', token);
-          api.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-          processQueue(null, token);
+        .then((res) => {
+          localStorage.setItem('auth_token', res.data.access);
+          api.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.access;
+          processQueue(null, res.data.access);
           resolve(api(originalRequest));
         })
         .catch((err) => {
@@ -73,8 +73,8 @@ api.interceptors.response.use(undefined, async (error) => {
 });
 
 const refreshToken = async () => {
-  handleRequest('post', '/login/token/refresh/', {
-    refresh_token: localStorage.getItem('refresh_token'),
+  return handleRequest('post', '/login/token/refresh/', {
+    refresh: localStorage.getItem('refresh_token'),
   });
 };
 
