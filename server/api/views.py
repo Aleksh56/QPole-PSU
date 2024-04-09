@@ -289,8 +289,7 @@ def my_poll(request):
                     poll.is_in_production = True
                     poll.save()
 
-                    return Response(f"{poll} выпущен в продакшен, редактирование опроса заблокировано", 
-                                                                             status=status.HTTP_200_OK)
+                    return Response({'message':f"Опрос успешно опубликован", 'severity': 'success'}, status=status.HTTP_200_OK)
             
             else:
                 return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)
@@ -325,6 +324,9 @@ def my_poll(request):
 
             return Response({'message':f"Опрос успешно удален", 'data':response_data}, status=status.HTTP_204_NO_CONTENT)
 
+    except SuccessException as success_exception:
+        return Response(success_exception.detail, success_exception.status_code)
+    
     except APIException as api_exception:
         return Response({'message':f"{api_exception}"}, api_exception.status_code)
     
