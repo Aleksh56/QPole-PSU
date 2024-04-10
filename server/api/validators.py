@@ -168,21 +168,21 @@ class ReleaseOptionValidator():
         value = getattr(instance, "name", None)
 
         if not value:
-            raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' не должен быть пустым.")
+            raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' не должен быть пустым.")
         
         if not min_len:
             if len(value) < 1:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' должен содержать не менее 1 символа.")
+                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать не менее 1 символа.")
         else:
             if len(value) < min_len:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' должен содержать более {min_len - 1} символов.")
+                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать более {min_len - 1} символов.")
             
         if not max_len:
             if len(value) > 50:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' должен содержать менее 50 символов.")
+                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее 50 символов.")
         else:
             if len(value) > max_len:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' должен содержать менее {max_len} символов.")
+                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее {max_len} символов.")
             
  
 def is_poll_valid(poll):

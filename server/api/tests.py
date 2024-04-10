@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q, Prefetch
+from django.db.models import Count, Case, When, F, ExpressionWrapper, FloatField
 from django.db import transaction
 
 
@@ -236,4 +237,88 @@ def poll_voting_test(request):
 
     # except Exception as ex:
     #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+
+
+@api_view(['GET'])
+@transaction.atomic
+def my_poll_stats_test(request):
+    # try:
+        current_user = request.user
+        my_profile = Profile.objects.filter(user_id=1).first()
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+
+            poll = Poll.objects.filter(poll_id=poll_id).prefetch_related(
+                Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                    'answer_options'
+                ).all())
+            ).first()
+            if not poll:
+                raise ObjectNotFoundException('Poll')
+
+            poll_statistics = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll=poll)
+                .values('poll_answer_group__poll__poll_id')
+                .annotate(
+                    total_answers=Count('id'),
+                    correct_answers=Count(Case(When(is_correct=True, then=1))),
+                    correct_percentage=ExpressionWrapper(
+                        100 * F('correct_answers') / F('total_answers'),
+                        output_field=FloatField()
+                    )
+                )
+            )
+
+            question_statistics = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll=poll)
+                .values('question_id')
+                .annotate(
+                    quantity=Count('id'),
+                    correct_quantity=Count(Case(When(is_correct=True, then=1))),
+                    correct_percentage=ExpressionWrapper(
+                        100 * F('correct_quantity') / F('quantity'),
+                        output_field=FloatField()
+                    )
+                )
+            ) 
+            
+            options_answers_count = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll=poll)
+                .values('answer_option')
+                .annotate(quantity=Count('id'))
+            )
+
+            free_answers = PollAnswer.objects.filter(
+                poll_answer_group__poll__poll_id=poll_id,
+                text__isnull=False
+            ).values('text', 'question_id')
+
+
+            context = {
+                'poll_statistics': poll_statistics,
+                'question_statistics': question_statistics,
+                'options_answers_count': options_answers_count,
+                'free_answers': free_answers
+            }
+
+
+            stats = PollStatsSerializer(poll, context=context)
+            return Response(stats.data)
+
+
+
+    # except APIException as api_exception:
+    #     return Response({'message': f"{api_exception}"}, api_exception.status_code)
+
+    # except Exception as ex:
+    #     return Response({'message': f"Внутренняя ошибка сервера в my_poll_stats: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

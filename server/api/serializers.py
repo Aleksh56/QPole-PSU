@@ -312,25 +312,37 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionStatsSerializer(many=True)
 
     votes_quantity = serializers.SerializerMethodField()
+    correct_answer_percentage = serializers.SerializerMethodField()
 
     def get_votes_quantity(self, instance):
         question_id = instance.id
-        question_answers_count = self.context.get('question_answers_count', {})
+        question_statistics = self.context.get('question_statistics', {})
 
-        for item in question_answers_count:
+        for item in question_statistics:
             if item['question_id'] == question_id:
                 return item['quantity']
         return 0
 
+    def get_correct_answer_percentage(self, instance):
+        question_id = instance.id
+        question_statistics = self.context.get('question_statistics', {})
+
+        for item in question_statistics:
+            if item['question_id'] == question_id:
+                return item['correct_percentage']
+        return 0
+    
     class Meta:
         model = PollQuestion
-        fields = ['id', 'answer_options', 'name', 'votes_quantity', 'has_multiple_choices']
+        fields = ['id', 'answer_options', 'name', 'votes_quantity', 'has_multiple_choices',
+                  'correct_answer_percentage']
 
 
 
 class PollStatsSerializer(serializers.ModelSerializer):
     members_quantity = serializers.SerializerMethodField()
     questions_quantity = serializers.SerializerMethodField()
+    correct_answer_percentage = serializers.SerializerMethodField()
 
     questions = PollQuestionStatsSerializer(many=True)
 
@@ -341,9 +353,16 @@ class PollStatsSerializer(serializers.ModelSerializer):
     def get_questions_quantity(self, instance):
         return instance.questions_quantity
 
+    def get_correct_answer_percentage(self, instance):
+        poll_statistics = self.context.get('poll_statistics', None)
 
+        if poll_statistics:
+            return poll_statistics[0].get('correct_percentage', None)
+            
+        return None
+    
     class Meta:
         model = Poll
-        fields = ['members_quantity', 'questions_quantity', 'questions']
+        fields = ['members_quantity', 'questions_quantity', 'questions', 'correct_answer_percentage']
 
 

@@ -18,5 +18,6 @@ urlpatterns = [
 
     path('optimization_test/', optimization_test, name='optimization_test'),
     path('poll_voting_test/', poll_voting_test, name='poll_voting_test'),
+    path('my_poll_stats_test/', my_poll_stats_test, name='my_poll_stats_test'),
 
 ]

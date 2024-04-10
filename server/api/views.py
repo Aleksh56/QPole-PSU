@@ -3,7 +3,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField
+from django.db.models import Count, Case, When, F
 from django.db import transaction
 from django.contrib.auth.models import AnonymousUser
 
@@ -216,24 +217,23 @@ def my_poll(request):
                 raise MissingParameterException(field_name='poll_id')
                 
             
-            if request_type == 'change_order':
+            if request_type == 'change_questions_order':
                 poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
             
                 objects_to_update = []
-
                 questions_data = data['questions_data']
-                for question_number, question_data in enumerate(questions_data, start=1):
-                    question = PollQuestion.objects.filter(id=int(question_data['id'])).first()
+                question_ids = list(questions_data.keys())
+                questions = PollQuestion.objects.filter(id__in=map(int, question_ids))
+                for question_number, question in enumerate(questions.all(), start=1):
                     if not question:
                         raise ObjectNotFoundException(model='AnswerOption')
 
                     question.order_id = question_number
-
                     objects_to_update.append(question)
 
-                AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
+                PollQuestion.objects.bulk_update(objects_to_update, ['order_id'])
 
                 return Response(status=status.HTTP_200_OK)
             
@@ -281,7 +281,17 @@ def my_poll(request):
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
             if request_type == 'deploy_to_production':
-                poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
+                poll = (
+                    Poll.objects.filter(
+                        Q(author=my_profile) and Q(poll_id=poll_id))
+                        .select_related('author', 'poll_type')
+                        .prefetch_related(
+                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                'answer_options'
+                        ).all()))
+                        .first()
+                    )
+
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
@@ -335,15 +345,15 @@ def my_poll(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_stats(request):
     try:
-        # current_user = request.user
-        # my_profile = Profile.objects.filter(user=current_user).first()
+        current_user = request.user
+        my_profile = Profile.objects.filter(user=current_user).first()
 
-        # if not my_profile:
-        #     raise ObjectNotFoundException(model='Profile')
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
@@ -358,40 +368,57 @@ def my_poll_stats(request):
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-
-            question_answers_count = (
+            poll_statistics = (
                 PollAnswer.objects
-                .filter(poll_answer_group__poll__poll_id=poll_id)
-                .values('question_id')
-                .annotate(quantity=Count('poll_answer_group__profile_id', distinct=True))
+                .filter(poll_answer_group__poll=poll)
+                .values('poll_answer_group__poll__poll_id')
+                .annotate(
+                    total_answers=Count('id'),
+                    correct_answers=Count(Case(When(is_correct=True, then=1))),
+                    correct_percentage=ExpressionWrapper(
+                        100 * F('correct_answers') / F('total_answers'),
+                        output_field=FloatField()
+                    )
+                )
             )
-            # question_answers_count = list(question_answers_count)
 
+            question_statistics = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll=poll)
+                .values('question_id')
+                .annotate(
+                    quantity=Count('id'),
+                    correct_quantity=Count(Case(When(is_correct=True, then=1))),
+                    correct_percentage=ExpressionWrapper(
+                        100 * F('correct_quantity') / F('quantity'),
+                        output_field=FloatField()
+                    )
+                )
+            ) 
+            
             options_answers_count = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
                 .values('answer_option')
                 .annotate(quantity=Count('id'))
             )
-            # options_answers_count = list(options_answers_count)
 
             free_answers = PollAnswer.objects.filter(
                 poll_answer_group__poll__poll_id=poll_id,
                 text__isnull=False
             ).values('text', 'question_id')
-            free_answers = list(free_answers)
 
 
             context = {
-                'question_answers_count': question_answers_count,
+                'poll_statistics': poll_statistics,
+                'question_statistics': question_statistics,
                 'options_answers_count': options_answers_count,
-                'free_answers': free_answers,
+                'free_answers': free_answers
             }
 
 
             stats = PollStatsSerializer(poll, context=context)
             return Response(stats.data)
-
 
 
     except APIException as api_exception:
@@ -539,7 +566,23 @@ def my_poll_question(request):
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
-            if request_type == 'change_order':
+            if request_type == 'change_options_order':
+                objects_to_update = []
+                options_data = data['options_data']
+                options_ids = list(options_data.keys())
+                options = AnswerOption.objects.filter(id__in=map(int, options_ids))
+                for option_number, option in enumerate(options.all(), start=1):
+                    if not option:
+                        raise ObjectNotFoundException(model='AnswerOption')
+
+                    option.order_id = option_number
+                    objects_to_update.append(option)
+
+                AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
+
+
+
+
                 objects_to_update = []
 
                 questions_data = data['questions_data']
@@ -606,7 +649,14 @@ def my_poll_question_option(request):
             if not poll_question_id:
                 raise MissingParameterException(field_name='poll_question_id')
              
-            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            poll = (
+                Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id))
+                    .prefetch_related(
+                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                        'answer_options'
+                    ).all())
+                ).first()
+            )
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
@@ -638,7 +688,14 @@ def my_poll_question_option(request):
                 raise MissingFieldException(field_name='poll_question_id')
             
 
-            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            poll = (
+                Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id))
+                    .prefetch_related(
+                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                        'answer_options'
+                    ).all())
+                ).first()
+            )
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
@@ -843,7 +900,7 @@ def poll_voting(request):
 
             if poll.has_user_participated_in(my_profile):
                 if not poll.is_revote_allowed:
-                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе")
                 else:
                     PollAnswerGroup.objects.filter(
                         Q(poll=poll) & Q(profile=my_profile)      
@@ -961,7 +1018,7 @@ def poll(request):
             if poll_id:
                 poll = (
                     Poll.objects
-                        .filter(poll_id=poll_id)
+                        .filter(Q(poll_id=poll_id) and Q(is_in_production=True))
                         .select_related('author', 'poll_type')
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
@@ -982,7 +1039,7 @@ def poll(request):
                 is_paused = request.GET.get('is_paused', None)
                 is_closed = request.GET.get('is_closed', None)
 
-                filters = Q()
+                filters = Q(is_in_production=True)
                 if poll_type:
                     poll_type = PollType.objects.filter(name=poll_type).first()
                     if not poll_type:
@@ -1029,7 +1086,7 @@ def poll(request):
 
             
     except APIException as api_exception:
-            return Response({'message':f"{api_exception}"}, api_exception.status_code)
+            return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
         
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
