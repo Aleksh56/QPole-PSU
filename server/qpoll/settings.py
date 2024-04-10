@@ -16,7 +16,7 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
-SERVER_URL = 'http://188.225.45.226:3000/pre-register/'
+SERVER_URL = 'http://188.225.45.226:3000/'
 
 LOGGING = {
     'version': 1,

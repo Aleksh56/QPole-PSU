@@ -919,49 +919,7 @@ def poll_voting(request):
             else:
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
-            poll_answer_group_data = {
-                'profile': my_profile.user_id,
-                'poll': poll.id,
-            }
-
-            poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
-            if poll_answer_group.is_valid():
-                poll_answer_group = poll_answer_group.save()
-            else:
-                return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-
-            data = answers
-            # Получите все вопросы в один запрос
-            questions_dict = {question.id: question for question in poll.questions.all()}
-
-            # Получите все варианты ответов в один запрос
-            answer_options_dict = {
-                question.id: {answer_option.id: answer_option for answer_option in question.answer_options.all()}
-                for question in poll.questions.all()
-            }
-
-            for answer in data:
-                answer['poll_answer_group'] = poll_answer_group
-                question_id = answer['question']
-                question = questions_dict.get(question_id)
-                if question:
-                    answer['question'] = question
-                    answer_option_id = answer['answer_option']
-                    answer_option = answer_options_dict.get(question_id, {}).get(answer_option_id)
-
-                    if poll.poll_type.name == 'Викторина':
-                        if not answer_option.is_correct == None:
-                            if answer_option.is_correct:
-                                answer['is_correct'] = True
-                            else:
-                                answer['is_correct'] = False
-
-                    answer['answer_option'] = answer_option
-
-            poll_answers = PollAnswer.objects.bulk_create([
-                PollAnswer(**item) for item in data
-            ])
+            poll_answer_group, answers = poll_voting_handler(answers, poll)
             serializer = PollAnswerGroupSerializer(poll_answer_group)
         
 
@@ -973,7 +931,12 @@ def poll_voting(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
            
-            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            poll = (
+                Poll.objects
+                    .filter(Q(author__user=current_user) and Q(poll_id=poll_id))
+                    .prefetch_related('user_answers')
+                ).first()
+
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
@@ -1076,7 +1039,11 @@ def poll(request):
                 paginator.page.number = page
                 total_items = polls.count()
                 total_pages = paginator.page.paginator.num_pages
-                serializer = MiniPollSerializer(paginated_result, many=True)
+
+                context = {
+                    'profile': my_profile
+                }
+                serializer = MiniPollSerializer(paginated_result, context=context, many=True)
                 pagination_data = {
                     'total_items': total_items,
                     'total_pages': total_pages,

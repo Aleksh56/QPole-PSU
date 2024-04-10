@@ -15,7 +15,7 @@ from api.utils import *
 
 from .serializers import ProfileSerializer
 
-from rest_framework import generics, permissions, status
+from rest_framework import status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 
@@ -35,10 +35,28 @@ def users(request):
                     raise ObjectNotFoundException('Profile')
                 serializer = ProfileSerializer(user)
             else:
+                role = request.GET.get('role', None)
+                is_banned = bool(request.GET.get('is_paused', None))
+                name_surname_patronymic = request.GET.get('name_surname_patronymic', None)
+
+
+                filters = Q()
+                if role:
+                    filters &= Q(role__role=role)
+                if is_banned:
+                    filters &= Q(is_banned=is_banned)
+                if name_surname_patronymic:
+                    filters &= (
+                        Q(name__icontains=name_surname_patronymic) or
+                        Q(surname__icontains=name_surname_patronymic) or
+                        Q(patronymic__icontains=name_surname_patronymic)
+                    )
+                                    
+
                 page = int(request.GET.get('page', 1))
                 page_size = int(request.GET.get('page_size', 20))  
 
-                users = Profile.objects.all().order_by('-joining_date').select_related('role')
+                users = Profile.objects.filter(filters).order_by('-joining_date').select_related('role')
                 paginator = PageNumberPagination()
                 paginator.page_size = page_size
                 paginated_result = paginator.paginate_queryset(users, request)

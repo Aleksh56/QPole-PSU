@@ -85,7 +85,7 @@ def poll_voting_test(request):
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
 
-        elif request.method == 'GET':
+        if request.method == '5555':
             data = {
                     "answers": [
                         {
@@ -205,14 +205,18 @@ def poll_voting_test(request):
         
             return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK)
 
-        elif request.method == 'DELETE':
+        elif request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
 
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
            
-            # poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
-            poll = Poll.objects.filter(Q(author__user__id=1) and Q(poll_id=poll_id)).first()
+            poll = (
+                Poll.objects
+                    .filter(Q(author=my_profile) and Q(poll_id=poll_id))
+                    .prefetch_related('user_answers')
+                ).first()
+
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 

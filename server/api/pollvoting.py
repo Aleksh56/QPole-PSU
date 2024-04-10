@@ -1,5 +1,6 @@
 from .exсeptions import *
-
+from .serializers import PollAnswerGroupSerializer
+from .models import PollAnswer
 
 def poll_voting_handler(answers, poll):
     required_questions = {question for question in poll.questions.all() if question.is_required}
@@ -107,3 +108,56 @@ def quizz_voting_handler(answers, poll):
         raise PollAnsweringException(detail=f"Вы ответили не на все обязательные вопросы: {difference}")
 
     return parsed_answers
+
+
+def save_votes(answers, poll, my_profile):
+    poll_answer_group_data = {
+                'profile': my_profile.user_id,
+                'poll': poll.id,
+            }
+
+    poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
+    if poll_answer_group.is_valid():
+        poll_answer_group = poll_answer_group.save()
+    else:
+        raise MyCustomException(detail=poll_answer_group.errors)
+    
+
+    data = answers
+    # Получите все вопросы в один запрос
+    questions_dict = {question.id: question for question in poll.questions.all()}
+
+    # Получите все варианты ответов в один запрос
+    answer_options_dict = {
+        question.id: {answer_option.id: answer_option for answer_option in question.answer_options.all()}
+        for question in poll.questions.all()
+    }
+
+    for answer in data:
+        answer['poll_answer_group'] = poll_answer_group
+        question_id = answer['question']
+        question = questions_dict.get(question_id)
+        if question:
+            answer['question'] = question
+            answer_option_id = answer['answer_option']
+            answer_option = answer_options_dict.get(question_id, {}).get(answer_option_id)
+
+            if poll.poll_type.name == 'Викторина':
+                if not answer_option.is_correct == None:
+                    if answer_option.is_correct:
+                        answer['is_correct'] = True
+                    else:
+                        answer['is_correct'] = False
+
+            answer['answer_option'] = answer_option
+
+    poll_answers = PollAnswer.objects.bulk_create([
+        PollAnswer(**item) for item in data
+    ])
+
+    return poll_answer_group, poll_answers
+
+
+
+
+

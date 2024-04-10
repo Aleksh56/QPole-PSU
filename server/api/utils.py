@@ -1,5 +1,4 @@
 import imghdr
-from django.db.models import Prefetch
 
 def check_file(file):
     file_type = imghdr.what(file)
@@ -128,7 +127,7 @@ def generate_poll_qr(poll):
             box_size=10,
             border=4,
         )
-        qr.add_data(SERVER_URL + str(poll.poll_id))
+        qr.add_data(SERVER_URL + 'conduct-poll/ '+ str(poll.poll_id))
         qr.make(fit=True)
         
         # Создание изображения QR-кода
