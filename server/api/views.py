@@ -919,7 +919,7 @@ def poll_voting(request):
             else:
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
-            poll_answer_group, answers = save_votes(answers, poll)
+            poll_answer_group, answers = save_votes(answers, poll, my_profile)
             serializer = PollAnswerGroupSerializer(poll_answer_group)
         
 
