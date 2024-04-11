@@ -42,7 +42,7 @@ def poll_voting_handler(answers, poll):
             if not answer_option:
                 raise ObjectNotFoundException(model='AnswerOption')
             
-            if question.is_free: # проверяем что вопрос содержит свободную форму ответа
+            if answer_option.is_free_response: # проверяем что вариант ответа содержит свободную форму ответа
                 text = answer.get('text', None)
                 if not text:
                     raise PollAnsweringException(detail=f"Поле со свободным ответом должно содержать текст ответа")

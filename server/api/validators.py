@@ -205,6 +205,10 @@ def is_poll_valid(poll):
             if len(all_options) > 1:
                 raise SuccessException(f"Вопрос №'{question.order_id}' является свободным и должен содержать 1 вариант ответа.")
 
+        free_options_quantity = len([option for option in all_options if option.is_free_response == True])
+        if free_options_quantity > 1:
+            raise SuccessException(f"Вопрос №'{question.order_id}' не может содержать более 1 свободного ответа.")
+
         for option in all_options:
             poll_option_validator = ReleaseOptionValidator()
             poll_option_validator.name(instance=option, max_len=50, min_len=1)

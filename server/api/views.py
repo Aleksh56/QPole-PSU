@@ -480,10 +480,13 @@ def my_poll_question(request):
                 raise TooManyInstancesException(model='PollQuestion', limit=50)
 
             data['poll'] = poll.id
+            last_question = poll.questions.order_by('order_id', 'id').last()
+            if last_question:
+                data['order_id'] = last_question.order_id + 1
+
             poll_question = PollQuestionSerializer(data=data)
             if poll_question.is_valid():
                 poll_question = poll_question.save()
-                # poll.questions.add(poll_question)
                 return Response(f"Вопрос {poll_question} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
                 return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -696,7 +699,15 @@ def my_poll_question_option(request):
                 raise TooManyInstancesException(model='PollQuestion', limit=10)
 
             data['question'] = poll_question.id
-            data['order_id'] = poll_question.answer_options.order_by('order_id', 'id').last().order_id + 1
+
+            last_option = poll_question.answer_options.order_by('order_id', 'id').last()
+            if last_option:
+                data['order_id'] = last_option.order_id + 1
+
+            # если свободная форма ответа, то добавляем в самый конец списка опций
+            data['is_free_response'] = data.get('is_free_response', False)  
+            if data['is_free_response']:
+                data['order_id'] = 16
 
             has_free_option = poll_question.answer_options.filter(is_free_response=True).exists()
             answer_option_serializer = PollQuestionOptionSerializer(data=data, context={'has_free_option': has_free_option})
