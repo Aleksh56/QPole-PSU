@@ -111,6 +111,9 @@ class PollQuestion(models.Model):
 
     has_correct_answer = models.BooleanField(default=None, null=True)   # есть ли верный ответ
     has_multiple_choices = models.BooleanField(default=False)   # есть ли множенственный выбор
+    is_free = models.BooleanField(default=False)   # свободная форма ответа, всего 1 вариант ответа
+    is_text = models.BooleanField(default=True)   # текст как ответ
+    is_image = models.BooleanField(default=False)   # фото как ответ
 
     order_id = models.PositiveIntegerField(default=1, null=False, blank=False) # порядковый номер в опросе
 
@@ -213,19 +216,3 @@ class Poll(models.Model):
         if self.duration:     
             return timezone.now() < self.created_date + self.duration
         else: return True
-
-
-    def is_valid(self, value, max_len=None, min_len=None):
-        if not min_len:
-            if len(value) < 5:
-                raise MyValidationError("'name' должно содержать не менее 5 символов.")
-        else:
-            if len(value) < min_len:
-                raise MyValidationError(f"'name' должно содержать более {min_len - 1} символов.")
-            
-        if not max_len:
-            if len(value) > 50:
-                raise MyValidationError("'name' должно содержать менее 50 символов.")
-        else:
-            if len(value) > max_len:
-                raise MyValidationError(f"'name' должно содержать менее {max_len} символов.")

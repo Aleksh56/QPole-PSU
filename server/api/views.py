@@ -155,7 +155,6 @@ def my_poll(request):
                 }
                 return Response(pagination_data)
 
-
         elif request.method == 'POST':
 
             if not my_profile.user.is_staff:
@@ -222,7 +221,7 @@ def my_poll(request):
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
             
-                objects_to_update = []
+                new_questions = []
                 questions_data = data['questions_data']
                 question_ids = list(questions_data.keys())
                 questions = PollQuestion.objects.filter(id__in=map(int, question_ids))
@@ -231,11 +230,13 @@ def my_poll(request):
                         raise ObjectNotFoundException(model='AnswerOption')
 
                     question.order_id = question_number
-                    objects_to_update.append(question)
+                    new_questions.append(question)
 
-                PollQuestion.objects.bulk_update(objects_to_update, ['order_id'])
+                PollQuestion.objects.bulk_update(new_questions, ['order_id'])
 
-                return Response(status=status.HTTP_200_OK)
+                serializer = PollQuestionSerializer(new_questions, many=True)
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
             
             elif request_type == 'clone_poll':
                 new_poll_id = data.get('new_poll_id', None)
@@ -567,7 +568,7 @@ def my_poll_question(request):
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             if request_type == 'change_options_order':
-                objects_to_update = []
+                new_options = []
                 options_data = data['options_data']
                 options_ids = list(options_data.keys())
                 options = AnswerOption.objects.filter(id__in=map(int, options_ids))
@@ -576,28 +577,13 @@ def my_poll_question(request):
                         raise ObjectNotFoundException(model='AnswerOption')
 
                     option.order_id = option_number
-                    objects_to_update.append(option)
+                    new_options.append(option)
 
-                AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
+                AnswerOption.objects.bulk_update(new_options, ['order_id'])
 
+                serializer = AnswerOptionSerializer(new_options, many=True)
 
-
-
-                objects_to_update = []
-
-                questions_data = data['questions_data']
-                for question_number, question_data in enumerate(questions_data, start=1):
-                    poll_question = poll.questions.filter(id=int(question_data['id'])).first()
-                    if not poll_question:
-                        raise ObjectNotFoundException(model='PollQuestion')
-
-                    poll_question.order_id = question_number
-
-                    objects_to_update.append(poll_question)
-
-                AnswerOption.objects.bulk_update(objects_to_update, ['order_id'])
-
-                return Response(status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             
             elif request_type == 'copy_question':
                 if len(poll.questions.all()) > 50:
