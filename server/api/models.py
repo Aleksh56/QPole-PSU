@@ -145,7 +145,7 @@ class Poll(models.Model):
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
     duration = models.DurationField(blank=True, null=True) # таймер
 
-    has_multiple_choices = models.BooleanField(default=False) # множественный выбор
+    has_multiple_choices = models.BooleanField(default=True) # множественный выбор
     has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
     is_anonymous = models.BooleanField(default=False) # анонимное
 

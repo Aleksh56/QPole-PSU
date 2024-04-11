@@ -30,8 +30,7 @@ class BaseValidator:
 
              
     def bolean(value):
-        if not isinstance(value, bool):
-            raise ValidationError("Характеристика должна быть переменной логического типа.")
+        pass
 
     def image(image):    
         is_img_ok, details = check_file(image)
