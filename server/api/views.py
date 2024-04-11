@@ -700,7 +700,7 @@ def my_poll_question_option(request):
 
             data['question'] = poll_question.id
 
-            last_option = poll_question.answer_options.order_by('order_id', 'id').last()
+            last_option = poll_question.answer_options.filter(is_free_response=False).order_by('order_id', 'id').last()
             if last_option:
                 data['order_id'] = last_option.order_id + 1
 

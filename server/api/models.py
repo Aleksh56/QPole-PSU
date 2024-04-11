@@ -80,7 +80,7 @@ class AnswerOption(models.Model):
     question = models.ForeignKey('PollQuestion', related_name='answer_options', on_delete=models.CASCADE) # связь с вариантом вопросом
 
     is_correct = models.BooleanField(default=None, null=True)   # верный ли ответ
-    is_text_response = models.BooleanField(default=True, null=True)    # текст ли как ответ
+    is_text_response = models.BooleanField(default=False, null=True)    # текст ли как ответ
     is_free_response = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
     is_image_response = models.BooleanField(default=False, null=True)    # фото ли как ответ
 
