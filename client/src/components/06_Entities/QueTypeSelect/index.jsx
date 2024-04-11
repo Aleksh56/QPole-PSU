@@ -11,7 +11,7 @@ const QueTypeSelect = ({ question }) => {
   const { pollType, isMultiple } = usePollType(id);
   const [questionType, setQuestionType] = useState('Один ответ');
 
-  export const queTypes = [
+  const queTypes = [
     {
       caption: 'Один ответ',
       name: 'single',
