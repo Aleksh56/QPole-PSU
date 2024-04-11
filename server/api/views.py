@@ -827,7 +827,10 @@ def my_poll_question_option(request):
                 if not poll_option:
                     raise ObjectNotFoundException(model='AnswerOption')
 
-                poll_option.order_id = order_number
+                if poll_option.is_free_response:
+                    poll_option.order_id = 16
+                else:
+                    poll_option.order_id = order_number
 
                 objects_to_update.append(poll_option)
 

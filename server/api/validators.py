@@ -165,23 +165,25 @@ class ReleaseOptionValidator():
     @staticmethod
     def name(instance, max_len=None, min_len=None):
         value = getattr(instance, "name", None)
+        is_free_response = getattr(instance, "is_free_response", False)
 
-        if not value:
+        if not value and not is_free_response:
             raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' не должен быть пустым.")
         
-        if not min_len:
-            if len(value) < 1:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать не менее 1 символа.")
-        else:
-            if len(value) < min_len:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать более {min_len - 1} символов.")
-            
-        if not max_len:
-            if len(value) > 50:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее 50 символов.")
-        else:
-            if len(value) > max_len:
-                raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее {max_len} символов.")
+        if not is_free_response:
+            if not min_len:
+                if len(value) < 1:
+                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать не менее 1 символа.")
+            else:
+                if len(value) < min_len:
+                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать более {min_len - 1} символов.")
+                
+            if not max_len:
+                if len(value) > 50:
+                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее 50 символов.")
+            else:
+                if len(value) > max_len:
+                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее {max_len} символов.")
             
  
 def is_poll_valid(poll):
