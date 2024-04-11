@@ -38,10 +38,11 @@ export const getAllOptionsRequest = async (id, q_id) => {
   );
 };
 
-export const addOptionRequest = async (id, q_id) => {
+export const addOptionRequest = async (id, q_id, param) => {
   return handleRequest('post', `/api/my_poll_question_option/`, {
     poll_id: id,
     poll_question_id: q_id,
+    ...(param && { is_free_response: 1 }),
   });
 };
 

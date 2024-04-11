@@ -1,4 +1,5 @@
 import React from 'react';
+import { RadioButtonChecked, CheckBox, ShortText } from '@mui/icons-material';
 
 export const appHeaderData = [
   { caption: 'Ваши опросы', to: '/app' },
@@ -108,7 +109,6 @@ export const pollTuningSettings = [
         defaultChecked: false,
       },
       { id: 'is_anonymous', label: 'Анонимное голосование', defaultChecked: false },
-      { id: 'has_multiple_choices', label: 'Множественный выбор в вопросе', defaultChecked: false },
     ],
   },
   {
@@ -143,4 +143,25 @@ export const admUsrsFilterCategories = [
   { name: 'Тип опроса', options: ['Опрос 1', 'Опрос 2'] },
   { name: 'Статус', options: ['Активный', 'Неактивный'] },
   { name: 'Группа', options: ['Группа 1', 'Группа 2'] },
+];
+
+export const queTypes = [
+  {
+    caption: 'Один ответ',
+    name: 'single',
+    icon: <RadioButtonChecked fontSize="small" />,
+    type: { has_multiple_choices: 0 },
+  },
+  {
+    caption: 'Несколько ответов',
+    name: 'multiple',
+    icon: <CheckBox fontSize="small" />,
+    type: { has_multiple_choices: 1 },
+  },
+  {
+    caption: 'Развернутый ответ',
+    name: 'free',
+    icon: <ShortText fontSize="small" />,
+    type: { is_free: 1 },
+  },
 ];

@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconButton, Stack, Button, Box } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import PoleSettingsMenuButton from '@/components/07_Shared/PoleSettingsMenuButton';
+import PollSettingsMenuBtn from '@/components/07_Shared/UIComponents/Buttons/pollSettingsMenuBtn';
 import { StyledNavContainer } from './styled';
 import { useNavigate, useParams } from 'react-router-dom';
 import { publishPollFx } from './model/publish-poll';
@@ -21,7 +21,7 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
     <StyledNavContainer>
       <Stack direction="row" spacing={2}>
         {buttons.map((button) => (
-          <PoleSettingsMenuButton
+          <PollSettingsMenuBtn
             key={button.label}
             icon={button.icon}
             label={button.label}

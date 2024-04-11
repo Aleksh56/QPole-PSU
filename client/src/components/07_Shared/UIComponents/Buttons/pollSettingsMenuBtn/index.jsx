@@ -1,9 +1,8 @@
 import React from 'react';
-import { Button } from '@mui/material';
 import { StyledButton, StyledNavLink } from './styled';
 import { useParams } from 'react-router-dom';
 
-const PoleSettingsMenuButton = ({ icon: Icon, label, page, disabled }) => {
+const PollSettingsMenuBtn = ({ icon: Icon, label, page, disabled }) => {
   const { id } = useParams();
 
   const handleClick = (event) => {
@@ -33,4 +32,4 @@ const PoleSettingsMenuButton = ({ icon: Icon, label, page, disabled }) => {
   );
 };
 
-export default PoleSettingsMenuButton;
+export default PollSettingsMenuBtn;

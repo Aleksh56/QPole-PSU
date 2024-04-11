@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+import { GaugeWrapper } from './styled';
 
 const CustomGauge = ({ value }) => {
   const size = 200;
@@ -9,14 +10,7 @@ const CustomGauge = ({ value }) => {
   const offset = circumference - (value / 100) * circumference;
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <GaugeWrapper>
       <svg width={size} height={size}>
         <circle
           stroke="lightgray"
@@ -42,7 +36,7 @@ const CustomGauge = ({ value }) => {
       <Typography variant="h6" sx={{ position: 'absolute' }}>
         {value}%
       </Typography>
-    </Box>
+    </GaugeWrapper>
   );
 };
 

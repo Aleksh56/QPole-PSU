@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { CardContent, CardMedia, Typography, Menu, MenuItem, Box } from '@mui/material';
+import { Typography, Menu, MenuItem, Box } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { StyledCard, StyledChip, StyledTypographyName } from './styled';
+import {
+  ActionsWrapper,
+  StyledCard,
+  StyledCardContent,
+  StyledCardMedia,
+  StyledChip,
+  StyledTypographyName,
+} from './styled';
 import { closePollFx } from './model/close-poll';
 import { duplicatePollFx } from './model/duplicate-poll';
 import config from '@/config';
@@ -44,23 +51,10 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
 
   return (
     <StyledCard>
-      <CardMedia
-        sx={{ backgroundSize: 'contain', padding: '25px', borderRadius: '16px' }}
-        image={config.serverUrl.main + pollData.image}
-        title="Poll Image"
-      />
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
-        <Box
-          sx={{
-            marginBottom: '20px',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
+      <StyledCardMedia image={config.serverUrl.main + pollData.image} title="Poll Image" />
+      <StyledCardContent>
+        <ActionsWrapper>
           <StyledChip label={!pollData.is_closed ? 'Открыт' : 'Закрыт'} />
-
           {!cardButton && (
             <Box zIndex="tooltip">
               <MoreHorizIcon onClick={handleMenuOpen} />
@@ -75,7 +69,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
               </Menu>
             </Box>
           )}
-        </Box>
+        </ActionsWrapper>
         <StyledTypographyName gutterBottom>{pollData.poll_type ?? ''}</StyledTypographyName>
         <Typography sx={{ fontSize: '14px', fontWeight: 600 }}>{pollData.name ?? ''}</Typography>
         <Typography sx={{ fontSize: '14px', fontWeight: 500, color: '#4C4C4C', marginTop: '10px' }}>
@@ -83,7 +77,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
             'Lorem Ipsum - это текст-"рыба", часто используемый в печати и вэб-дизайне. Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века.'}
         </Typography>
         {cardButton}
-      </CardContent>
+      </StyledCardContent>
     </StyledCard>
   );
 });

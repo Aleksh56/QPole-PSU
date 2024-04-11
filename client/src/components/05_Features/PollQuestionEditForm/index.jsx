@@ -13,11 +13,13 @@ import {
 } from './api/apiRequests';
 import { useParams } from 'react-router-dom';
 import { DeleteOutline, DragIndicator } from '@mui/icons-material';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import usePollType from '@/hooks/usePollType';
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import { toggleMultipleFx } from './model/toggle-multiple';
 import { deleteImageFx } from './model/delete-image';
+import { QueSettingsWrapper } from './styled';
+import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
+import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
 
 const PollQuestionEditForm = ({ question }) => {
   const { id } = useParams();
@@ -68,18 +70,30 @@ const PollQuestionEditForm = ({ question }) => {
     fetchOptions();
   };
 
-  const handleAddOption = async () => {
-    await addOptionRequest(id, question.id).then(() => fetchOptions());
+  const handleAddOption = async (param) => {
+    await addOptionRequest(id, question.id, param).then(() => fetchOptions());
   };
 
   const onDragEnd = async (result) => {
-    if (!result.destination) return;
+    const { source, destination } = result;
+    const newItems = Array.from(options);
 
-    const items = Array.from(options);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    setOptions(items);
-    await changeOptionOrderRequest(id, question.id, items);
+    if (
+      !destination ||
+      (source.droppableId === destination.droppableId && source.index === destination.index)
+    ) {
+      return;
+    }
+    const isLastFreeResponse = newItems[newItems.length - 1].is_free_response;
+
+    if (destination.index === newItems.length - 1 && isLastFreeResponse) {
+      return;
+    }
+
+    const [reorderedItem] = newItems.splice(source.index, 1);
+    newItems.splice(destination.index, 0, reorderedItem);
+    setOptions(newItems);
+    await changeOptionOrderRequest(id, question.id, newItems);
   };
 
   const toggleMultipleChoice = (q_id) => {
@@ -93,19 +107,21 @@ const PollQuestionEditForm = ({ question }) => {
   };
 
   return (
-    <div>
+    <Box>
       <PoleImageUpload
         image={question?.image}
         onFileSelect={(e) => handleFieldChange('image', e, question.id)}
         handleDelete={() => handleImageDelete(question.id)}
       />
-      <InvisibleLabeledField
-        label="Заголовок вопроса"
-        placeholder="Введите заголовок"
-        value={editedQuestion.name || ''}
-        handleChange={(e) => handleFieldChange('name', e, question.id)}
-      />
-      <Divider style={{ margin: '20px 0' }} />
+      <QueSettingsWrapper>
+        <InvisibleLabeledField
+          placeholder="Введите заголовок"
+          value={editedQuestion.name || ''}
+          handleChange={(e) => handleFieldChange('name', e, question.id)}
+        />
+        <QueTypeSelect question={editedQuestion} />
+      </QueSettingsWrapper>
+      <Divider style={{ margin: '30px 0' }} />
       {isMultiple && (
         <>
           <FormControlLabel
@@ -121,76 +137,59 @@ const PollQuestionEditForm = ({ question }) => {
           <Divider style={{ margin: '20px 0' }} />
         </>
       )}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="options">
-          {(provided) => (
-            <Box {...provided.droppableProps} ref={provided.innerRef}>
-              {options.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id.toString()} index={index}>
-                  {(provided) => (
-                    <Box
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      sx={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr auto',
-                        alignItems: 'center',
-                        border: '1px solid black',
-                        borderRadius: '6px',
-                        padding: '10px',
-                        marginBottom: '15px',
-                      }}
-                    >
-                      <InvisibleLabeledField
-                        placeholder="Начните вводить"
-                        value={item.name || ''}
-                        handleChange={(e) => handleOptionChange('name', e, item.id, question.id)}
-                      />
-                      <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '5px' }}>
-                        {pollType === 'Викторина' && (
-                          <RadioGroup
-                            value={selectedOption}
-                            onChange={(e) => handleOptionSelect(e, question.id)}
-                            sx={{ width: '24px', height: '24px' }}
-                          >
-                            <FormControlLabel
-                              value={item.id.toString()}
-                              sx={{ width: '24px', height: '24px', margin: 0 }}
-                              control={<Radio sx={{ width: '24px', height: '24px' }} />}
-                            />
-                          </RadioGroup>
-                        )}
-                        <DeleteOutline
-                          sx={{ cursor: 'pointer' }}
-                          onClick={() => handleDeleteOption(item.id, question.id)}
-                        />
-                        <DragIndicator sx={{ cursor: 'grab' }} />
-                      </Box>
-                    </Box>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
+      <DraggableList
+        items={options}
+        onDragEnd={onDragEnd}
+        pollType={pollType}
+        renderItem={(item) => (
+          <>
+            <DragIndicator sx={{ cursor: 'grab' }} />
+            {pollType === 'Викторина' && (
+              <RadioGroup
+                value={selectedOption}
+                onChange={(e) => handleOptionSelect(e, question.id)}
+                sx={{ width: '24px', height: '24px', marginRight: '15px' }}
+              >
+                <FormControlLabel
+                  value={item.id.toString()}
+                  sx={{ width: '24px', height: '24px', margin: 0 }}
+                  control={<Radio sx={{ width: '24px', height: '24px' }} />}
+                />
+              </RadioGroup>
+            )}
+            {item.is_free_response ? (
+              <p>Другое</p>
+            ) : (
+              <InvisibleLabeledField
+                placeholder="Начните вводить"
+                value={item.name || ''}
+                handleChange={(e) => handleOptionChange('name', e, item.id, question.id)}
+              />
+            )}
+            <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '5px' }}>
+              <DeleteOutline
+                sx={{ cursor: 'pointer' }}
+                onClick={() => handleDeleteOption(item.id, question.id)}
+              />
             </Box>
-          )}
-        </Droppable>
-      </DragDropContext>
-      <Box sx={{ display: 'flex', justifyContent: 'center', columnGap: '10px' }}>
+          </>
+        )}
+      />
+      <Box sx={{ display: 'flex', columnGap: '10px' }}>
         {options.length === 0 && <Typography>Вы не создали ни одного варианта ответа</Typography>}
         <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
-          Добавить вариант ответа
+          Добавить ответ
         </button>
         {pollType === 'Опрос' && (
           <>
             <span>или</span>
-            <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
-              Добавить вариант другое
+            <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>
+              Добавить "Другое"
             </button>
           </>
         )}
       </Box>
-    </div>
+    </Box>
   );
 };
 

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, Chip, Typography } from '@mui/material';
+import { Card, Chip, Typography, CardMedia, CardContent, Box } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 import { colorConfig } from '@/app/template/config/color.config';
 
@@ -26,6 +26,26 @@ export const StyledCard = styled(Card)(() => ({
   '&:hover': {
     transform: 'translateY(-8px)',
   },
+}));
+
+export const StyledCardMedia = styled(CardMedia)(() => ({
+  backgroundSize: 'contain',
+  padding: Rem(25),
+  borderRadius: Rem(16),
+}));
+
+export const StyledCardContent = styled(CardContent)(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'start',
+}));
+
+export const ActionsWrapper = styled(Box)(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  marginBottom: Rem(20),
+  width: '100%',
 }));
 
 export const StyledTypographyName = styled(Typography)(() => ({
