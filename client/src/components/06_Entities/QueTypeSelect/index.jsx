@@ -1,15 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import { TypeSelect } from './styled';
-import { queTypes } from '@/data/fields';
 import { useParams } from 'react-router-dom';
 import usePollType from '@/hooks/usePollType';
 import { changePollTypeFx } from './models/change-poll-type';
+import { RadioButtonChecked, CheckBox, ShortText } from '@mui/icons-material';
 
 const QueTypeSelect = ({ question }) => {
   const { id } = useParams();
   const { pollType, isMultiple } = usePollType(id);
   const [questionType, setQuestionType] = useState('Один ответ');
+
+  export const queTypes = [
+    {
+      caption: 'Один ответ',
+      name: 'single',
+      icon: <RadioButtonChecked fontSize="small" />,
+      type: { has_multiple_choices: 0 },
+    },
+    {
+      caption: 'Несколько ответов',
+      name: 'multiple',
+      icon: <CheckBox fontSize="small" />,
+      type: { has_multiple_choices: 1 },
+    },
+    {
+      caption: 'Развернутый ответ',
+      name: 'free',
+      icon: <ShortText fontSize="small" />,
+      type: { is_free: 1 },
+    },
+  ];
 
   useEffect(() => {
     console.log(question);
