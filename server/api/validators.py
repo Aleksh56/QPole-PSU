@@ -201,6 +201,10 @@ def is_poll_valid(poll):
         if len(all_options) == 0:
             raise SuccessException(f"Вопрос №'{question.order_id}' должен содержать хотя бы 1 вариант ответа.")
     
+        if question.is_free:
+            if len(all_options) > 1:
+                raise SuccessException(f"Вопрос №'{question.order_id}' является свободным и должен содержать 1 вариант ответа.")
+
         for option in all_options:
             poll_option_validator = ReleaseOptionValidator()
             poll_option_validator.name(instance=option, max_len=50, min_len=1)

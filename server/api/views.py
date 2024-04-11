@@ -696,6 +696,8 @@ def my_poll_question_option(request):
                 raise TooManyInstancesException(model='PollQuestion', limit=10)
 
             data['question'] = poll_question.id
+            data['order_id'] = poll_question.answer_options.order_by('order_id', 'id').last().order_id + 1
+
             has_free_option = poll_question.answer_options.filter(is_free_response=True).exists()
             answer_option_serializer = PollQuestionOptionSerializer(data=data, context={'has_free_option': has_free_option})
             if answer_option_serializer.is_valid():
