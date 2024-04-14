@@ -3,10 +3,11 @@ import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper } from './s
 import { PieChart, BarChart, LineChart } from '@mui/x-charts';
 
 const PollResultCard = ({ data, chartType }) => {
+  console.log(data);
   const chartData = data.answer_options.map((option) => ({
     id: option.id,
     value: option.votes_quantity,
-    label: option.name,
+    label: option.is_free_response ? 'Другое' : option.name,
   }));
 
   const renderChart = () => {
@@ -24,7 +25,7 @@ const PollResultCard = ({ data, chartType }) => {
   return (
     <CardWrapper>
       <CardInfoWrapper>
-        <CardHeading>{data.name}:</CardHeading>
+        <CardHeading>{data.name ?? ''}:</CardHeading>
         <CardAnswersCount>Ответов: {data.votes_quantity}</CardAnswersCount>
       </CardInfoWrapper>
       {renderChart()}

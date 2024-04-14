@@ -5,16 +5,20 @@ export const updateMultipleAnswer = createEvent();
 export const resetAnswers = createEvent();
 
 export const $answersStore = createStore([])
-  .on(updateMultipleAnswer, (state, { question, answer_option }) => {
-    const answerObject = { answer_option, question };
-    const existingIndex = state.findIndex(
-      (answer) => answer.answer_option === answer_option && answer.question === question
-    );
-
-    if (existingIndex === -1) {
-      return [...state, answerObject];
+  .on(updateMultipleAnswer, (state, { question, answer_option, text = null }) => {
+    if (!text) {
+      const filteredState = state.filter(
+        (answer) => !(answer.text && answer.question === question)
+      );
+      const existingIndex = filteredState.findIndex(
+        (answer) => answer.answer_option === answer_option && answer.question === question
+      );
+      return existingIndex === -1
+        ? [...filteredState, { answer_option, question }]
+        : filteredState.filter((_, index) => index !== existingIndex);
     } else {
-      return state.filter((_, index) => index !== existingIndex);
+      const filteredState = state.filter((answer) => !answer.text && answer.question === question);
+      return [...filteredState, { answer_option, question, text }];
     }
   })
   .on(updateAnswer, (state, payload) => {

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Box, Typography, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import {
+  Divider,
+  Box,
+  Typography,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Checkbox,
+} from '@mui/material';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
 import {
@@ -18,20 +26,22 @@ import { deleteImageFx } from './model/delete-image';
 import { QueSettingsWrapper } from './styled';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
 import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
+import { isArray } from 'lodash';
 
 const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   const { id } = useParams();
   const [editedQuestion, setEditedQuestion] = useState(question);
   const [options, setOptions] = useState([]);
-  const [selectedOption, setSelectedOption] = useState('');
+  const [selectedOption, setSelectedOption] = useState([]);
   const [questionType, setQuestionType] = useState('Один ответ');
   const [isFreeResponse, setIsFreeResponse] = useState(false);
   const { pollType } = usePollType(id);
 
   useEffect(() => {
-    const correctOption = question.answer_options.find((option) => option.is_correct);
-    setSelectedOption(correctOption ? correctOption.id : '');
+    const correctOptions = question.answer_options.filter((option) => option.is_correct);
+    setSelectedOption(correctOptions.length ? correctOptions.map((option) => option.id) : []);
     setEditedQuestion(question);
+    console.log(selectedOption);
   }, [question]);
 
   useEffect(() => {
@@ -41,8 +51,18 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
 
   const handleOptionSelect = async (e, q_id) => {
     const value = e.target.value;
-    await handleChangeAnswerRequest(id, q_id, value);
-    setSelectedOption(value);
+    if (question.has_multiple_choices) {
+      if (selectedOption.includes(Number(value))) {
+        setSelectedOption(selectedOption.filter((item) => item !== Number(value)));
+        await handleChangeAnswerRequest(id, q_id, value, 0);
+      } else {
+        setSelectedOption([...selectedOption, Number(value)]);
+        await handleChangeAnswerRequest(id, q_id, value, 1);
+      }
+    } else {
+      setSelectedOption([value]);
+      await handleChangeAnswerRequest(id, q_id, value, 1);
+    }
   };
 
   const fetchOptions = async () => {
@@ -139,19 +159,34 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
         renderItem={(item) => (
           <>
             <DragIndicator sx={{ cursor: 'grab' }} />
-            {pollType === 'Викторина' && (
-              <RadioGroup
-                value={selectedOption}
-                onChange={(e) => handleOptionSelect(e, question.id)}
-                sx={{ width: '24px', height: '24px', marginRight: '15px' }}
-              >
-                <FormControlLabel
-                  value={item.id.toString()}
-                  sx={{ width: '24px', height: '24px', margin: 0 }}
-                  control={<Radio sx={{ width: '24px', height: '24px' }} />}
-                />
-              </RadioGroup>
-            )}
+            {pollType === 'Викторина' &&
+              (question.has_multiple_choices ? (
+                <Box sx={{ width: '24px', height: '24px', marginRight: '15px' }}>
+                  <FormControlLabel
+                    key={item.id}
+                    control={
+                      <Checkbox
+                        checked={selectedOption.includes(item.id)}
+                        onChange={(e) => handleOptionSelect(e, question.id)}
+                        value={item.id}
+                        sx={{ width: '24px', height: '24px' }}
+                      />
+                    }
+                  />
+                </Box>
+              ) : (
+                <RadioGroup
+                  value={selectedOption[0] || ''}
+                  onChange={(e) => handleOptionSelect(e, question.id)}
+                  sx={{ width: '24px', height: '24px', marginRight: '15px' }}
+                >
+                  <FormControlLabel
+                    control={<Radio sx={{ width: '24px', height: '24px' }} />}
+                    value={item.id.toString()}
+                  />
+                </RadioGroup>
+              ))}
+
             {item.is_free_response ? (
               <p>Другое</p>
             ) : (
