@@ -25,6 +25,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
   const [questionType, setQuestionType] = useState('Один ответ');
+  const [isFreeResponse, setIsFreeResponse] = useState(false);
   const { pollType } = usePollType(id);
 
   useEffect(() => {
@@ -32,6 +33,11 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
     setSelectedOption(correctOption ? correctOption.id : '');
     setEditedQuestion(question);
   }, [question]);
+
+  useEffect(() => {
+    const hasFreeResponse = options.some((option) => option.is_free_response);
+    setIsFreeResponse(hasFreeResponse);
+  }, [options]);
 
   const handleOptionSelect = async (e, q_id) => {
     const value = e.target.value;
@@ -43,7 +49,11 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
     if (question.is_free) {
       setOptions([]);
     } else {
-      await getAllOptionsRequest(id, question.id).then((res) => setOptions(res.data));
+      await getAllOptionsRequest(id, question.id).then((res) => {
+        setOptions(res.data);
+        const hasFreeResponse = res.data.some((option) => option.is_free_response);
+        setIsFreeResponse(hasFreeResponse);
+      });
     }
   };
 
@@ -169,7 +179,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
             <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
               Добавить ответ
             </button>
-            {pollType === 'Опрос' && (
+            {pollType === 'Опрос' && !isFreeResponse && (
               <>
                 <span>или</span>
                 <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>
