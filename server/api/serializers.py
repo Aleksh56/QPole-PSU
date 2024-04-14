@@ -239,13 +239,6 @@ class PollQuestionSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionSerializer(many=True, required=False)
     name = serializers.CharField(validators=[BaseValidator.name], required=False)
 
-    has_correct_answer = serializers.CharField(validators=[BaseValidator.bolean], required=False)
-    has_multiple_choices = serializers.CharField(validators=[BaseValidator.bolean], required=False)
-    is_available = serializers.CharField(validators=[BaseValidator.bolean], required=False)
-    is_text = serializers.CharField(validators=[BaseValidator.bolean], required=False)
-    is_image = serializers.CharField(validators=[BaseValidator.bolean], required=False)
-    is_free = serializers.CharField(validators=[BaseValidator.bolean], required=False)
-
     image = serializers.ImageField(validators=[BaseValidator.image], required=False)
 
 
