@@ -335,8 +335,8 @@ def my_poll(request):
 
             return Response({'message':f"Опрос успешно удален", 'data':response_data}, status=status.HTTP_204_NO_CONTENT)
 
-    except SuccessException as success_exception:
-        return Response(success_exception.detail, success_exception.status_code)
+    except PollValidationException as exception:
+        return Response(exception.detail, exception.status_code)
     
     except APIException as api_exception:
         return Response({'message':f"{api_exception}"}, api_exception.status_code)
@@ -512,6 +512,18 @@ def my_poll_question(request):
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
+            # обнуляем правильность ответов при изменении has_multiple_choices или is_free
+            has_multiple_choices = data.get('has_multiple_choices', None) 
+            is_free = data.get('is_free', None) 
+            if has_multiple_choices is not None or is_free is not None:
+                options_to_update = poll_question.answer_options.all()
+                new_options = []
+                for option in options_to_update:
+                    option.is_correct = False
+                    new_options.append(option)
+                AnswerOption.objects.bulk_update(new_options, ['is_correct'])
+
+
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
             if serializer.is_valid():
                 serializer.save()

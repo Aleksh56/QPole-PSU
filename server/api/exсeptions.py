@@ -170,10 +170,10 @@ class MyCustomException(APIException):
         return self.detail
     
 
-class SuccessException(APIException):
+class PollValidationException(APIException):
     status_code = 202 
     default_detail = 'Ошибка валидации опроса при выходе в продакшн'
-    default_code = 'SuccessException'
+    default_code = 'PollValidationException'
 
     def __init__(self, detail=default_detail):
         self.detail = {'message':f"{detail}", 'severity': 'error'}

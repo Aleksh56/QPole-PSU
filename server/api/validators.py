@@ -1,5 +1,5 @@
 from rest_framework.exceptions import ValidationError
-from .exсeptions import SuccessException
+from .exсeptions import PollValidationException
 from api.utils import check_file
 
 from math import ceil
@@ -118,22 +118,22 @@ class ReleasePollValidator(PollValidator):
         value = getattr(instance, "name", None)
         
         if not value:
-            raise SuccessException(f"Заголовок текущего опроса не должен быть пустым.")
+            raise PollValidationException(f"Заголовок текущего опроса не должен быть пустым.")
         
 
         if not min_len:
             if len(value) < 5:
-                raise SuccessException(f"Заголовок текущего опроса должен содержать не менее 5 символов.")
+                raise PollValidationException(f"Заголовок текущего опроса должен содержать не менее 5 символов.")
         else:
             if len(value) < min_len:
-                raise SuccessException(f"Заголовок текущего опроса должен содержать более {min_len - 1} символов.")
+                raise PollValidationException(f"Заголовок текущего опроса должен содержать более {min_len - 1} символов.")
             
         if not max_len:
             if len(value) > 50:
-                raise SuccessException(f"Заголовок текущего опроса должен содержать менее 50 символов.")
+                raise PollValidationException(f"Заголовок текущего опроса должен содержать менее 50 символов.")
         else:
             if len(value) > max_len:
-                raise SuccessException(f"Заголовок текущего опроса должен содержать менее {max_len} символов.")
+                raise PollValidationException(f"Заголовок текущего опроса должен содержать менее {max_len} символов.")
 
 
 class ReleaseQuestionValidator():
@@ -143,21 +143,21 @@ class ReleaseQuestionValidator():
         value = getattr(instance, "name", None)
 
         if not value:
-            raise SuccessException(f"Текст вопроса №'{instance.order_id}' не должен быть пустым.")
+            raise PollValidationException(f"Текст вопроса №'{instance.order_id}' не должен быть пустым.")
 
         if not min_len:
             if len(value) < 5:
-                raise SuccessException(f"Текст вопроса №'{instance.order_id}' должен содержать не менее 5 символов.")
+                raise PollValidationException(f"Текст вопроса №'{instance.order_id}' должен содержать не менее 5 символов.")
         else:
             if len(value) < min_len:
-                raise SuccessException(f"Текст вопроса №'{instance.order_id}' должен содержать более {min_len - 1} символов.")
+                raise PollValidationException(f"Текст вопроса №'{instance.order_id}' должен содержать более {min_len - 1} символов.")
             
         if not max_len:
             if len(value) > 50:
-                raise SuccessException(f"Текст вопроса №'{instance.order_id}' должен содержать менее 50 символов.")
+                raise PollValidationException(f"Текст вопроса №'{instance.order_id}' должен содержать менее 50 символов.")
         else:
             if len(value) > max_len:
-                raise SuccessException(f"Текст вопроса №'{instance.order_id}' должен содержать менее {max_len} символов.")
+                raise PollValidationException(f"Текст вопроса №'{instance.order_id}' должен содержать менее {max_len} символов.")
             
 
 class ReleaseOptionValidator():
@@ -168,22 +168,22 @@ class ReleaseOptionValidator():
         is_free_response = getattr(instance, "is_free_response", False)
 
         if not value and not is_free_response:
-            raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' не должен быть пустым.")
+            raise PollValidationException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' не должен быть пустым.")
         
         if not is_free_response:
             if not min_len:
                 if len(value) < 1:
-                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать не менее 1 символа.")
+                    raise PollValidationException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать не менее 1 символа.")
             else:
                 if len(value) < min_len:
-                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать более {min_len - 1} символов.")
+                    raise PollValidationException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать более {min_len - 1} символов.")
                 
             if not max_len:
                 if len(value) > 50:
-                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее 50 символов.")
+                    raise PollValidationException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее 50 символов.")
             else:
                 if len(value) > max_len:
-                    raise SuccessException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее {max_len} символов.")
+                    raise PollValidationException(f"Текст варианта ответа №'{instance.order_id}' вопроса №'{instance.question.order_id}' должен содержать менее {max_len} символов.")
             
  
 def is_poll_valid(poll):
@@ -192,7 +192,7 @@ def is_poll_valid(poll):
 
     all_questions = poll.questions.all()
     if len(all_questions) == 0:
-        raise SuccessException(f"Текущий опрос должен содержать хотя бы 1 вопрос.")
+        raise PollValidationException(f"Текущий опрос должен содержать хотя бы 1 вопрос.")
     
     for question in all_questions:
         poll_question_validator = ReleaseQuestionValidator()
@@ -200,15 +200,15 @@ def is_poll_valid(poll):
         
         all_options = question.answer_options.all()
         if len(all_options) == 0:
-            raise SuccessException(f"Вопрос №'{question.order_id}' должен содержать хотя бы 1 вариант ответа.")
+            raise PollValidationException(f"Вопрос №'{question.order_id}' должен содержать хотя бы 1 вариант ответа.")
     
         if question.is_free:
             if len(all_options) > 1:
-                raise SuccessException(f"Вопрос №'{question.order_id}' является свободным и должен содержать 1 вариант ответа.")
+                raise PollValidationException(f"Вопрос №'{question.order_id}' является свободным и должен содержать 1 вариант ответа.")
 
         free_options_quantity = len([option for option in all_options if option.is_free_response == True])
         if free_options_quantity > 1:
-            raise SuccessException(f"Вопрос №'{question.order_id}' не может содержать более 1 свободного ответа.")
+            raise PollValidationException(f"Вопрос №'{question.order_id}' не может содержать более 1 свободного ответа.")
 
         for option in all_options:
             poll_option_validator = ReleaseOptionValidator()
@@ -218,7 +218,7 @@ def is_poll_valid(poll):
             if question.has_correct_answer:
                 has_correct_option = [option for option in all_options if option.is_correct]
                 if not has_correct_option:
-                    raise SuccessException(f"Вопрос №'{question.order_id}' должен содержать хотя бы 1 верный вариант ответа.")
+                    raise PollValidationException(f"Вопрос №'{question.order_id}' должен содержать хотя бы 1 верный вариант ответа.")
 
             
     return True
