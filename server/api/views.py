@@ -760,13 +760,18 @@ def my_poll_question_option(request):
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             is_correct = data.get('is_correct', None)
-            if is_correct:
-                data['is_correct'] = bool(data.get('is_correct', None))
-                all_options = poll_question.answer_options.all()
-                for option in all_options:
-                    if option.is_correct:
-                        option.is_correct = False
-                        option.save()
+            if poll_question.has_multiple_choices == False:
+                if is_correct:
+                    data['is_correct'] = bool(data.get('is_correct', None))
+                    all_options = poll_question.answer_options.all()
+                    new_options = []
+                    for option in all_options:
+                        if option.is_correct:
+                            option.is_correct = False
+                            new_options.append(option)
+
+
+                    AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
             serializer = PollQuestionOptionSerializer(instance=question_option, data=data, partial=True)
 
