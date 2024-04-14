@@ -42,14 +42,20 @@ def poll_voting_handler(answers, poll):
             if not answer_option:
                 raise ObjectNotFoundException(model='AnswerOption')
             
-            if answer_option.is_free_response: # проверяем что вариант ответа содержит свободную форму ответа
+            if question.is_free:
                 text = answer.get('text', None)
                 if not text:
-                    raise PollAnsweringException(detail=f"Поле со свободным ответом должно содержать текст ответа")
+                    raise PollAnsweringException(detail=f"Вопрос с открытым ответом должен содержать текст ответа")
                 parsed_answers.append({'question': question_id, 'answer_option': answer_option_id, 'text': text})
             else:
-                parsed_answers.append({'question': question_id, 'answer_option': answer_option_id})
-        
+                if answer_option.is_free_response: # проверяем что вариант ответа содержит свободную форму ответа
+                    text = answer.get('text', None)
+                    if not text:
+                        raise PollAnsweringException(detail=f"Поле со свободным ответом должно содержать текст ответа")
+                    parsed_answers.append({'question': question_id, 'answer_option': answer_option_id, 'text': text})
+                else:
+                    parsed_answers.append({'question': question_id, 'answer_option': answer_option_id})
+            
             # добавляем в список отвеченных вопросов
             answered_questions.add(question)
 
