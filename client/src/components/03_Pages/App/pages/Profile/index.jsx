@@ -5,6 +5,7 @@ import { Box } from '@mui/material';
 import { SidebarLinksData } from './data/SidebarLinksData';
 import ProfileAboutPage from '../ProfileAbout';
 import usePageTitle from '@/hooks/usePageTitle';
+import ProfileHelpPage from '../ProfileHelp';
 
 const ProfileAppPage = () => {
   usePageTitle('profile');
@@ -17,6 +18,7 @@ const ProfileAppPage = () => {
         <Routes>
           <Route path="/" element={<ProfileAboutPage />} />
           <Route path="/contributors" element={'Contributors'} />
+          <Route path="/help" element={<ProfileHelpPage />} />
           <Route path="/statistics" element={'Statistics'} />
         </Routes>
       </Box>

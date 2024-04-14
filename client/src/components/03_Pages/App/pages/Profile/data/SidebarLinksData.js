@@ -18,4 +18,9 @@ export const SidebarLinksData = [
     icon: PeopleIcon,
     to: '/app/profile/contributors',
   },
+  {
+    caption: 'Помощь',
+    icon: PeopleIcon,
+    to: '/app/profile/help',
+  },
 ];

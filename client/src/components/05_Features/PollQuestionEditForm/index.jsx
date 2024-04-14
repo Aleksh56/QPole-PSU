@@ -27,6 +27,7 @@ import { QueSettingsWrapper } from './styled';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
 import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
 import { isArray } from 'lodash';
+import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 
 const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   const { id } = useParams();
@@ -35,6 +36,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   const [selectedOption, setSelectedOption] = useState([]);
   const [questionType, setQuestionType] = useState('Один ответ');
   const [isFreeResponse, setIsFreeResponse] = useState(false);
+  const [isRequired, setIsRequired] = useState(false);
   const { pollType } = usePollType(id);
 
   useEffect(() => {
@@ -79,6 +81,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
 
   useEffect(() => {
     fetchOptions();
+    setIsRequired(question.is_required);
   }, [id, question]);
 
   const handleFieldChange = async (fieldName, value, q_id) => {
@@ -205,25 +208,42 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
           </>
         )}
       />
-      <Box sx={{ display: 'flex', columnGap: '10px' }}>
-        {options.length === 0 && !question.is_free && (
-          <Typography>Вы не создали ни одного варианта ответа</Typography>
-        )}
-        {!question.is_free && (
-          <>
-            <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
-              Добавить ответ
-            </button>
-            {pollType === 'Опрос' && !isFreeResponse && (
-              <>
-                <span>или</span>
-                <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>
-                  Добавить "Другое"
-                </button>
-              </>
-            )}
-          </>
-        )}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '10px' }}>
+          {options.length === 0 && !question.is_free && (
+            <Typography>Вы не создали ни одного варианта ответа</Typography>
+          )}
+          {!question.is_free && (
+            <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '10px' }}>
+              <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
+                Добавить ответ
+              </button>
+              {pollType === 'Опрос' && !isFreeResponse && (
+                <>
+                  <span>или</span>
+                  <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>
+                    Добавить "Другое"
+                  </button>
+                </>
+              )}
+            </Box>
+          )}
+        </Box>
+        <Box>
+          <FormControlLabel
+            label="Обязательный вопрос"
+            control={
+              <CustomSwitch
+                onChange={() => {
+                  setIsRequired((prev) => !prev);
+                  handleFieldChange('is_required', !isRequired, question.id);
+                }}
+                checked={isRequired}
+              />
+            }
+            sx={{ flexDirection: 'row-reverse' }}
+          />
+        </Box>
       </Box>
     </Box>
   );

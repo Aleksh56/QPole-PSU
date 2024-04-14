@@ -19,14 +19,11 @@ const PollResultsPage = () => {
     const fetchResults = async () => {
       const data = await getPollResultsFx({ id });
       setQuestions(data.questions);
-      console.log(questions);
     };
     fetchResults();
   }, []);
 
-  const handleChartTypeChange = (event) => {
-    setChartType(event.target.value);
-  };
+  const handleChartTypeChange = (event) => setChartType(event.target.value);
 
   return (
     <Wrapper>
