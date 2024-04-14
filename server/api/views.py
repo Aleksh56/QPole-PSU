@@ -526,10 +526,11 @@ def my_poll_question(request):
             # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
             is_free = bool(data.get('is_free', False))
             if is_free:
-                free_option = AnswerOption.objects.create(
-                    question=poll_question,
-                    is_free_response=True,
-                )
+                if not poll_question.answer_options.filter(is_free_response=True).exists():
+                    free_option = AnswerOption.objects.create(
+                        question=poll_question,
+                        is_free_response=True,
+                    )
 
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
             if serializer.is_valid():
@@ -1007,7 +1008,7 @@ def poll(request):
             if poll_id:
                 poll = (
                     Poll.objects
-                        .filter(Q(poll_id=poll_id) and Q(is_in_production=True))
+                        .filter(Q(poll_id=poll_id) & Q(is_in_production=True))
                         .select_related('author', 'poll_type')
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
