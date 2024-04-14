@@ -5,7 +5,7 @@ import AppPageRoutes from '@routes/AppPageRoutes';
 import { PrivateRoute } from '@routes/PrivateRoute';
 import PollListPage from '@/components/03_Pages/Polls/PollList';
 import ConductionPollPage from './components/03_Pages/Polls/ConductionPoll';
-import FrmRestore from '@/components/04_Widgets/frmRestore';
+import FrmRestore from '@/components/04_Widgets/Data/Forms/frmRestore';
 import AdminPanelPage from './components/03_Pages/Admin';
 import AdminPrivateRoute from './app/Routes/AdminPrivateRoute';
 

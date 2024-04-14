@@ -1,6 +1,6 @@
-import Hero from '@/components/04_Widgets/common/Hero';
+import Hero from '@/components/04_Widgets/Content/Display/hero';
 import ServSection from '@/components/04_Widgets/Content/Display/servSection';
-import Footer from '@/components/04_Widgets/common/Footer';
+import Footer from '@/components/04_Widgets/Navigation/Menus/footer';
 import usePageTitle from '@/hooks/usePageTitle';
 import { useEffect, useState } from 'react';
 import { getProvider } from '@/services/ethereum';

@@ -9,7 +9,7 @@ import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeled
 import PasswordResetButtons from '@/components/05_Features/PasswordResetButtons';
 import usePageTitle from '@/hooks/usePageTitle';
 
-const PasswordResetForm = () => {
+const FrmResetPass = () => {
   usePageTitle('restore');
   const resetPasswordFormTheme = useTheme();
   const [isEmailSubmitted, setEmailSubmitted] = useState(false);
@@ -114,4 +114,4 @@ const PasswordResetForm = () => {
   );
 };
 
-export default PasswordResetForm;
+export default FrmResetPass;

@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '../../Navigation/Menus/mainHeader';
+import Header from '../../../Navigation/Menus/mainHeader';
 import SecondaryButton from '@/components/07_Shared/UIComponents/Buttons/secBtn';
 import {
   StyledHero,

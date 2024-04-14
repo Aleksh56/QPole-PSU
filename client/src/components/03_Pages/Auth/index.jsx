@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, registerUser } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
-import AuthForm from '@/components/04_Widgets/auth/AuthForm';
+import FrmAuth from '@/components/04_Widgets/Data/Forms/frmAuth';
 import AuthIllustration from '@/components/05_Features/AuthIllustration';
 import { ThemeProvider, useTheme } from '@mui/material';
 import usePageTitle from '@/hooks/usePageTitle';
@@ -52,7 +52,7 @@ const AuthPage = () => {
       <StyledAuthWrapper component="main">
         <OverlayWrapper container>
           <AuthIllustration />
-          <AuthForm
+          <FrmAuth
             isSignIn={isSignIn}
             handleFormSwitch={handleFormSwitch}
             handleFormSubmit={handleFormSubmit}

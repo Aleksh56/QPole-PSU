@@ -14,26 +14,23 @@ import {
 import { useParams } from 'react-router-dom';
 import { DeleteOutline, DragIndicator } from '@mui/icons-material';
 import usePollType from '@/hooks/usePollType';
-import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
-import { toggleMultipleFx } from './model/toggle-multiple';
 import { deleteImageFx } from './model/delete-image';
 import { QueSettingsWrapper } from './styled';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
 import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
 
-const PollQuestionEditForm = ({ question }) => {
+const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   const { id } = useParams();
   const [editedQuestion, setEditedQuestion] = useState(question);
-  const [switchState, setSwitchState] = useState(false);
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
-  const { pollType, isMultiple } = usePollType(id);
+  const [questionType, setQuestionType] = useState('Один ответ');
+  const { pollType } = usePollType(id);
 
   useEffect(() => {
     const correctOption = question.answer_options.find((option) => option.is_correct);
     setSelectedOption(correctOption ? correctOption.id : '');
     setEditedQuestion(question);
-    setSwitchState(question.has_multiple_choices);
   }, [question]);
 
   const handleOptionSelect = async (e, q_id) => {
@@ -43,12 +40,16 @@ const PollQuestionEditForm = ({ question }) => {
   };
 
   const fetchOptions = async () => {
-    await getAllOptionsRequest(id, question.id).then((res) => setOptions(res.data));
+    if (question.is_free) {
+      setOptions([]);
+    } else {
+      await getAllOptionsRequest(id, question.id).then((res) => setOptions(res.data));
+    }
   };
 
   useEffect(() => {
     fetchOptions();
-  }, [id, question.id]);
+  }, [id, question]);
 
   const handleFieldChange = async (fieldName, value, q_id) => {
     const updatedQuestion = { ...editedQuestion, [fieldName]: value };
@@ -96,12 +97,6 @@ const PollQuestionEditForm = ({ question }) => {
     await changeOptionOrderRequest(id, question.id, newItems);
   };
 
-  const toggleMultipleChoice = (q_id) => {
-    const value = !switchState;
-    toggleMultipleFx({ id, q_id, value });
-    setSwitchState((prev) => !prev);
-  };
-
   const handleImageDelete = (q_id) => {
     deleteImageFx({ id, q_id });
   };
@@ -119,24 +114,14 @@ const PollQuestionEditForm = ({ question }) => {
           value={editedQuestion.name || ''}
           handleChange={(e) => handleFieldChange('name', e, question.id)}
         />
-        <QueTypeSelect question={editedQuestion} />
+        <QueTypeSelect
+          question={editedQuestion}
+          questionType={questionType}
+          setQuestionType={setQuestionType}
+          setQuestion={setSelectedQuestion}
+        />
       </QueSettingsWrapper>
       <Divider style={{ margin: '30px 0' }} />
-      {isMultiple && (
-        <>
-          <FormControlLabel
-            control={
-              <CustomSwitch
-                focusVisibleClassName={'.Mui-focusVisible'}
-                onChange={() => toggleMultipleChoice(question.id)}
-                checked={switchState}
-              />
-            }
-            label="Множественный выбор"
-          />
-          <Divider style={{ margin: '20px 0' }} />
-        </>
-      )}
       <DraggableList
         items={options}
         onDragEnd={onDragEnd}
@@ -176,16 +161,22 @@ const PollQuestionEditForm = ({ question }) => {
         )}
       />
       <Box sx={{ display: 'flex', columnGap: '10px' }}>
-        {options.length === 0 && <Typography>Вы не создали ни одного варианта ответа</Typography>}
-        <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
-          Добавить ответ
-        </button>
-        {pollType === 'Опрос' && (
+        {options.length === 0 && !question.is_free && (
+          <Typography>Вы не создали ни одного варианта ответа</Typography>
+        )}
+        {!question.is_free && (
           <>
-            <span>или</span>
-            <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>
-              Добавить "Другое"
+            <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
+              Добавить ответ
             </button>
+            {pollType === 'Опрос' && (
+              <>
+                <span>или</span>
+                <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>
+                  Добавить "Другое"
+                </button>
+              </>
+            )}
           </>
         )}
       </Box>

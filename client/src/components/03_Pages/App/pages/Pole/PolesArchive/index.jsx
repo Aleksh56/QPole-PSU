@@ -1,5 +1,5 @@
 import { getAllPoles } from '@/components/03_Pages/App/api/apiRequests';
-import AppPolesFilters from '@/components/04_Widgets/app/AppPolesFilters';
+import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
 import React, { useEffect, useState } from 'react';
 import { ContentWrapper, PollsGrid, StyledAppContentWrapper } from './styled';
 import { CircularProgress } from '@mui/material';
@@ -25,7 +25,7 @@ const PolesArchivePage = () => {
 
   return (
     <>
-      <AppPolesFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollData} />
+      <AppPollFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollData} />
       {loading ? (
         <StyledAppContentWrapper>
           <CircularProgress />

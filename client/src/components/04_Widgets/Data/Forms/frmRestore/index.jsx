@@ -1,6 +1,6 @@
 import React from 'react';
 import AuthIllustration from '@/components/05_Features/AuthIllustration';
-import PasswordResetForm from '@/components/04_Widgets/auth/PasswordResetForm';
+import FrmResetPass from '@/components/04_Widgets/Data/Forms/frmResetPass';
 import { ThemeProvider, useTheme } from '@mui/material';
 import { OverlayWrapper, StyledAuthWrapper } from '@/components/03_Pages/Auth/styled';
 
@@ -11,7 +11,7 @@ const FrmRestore = () => {
       <StyledAuthWrapper component="main">
         <OverlayWrapper container>
           <AuthIllustration />
-          <PasswordResetForm />
+          <FrmResetPass />
         </OverlayWrapper>
       </StyledAuthWrapper>
     </ThemeProvider>

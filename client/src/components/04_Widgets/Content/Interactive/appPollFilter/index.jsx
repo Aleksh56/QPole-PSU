@@ -5,7 +5,7 @@ import { filterPollsRequest } from './api/apiRequests';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appFilterOptions } from '@/data/fields';
 
-const AppPolesFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => {} }) => {
+const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => {} }) => {
   const [filters, setFilters] = useState({
     search: '',
     poll_type: 'Все типы',
@@ -58,4 +58,4 @@ const AppPolesFilters = ({ handleCreateModalOpen = () => {}, setPollData = () =>
   );
 };
 
-export default AppPolesFilters;
+export default AppPollFilters;

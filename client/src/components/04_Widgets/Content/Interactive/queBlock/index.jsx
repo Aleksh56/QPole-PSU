@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Checkbox,
-  Typography,
-} from '@mui/material';
+import { RadioGroup, FormControlLabel, Radio, Checkbox, Typography } from '@mui/material';
 import {
   updateAnswer,
   updateMultipleAnswer,
@@ -15,7 +7,7 @@ import {
 import { shuffleArray } from '@/utils/js/shuffleArray';
 import { StyledFormControl } from './styled';
 
-const QuestionBlock = ({ question, isMixed }) => {
+const QueBlock = ({ question, isMixed }) => {
   const [selectedValue, setSelectedValue] = useState('');
   const [selectedValues, setSelectedValues] = useState([]);
   const [options, setOptions] = useState(question.answer_options ?? []);
@@ -77,4 +69,4 @@ const QuestionBlock = ({ question, isMixed }) => {
   );
 };
 
-export default QuestionBlock;
+export default QueBlock;

@@ -57,7 +57,10 @@ const PoleQuestionsPage = () => {
           </Box>
           <Box sx={{ width: '75%' }}>
             {Object.keys(selectedQuestion).length > 0 && (
-              <PollQuestionEditForm question={selectedQuestion} />
+              <PollQuestionEditForm
+                question={selectedQuestion}
+                setSelectedQuestion={setSelectedQuestion}
+              />
             )}
           </Box>
         </ListWrapper>

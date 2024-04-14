@@ -1,5 +1,5 @@
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
-import PollFilters from '@/components/04_Widgets/PollList/PollFilters';
+import PollFilters from '@/components/04_Widgets/Content/Interactive/pollFilters';
 import React, { useEffect, useState } from 'react';
 import { ContentWrapper, PollListPageContentWrapper } from './styled';
 import PollListOutput from '@/components/04_Widgets/PollList/PollListOutput';

@@ -2,8 +2,8 @@ import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 import React, { useEffect, useState } from 'react';
 import { fetchPollQuestions } from './model/fetch-questions';
 import { useNavigate, useParams } from 'react-router-dom';
-import ConductionHeader from '@/components/04_Widgets/ConductionPoll/ConductionHeader';
-import QuestionBlock from '@/components/04_Widgets/ConductionPoll/QuestionBlock';
+import ConductionHeader from '@/components/04_Widgets/Content/Display/conductionHeader';
+import QueBlock from '@/components/04_Widgets/Content/Interactive/queBlock';
 import { ConductionBackgroundWrapper, ConductionWrapper } from './styled';
 import { useUnit } from 'effector-react';
 import { $answersStore, resetAnswers } from './store/answer-store';
@@ -57,7 +57,7 @@ const ConductionPollPage = () => {
           <>
             <ConductionHeader data={pollData} />
             {pollData?.questions?.map((item) => (
-              <QuestionBlock question={item} isMixed={pollData?.mix_options} />
+              <QueBlock question={item} isMixed={pollData?.mix_options} />
             ))}
             <button onClick={() => handleSubmit()}>Send</button>
           </>

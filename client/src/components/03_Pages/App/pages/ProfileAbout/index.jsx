@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { StyledProfileAboutWrapper } from './styled';
-import ProfileUserData from '@/components/04_Widgets/profile/ProfileUserData';
-import ProfileTimezone from '@/components/04_Widgets/profile/ProfileTimezone';
-import Profile2AuthBlock from '@/components/04_Widgets/profile/Profile2Auth';
+import ProfileUserData from '@/components/04_Widgets/Content/Interactive/profileUserData';
+import ProfileTimezone from '@/components/04_Widgets/Content/Interactive/profileTimezone';
+import Profile2AuthBlock from '@/components/04_Widgets/Content/Interactive/profile2Auth';
 import { ProfileInfoFieldsConfig } from './data/ProfileInfoFields';
 import useUserData from '@/hooks/useUserData';
 

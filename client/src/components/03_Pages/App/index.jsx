@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AppCreateFirstPoll from '@/components/05_Features/AppCreateFirstPoll';
-import AppPolesFilters from '@/components/04_Widgets/app/AppPolesFilters';
+import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
 import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
 import AppPoleCard from '@/components/07_Shared/DataDisplay/Cards/appPoleCard';
 import { getAllPoles } from './api/apiRequests';
@@ -34,7 +34,7 @@ const AppPage = () => {
 
   return (
     <>
-      <AppPolesFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollData} />
+      <AppPollFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollData} />
       {loading ? (
         <StyledAppContentWrapper>
           <CircularProgress />

@@ -9,7 +9,7 @@ import { pattern } from '@/config/validation.patterns';
 import { validateField } from '@/utils/js/validateField';
 import { useAlert } from '@/app/context/AlertProvider';
 
-const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
+const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
   const authFormTheme = useTheme();
   const { showAlert } = useAlert();
   const { t } = useTranslation();
@@ -103,4 +103,4 @@ const AuthForm = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = ()
     </ThemeProvider>
   );
 };
-export default AuthForm;
+export default FrmAuth;
