@@ -523,6 +523,13 @@ def my_poll_question(request):
                     new_options.append(option)
                 AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
+            # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
+            is_free = bool(data.get('is_free', False))
+            if is_free:
+                free_option = AnswerOption.objects.create(
+                    question=poll_question,
+                    is_free_response=True,
+                )
 
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
             if serializer.is_valid():
