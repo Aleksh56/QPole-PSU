@@ -77,7 +77,7 @@ def my_profile(request):
       
 
     except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
     except Exception as ex:
         return Response(f"Внутренняя ошибка сервера в my_profile: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -98,7 +98,7 @@ def my_poll(request):
             if poll_id:
                 poll = (
                     Poll.objects.filter(
-                        Q(author__user=current_user) and Q(poll_id=poll_id))
+                        Q(author__user=current_user) & Q(poll_id=poll_id))
                         .select_related('author', 'poll_type')
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
@@ -339,7 +339,7 @@ def my_poll(request):
         return Response(exception.detail, exception.status_code)
     
     except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -404,11 +404,22 @@ def my_poll_stats(request):
                 .annotate(quantity=Count('id'))
             )
 
-            free_answers = PollAnswer.objects.filter(
-                poll_answer_group__poll__poll_id=poll_id,
-                text__isnull=False
-            ).values('text', 'question_id')
-
+            free_answers = (
+                PollAnswer.objects
+                .filter(
+                    poll_answer_group__poll__poll_id=poll_id,
+                    text__isnull=False
+                )
+                # .select_related('poll_answer_group__profile')
+                .values(
+                    'text',
+                    'question_id',
+                    user_id=F('poll_answer_group__profile__user_id'),
+                    profile_name=F('poll_answer_group__profile__name'),
+                    profile_surname=F('poll_answer_group__profile__surname')
+                )
+            )
+            print(free_answers)
 
             context = {
                 'poll_statistics': poll_statistics,
@@ -423,11 +434,80 @@ def my_poll_stats(request):
 
 
     except APIException as api_exception:
-        return Response({'message': f"{api_exception}"}, api_exception.status_code)
+        return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_stats: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def my_poll_user_answers(request):
+    try:
+        current_user = request.user
+        my_profile = Profile.objects.filter(user=current_user).first()
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        poll_id = request.GET.get('poll_id', None)
+        if not poll_id:
+            raise MissingParameterException(field_name='poll_id')
+        
+        if request.method == 'GET':
+
+            user_id = request.GET.get('user_id', None)
+
+            if user_id:
+                answer = (
+                    PollAnswerGroup.objects.filter(Q(poll__poll_id=poll_id) & Q(profile__user_id=user_id))
+                    .prefetch_related(
+                            'answers'
+                        ).all()
+                    .first()
+                )
+                if not answer:
+                    raise MyCustomException(detail="Данный юзер еще не принял участие в опросе")
+        
+                answer = PollAnswerGroupSerializer(answer)
+                return Response(answer.data)
+
+            else:
+                answers = (
+                    PollAnswerGroup.objects
+                    .filter(poll__poll_id=poll_id)
+                    .prefetch_related('answers')
+                    .order_by('-voting_date')
+                )
+
+                page = int(request.GET.get('page', 1))
+                page_size = int(request.GET.get('page_size', 10))  
+
+                paginator = PageNumberPagination()
+                paginator.page_size = page_size 
+                paginated_result = paginator.paginate_queryset(answers, request)
+                paginator.page.number = page
+                total_items = answers.count()
+                total_pages = paginator.page.paginator.num_pages
+
+                answers = PollAnswerGroupSerializer(paginated_result, many=True)
+
+                pagination_data = {
+                    'total_items': total_items,
+                    'total_pages': total_pages,
+                    'results': answers.data 
+                }
+                return Response(pagination_data)
+
+
+
+    except APIException as api_exception:
+        return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
+
+    except Exception as ex:
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_answers: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
@@ -512,25 +592,25 @@ def my_poll_question(request):
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
-            # обнуляем правильность ответов при изменении has_multiple_choices или is_free
-            has_multiple_choices = data.get('has_multiple_choices', None) 
-            is_free = data.get('is_free', None) 
-            if has_multiple_choices is not None or is_free is not None:
-                options_to_update = poll_question.answer_options.all()
-                new_options = []
-                for option in options_to_update:
-                    option.is_correct = False
-                    new_options.append(option)
-                AnswerOption.objects.bulk_update(new_options, ['is_correct'])
+            # # обнуляем правильность ответов при изменении has_multiple_choices или is_free
+            # has_multiple_choices = data.get('has_multiple_choices', None) 
+            # is_free = data.get('is_free', None) 
+            # if has_multiple_choices is not None or is_free is not None:
+            #     options_to_update = poll_question.answer_options.all()
+            #     new_options = []
+            #     for option in options_to_update:
+            #         option.is_correct = False
+            #         new_options.append(option)
+            #     AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
-            # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
-            is_free = bool(data.get('is_free', False))
-            if is_free:
-                if not poll_question.answer_options.filter(is_free_response=True).exists():
-                    free_option = AnswerOption.objects.create(
-                        question=poll_question,
-                        is_free_response=True,
-                    )
+            # # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
+            # is_free = bool(data.get('is_free', False))
+            # if is_free:
+            #     if not poll_question.answer_options.filter(is_free_response=True).exists():
+            #         free_option = AnswerOption.objects.create(
+            #             question=poll_question,
+            #             is_free_response=True,
+            #         )
 
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
             if serializer.is_valid():
@@ -635,7 +715,7 @@ def my_poll_question(request):
 
 
     except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -866,7 +946,7 @@ def my_poll_question_option(request):
             
 
     except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_question_option: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -984,7 +1064,7 @@ def poll_voting(request):
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
     except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
         return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
@@ -1123,7 +1203,7 @@ def my_poll_votes(request):
             return paginator.get_paginated_response(serializer.data)
 
     except APIException as api_exception:
-        return Response({'message': f"{api_exception}"}, api_exception.status_code)
+        return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

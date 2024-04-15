@@ -241,7 +241,45 @@ class PollQuestionSerializer(serializers.ModelSerializer):
 
     image = serializers.ImageField(validators=[BaseValidator.image], required=False)
 
+    # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
+    def set_is_free(self, value):
+        if not self.instance.answer_options.filter(is_free_response=True).exists():
+            free_option = AnswerOption.objects.create(
+                question=self.id,
+                is_free_response=True,
+            )
+        options_to_update = self.instance.answer_options.all()
+        new_options = []
+        for option in options_to_update:
+            option.is_correct = False
+            new_options.append(option)
+        AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
+    # обнуляем правильность ответов при изменении has_multiple_choices или is_free
+    def set_has_multiple_choices(self, value):
+        options_to_update = self.instance.answer_options.all()
+        new_options = []
+        for option in options_to_update:
+            option.is_correct = False
+            new_options.append(option)
+        AnswerOption.objects.bulk_update(new_options, ['is_correct'])
+
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
     
     class Meta:
         model = PollQuestion
@@ -287,13 +325,13 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
 
     def get_free_answers(self, instance):
         if instance.is_free_response:
-            free_answers = []
+            free_answers = {}
             question_id = instance.question.id
             user_answers = self.context.get('free_answers', [])
             for item in user_answers:
                 if item['question_id'] == question_id:
-                    free_answers.append(item['text']) 
-
+                    free_answers[item['profile_name'] + ' ' + item['profile_surname']] = item['text']
+                    # free_answers[item['user_id']] = item['text']
             return free_answers
              
     class Meta:

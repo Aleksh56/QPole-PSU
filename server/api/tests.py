@@ -301,10 +301,22 @@ def my_poll_stats_test(request):
                 .annotate(quantity=Count('id'))
             )
 
-            free_answers = PollAnswer.objects.filter(
-                poll_answer_group__poll__poll_id=poll_id,
-                text__isnull=False
-            ).values('text', 'question_id')
+            free_answers = (
+                PollAnswer.objects
+                .filter(
+                    poll_answer_group__poll__poll_id=poll_id,
+                    text__isnull=False
+                )
+                # .select_related('poll_answer_group__profile')
+                .values(
+                    'text',
+                    'question_id',
+                    user_id=F('poll_answer_group__profile__user_id'),
+                    profile_name=F('poll_answer_group__profile__name'),
+                    profile_surname=F('poll_answer_group__profile__surname')
+                )
+            )
+            print(free_answers)
 
 
             context = {
