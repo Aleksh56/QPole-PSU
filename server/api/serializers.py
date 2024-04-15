@@ -245,7 +245,7 @@ class PollQuestionSerializer(serializers.ModelSerializer):
     def set_is_free(self, value):
         if not self.instance.answer_options.filter(is_free_response=True).exists():
             free_option = AnswerOption.objects.create(
-                question=self.id,
+                question=self.instance.id,
                 is_free_response=True,
             )
         options_to_update = self.instance.answer_options.all()
