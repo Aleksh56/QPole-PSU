@@ -949,10 +949,22 @@ def poll_voting(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                my_answers = PollAnswerGroup.objects.filter(
+                my_answer = PollAnswerGroup.objects.filter(
                     Q(profile=my_profile) & Q(poll__poll_id=poll_id)
-                )
-                serializer = PollAnswerGroupSerializer(my_answers, many=True)
+                ).select_related('poll').prefetch_related('answers').first()
+
+                poll = Poll.objects.filter(
+                    Q(author__user=current_user) & Q(poll_id=poll_id)
+                ).select_related('author', 'poll_type').prefetch_related(
+                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related('answer_options').all())
+                ).first()
+
+                if not my_answer:
+                    raise ObjectNotFoundException(model='PollAnswerGroup')
+                
+                my_answer.poll = poll
+
+                serializer = PollAnswerGroupSerializer(my_answer)
                 return Response(serializer.data)
             
             else:

@@ -95,26 +95,8 @@ class MyProfileSerializer(serializers.ModelSerializer):
         
 class PollAnswerSerializer(serializers.ModelSerializer):
 
-    # def create(self, validated_data):
-
-    #     poll = self.context.get('poll')
-    #     poll_answer_group = self.context.get('poll_answer_group')
-    #     validated_data['poll_answer_group'] = poll_answer_group
-    #     if poll.poll_type.name == 'Викторина':
-    #         answer_option = validated_data['answer_option']
-    #         if not answer_option.is_correct == None:
-    #             if answer_option.is_correct:
-    #                 validated_data['is_correct'] = True
-    #             else:
-    #                 validated_data['is_correct'] = False
-                
-
-    #     return super().create(validated_data)
-
-
     class Meta:
         model = PollAnswer
-        # fields = ['id', 'question', 'answer_option', 'poll_answer_group', 'is_correct']
         fields = '__all__'
 
 
@@ -149,6 +131,29 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
             }
         
             return results
+    
+    def to_representation(self, instance):
+        my_answers = super().to_representation(instance)
+        data = {
+                    'questions': PollQuestionSerializer(instance.poll.questions.all(), many=True).data,
+                    'result': my_answers
+                }
+        
+        for answer in my_answers['answers']:
+            question_id = answer['question']
+            answer_option_id = answer['answer_option']
+
+            for question in data['questions']:
+                for answer_option in question['answer_options']:
+                    if answer_option['question'] == question_id and answer_option['id'] == answer_option_id:
+                        answer_option['is_chosen'] = True
+                        answer_option['text'] = answer['text']
+                    else:
+                        answer_option['is_chosen'] = False
+
+        return data
+    
+
     
     class Meta:
         model = PollAnswerGroup
