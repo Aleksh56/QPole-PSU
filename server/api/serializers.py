@@ -148,8 +148,6 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
                     if answer_option['question'] == question_id and answer_option['id'] == answer_option_id:
                         answer_option['is_chosen'] = True
                         answer_option['text'] = answer['text']
-                    else:
-                        answer_option['is_chosen'] = False
 
         return data
     
