@@ -131,7 +131,8 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
         if instance.poll.poll_type.name == 'Викторина':
             total = 0
             correct = 0
-            for answer in instance.answers.all():
+            answers = instance.answers.all()
+            for answer in answers:
                 total += 1
                 if answer.answer_option.is_correct == True:
                     answer.is_correct = True
@@ -144,6 +145,7 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
                 'correct': correct,
                 'wrong': total - correct,
                 'percentage': round(float(correct / total), 2) * 100,
+                'answers': PollAnswerSerializer(answers, many=True).data
             }
         
             return results

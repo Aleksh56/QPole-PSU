@@ -136,7 +136,7 @@ def my_poll(request):
                 page = int(request.GET.get('page', 1))
                 page_size = int(request.GET.get('page_size', 20))  
 
-                polls = Poll.objects.filter(filters).select_related('author', 'poll_type')
+                polls = Poll.objects.filter(filters).select_related('author', 'poll_type').order_by('-created_date')
                 
                 page = int(request.GET.get('page', 1))
                 page_size = int(request.GET.get('page_size', 3))  
@@ -592,26 +592,6 @@ def my_poll_question(request):
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
-            # # обнуляем правильность ответов при изменении has_multiple_choices или is_free
-            # has_multiple_choices = data.get('has_multiple_choices', None) 
-            # is_free = data.get('is_free', None) 
-            # if has_multiple_choices is not None or is_free is not None:
-            #     options_to_update = poll_question.answer_options.all()
-            #     new_options = []
-            #     for option in options_to_update:
-            #         option.is_correct = False
-            #         new_options.append(option)
-            #     AnswerOption.objects.bulk_update(new_options, ['is_correct'])
-
-            # # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
-            # is_free = bool(data.get('is_free', False))
-            # if is_free:
-            #     if not poll_question.answer_options.filter(is_free_response=True).exists():
-            #         free_option = AnswerOption.objects.create(
-            #             question=poll_question,
-            #             is_free_response=True,
-            #         )
-
             serializer = PollQuestionSerializer(instance=poll_question, data=data, partial=True)
             if serializer.is_valid():
                 serializer.save()

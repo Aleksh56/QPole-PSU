@@ -216,3 +216,22 @@ class Poll(models.Model):
         if self.duration:     
             return timezone.now() < self.created_date + self.duration
         else: return True
+
+
+class SupportRequestType(models.Model):
+    type = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"Тип обращения {self.type.type}"
+
+
+class SupportRequest(models.Model):
+    text = models.CharField(max_length=1000)
+    type = models.ForeignKey(SupportRequestType, related_name='tickets', on_delete=models.CASCADE) 
+    author = models.ForeignKey(Profile, related_name='tickets', on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    
+    def __str__(self):
+        return f"Обращение типа {self.type.type} от {self.author} от {self.created_date}"
+
