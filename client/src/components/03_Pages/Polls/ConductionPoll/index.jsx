@@ -19,12 +19,13 @@ const ConductionPollPage = () => {
   const answers = useUnit($answersStore);
   const [pollData, setPollData] = useState({});
   const [showResults, setShowResults] = useState(false);
+  const [results, setResults] = useState({});
 
   useEffect(() => {
     const pollDataRequest = async () => {
       resetAnswers();
       const data = await fetchPollQuestions(id);
-      if (data.has_user_participated_in || isAuthenticated === false) {
+      if ((!data.is_revote_allowed && data.has_user_participated_in) || isAuthenticated === false) {
         navigate('/polls');
         return;
       }
@@ -38,7 +39,9 @@ const ConductionPollPage = () => {
 
   const handleSubmit = async () => {
     const response = await sendAnswersRequestFx({ answers, id });
-    if (!Object.keys(response.result).length > 0) {
+    console.log(response.data);
+    setResults(response.data);
+    if (!response.data.result.results && !Object.keys(response.data.result.results).length > 0) {
       navigate('/polls');
     } else {
       setShowResults(true);
@@ -52,7 +55,7 @@ const ConductionPollPage = () => {
       <Header isMainPage={false} />
       <ConductionWrapper>
         {showResults ? (
-          <PollResult />
+          <PollResult data={results} />
         ) : (
           <>
             <ConductionHeader data={pollData} />

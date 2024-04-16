@@ -11,6 +11,7 @@ import FrmShare from '@/components/04_Widgets/Data/Forms/frmShare';
 const PollSettingsMenuNavigation = ({ buttons }) => {
   const { id } = useParams();
   const { showAlert } = useAlert();
+  const [isPublished, setIsPublished] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -38,7 +39,7 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
           ))}
         </Stack>
         <Box>
-          <Button onClick={() => handlePublishPoll()}>Опубликовать</Button>
+          {!isPublished && <Button onClick={() => handlePublishPoll()}>Опубликовать</Button>}
           <IconButton onClick={() => navigate(`/app`)}>
             <CloseIcon />
           </IconButton>

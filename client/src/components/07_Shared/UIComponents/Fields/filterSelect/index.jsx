@@ -10,6 +10,7 @@ const FilterSelect = ({ label, name, value, options, onChange }) => {
       name={name}
       value={value}
       onChange={onChange}
+      fullWidth
       style={{ minWidth: '120px' }}
     >
       {options.map((option) => (

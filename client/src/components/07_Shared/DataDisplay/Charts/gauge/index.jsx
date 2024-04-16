@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { GaugeWrapper } from './styled';
+import { colorConfig } from '@/app/template/config/color.config';
 
 const CustomGauge = ({ value }) => {
   const size = 200;
@@ -23,7 +24,7 @@ const CustomGauge = ({ value }) => {
           cy={size / 2}
         />
         <circle
-          stroke="tomato"
+          stroke={colorConfig.primaryBlue}
           fill="transparent"
           strokeWidth={strokeWidth}
           strokeDasharray={circumference + ' ' + circumference}

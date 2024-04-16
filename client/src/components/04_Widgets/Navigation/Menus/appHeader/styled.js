@@ -6,6 +6,7 @@ import { MenuButton } from '@mui/base/MenuButton';
 
 export const StyledHeaderWrapper = styled('header')(() => ({
   backgroundColor: '#EAEDFE',
+  width: '100%',
 }));
 
 export const StyledHeaderContainer = styled(Box)(() => ({
@@ -15,11 +16,18 @@ export const StyledHeaderContainer = styled(Box)(() => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: `${Rem(20)} ${Rem(15)}`,
+  '@media (max-width: 768px)': {
+    flexDirection: 'column',
+    padding: `${Rem(10)} ${Rem(5)}`,
+  },
 }));
 
 export const StyledHeaderLogo = styled(Link)(() => ({
   fontSize: Rem(32),
   color: '#000',
+  '@media (max-width: 768px)': {
+    fontSize: Rem(24),
+  },
 }));
 
 export const StyledHeaderProfile = styled(MenuButton)(() => ({
@@ -43,4 +51,7 @@ export const Listbox = styled('ul')(() => ({
   border: '1px solid gray',
   color: '#000',
   zIndex: 1,
+  '@media (max-width: 768px)': {
+    minWidth: '150px',
+  },
 }));

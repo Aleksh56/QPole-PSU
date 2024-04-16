@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box, ListItemText, Typography,List } from '@mui/material';
+import { Box, ListItemText, Typography, List } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 import { designTokens } from '@/constants/designTokens';
 import { NavLink } from 'react-router-dom';
@@ -9,8 +9,10 @@ export const StyledProfileWrapper = styled(Box)(() => ({
   height: '100vh',
   display: 'flex',
   alignItems: 'end',
-
   boxShadow: '10px 0px 20px 0px rgba(0,0,0,0.3)',
+  // '@media (max-width: 1000px)': {
+  //   width: '0',
+  // },
 }));
 
 export const StyledList = styled(List)(() => ({

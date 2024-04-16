@@ -51,7 +51,7 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
           />
         ))}
         <StyledButton variant="contained" onClick={() => handleCreateModalOpen(true)}>
-          Создать новый опрос
+          Создать опрос
         </StyledButton>
       </StyledStack>
     </StyledStackWrapper>

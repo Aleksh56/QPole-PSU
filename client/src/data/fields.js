@@ -1,4 +1,5 @@
-import React from 'react';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
 
 export const appHeaderData = [
   { caption: 'Ваши опросы', to: '/app' },
@@ -142,4 +143,17 @@ export const admUsrsFilterCategories = [
   { name: 'Тип опроса', options: ['Опрос 1', 'Опрос 2'] },
   { name: 'Статус', options: ['Активный', 'Неактивный'] },
   { name: 'Группа', options: ['Группа 1', 'Группа 2'] },
+];
+
+export const shareButtons = [
+  {
+    caption: 'QR-код',
+    description: 'Скачайте рисунок с QR-кодом вашего опроса',
+    icon: QrCode2Icon,
+  },
+  {
+    caption: 'Email приглашения',
+    description: 'Пригласите участников опроса',
+    icon: MailOutlineIcon,
+  },
 ];

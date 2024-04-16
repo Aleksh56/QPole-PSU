@@ -72,10 +72,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
         </ActionsWrapper>
         <StyledTypographyName gutterBottom>{pollData.poll_type ?? ''}</StyledTypographyName>
         <Typography sx={{ fontSize: '14px', fontWeight: 600 }}>{pollData.name ?? ''}</Typography>
-        <Typography sx={{ fontSize: '14px', fontWeight: 500, color: '#4C4C4C', marginTop: '10px' }}>
-          {pollData.description ??
-            'Lorem Ipsum - это текст-"рыба", часто используемый в печати и вэб-дизайне. Lorem Ipsum является стандартной "рыбой" для текстов на латинице с начала XVI века.'}
-        </Typography>
+        <Typography>{pollData.description ?? ''}</Typography>
         {cardButton}
       </StyledCardContent>
     </StyledCard>

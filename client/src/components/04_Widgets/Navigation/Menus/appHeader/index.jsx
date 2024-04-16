@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppHeaderNavigationOutput from '@/components/05_Features/AppHeaderNavOutput';
 import {
   Listbox,
@@ -23,6 +23,9 @@ const AppHeader = () => {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const userData = useUserData();
+  const [isMenuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => setMenuOpen(!isMenuOpen);
 
   const handleLogOut = () => {
     setAuth(false);

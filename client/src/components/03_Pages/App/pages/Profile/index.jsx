@@ -1,20 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ProfileSidebar from '@/components/04_Widgets/Navigation/Menus/profileSidebar';
 import { Routes, Route } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { SidebarLinksData } from './data/SidebarLinksData';
 import ProfileAboutPage from '../ProfileAbout';
 import usePageTitle from '@/hooks/usePageTitle';
 import ProfileHelpPage from '../ProfileHelp';
+import { SidebarWrapper } from './styled';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const ProfileAppPage = () => {
   usePageTitle('profile');
+  const [showHeader, setShowHeader] = useState(false);
+  const [isSideOpen, setIsSideOpen] = useState(false);
+
+  const toggleSidebar = () => setIsSideOpen((prev) => !prev);
+
   return (
     <Box sx={{ display: 'flex', width: '100%', height: '100vh' }}>
-      <Box sx={{ width: '20%', flexShrink: 0 }}>
+      <SidebarWrapper isSideOpen={isSideOpen}>
         <ProfileSidebar linksData={SidebarLinksData} />
-      </Box>
+      </SidebarWrapper>
       <Box sx={{ flex: 1, backgroundColor: '#f7f9fa', overflowY: 'auto' }}>
+        {showHeader && (
+          <Box
+            sx={{
+              padding: '16px',
+              backgroundColor: '#e0e0e0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <MenuIcon onClick={() => toggleSidebar()} />
+            <Typography variant="h5" sx={{ flexGrow: 1, textAlign: 'center' }}>
+              Company Logo
+            </Typography>
+            <Box sx={{ width: 48 }}></Box>
+          </Box>
+        )}
         <Routes>
           <Route path="/" element={<ProfileAboutPage />} />
           <Route path="/contributors" element={'Contributors'} />
