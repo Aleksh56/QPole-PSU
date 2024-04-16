@@ -163,3 +163,20 @@ def get_qrcode_img_bytes(qrcode_path):
         return qr_image_base64
 
 
+from rest_framework.pagination import PageNumberPagination
+
+def get_paginated_response(request, objects, serializer):
+    paginator = PageNumberPagination()
+    paginator.page_size = int(request.GET.get('page_size', 10))
+    page = int(request.GET.get('page', 1))
+    objects = paginator.paginate_queryset(objects, request)
+    paginator.page.number = page
+    total_items = paginator.page.paginator.count
+    total_pages = paginator.page.paginator.num_pages
+    serializer = serializer(objects, many=True)
+    pagination_data = {
+        'total_items': total_items,
+        'total_pages': total_pages,
+        'results': serializer.data 
+    }
+    return pagination_data

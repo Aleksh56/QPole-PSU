@@ -145,7 +145,7 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
                 'correct': correct,
                 'wrong': total - correct,
                 'percentage': round(float(correct / total), 2) * 100,
-                'answers': PollAnswerSerializer(answers, many=True).data
+                # 'answers': PollAnswerSerializer(answers, many=True).data
             }
         
             return results
@@ -398,4 +398,23 @@ class PollStatsSerializer(serializers.ModelSerializer):
         model = Poll
         fields = ['members_quantity', 'questions_quantity', 'questions', 'correct_answer_percentage']
 
+
+
+
+class SupportRequestTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupportRequestType
+        fields = '__all__'
+
+    
+
+class SupportRequestBaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SupportRequest
+        fields = '__all__'
+
+
+class SupportRequestSerializer(SupportRequestBaseSerializer):
+    author = GetProfileSerializer()
+    type = SupportRequestTypeSerializer()
 

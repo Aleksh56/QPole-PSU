@@ -9,7 +9,7 @@ from django.contrib.auth.models import AnonymousUser
 
 
 from api.exсeptions import *
-from api.serializers import PollSerializer
+from api.serializers import PollSerializer, SupportRequestSerializer
 from api.models import *
 from api.utils import *
 
@@ -52,18 +52,9 @@ def users(request):
                         Q(patronymic__icontains=name_surname_patronymic)
                     )
                                     
-
-                page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 20))  
-
                 users = Profile.objects.filter(filters).order_by('-joining_date').select_related('role')
-                paginator = PageNumberPagination()
-                paginator.page_size = page_size
-                paginated_result = paginator.paginate_queryset(users, request)
-                paginator.page.number = page
-
-                serializer = ProfileSerializer(paginated_result, many=True)
-                return paginator.get_paginated_response(serializer.data)
+                pagination_data = get_paginated_response(request, users, ProfileSerializer)
+                return Response(pagination_data)
     
 
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -152,17 +143,10 @@ def polls(request):
                     raise ObjectNotFoundException('Poll')
                 serializer = PollSerializer(poll)
             else:
-                page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 20))  
-
                 polls = Poll.objects.all().order_by('-created_date').select_related('author', 'poll_type')
-                paginator = PageNumberPagination()
-                paginator.page_size = page_size
-                paginated_result = paginator.paginate_queryset(polls, request)
-                paginator.page.number = page
+                polls = get_paginated_response(request, polls, PollSerializer)
 
-                serializer = PollSerializer(paginated_result, many=True)
-                return paginator.get_paginated_response(serializer.data)
+                return Response(polls)
     
 
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -223,6 +207,103 @@ def polls(request):
         return Response(f"Внутренняя ошибка сервера в admin polls: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
       
 # удаление опросов, юзеры, изменение роли, бан
+
+
+@api_view(['GET', 'POST', 'PUT' 'DELETE'])
+@permission_classes([IsAdminUser])
+@transaction.atomic
+def support_request(request):
+    try:
+        if request.method == 'GET':
+            ticket_id = request.GET.get('ticket_id', None)
+
+            if ticket_id:
+                ticket = (
+                    SupportRequest.objects
+                        .filter(id=ticket_id)
+                        .select_related('author', 'type')
+                        .first()
+                    )
+                if not ticket:
+                    raise ObjectNotFoundException(model='SupportRequest')
+                
+                serializer = SupportRequestSerializer(ticket)
+                return Response(serializer.data)
+            
+            else:
+                ticket_type = request.GET.get('ticket_type', None)
+                name = request.GET.get('name', None)
+                is_seen = request.GET.get('is_seen', None)
+                is_closed = request.GET.get('is_closed', None)
+                author_id = request.GET.get('author_id', None)
+
+                filters = Q()
+                if ticket_type:
+                    ticket_type = SupportRequestType.objects.filter(type=ticket_type).first()
+                    if not ticket_type:
+                        raise ObjectNotFoundException(model='SupportRequestType')
+                    filters &= Q(type=ticket_type)
+                if name:
+                    filters &= Q(name__icontains=name)
+                if is_seen:
+                    filters &= Q(is_seen=is_seen)
+                if is_closed:
+                    filters &= Q(is_closed=is_closed)
+                if author_id:
+                    filters &= Q(author__user_id=author_id)
+
+                all_tickets = (
+                    SupportRequest.objects
+                        .filter(filters)
+                        .select_related('author', 'type')
+                        .order_by('-created_date')
+                )
+                all_tickets = get_paginated_response(request, all_tickets, SupportRequestSerializer)
+                return Response(all_tickets)
+
+        elif request.method == 'PATCH':
+            data = request.data
+
+            ticket_id = request.GET.get('ticket_id', None)
+            if not ticket_id:
+                raise MissingParameterException(field_name='ticket_id')
+            
+            ticket = SupportRequest.objects.filter(id=ticket_id).first()
+            if not ticket:
+                raise ObjectNotFoundException(model='SupportRequest')
+    
+            serializer = PollSerializer(instance=ticket, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+            
+        elif request.method == 'DELETE':
+            ticket_id = request.GET.get('ticket_id', None)
+
+            if not ticket_id:
+                raise MissingParameterException(field_name='ticket_id')
+           
+            ticket = (
+                SupportRequest.objects
+                    .filter(id=ticket_id)
+                ).first()
+
+            if not ticket:
+                raise ObjectNotFoundException(model='SupportRequest')
+
+            ticket.delete()
+
+            return Response({'message':f"{ticket} успешно удален"}, status=status.HTTP_204_NO_CONTENT)
+    
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в adnmin_api support_request: {ex}"},
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 

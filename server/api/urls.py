@@ -15,6 +15,7 @@ urlpatterns = [
     path('my_poll_stats/', my_poll_stats, name='my_poll_stats'),
     path('my_poll_user_answers/', my_poll_user_answers, name='my_poll_user_answers'),
     path('poll/', poll, name='poll'),
+    path('my_support_requests/', my_support_requests, name='my_support_requests'),
 
 
     path('optimization_test/', optimization_test, name='optimization_test'),

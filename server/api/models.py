@@ -222,7 +222,7 @@ class SupportRequestType(models.Model):
     type = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"Тип обращения {self.type.type}"
+        return f"Тип обращения {self.type}"
 
 
 class SupportRequest(models.Model):
@@ -230,6 +230,10 @@ class SupportRequest(models.Model):
     type = models.ForeignKey(SupportRequestType, related_name='tickets', on_delete=models.CASCADE) 
     author = models.ForeignKey(Profile, related_name='tickets', on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
+
+    is_seen = models.BooleanField(default=False)
+    is_closed = models.BooleanField(default=False)
+    is_closed_date = models.DateTimeField(default=None, null=True)
 
     
     def __str__(self):

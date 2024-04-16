@@ -1188,3 +1188,116 @@ def my_poll_votes(request):
     except Exception as ex:
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def my_support_requests(request):
+    current_user = request.user
+    my_profile = Profile.objects.filter(user=current_user).first()
+
+    if not my_profile:
+        raise ObjectNotFoundException(model='Profile')
+    
+    try:
+        if request.method == 'GET':
+            ticket_id = request.GET.get('ticket_id', None)
+
+            if ticket_id:
+                ticket = (
+                    SupportRequest.objects
+                        .filter(Q(id=ticket_id) & Q(author=my_profile))
+                        .select_related('author', 'type')
+                        .first()
+                    )
+                if not ticket:
+                    raise ObjectNotFoundException(model='SupportRequest')
+                
+                serializer = SupportRequestSerializer(ticket)
+                return Response(serializer.data)
+            
+            else:
+                ticket_type = request.GET.get('ticket_type', None)
+                name = request.GET.get('name', None)
+                is_seen = request.GET.get('is_seen', None)
+                is_closed = request.GET.get('is_closed', None)
+                author_id = request.GET.get('author_id', None)
+
+                filters = Q(author=my_profile)
+                if ticket_type:
+                    ticket_type = SupportRequestType.objects.filter(type=ticket_type).first()
+                    if not ticket_type:
+                        raise ObjectNotFoundException(model='SupportRequestType')
+                    filters &= Q(type=ticket_type)
+                if name:
+                    filters &= Q(name__icontains=name)
+                if is_seen:
+                    filters &= Q(is_seen=is_seen)
+                if is_closed:
+                    filters &= Q(is_closed=is_closed)
+                if author_id:
+                    filters &= Q(author__user_id=author_id)
+
+                all_tickets = (
+                    SupportRequest.objects
+                        .filter(filters)
+                        .select_related('author', 'type')
+                        .order_by('-created_date')
+                )
+                all_tickets = get_paginated_response(request, all_tickets, SupportRequestSerializer)
+                return Response(all_tickets)
+
+        elif request.method == 'POST':
+            data = request.data.copy()
+
+            ticket_type = data.get('ticket_type', None)
+            if not ticket_type:
+                raise MissingFieldException(field_name='ticket_type')
+            
+            ticket_type = SupportRequestType.objects.filter(type=ticket_type).first()
+            if not ticket_type:
+                raise ObjectNotFoundException(model='SupportRequestType')
+            data['type'] = ticket_type.id
+            data['author'] = my_profile.user_id
+            
+            ticket_exists = (
+                    SupportRequest.objects
+                        .filter(Q(author=my_profile))
+                        .exists()
+                    )
+            if ticket_exists:
+                raise AccessDeniedException(detail='У Вас есть еще не рассмотренное обращение, ожидайте ответа')
+    
+            serializer = SupportRequestBaseSerializer(data=data)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
+      
+        elif request.method == 'DELETE':
+            ticket_id = request.GET.get('ticket_id', None)
+
+            if not ticket_id:
+                raise MissingParameterException(field_name='ticket_id')
+           
+            ticket = (
+                SupportRequest.objects
+                    .filter(Q(id=ticket_id) & Q(author=my_profile))
+                ).first()
+
+            if not ticket:
+                raise ObjectNotFoundException(model='SupportRequest')
+
+            ticket.delete()
+
+            return Response({'message':f"{ticket} успешно отменена"}, status=status.HTTP_204_NO_CONTENT)
+    
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в support_request: {ex}"},
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+
