@@ -175,18 +175,21 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
                             else:
                                 correct_answers_quantity -= 1
 
-            correct_percentage = correct_answers_quantity / correct_quantity
-            if correct_percentage < 0:
-                correct_percentage = 0.0
-            question['points'] = correct_percentage
-            poll_points_gained += correct_percentage
-            # print('correct_answers_quantity =', correct_answers_quantity)
-            # print('correct_quantity =', correct_quantity)
-            # print('correct_percentage =', correct_percentage)
+            if not correct_quantity == 0:
+                correct_percentage = correct_answers_quantity / correct_quantity
+                if correct_percentage < 0:
+                    correct_percentage = 0.0
+                question['points'] = correct_percentage
+                poll_points_gained += correct_percentage
+                # print('correct_answers_quantity =', correct_answers_quantity)
+                # print('correct_quantity =', correct_quantity)
+                # print('correct_percentage =', correct_percentage)
 
         # print('poll_points =', poll_points)
         # print('poll_points_gained =', poll_points_gained)
-        data['percentage'] = round(poll_points_gained / poll_points * 100, 2)
+        if not poll_points == 0:
+            data['percentage'] = round(poll_points_gained / poll_points * 100, 2)
+            
         return data
     
 
