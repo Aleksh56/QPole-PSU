@@ -167,11 +167,13 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
                         answer_option['is_chosen'] = True # отмечаем, что вариант ответа был выбран
                         answer_option['text'] = answer['text'] # добавляем текст ответа, если он был дан
                         answer_option['points'] = answer['points'] # начисляем очки, которые получили после проверки правильности
-                        question['points'] += answer['points'] # начисляем очки, которые получили после проверки правильности
-                        if answer['points'] > 0:
-                            correct_answers_quantity += 1
-                        else:
-                            correct_answers_quantity -= 1
+                        
+                        if answer['points'] is not None: # проверяем что очки вообще есть
+                            question['points'] += answer['points'] # начисляем очки, которые получили после проверки правильности
+                            if answer['points'] > 0:
+                                correct_answers_quantity += 1
+                            else:
+                                correct_answers_quantity -= 1
 
             correct_percentage = correct_answers_quantity / correct_quantity
             if correct_percentage < 0:
