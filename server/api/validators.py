@@ -1,4 +1,5 @@
 from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueValidator
 from .exсeptions import PollValidationException
 from api.utils import check_file
 

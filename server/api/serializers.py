@@ -134,21 +134,57 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         my_answers = super().to_representation(instance)
+                
+        poll_points = 0
+        poll_points_gained = 0.0
+
         data = {
                     'questions': PollQuestionSerializer(instance.poll.questions.all(), many=True).data,
                     'result': my_answers
                 }
-        
-        for answer in my_answers['answers']:
-            question_id = answer['question']
-            answer_option_id = answer['answer_option']
 
-            for question in data['questions']:
-                for answer_option in question['answer_options']:
-                    if answer_option['question'] == question_id and answer_option['id'] == answer_option_id:
-                        answer_option['is_chosen'] = True
-                        answer_option['text'] = answer['text']
+        for question in data['questions']: # проходим по всем вопросам 
+            correct_percentage = 0.0
+            correct_quantity = 0
+            correct_answers_quantity = 0
+            if question.get('is_answered') is None: # проверка чтобы не занулять вопрос на который дан ответ
+                question['is_answered'] = False # если ответ уже дан, то не делаем его False
+                question['points'] = 0  # изначально начисляем 0 баллов
+                question['options_quantity'] = 0  # изначально считаем колво верных вариантов ответа
+            for answer_option in question['answer_options']: # проходим по всем вариантам ответа 
+                if answer_option.get('is_correct') is not None:
+                    if answer_option.get('is_correct') == True:
+                        correct_quantity += 1
+                        poll_points += 1
+                if answer_option.get('is_answered') is None: # проверка на то что на вариант ответа еще не ответили
+                    answer_option['is_chosen'] = False # отмечаем, что вариант ответа изначально не выбран
+                    answer_option['text'] = None # отмечаем, что текст для варианта ответа изначально не указан
+                    answer_option['points'] = 0 # отмечаем, сколько баллов получили за ответ
 
+                for answer in my_answers['answers']: # проходим по всем моим ответам
+                    if answer_option['id'] == answer['answer_option']: # выбираем ответ по совпавшим id
+                        question['is_answered'] = True # отмечаем, что вопрос отвечен
+                        answer_option['is_chosen'] = True # отмечаем, что вариант ответа был выбран
+                        answer_option['text'] = answer['text'] # добавляем текст ответа, если он был дан
+                        answer_option['points'] = answer['points'] # начисляем очки, которые получили после проверки правильности
+                        question['points'] += answer['points'] # начисляем очки, которые получили после проверки правильности
+                        if answer['points'] > 0:
+                            correct_answers_quantity += 1
+                        else:
+                            correct_answers_quantity -= 1
+
+            correct_percentage = correct_answers_quantity / correct_quantity
+            if correct_percentage < 0:
+                correct_percentage = 0.0
+            question['points'] = correct_percentage
+            poll_points_gained += correct_percentage
+            # print('correct_answers_quantity =', correct_answers_quantity)
+            # print('correct_quantity =', correct_quantity)
+            # print('correct_percentage =', correct_percentage)
+
+        # print('poll_points =', poll_points)
+        # print('poll_points_gained =', poll_points_gained)
+        data['percentage'] = round(poll_points_gained / poll_points * 100, 2)
         return data
     
 

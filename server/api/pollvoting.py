@@ -105,9 +105,22 @@ def quizz_voting_handler(answers, poll):
             answer_option = next((option for option in question.answer_options.all() if option.id == answer_option_id), None)
             if not answer_option:
                 raise ObjectNotFoundException(model='AnswerOption')
-
-            parsed_answers.append({'question': question_id, 'answer_option': answer_option_id})
-        
+            
+            if question.is_free:
+                text = answer.get('text', None)
+                if not text:
+                    raise PollAnsweringException(detail=f"Вопрос с открытым ответом должен содержать текст ответа")
+                parsed_answers.append({'question': question_id, 'answer_option': answer_option_id, 'text': text})
+            else:
+                if answer_option.is_free_response: # проверяем что вариант ответа содержит свободную форму ответа
+                    text = answer.get('text', None)
+                    if not text:
+                        raise PollAnsweringException(detail=f"Поле со свободным ответом должно содержать текст ответа")
+                    parsed_answers.append({'question': question_id, 'answer_option': answer_option_id, 'text': text})
+                else:
+                    parsed_answers.append({'question': question_id, 'answer_option': answer_option_id})
+            
+            # добавляем в список отвеченных вопросов
             answered_questions.add(question)
 
     if not required_questions.issubset(answered_questions):
@@ -150,11 +163,23 @@ def save_votes(answers, poll, my_profile):
             answer_option = answer_options_dict.get(question_id, {}).get(answer_option_id)
 
             if poll.poll_type.name == 'Викторина':
-                if not answer_option.is_correct == None:
-                    if answer_option.is_correct:
-                        answer['is_correct'] = True
+                if question.is_free:
+                    if answer_option.name.lower().rstrip() == answer['text'].lower().rstrip():
+                        answer['points'] = 1
                     else:
-                        answer['is_correct'] = False
+                        answer['points'] = 0
+                else:
+                    if answer_option.is_free_response:
+                        if answer_option.name.lower().rstrip() == answer['text'].lower().rstrip():
+                            answer['points'] = 1
+                        else:
+                            answer['points'] = 0
+                    else:
+                        if answer_option.is_correct is not None:
+                            if answer_option.is_correct:
+                                answer['points'] = 1
+                            else:
+                                answer['points'] = 0
 
             answer['answer_option'] = answer_option
 

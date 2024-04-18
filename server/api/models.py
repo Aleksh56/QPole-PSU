@@ -60,6 +60,8 @@ class PollAnswer(models.Model):
     text = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото ответа', upload_to=f'images/poll_answers/', blank=True, null=True, default=None)
 
+    points = models.PositiveSmallIntegerField(default=None, null=True)
+
     def __str__(self):
         return f"Ответ на {self.question}"
     
@@ -89,7 +91,7 @@ class AnswerOption(models.Model):
     def __str__(self):
         if self.is_free_response:
             if not self.is_image_response:
-                return f"Свободный вариант ответа'"
+                return f"Свободный вариант ответа '{self.name}'"
             else:
                 return f"Свободный вариант ответа с фотографией"
         else:
