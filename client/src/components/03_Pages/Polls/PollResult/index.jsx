@@ -9,7 +9,7 @@ const PollResult = ({ data }) => {
 
   return (
     <>
-      <PollResultHeader data={results} />
+      <PollResultHeader res={results} data={data}/>
       {questions.map((item) => (
         <ConductionResCrd key={v4()} question={item} answers={result.answers} />
       ))}

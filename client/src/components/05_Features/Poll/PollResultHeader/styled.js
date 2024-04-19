@@ -42,17 +42,3 @@ export const DescriptionTagsWrapper = styled(Box)(() => ({
   alignItems: 'center',
   width: '100%',
 }));
-
-export const StyledTitle = styled(Typography)(() => ({
-  fontSize: Rem(16),
-  fontWeight: 600,
-  padding: `${Rem(10)} 0`,
-  borderBottom: `${Rem(1)} solid #000`,
-  width: '100%',
-}));
-
-export const StyledDescText = styled(Typography)(() => ({
-  width: '100%',
-  marginTop: Rem(10),
-  fontSize: Rem(14),
-}));

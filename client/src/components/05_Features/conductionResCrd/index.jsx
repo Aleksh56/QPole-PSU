@@ -14,7 +14,7 @@ const ConductionResCrd = ({ question = {}, answers }) => {
           const isCorrect = foundAnswer ? foundAnswer.points === 1 : null;
           return (
             <StyledOption key={item.id} isCorrect={isCorrect}>
-              <OptionName>{item.name}</OptionName>
+              <OptionName>{question.is_free ? item.text : item.name}</OptionName>
             </StyledOption>
           );
         })}

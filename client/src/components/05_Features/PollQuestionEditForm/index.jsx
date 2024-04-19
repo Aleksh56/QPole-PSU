@@ -67,7 +67,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   };
 
   const fetchOptions = async () => {
-    if (question.is_free) {
+    if (question.is_free && pollType !== 'Викторина') {
       setOptions([]);
     } else {
       await getAllOptionsRequest(id, question.id).then((res) => {

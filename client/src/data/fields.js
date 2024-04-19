@@ -157,3 +157,9 @@ export const shareButtons = [
     icon: MailOutlineIcon,
   },
 ];
+
+export const pollResTableFlds = [
+  { caption: 'Количество баллов (правильных ответов)', field: 'correct' },
+  { caption: 'Максимальное количество баллов', field: 'total' },
+  { caption: 'Процент', field: 'percentage' },
+];

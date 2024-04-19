@@ -1,50 +1,45 @@
 import React from 'react';
-import { Typography, Box, styled } from '@mui/material';
-import {
-  DescriptionTagsWrapper,
-  DescriptionWrapper,
-  GraphWrapper,
-  HeaderWrapper,
-  StyledDescText,
-  StyledTitle,
-} from './styled';
+import { Typography, Box, Grid } from '@mui/material';
+import { DescriptionTagsWrapper, DescriptionWrapper, GraphWrapper, HeaderWrapper } from './styled';
 import CustomGauge from '@/components/07_Shared/DataDisplay/Charts/gauge';
+import { pollResTableFlds } from '@/data/fields';
 
-// const TwoColumnWrapper = styled.div`
-//   display: 'flex';
-//   justify-content: 'space-between';
-//   align-items: 'center';
-//   padding: '16px';
-// `;
-
-// const Column = styled.div`
-//   flex: 1;
-//   padding: '0 12px';
-// `;
-
-const PollResultHeader = ({ data }) => {
+const PollResultHeader = ({ res, data }) => {
+  console.log(res);
   return (
     <HeaderWrapper>
       <GraphWrapper>
-        <CustomGauge value={data.percentage} />
+        <CustomGauge value={res.percentage} />
       </GraphWrapper>
       <DescriptionWrapper>
         <DescriptionTagsWrapper>
-          <Typography sx={{ fontSize: '12px', color: '#aaa' }}>1</Typography>
+          <Typography sx={{ fontSize: '12px', color: '#aaa' }}>{data.poll_type}</Typography>
           <Box>
-            <Typography sx={{ fontSize: '12px' }}>21.12.24 17:00 – 22.12.25 12:00</Typography>
+            <Typography sx={{ fontSize: '12px' }}>{data.result.voting_date}</Typography>
           </Box>
         </DescriptionTagsWrapper>
-        {/* <TwoColumnWrapper>
-          <Column>
-            <StyledTitle>Results Overview</StyledTitle>
-          </Column>
-          <Column>
-            <StyledDescText>
-              {correctAnswers} out of {totalQuestions} correct ({percentage}%)
-            </StyledDescText>
-          </Column>
-        </TwoColumnWrapper> */}
+
+        <Grid
+          container
+          sx={{
+            marginTop: '30px',
+            border: '1px solid black',
+            rowGap: '10px',
+          }}
+        >
+          {pollResTableFlds.map((item) => (
+            <>
+              <Grid item xs={11} sx={{ padding: '2px' }}>
+                <Typography sx={{ fontSize: '13px', fontWeight: 'bold' }}>
+                  {item.caption}
+                </Typography>
+              </Grid>
+              <Grid item xs={1} sx={{ padding: '2px' }}>
+                <Typography sx={{ fontSize: '13px' }}>{res[item.field]}</Typography>
+              </Grid>
+            </>
+          ))}
+        </Grid>
       </DescriptionWrapper>
     </HeaderWrapper>
   );
