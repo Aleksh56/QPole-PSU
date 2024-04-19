@@ -104,38 +104,14 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
     answers = PollAnswerSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
 
-    results = serializers.SerializerMethodField()
 
     def get_author(self, instance):
         return MiniProfileSerializer(instance=instance.profile).data
     
-    def get_results(self, instance):
-        if instance.poll.poll_type.name == 'Викторина':
-            total = 0
-            correct = 0
-            answers = instance.answers.all()
-            for answer in answers:
-                total += 1
-                if answer.answer_option.is_correct == True:
-                    answer.is_correct = True
-                    correct += 1
-                else:
-                    answer.is_correct = False
-            
-            results = {
-                'total': total,
-                'correct': correct,
-                'wrong': total - correct,
-                'percentage': round(float(correct / total), 2) * 100,
-                # 'answers': PollAnswerSerializer(answers, many=True).data
-            }
-        
-            return results
-    
+
     def to_representation(self, instance):
         my_answers = super().to_representation(instance)
                 
-        poll_correct_percentage = 0.0
         poll_points = 0
         poll_gained_points = 0
 
@@ -176,20 +152,22 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
                                 question_gained_quantity += answer_option['points']
             
 
-            question['points'] += round(question_gained_quantity / question_correct_quantity, 2) # начисляем очки, которые получили после проверки правильности
-            if question['points'] < 0:
-                question['points'] = 0
-            poll_gained_points += question['points']
-            poll_points += 1
+            if question_correct_quantity:
+                question['points'] += round(question_gained_quantity / question_correct_quantity, 2) # начисляем очки, которые получили после проверки правильности
+                if question['points'] < 0:
+                    question['points'] = 0
+                poll_gained_points += question['points']
+                poll_points += 1
 
-        results = {
-                'total': poll_points,
-                'correct': poll_gained_points,
-                'wrong': poll_points - poll_gained_points,
-                'percentage': round(float(poll_gained_points / poll_points), 2) * 100,
-            }
-        
-        data['results'] = results
+                results = {
+                        'total': poll_points,
+                        'correct': poll_gained_points,
+                        'wrong': poll_points - poll_gained_points,
+                        'percentage': round(float(poll_gained_points / poll_points), 2) * 100,
+                    }
+                
+                data['results'] = results
+                
         return data
     
 
