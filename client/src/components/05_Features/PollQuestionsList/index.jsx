@@ -21,6 +21,7 @@ const PollQuestionsList = ({
   onAddQuestion,
   selectedQuestion,
   setQuestions,
+  setSelected,
 }) => {
   const { id } = useParams();
 
@@ -37,7 +38,7 @@ const PollQuestionsList = ({
     e.stopPropagation();
     await deleteQuestionRequest(id, q_id).then(() => {
       if (q_id === selectedQuestion?.id) {
-        onSelectQuestion('');
+        setSelected({});
       }
       const newQuestions = questions.filter((que) => que.id !== q_id);
       setQuestions(newQuestions);

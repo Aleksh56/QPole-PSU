@@ -19,10 +19,13 @@ const _settings = {
 const PoleQuestionsPage = () => {
   const { id } = useParams();
   const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState({});
 
   useEffect(() => {
+    setLoading(true);
     handleGetAllQuestionRequest(id).then((res) => setQuestions(res.data));
+    setLoading(false);
   }, [id]);
 
   const handleCreateQuestion = useCallback(async () => {
@@ -42,7 +45,7 @@ const PoleQuestionsPage = () => {
 
   return (
     <div>
-      {questions.length === 0 ? (
+      {!loading && questions.length === 0 ? (
         <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
       ) : (
         <ListWrapper>
@@ -53,6 +56,7 @@ const PoleQuestionsPage = () => {
               onAddQuestion={handleCreateQuestion}
               selectedQuestion={selectedQuestion}
               setQuestions={setQuestions}
+              setSelected={setSelectedQuestion}
             />
           </Box>
           <Box sx={{ width: '75%' }}>

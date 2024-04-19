@@ -23,12 +23,10 @@ import CustomGauge from '@/components/07_Shared/DataDisplay/Charts/gauge';
 // `;
 
 const PollResultHeader = ({ data }) => {
-  const { results } = data;
-
   return (
     <HeaderWrapper>
       <GraphWrapper>
-        <CustomGauge value={results.percentage} />
+        <CustomGauge value={data.percentage} />
       </GraphWrapper>
       <DescriptionWrapper>
         <DescriptionTagsWrapper>

@@ -6,6 +6,9 @@ export const StyledProfileContainer = styled(Box)(() => ({
   maxWidth: Rem(580),
   margin: '0 auto',
   padding: '50px 20px 0 20px',
+  '@media (max-width: 768px)': {
+    padding: '25px 20px 0 20px',
+  },
 }));
 
 export const StyledProfileFieldsBox = styled(Box)(() => ({

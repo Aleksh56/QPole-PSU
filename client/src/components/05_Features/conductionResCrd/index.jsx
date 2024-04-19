@@ -11,7 +11,7 @@ const ConductionResCrd = ({ question = {}, answers }) => {
       <OptionsWrapper>
         {options.map((item) => {
           const foundAnswer = answers.find((ans) => ans.answer_option === item.id);
-          const isCorrect = foundAnswer ? foundAnswer.is_correct : null;
+          const isCorrect = foundAnswer ? foundAnswer.points === 1 : null;
           return (
             <StyledOption key={item.id} isCorrect={isCorrect}>
               <OptionName>{item.name}</OptionName>

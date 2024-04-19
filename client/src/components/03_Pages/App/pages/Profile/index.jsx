@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ProfileSidebar from '@/components/04_Widgets/Navigation/Menus/profileSidebar';
 import { Routes, Route } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
@@ -14,12 +14,28 @@ const ProfileAppPage = () => {
   const [showHeader, setShowHeader] = useState(false);
   const [isSideOpen, setIsSideOpen] = useState(false);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 1000) {
+        setShowHeader(true);
+      } else {
+        setShowHeader(false);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const toggleSidebar = () => setIsSideOpen((prev) => !prev);
 
   return (
     <Box sx={{ display: 'flex', width: '100%', height: '100vh' }}>
       <SidebarWrapper isSideOpen={isSideOpen}>
-        <ProfileSidebar linksData={SidebarLinksData} />
+        <ProfileSidebar linksData={SidebarLinksData} onClose={toggleSidebar} />
       </SidebarWrapper>
       <Box sx={{ flex: 1, backgroundColor: '#f7f9fa', overflowY: 'auto' }}>
         {showHeader && (
@@ -34,7 +50,7 @@ const ProfileAppPage = () => {
           >
             <MenuIcon onClick={() => toggleSidebar()} />
             <Typography variant="h5" sx={{ flexGrow: 1, textAlign: 'center' }}>
-              Company Logo
+              QPoll
             </Typography>
             <Box sx={{ width: 48 }}></Box>
           </Box>

@@ -10,9 +10,25 @@ export const StyledProfileWrapper = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'end',
   boxShadow: '10px 0px 20px 0px rgba(0,0,0,0.3)',
-  // '@media (max-width: 1000px)': {
-  //   width: '0',
-  // },
+  width: '240px',
+  '@media (max-width: 1000px)': {
+    position: 'fixed',
+    zIndex: 9000,
+    top: 0,
+    left: 0,
+    height: '100%',
+    boxShadow: '0 0 10px rgba(0, 0, 0, 0.5)',
+  },
+}));
+
+export const CloseButtonWrapper = styled(Box)(() => ({
+  position: 'absolute',
+  top: '10px',
+  right: '10px',
+  zIndex: 9001,
+  '@media (min-width: 1001px)': {
+    display: 'none',
+  },
 }));
 
 export const StyledList = styled(List)(() => ({

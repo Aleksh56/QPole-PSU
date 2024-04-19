@@ -22,7 +22,15 @@ const QueBlock = ({ question, isMixed }) => {
   const [options, setOptions] = useState(question.answer_options ?? []);
 
   useEffect(() => {
-    if (isMixed) setOptions(shuffleArray(question.answer_options));
+    if (isMixed) {
+      const shuffled = shuffleArray([...question.answer_options]);
+      const index = shuffled.findIndex((option) => option.order_id === 16);
+      if (index !== -1) {
+        const [item] = shuffled.splice(index, 1);
+        shuffled.push(item);
+      }
+      setOptions(shuffled);
+    }
   }, [question]);
 
   const handleChange = (event, opt_id, isFree) => {
@@ -91,7 +99,7 @@ const QueBlock = ({ question, isMixed }) => {
             option.is_free_response ? (
               <TextField
                 key={option.id}
-                label={option.name}
+                label="Введите ваш ответ"
                 variant="outlined"
                 fullWidth
                 value={fieldValue || ''}

@@ -10,6 +10,10 @@ export const PollListPageContentWrapper = styled(Box)(() => ({
   maxWidth: Rem(1500),
   margin: '0 auto',
   padding: `${Rem(70)} ${Rem(15)}`,
+  '@media (max-width: 1000px)': {
+    gridTemplateColumns: '1fr',
+    padding: `${Rem(50)} ${Rem(10)}`,
+  },
 }));
 
 export const ContentWrapper = styled(Box)(() => ({

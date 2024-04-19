@@ -1,41 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TextField, MenuItem, Button, Box } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import useUserData from '@/hooks/useUserData';
+import { sendTicketFx } from './model/send-ticket';
+import { useAlert } from '@/app/context/AlertProvider';
 
 const FrmFeedback = () => {
-  const userData = useUserData();
-  const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
+  const { showAlert } = useAlert();
   const [message, setMessage] = useState('');
   const [type, setType] = useState('');
 
-  useEffect(() => {
-    if (userData) setEmail(userData.email);
-  }, [userData]);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!type || !email || message.length < 10) {
-      alert(
-        'Пожалуйста, заполните обязательные поля и убедитесь, что сообщение содержит минимум 10 символов.'
+    if (!type || message.length < 10) {
+      showAlert(
+        'Пожалуйста, заполните все обязательные поля и убедитесь, что сообщение содержит минимум 10 символов.',
+        'info'
       );
       return;
     }
 
-    const formData = {
-      type,
-      email,
-      fullName,
-      message,
-    };
+    await sendTicketFx({ type, message });
 
-    console.log(formData);
-
-    alert('Обращение отправлено успешно!');
-    // Очистка формы
+    showAlert('Обращение успешно отправлено !', 'success');
     setType('');
-    setFullName('');
     setMessage('');
   };
 
@@ -50,11 +37,11 @@ const FrmFeedback = () => {
         fullWidth
         margin="normal"
       >
-        <MenuItem value="complaint">Жалоба</MenuItem>
-        <MenuItem value="suggestion">Предложение</MenuItem>
-        <MenuItem value="question">Вопрос</MenuItem>
+        <MenuItem value="Жалоба">Жалоба</MenuItem>
+        <MenuItem value="Обращение">Предложение</MenuItem>
+        <MenuItem value="Вопрос">Вопрос</MenuItem>
       </TextField>
-      <TextField
+      {/* <TextField
         label="Электронная почта"
         type="email"
         value={email}
@@ -69,7 +56,7 @@ const FrmFeedback = () => {
         onChange={(e) => setFullName(e.target.value)}
         fullWidth
         margin="normal"
-      />
+      /> */}
       <TextField
         label="Сообщение"
         value={message}

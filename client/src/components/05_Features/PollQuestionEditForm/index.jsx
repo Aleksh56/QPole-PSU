@@ -26,7 +26,6 @@ import { deleteImageFx } from './model/delete-image';
 import { QueSettingsWrapper } from './styled';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
 import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
-import { isArray } from 'lodash';
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 
 const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
@@ -191,7 +190,15 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
               ))}
 
             {item.is_free_response ? (
-              <p>Другое</p>
+              pollType === 'Опрос' ? (
+                <p>Другое</p>
+              ) : (
+                <InvisibleLabeledField
+                  placeholder="Введите правильный ответ"
+                  value={item.name || ''}
+                  handleChange={(e) => handleOptionChange('name', e, item.id, question.id)}
+                />
+              )
             ) : (
               <InvisibleLabeledField
                 placeholder="Начните вводить"
@@ -218,7 +225,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
               <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
                 Добавить ответ
               </button>
-              {pollType === 'Опрос' && !isFreeResponse && (
+              {!isFreeResponse && (
                 <>
                   <span>или</span>
                   <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>

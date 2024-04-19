@@ -7,6 +7,9 @@ export const Styled2AuthContainerHeading = styled(Typography)(() => ({
   marginTop: '48px',
   fontSize: '18px',
   lineHeight: '24px',
+  '@media (max-width: 768px)': {
+    marginTop: '20px',
+  },
 }));
 
 export const StyledAuthContentWrapper = styled(Box)(() => ({

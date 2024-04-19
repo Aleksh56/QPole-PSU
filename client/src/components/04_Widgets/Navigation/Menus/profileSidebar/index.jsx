@@ -5,6 +5,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import Box from '@mui/material/Box';
 import { v4 } from 'uuid';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   StyledList,
   StyledNavItem,
@@ -12,11 +13,15 @@ import {
   StyledProfileContentWrapper,
   StyledProfileSidebarHeading,
   StyledProfileWrapper,
+  CloseButtonWrapper,
 } from './styled';
 
-const ProfileSidebar = memo(({ linksData = {} }) => {
+const ProfileSidebar = memo(({ linksData = {}, onClose }) => {
   return (
     <StyledProfileWrapper>
+      <CloseButtonWrapper>
+        <CloseIcon onClick={() => onClose()} sx={{ display: { xs: 'block', sm: 'none' } }} />
+      </CloseButtonWrapper>
       <StyledProfileContentWrapper>
         <StyledList component="nav" aria-label="main mailbox folders">
           <ListItem>

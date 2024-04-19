@@ -39,9 +39,8 @@ const ConductionPollPage = () => {
 
   const handleSubmit = async () => {
     const response = await sendAnswersRequestFx({ answers, id });
-    console.log(response.data);
     setResults(response.data);
-    if (!response.data.result.results && !Object.keys(response.data.result.results).length > 0) {
+    if (!response.data.poll_type === 'Викторина') {
       navigate('/polls');
     } else {
       setShowResults(true);

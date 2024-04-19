@@ -25,7 +25,17 @@ const Profile2AuthBlock = ({ caption = '' }) => {
       <StyledProfileFieldsBox>
         <StyledAuthContentWrapper>
           <StyledImage src={SecurityIcon} alt="Security icon" />
-          <Box sx={{ marginRight: '100px' }}>
+          <Box
+            sx={{
+              marginRight: '100px',
+              '@media (max-width: 768px)': {
+                marginRight: '50px',
+              },
+              '@media (max-width: 450px)': {
+                marginRight: '20px',
+              },
+            }}
+          >
             <Styled2AuthHeading>Двухфакторная аутентификация</Styled2AuthHeading>
             <Styled2AuthInfo>
               Добавьте дополнительную безопасность своей учетной записи, используя двухфакторную

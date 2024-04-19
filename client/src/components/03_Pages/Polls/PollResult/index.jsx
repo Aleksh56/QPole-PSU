@@ -5,11 +5,11 @@ import { v4 } from 'uuid';
 
 const PollResult = ({ data }) => {
   console.log(data);
-  const { questions, result } = data;
+  const { questions, result, results } = data;
 
   return (
     <>
-      <PollResultHeader data={result} />
+      <PollResultHeader data={results} />
       {questions.map((item) => (
         <ConductionResCrd key={v4()} question={item} answers={result.answers} />
       ))}
