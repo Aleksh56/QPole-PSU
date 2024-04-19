@@ -6,6 +6,7 @@ import { adminPanelSidebarLinks } from '@/data/onboardings';
 import AdminUsersPage from './pages/AdminUsers';
 import AdmHeader from '@/components/04_Widgets/Navigation/Menus/admHeader';
 import { colorConfig } from '@/app/template/config/color.config';
+import AdmSupportPage from './pages/AdminSupport';
 
 const AdminPanelPage = () => {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ const AdminPanelPage = () => {
           </List>
         </StyledDrawerWrapper>
         <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#F5F6FA' }}>
-          <AdmHeader notificationsCount={3} />
+          <AdmHeader />
           <Box sx={{ padding: '20px' }}>
             <Routes>
               <Route
@@ -65,6 +66,7 @@ const AdminPanelPage = () => {
                 element={<Typography paragraph>Это главная страница.</Typography>}
               />
               <Route path="/users" element={<AdminUsersPage />} />
+              <Route path="/support" element={<AdmSupportPage />} />
               <Route
                 path="/settings"
                 element={<Typography paragraph>Настройки системы.</Typography>}

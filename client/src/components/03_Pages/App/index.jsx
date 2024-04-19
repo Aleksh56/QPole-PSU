@@ -57,13 +57,14 @@ const AppPage = () => {
               }}
             >
               <PollsGrid>
-                {pollData
-                  .filter((item) => !item.is_closed)
-                  .map((item) => (
-                    <Link key={item.poll_id} to={`/app/tests/${item.poll_id}/main`}>
-                      <AppPoleCard pollData={item} fetchData={fetchData} />
-                    </Link>
-                  ))}
+                {pollData &&
+                  pollData
+                    .filter((item) => !item.is_closed)
+                    .map((item) => (
+                      <Link key={item.poll_id} to={`/app/tests/${item.poll_id}/main`}>
+                        <AppPoleCard pollData={item} fetchData={fetchData} />
+                      </Link>
+                    ))}
               </PollsGrid>
               <CustomPagination
                 pageSize={pageSize}

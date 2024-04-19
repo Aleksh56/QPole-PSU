@@ -13,6 +13,7 @@ import { closePollFx } from './model/close-poll';
 import { duplicatePollFx } from './model/duplicate-poll';
 import config from '@/config';
 import { deletePollFx } from './model/delete-poll';
+import zaglushka from '@assets/zaglushka.jpg';
 
 const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -51,7 +52,10 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
 
   return (
     <StyledCard>
-      <StyledCardMedia image={config.serverUrl.main + pollData.image} title="Poll Image" />
+      <StyledCardMedia
+        image={pollData.image ? config.serverUrl.main + pollData.image : zaglushka}
+        title="Poll Image"
+      />
       <StyledCardContent>
         <ActionsWrapper>
           <StyledChip label={!pollData.is_closed ? 'Открыт' : 'Закрыт'} />

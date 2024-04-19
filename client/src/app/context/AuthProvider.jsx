@@ -8,6 +8,7 @@ const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setAuthState] = useState(false);
   const [token, setToken] = useState('');
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('auth_token');
@@ -15,6 +16,7 @@ export const AuthProvider = ({ children }) => {
       setAuthState(true);
       setToken(storedToken);
     }
+    setLoading(false);
   }, []);
 
   const setAuth = useCallback(
@@ -33,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   );
 
   const contextValue = useMemo(
-    () => ({ isAuthenticated, setAuth, token }),
+    () => ({ isAuthenticated, setAuth, token, isLoading }),
     [isAuthenticated, setAuth]
   );
 

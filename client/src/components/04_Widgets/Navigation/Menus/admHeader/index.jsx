@@ -3,9 +3,11 @@ import { IconButton, Typography, InputBase, Badge, Avatar, Stack } from '@mui/ma
 import { Search as SearchIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { SearchWrapper, StyledAppBar, StyledStack, StyledToolbar } from './styled';
 import useUserData from '@/hooks/useUserData';
+import useTicketsCount from '@/hooks/admin/useTicketsCount';
 
-const AdmHeader = ({ notificationsCount }) => {
+const AdmHeader = () => {
   const userData = useUserData();
+  const { ticketsCount } = useTicketsCount();
 
   return (
     <StyledAppBar>
@@ -19,7 +21,7 @@ const AdmHeader = ({ notificationsCount }) => {
 
         <StyledStack direction="row" spacing={2} alignItems="center">
           <IconButton aria-label="show new notifications" color="black">
-            <Badge badgeContent={notificationsCount} color="error">
+            <Badge badgeContent={ticketsCount} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>

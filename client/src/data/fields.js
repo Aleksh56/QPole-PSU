@@ -1,3 +1,4 @@
+import React from 'react';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 
@@ -162,4 +163,49 @@ export const pollResTableFlds = [
   { caption: 'Количество баллов (правильных ответов)', field: 'correct' },
   { caption: 'Максимальное количество баллов', field: 'total' },
   { caption: 'Процент', field: 'percentage' },
+];
+
+export const admSupportTableCols = [
+  { caption: 'ID', key: 'id' },
+  // { caption: 'ФИО', key: 'author', render: (author) => <span>{author.name}</span> ?? '-' },
+  { caption: 'Email', key: 'author', render: (author) => <span>{author.email}</span> ?? '-' },
+  { caption: 'Сообщение', key: 'text' },
+  // { caption: 'Дата обращения', key: 'created_date' },
+  {
+    caption: 'Просмотрено',
+    key: 'is_seen',
+    render: (is_seen) =>
+      (
+        <span
+          style={{
+            color: !is_seen ? '#EF3826' : '#00B69B',
+            backgroundColor: !is_seen ? 'rgba(239, 56, 38, .2)' : 'rgba(0, 182, 155, .3)',
+            padding: '6px 16px',
+            borderRadius: '5px',
+            fontWeight: 500,
+          }}
+        >
+          {is_seen ? 'Просмотрено' : 'Не просмотрено'}
+        </span>
+      ) ?? '-',
+  },
+  {
+    caption: 'Статус',
+    key: 'is_closed',
+    render: (is_closed) =>
+      (
+        <span
+          style={{
+            color: !is_closed ? '#EF3826' : '#00B69B',
+            backgroundColor: !is_closed ? 'rgba(239, 56, 38, .2)' : 'rgba(0, 182, 155, .3)',
+            padding: '6px 16px',
+            borderRadius: '5px',
+            fontWeight: 500,
+          }}
+        >
+          {is_closed ? 'Закрыта' : 'Открыта'}
+        </span>
+      ) ?? '-',
+  },
+  { caption: 'Дата закрытия', key: 'is_closed_date' },
 ];

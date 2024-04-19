@@ -14,7 +14,7 @@ import PollResult from '../PollResult';
 
 const ConductionPollPage = () => {
   const { id } = useParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const answers = useUnit($answersStore);
   const [pollData, setPollData] = useState({});
@@ -22,6 +22,7 @@ const ConductionPollPage = () => {
   const [results, setResults] = useState({});
 
   useEffect(() => {
+    if (isLoading) return;
     const pollDataRequest = async () => {
       resetAnswers();
       const data = await fetchPollQuestions(id);
@@ -35,7 +36,7 @@ const ConductionPollPage = () => {
       setPollData(data);
     };
     pollDataRequest();
-  }, []);
+  }, [isLoading, isAuthenticated, id]);
 
   const handleSubmit = async () => {
     const response = await sendAnswersRequestFx({ answers, id });
