@@ -27,3 +27,6 @@ dist-ssr
 
 
 .eslintrc.js
+jest.config.cjs
+jest.setup.js
+CheatSheet.txt
