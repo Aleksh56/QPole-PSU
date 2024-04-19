@@ -216,10 +216,9 @@ def is_poll_valid(poll):
             poll_option_validator.name(instance=option, max_len=50, min_len=1)
 
         if poll.poll_type.name == 'Викторина':
-            if question.has_correct_answer:
-                has_correct_option = [option for option in all_options if option.is_correct]
-                if not has_correct_option:
-                    raise PollValidationException(f"Вопрос №'{question.order_id}' должен содержать хотя бы 1 верный вариант ответа.")
+            has_correct_option = [option for option in all_options if option.is_correct]
+            if not has_correct_option:
+                raise PollValidationException(f"Вопрос №'{question.order_id}' должен содержать хотя бы 1 верный вариант ответа.")
 
             
     return True
