@@ -167,7 +167,7 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
                     }
                 
                 data['results'] = results
-                
+
         return data
     
 
@@ -267,17 +267,18 @@ class PollQuestionSerializer(serializers.ModelSerializer):
 
     # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
     def set_is_free(self, value):
-        if not self.instance.answer_options.filter(is_free_response=True).exists():
-            free_option = AnswerOption.objects.create(
-                question=self.instance,
-                is_free_response=True,
-            )
-        options_to_update = self.instance.answer_options.all()
-        new_options = []
-        for option in options_to_update:
-            option.is_correct = False
-            new_options.append(option)
-        AnswerOption.objects.bulk_update(new_options, ['is_correct'])
+        if value:
+            if not self.instance.answer_options.filter(is_free_response=True).exists():
+                free_option = AnswerOption.objects.create(
+                    question=self.instance,
+                    is_free_response=True,
+                )
+            options_to_update = self.instance.answer_options.all()
+            new_options = []
+            for option in options_to_update:
+                option.is_correct = False
+                new_options.append(option)
+            AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
     # обнуляем правильность ответов при изменении has_multiple_choices или is_free
     def set_has_multiple_choices(self, value):
