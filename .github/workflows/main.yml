@@ -11,6 +11,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Run tests before deploy
+        run: npm install && npm test
+
+      - name: Check test status
+        id: check_test_status
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "Tests passed!"
+            exit 0
+          else
+            echo "Tests failed!"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
