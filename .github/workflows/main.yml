@@ -12,8 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: List files in the repository
-        run: ls -la
+      - name: Cd client directory
+        run: cd client
 
       - name: Run tests before deploy
         run: npm install && npm test
