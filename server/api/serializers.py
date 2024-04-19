@@ -117,7 +117,8 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
 
         data = {
                     'questions': PollQuestionSerializer(instance.poll.questions.all(), many=True).data,
-                    'result': my_answers
+                    'result': my_answers,
+                    'poll_type': instance.poll.poll_type.name,
                 }
 
         for question in data['questions']: # проходим по всем вопросам 
