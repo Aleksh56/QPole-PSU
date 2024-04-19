@@ -15,6 +15,9 @@ jobs:
       - name: Cd client directory
         run: cd client
 
+      - name: List files in the repository
+        run: ls -la
+
       - name: Run tests before deploy
         run: npm install && npm test
 
