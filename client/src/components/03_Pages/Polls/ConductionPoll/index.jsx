@@ -11,10 +11,12 @@ import { sendAnswersRequestFx } from './model/send-answers';
 import useAuth from '@/hooks/useAuth';
 import { shuffleArray } from '@/utils/js/shuffleArray';
 import PollResult from '../PollResult';
+import { useAlert } from '@/app/context/AlertProvider';
 
 const ConductionPollPage = () => {
   const { id } = useParams();
   const { isAuthenticated, isLoading } = useAuth();
+  const { showAlert } = useAlert();
   const navigate = useNavigate();
   const answers = useUnit($answersStore);
   const [pollData, setPollData] = useState({});
@@ -41,8 +43,11 @@ const ConductionPollPage = () => {
   const handleSubmit = async () => {
     const response = await sendAnswersRequestFx({ answers, id });
     setResults(response.data);
-    if (!response.data.poll_type === 'Викторина') {
-      navigate('/polls');
+    if (response.data.poll_type !== 'Викторина') {
+      showAlert('Ваш голос успешно записан!', 'success');
+      setTimeout(() => {
+        navigate('/polls');
+      }, 1500);
     } else {
       setShowResults(true);
     }

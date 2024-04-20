@@ -10,6 +10,7 @@ import {
 } from './api/apiRequests';
 import { useParams } from 'react-router-dom';
 import { ListWrapper } from './styled';
+import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
 
 const _settings = {
   title: 'Вы не создали ни одного вопроса',
@@ -19,13 +20,13 @@ const _settings = {
 const PoleQuestionsPage = () => {
   const { id } = useParams();
   const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedQuestion, setSelectedQuestion] = useState({});
 
   useEffect(() => {
-    setLoading(true);
-    handleGetAllQuestionRequest(id).then((res) => setQuestions(res.data));
-    setLoading(false);
+    handleGetAllQuestionRequest(id)
+      .then((res) => setQuestions(res.data))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleCreateQuestion = useCallback(async () => {
@@ -45,7 +46,9 @@ const PoleQuestionsPage = () => {
 
   return (
     <div>
-      {!loading && questions.length === 0 ? (
+      {loading ? (
+        <CLoader />
+      ) : questions.length === 0 ? (
         <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
       ) : (
         <ListWrapper>

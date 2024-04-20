@@ -149,11 +149,13 @@ export const admUsrsFilterCategories = [
 export const shareButtons = [
   {
     caption: 'QR-код',
+    view: 'qr',
     description: 'Скачайте рисунок с QR-кодом вашего опроса',
     icon: QrCode2Icon,
   },
   {
     caption: 'Email приглашения',
+    view: 'email',
     description: 'Пригласите участников опроса',
     icon: MailOutlineIcon,
   },

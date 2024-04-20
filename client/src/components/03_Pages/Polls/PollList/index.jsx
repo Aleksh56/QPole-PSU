@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { ContentWrapper, PollListPageContentWrapper } from './styled';
 import PollListOutput from '@/components/04_Widgets/PollList/PollListOutput';
 import { fetchAllPollsFx } from './model/fetch-polls';
-import { CircularProgress } from '@mui/material';
 import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
 import usePagination from '@/hooks/usePagination';
+import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
 
 const PollListPage = () => {
   const [polls, setPolls] = useState([]);
@@ -43,7 +43,7 @@ const PollListPage = () => {
             />
           </ContentWrapper>
         )}
-        {loading && <CircularProgress />}
+        {loading && <CLoader />}
       </PollListPageContentWrapper>
     </>
   );

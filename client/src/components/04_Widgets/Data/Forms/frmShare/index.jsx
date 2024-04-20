@@ -1,88 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { DialogContent } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  BtnsWrapper,
-  CopyButton,
-  LinkBox,
-  LinkContent,
-  LinkDesc,
-  LinkField,
-  LinkTitle,
-  ShareBtn,
-  ShareBtnContent,
-  ShareDescription,
-  ShareDialog,
-  ShareDialogTitle,
-  ShareTextWrapper,
-  ShareTitle,
-  StyledArrowForwardIosIcon,
-  StyledCheckIcon,
-} from './styled';
-import { shareButtons } from '@/data/fields';
-import { v4 } from 'uuid';
-import { colorConfig } from '@/app/template/config/color.config';
-import { useParams } from 'react-router-dom';
+import { ShareDialog, ShareDialogTitle, StyledCheckIcon } from './styled';
+import FrmShareMain from '@/components/05_Features/frmShareMain';
+import FrmShareQR from '@/components/05_Features/frmShareQR';
 
 const FrmShare = ({ open, setOpen }) => {
-  const { id } = useParams();
-  const [surveyLink, setSurveyLink] = useState('');
-  const [buttonText, setButtonText] = useState('Копировать');
-  const [fieldColor, setFieldColor] = useState('rgba(39,116,248,.11)');
-  const [btnColor, setBtnColor] = useState(colorConfig.primaryBlue);
+  const [activeView, setActiveView] = useState('main');
 
-  useEffect(() => {
-    const host = window.location.host;
-    const protocol = window.location.protocol;
-    const link = `${protocol}//${host}/conduct-poll/${id}`;
-    setSurveyLink(link);
-  }, [id]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(surveyLink);
-    setButtonText('Скопировано');
-    setFieldColor('rgba(100,255,100,.3)');
-    setBtnColor('#48c855');
-
-    setTimeout(() => {
-      setButtonText('Копировать');
-      setFieldColor('rgba(39,116,248,.11)');
-      setBtnColor(colorConfig.primaryBlue);
-    }, 1000);
-  };
+  const handleSwitchView = (view) => setActiveView(view);
 
   return (
-    <ShareDialog open={open} onClose={() => setOpen(false)}>
+    <ShareDialog
+      open={open}
+      onClose={() => {
+        setOpen(false);
+        setActiveView('main');
+      }}
+    >
       <ShareDialogTitle>
         <StyledCheckIcon color="success" />
         Опрос успешно опубликован
-        <CloseIcon onClick={() => setOpen(false)} sx={{ marginLeft: 'auto', cursor: 'pointer' }} />
+        <CloseIcon
+          onClick={() => {
+            setOpen(false);
+            setActiveView('main');
+          }}
+          sx={{ marginLeft: 'auto', cursor: 'pointer' }}
+        />
       </ShareDialogTitle>
       <DialogContent sx={{ p: '0' }}>
-        <LinkContent>
-          <LinkTitle>Прямая ссылка на ваш опрос</LinkTitle>
-          <LinkDesc>Скопируйте и отправьте своим респондентам ссылку</LinkDesc>
-          <LinkBox>
-            <LinkField fullWidth value={surveyLink} propColor={fieldColor} textColor={btnColor} />
-            <CopyButton onClick={() => handleCopy()} propColor={btnColor}>
-              {buttonText}
-            </CopyButton>
-          </LinkBox>
-        </LinkContent>
-        <BtnsWrapper>
-          {shareButtons.map((item) => (
-            <ShareBtn key={v4()}>
-              <ShareBtnContent>
-                <item.icon sx={{ fontSize: '30px' }} />
-                <ShareTextWrapper>
-                  <ShareTitle>{item.caption}</ShareTitle>
-                  <ShareDescription>{item.description}</ShareDescription>
-                </ShareTextWrapper>
-              </ShareBtnContent>
-              <StyledArrowForwardIosIcon />
-            </ShareBtn>
-          ))}
-        </BtnsWrapper>
+        {activeView === 'main' && <FrmShareMain setView={handleSwitchView} />}
+        {activeView === 'qr' && <FrmShareQR setView={handleSwitchView} />}
+        {/* {activeView === 'email' && <FrmShareEmail setView={handleSwitchView}/>} */}
       </DialogContent>
     </ShareDialog>
   );

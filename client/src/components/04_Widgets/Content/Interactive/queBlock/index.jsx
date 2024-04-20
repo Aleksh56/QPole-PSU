@@ -33,44 +33,29 @@ const QueBlock = ({ question, isMixed }) => {
     }
   }, [question]);
 
-  const handleChange = (event, opt_id, isFree) => {
-    const { value, checked } = event.target;
-    if (question.has_multiple_choices) {
-      if (isFree) {
-        setSelectedValues('');
-        setFieldValue(value);
-        updateMultipleAnswer({ answer_option: opt_id, question: question.id, text: value });
-      } else {
-        setFieldValue('');
-        if (checked) {
-          setSelectedValues((prev) => [...prev, opt_id]);
-        } else {
-          setSelectedValues((prev) => prev.filter((id) => id !== opt_id));
-        }
-        updateMultipleAnswer({
-          answer_option: opt_id,
-          question: question.id,
-          selected: selectedValues[opt_id],
-        });
-      }
-    } else if (question.is_free) {
-      setSelectedValue(value);
-      updateAnswer({
-        answer_option: opt_id,
-        question: question.id,
-        text: value,
-      });
+  const handleMultipleChoiceChange = (event, opt_id) => {
+    const { checked } = event.target;
+    setFieldValue('');
+    if (checked) {
+      setSelectedValues((prev) => [...prev, opt_id]);
     } else {
-      if (isFree) {
-        setFieldValue(value);
-        setSelectedValue('');
-        updateAnswer({ answer_option: opt_id, question: question.id, text: value });
-      } else {
-        setFieldValue('');
-        setSelectedValue(opt_id);
-        updateAnswer({ answer_option: Number(opt_id), question: question.id });
-      }
+      setSelectedValues((prev) => prev.filter((id) => id !== opt_id));
     }
+    updateMultipleAnswer({ answer_option: opt_id, question: question.id, selected: checked });
+  };
+
+  const handleRadioChange = (event) => {
+    const { value } = event.target;
+    setFieldValue('');
+    setSelectedValue(value);
+    updateAnswer({ answer_option: Number(value), question: question.id });
+  };
+
+  const handleTextChange = (event, opt_id) => {
+    const { value } = event.target;
+    setSelectedValues([]);
+    setFieldValue(value);
+    updateMultipleAnswer({ answer_option: opt_id, question: question.id, text: value });
   };
 
   return (
@@ -82,9 +67,9 @@ const QueBlock = ({ question, isMixed }) => {
             label="Мой ответ"
             variant="outlined"
             fullWidth
-            value={selectedValue}
+            value={fieldValue || ''}
             id={String(option.id)}
-            onChange={(e) => handleChange(e, option.id)}
+            onChange={(e) => handleTextChange(e, option.id)}
             sx={{ marginTop: '10px' }}
           />
         ))
@@ -93,7 +78,7 @@ const QueBlock = ({ question, isMixed }) => {
           aria-label={question.name}
           name="radio-buttons-group"
           value={selectedValue}
-          onChange={(e) => handleChange(e, e.target.value)}
+          onChange={handleRadioChange}
         >
           {options.map((option) =>
             option.is_free_response ? (
@@ -103,7 +88,7 @@ const QueBlock = ({ question, isMixed }) => {
                 variant="outlined"
                 fullWidth
                 value={fieldValue || ''}
-                onChange={(e) => handleChange(e, option.id, option.is_free_response)}
+                onChange={(e) => handleTextChange(e, option.id)}
                 sx={{ marginTop: '10px' }}
               />
             ) : (
@@ -114,7 +99,7 @@ const QueBlock = ({ question, isMixed }) => {
                   question.has_multiple_choices ? (
                     <Checkbox
                       checked={selectedValues?.includes(option.id)}
-                      onChange={(e) => handleChange(e, option.id)}
+                      onChange={(e) => handleMultipleChoiceChange(e, option.id)}
                     />
                   ) : (
                     <Radio checked={selectedValue === option.id.toString()} />
