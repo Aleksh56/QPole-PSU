@@ -1,16 +1,19 @@
-import React from 'react';
-import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper } from './styled';
+import React, { useState } from 'react';
+import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper, InfoButton } from './styled';
 import { PieChart, BarChart, LineChart } from '@mui/x-charts';
+import { Box } from '@mui/material';
+import FrmOtherResults from '../frmOtherResults';
 
 const PollResultCard = ({ data, chartType }) => {
-  console.log(data);
-  const chartData = data.answer_options.map((option) => ({
-    id: option.id,
-    value: option.votes_quantity,
-    label: option.is_free_response ? 'Другое' : option.name,
-  }));
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const renderChart = () => {
+    const chartData = data.answer_options.map((option) => ({
+      id: option.id,
+      value: option.votes_quantity,
+      label: option.is_free_response ? 'Другое' : option.name,
+    }));
+
     switch (chartType) {
       case 'bar':
         return <BarChart series={[{ data: chartData }]} width={450} height={200} />;
@@ -25,10 +28,14 @@ const PollResultCard = ({ data, chartType }) => {
   return (
     <CardWrapper>
       <CardInfoWrapper>
-        <CardHeading>{data.name ?? ''}:</CardHeading>
-        <CardAnswersCount>Ответов: {data.votes_quantity}</CardAnswersCount>
+        <Box>
+          <CardHeading>{data.name ?? ''}:</CardHeading>
+          <CardAnswersCount>Ответов: {data.votes_quantity}</CardAnswersCount>
+        </Box>
+        <InfoButton onClick={() => setInfoOpen(true)}>Подробнее</InfoButton>
       </CardInfoWrapper>
       {renderChart()}
+      <FrmOtherResults open={infoOpen} onClose={() => setInfoOpen(false)} data={data} />
     </CardWrapper>
   );
 };
