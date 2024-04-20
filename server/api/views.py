@@ -375,7 +375,7 @@ def my_poll_stats(request):
                 .values('poll_answer_group__poll__poll_id')
                 .annotate(
                     total_answers=Count('id'),
-                    correct_answers=Count(Case(When(poins=1, then=1))),
+                    correct_answers=Count(Case(When(points=1, then=1))),
                     correct_percentage=ExpressionWrapper(
                         100 * F('correct_answers') / F('total_answers'),
                         output_field=FloatField()
