@@ -349,7 +349,7 @@ def my_poll(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_stats(request):
-    # try:
+    try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -386,10 +386,14 @@ def my_poll_stats(request):
             question_statistics = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
-                .values('question_id')
+                .values('question_id', 'poll_answer_group__profile')
+                .distinct()
                 .annotate(
                     quantity=Count('id'),
-                    correct_quantity=Count(Case(When(is_correct=True, then=1))),
+                    correct_quantity=Count(Case(
+                        When(points=1, then=1),
+                        default=0
+                    )),
                     correct_percentage=ExpressionWrapper(
                         100 * F('correct_quantity') / F('quantity'),
                         output_field=FloatField()
@@ -419,7 +423,6 @@ def my_poll_stats(request):
                     profile_surname=F('poll_answer_group__profile__surname')
                 )
             )
-            print(free_answers)
 
             context = {
                 'poll_statistics': poll_statistics,
@@ -433,11 +436,11 @@ def my_poll_stats(request):
             return Response(stats.data)
 
 
-    # except APIException as api_exception:
-    #     return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
-    # except Exception as ex:
-    #     return Response({'message': f"Внутренняя ошибка сервера в my_poll_stats: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_stats: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

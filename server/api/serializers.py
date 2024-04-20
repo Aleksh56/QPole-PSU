@@ -364,13 +364,16 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
 
     def get_free_answers(self, instance):
         if instance.is_free_response:
-            free_answers = {}
+            free_answers = []
             question_id = instance.question.id
             user_answers = self.context.get('free_answers', [])
             for item in user_answers:
                 if item['question_id'] == question_id:
-                    free_answers[(item.get('profile_name') or '') + ' ' + (item.get('profile_surname', '') or '')] = item['text']
-                    # free_answers[item['user_id']] = item['text']
+                    answer = {
+                        'name': (item.get('profile_name') or '') + ' ' + (item.get('profile_surname', '') or ''),
+                        'text': item['text']
+                    }
+                    free_answers.append(answer)
             return free_answers
              
     class Meta:
