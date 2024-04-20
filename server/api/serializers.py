@@ -369,7 +369,7 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
             user_answers = self.context.get('free_answers', [])
             for item in user_answers:
                 if item['question_id'] == question_id:
-                    free_answers[item['profile_name'] + ' ' + item['profile_surname']] = item['text']
+                    free_answers[(item.get('profile_name') or '') + ' ' + (item.get('profile_surname', '') or '')] = item['text']
                     # free_answers[item['user_id']] = item['text']
             return free_answers
              
