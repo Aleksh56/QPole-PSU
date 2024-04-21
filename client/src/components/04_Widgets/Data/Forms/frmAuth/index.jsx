@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from './styled';
 import AuthFormHeading from '@/components/05_Features/AuthFormHeading';
 import { useNavigate } from 'react-router-dom';
-import { ThemeProvider, useTheme } from '@mui/material';
 import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
 import { useTranslation } from 'react-i18next';
 import { pattern } from '@/config/validation.patterns';
@@ -10,7 +9,6 @@ import { validateField } from '@/utils/js/validateField';
 import { useAlert } from '@/app/context/AlertProvider';
 
 const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
-  const authFormTheme = useTheme();
   const { showAlert } = useAlert();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -54,53 +52,51 @@ const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () 
   };
 
   return (
-    <ThemeProvider theme={authFormTheme}>
-      <FormGridWrapper item>
-        <FormContainer>
-          <AuthFormHeading isSignIn={isSignIn} handleFormSwitch={handleFormSwitch} />
-          <StyledForm onSubmit={handleSubmit}>
+    <FormGridWrapper item>
+      <FormContainer>
+        <AuthFormHeading isSignIn={isSignIn} handleFormSwitch={handleFormSwitch} />
+        <StyledForm onSubmit={handleSubmit}>
+          <LabeledInput
+            label="Ваша почта"
+            required={true}
+            autoComplete="email"
+            id="email"
+            placeholder="Эл. почта"
+            handleChange={handleInputChange}
+            errorMessage={formErrors.email}
+          />
+          <LabeledInput
+            label="Пароль"
+            required={true}
+            autoComplete="current-password"
+            id="password"
+            placeholder="Пароль"
+            handleChange={handleInputChange}
+            errorMessage={formErrors.password}
+            children={
+              isSignIn ? (
+                <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
+              ) : (
+                ''
+              )
+            }
+          />
+          {!isSignIn && (
             <LabeledInput
-              label="Ваша почта"
+              label="Телефон"
               required={true}
-              autoComplete="email"
-              id="email"
-              placeholder="Эл. почта"
+              autoComplete="tel"
+              id="number"
               handleChange={handleInputChange}
-              errorMessage={formErrors.email}
+              placeholder="Телефон"
             />
-            <LabeledInput
-              label="Пароль"
-              required={true}
-              autoComplete="current-password"
-              id="password"
-              placeholder="Пароль"
-              handleChange={handleInputChange}
-              errorMessage={formErrors.password}
-              children={
-                isSignIn ? (
-                  <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
-                ) : (
-                  ''
-                )
-              }
-            />
-            {!isSignIn && (
-              <LabeledInput
-                label="Телефон"
-                required={true}
-                autoComplete="tel"
-                id="number"
-                handleChange={handleInputChange}
-                placeholder="Телефон"
-              />
-            )}
-            <StyledConfirmButton disabled={false} type="submit" fullWidth variant="contained">
-              {isSignIn ? t('button.login') : t('button.signup')}
-            </StyledConfirmButton>
-          </StyledForm>
-        </FormContainer>
-      </FormGridWrapper>
-    </ThemeProvider>
+          )}
+          <StyledConfirmButton disabled={false} type="submit" fullWidth variant="contained">
+            {isSignIn ? t('button.login') : t('button.signup')}
+          </StyledConfirmButton>
+        </StyledForm>
+      </FormContainer>
+    </FormGridWrapper>
   );
 };
 export default FrmAuth;

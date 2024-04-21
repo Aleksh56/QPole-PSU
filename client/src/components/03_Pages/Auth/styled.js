@@ -8,11 +8,11 @@ export const StyledAuthWrapper = styled(Box)(() => ({
   maxHeight: '100vh',
 }));
 
-export const OverlayWrapper = styled(Grid)(({ theme }) => ({
+export const OverlayWrapper = styled(Grid)(() => ({
   width: '100vw',
   height: '100vh',
   position: 'relative',
-  [theme.breakpoints.down('lg')]: {
-    justifyContent: 'center',
-  },
+  // [theme.breakpoints.down('lg')]: {
+  //   justifyContent: 'center',
+  // },
 }));

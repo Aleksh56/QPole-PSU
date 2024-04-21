@@ -5,11 +5,9 @@ import { loginUser, registerUser } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
 import FrmAuth from '@/components/04_Widgets/Data/Forms/frmAuth';
 import AuthIllustration from '@/components/05_Features/AuthIllustration';
-import { ThemeProvider, useTheme } from '@mui/material';
 import usePageTitle from '@/hooks/usePageTitle';
 
 const AuthPage = () => {
-  const authTheme = useTheme();
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,18 +46,16 @@ const AuthPage = () => {
   );
 
   return (
-    <ThemeProvider theme={authTheme}>
-      <StyledAuthWrapper component="main">
-        <OverlayWrapper container>
-          <AuthIllustration />
-          <FrmAuth
-            isSignIn={isSignIn}
-            handleFormSwitch={handleFormSwitch}
-            handleFormSubmit={handleFormSubmit}
-          />
-        </OverlayWrapper>
-      </StyledAuthWrapper>
-    </ThemeProvider>
+    <StyledAuthWrapper component="main">
+      <OverlayWrapper container>
+        <AuthIllustration />
+        <FrmAuth
+          isSignIn={isSignIn}
+          handleFormSwitch={handleFormSwitch}
+          handleFormSubmit={handleFormSubmit}
+        />
+      </OverlayWrapper>
+    </StyledAuthWrapper>
   );
 };
 

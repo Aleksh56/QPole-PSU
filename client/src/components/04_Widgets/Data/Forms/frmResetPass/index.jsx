@@ -4,14 +4,12 @@ import PasswordResetHeading from '@/components/05_Features/PasswordResetHeading'
 import { useNavigate } from 'react-router-dom';
 import { checkResetPasswordCode, resetPasswordRequest, sendResetPasswordCode } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
-import { ThemeProvider, useTheme } from '@mui/material';
 import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
 import PasswordResetButtons from '@/components/05_Features/PasswordResetButtons';
 import usePageTitle from '@/hooks/usePageTitle';
 
 const FrmResetPass = () => {
   usePageTitle('restore');
-  const resetPasswordFormTheme = useTheme();
   const [isEmailSubmitted, setEmailSubmitted] = useState(false);
   const [isCodeSubmitted, setCodeSubmitted] = useState(false);
   const [resetAccountEmail, setResetAccountEmail] = useState('');
@@ -53,64 +51,62 @@ const FrmResetPass = () => {
   };
 
   return (
-    <ThemeProvider theme={resetPasswordFormTheme}>
-      <FormGridWrapper item>
-        <FormContainer>
-          <PasswordResetHeading />
-          <StyledForm
-            onSubmit={
-              isEmailSubmitted
-                ? isCodeSubmitted
-                  ? handlePasswordReset
-                  : handleCodeSubmit
-                : handleEmailSubmit
-            }
-          >
-            {!isEmailSubmitted && (
-              <LabeledInput
-                label="Введите вашу почту"
-                required={true}
-                id="email"
-                autoComplete="email"
-                placeholder="example@mail.ru"
-                value={resetAccountEmail}
-                handleChange={(e) => setResetAccountEmail(e.target.value)}
-              />
-            )}
-            {isEmailSubmitted && !isCodeSubmitted && (
-              <LabeledInput
-                label="Введите код восстановления"
-                required={true}
-                id="code"
-                autoComplete="one-time-code"
-                placeholder="000-000"
-                mask={['9', '9', '9', '-', '9', '9', '9']}
-                value={resetAccountCode}
-                handleChange={(e) => console.log(e.target.value)}
-              />
-            )}
-            {isCodeSubmitted && (
-              <LabeledInput
-                label="Новый пароль"
-                required={true}
-                id="new-password"
-                autoComplete="new-password"
-                placeholder="Пароль"
-                value={resetAccountNewPassword}
-                handleChange={(e) => setResetAccountNewPassword(e.target.value)}
-              />
-            )}
-
-            <PasswordResetButtons
-              confirmCaption="Отправить"
-              returnCaption="Вернуться назад"
-              isConfirmDisabled={false}
-              returnClick={() => navigate('/signin')}
+    <FormGridWrapper item>
+      <FormContainer>
+        <PasswordResetHeading />
+        <StyledForm
+          onSubmit={
+            isEmailSubmitted
+              ? isCodeSubmitted
+                ? handlePasswordReset
+                : handleCodeSubmit
+              : handleEmailSubmit
+          }
+        >
+          {!isEmailSubmitted && (
+            <LabeledInput
+              label="Введите вашу почту"
+              required={true}
+              id="email"
+              autoComplete="email"
+              placeholder="example@mail.ru"
+              value={resetAccountEmail}
+              handleChange={(e) => setResetAccountEmail(e.target.value)}
             />
-          </StyledForm>
-        </FormContainer>
-      </FormGridWrapper>
-    </ThemeProvider>
+          )}
+          {isEmailSubmitted && !isCodeSubmitted && (
+            <LabeledInput
+              label="Введите код восстановления"
+              required={true}
+              id="code"
+              autoComplete="one-time-code"
+              placeholder="000-000"
+              mask={['9', '9', '9', '-', '9', '9', '9']}
+              value={resetAccountCode}
+              handleChange={(e) => console.log(e.target.value)}
+            />
+          )}
+          {isCodeSubmitted && (
+            <LabeledInput
+              label="Новый пароль"
+              required={true}
+              id="new-password"
+              autoComplete="new-password"
+              placeholder="Пароль"
+              value={resetAccountNewPassword}
+              handleChange={(e) => setResetAccountNewPassword(e.target.value)}
+            />
+          )}
+
+          <PasswordResetButtons
+            confirmCaption="Отправить"
+            returnCaption="Вернуться назад"
+            isConfirmDisabled={false}
+            returnClick={() => navigate('/signin')}
+          />
+        </StyledForm>
+      </FormContainer>
+    </FormGridWrapper>
   );
 };
 

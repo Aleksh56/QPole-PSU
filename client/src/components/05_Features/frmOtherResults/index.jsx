@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogTitle, Typography, Box } from '@mui/materi
 const FrmOtherResults = ({ open, onClose, data }) => {
   const filteredData = data.answer_options.filter((option) => option.is_free_response);
 
-  console.log('filteredData', data);
   return (
     <Dialog open={open} onClose={onClose} scroll="paper" maxWidth="sm" fullWidth>
       <DialogTitle>Результаты</DialogTitle>
