@@ -15,8 +15,8 @@
     "@emotion/styled": "^11.11.5",
     "@hapi/hapi": "^21.3.2",
     "@hapi/inert": "^7.1.0",
-    "@mui/icons-material": "^5.15.5",
-    "@mui/material": "^5.15.5",
+    "@mui/icons-material": "^5.15.15",
+    "@mui/material": "^5.15.15",
     "@mui/x-charts": "^6.19.5",
     "@react-pdf/renderer": "^3.4.2",
     "@types/react-input-mask": "^2.0.4",
@@ -35,7 +35,8 @@
     "react-input-mask": "^2.0.4",
     "react-router-dom": "^6.21.3",
     "react-text-mask": "^5.5.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "web3": "^4.8.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.9",
