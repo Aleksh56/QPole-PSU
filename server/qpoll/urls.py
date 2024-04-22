@@ -34,7 +34,7 @@ urlpatterns = [
     path('admin_api/', include('admin_api.urls')),
     path('login/', include('login.urls')),
 
-    path('test_api/', test_api),
+    # path('test_api/', test_api),
 
 ]
 
