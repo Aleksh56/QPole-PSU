@@ -1,11 +1,13 @@
 import styled from '@emotion/styled';
 import { Rem } from '@/utils/convertToRem';
 import { Box, Button, Stack } from '@mui/material';
-import { designTokens } from '@/constants/designTokens';
 
 export const StyledStackWrapper = styled(Box)(() => ({
   width: '100%',
   boxShadow: '1px 20px 20px 0 #00000030',
+  '@media (max-width: 900px)': {
+    display: 'none',
+  },
 }));
 
 export const StyledStack = styled(Stack)(() => ({

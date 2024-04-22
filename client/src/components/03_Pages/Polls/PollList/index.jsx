@@ -30,7 +30,7 @@ const PollListPage = () => {
     <>
       <Header isMainPage={false} />
       <PollListPageContentWrapper>
-        <PollFilters />
+        <PollFilters setPolls={setPolls} />
         {!loading && (
           <ContentWrapper>
             <PollListOutput polls={polls} />

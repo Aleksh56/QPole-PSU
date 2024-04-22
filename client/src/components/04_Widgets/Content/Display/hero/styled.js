@@ -24,47 +24,47 @@ export const StyledHeroContainer = styled(Box)(() => ({
   backgroundColor: 'rgba(172, 220, 255, 0.2)',
 }));
 
-export const StyledHero = styled(Box)(() => ({
+export const StyledHero = styled(Box)(({ theme }) => ({
   ...heroBaseStyles,
   gridTemplateColumns: '1fr',
   paddingTop: Rem(60),
-  // [theme.breakpoints.up('sm')]: {
-  //   paddingTop: Rem(120),
-  // },
-  // [theme.breakpoints.up('md')]: {
-  //   ...heroBaseStyles,
-  //   gridTemplateColumns: '1fr 1fr',
-  // },
+  [theme.breakpoints.up('sm')]: {
+    paddingTop: Rem(120),
+  },
+  [theme.breakpoints.up('md')]: {
+    ...heroBaseStyles,
+    gridTemplateColumns: '1fr 1fr',
+  },
   '@media (max-width: 899px)': {
-    paddingTop: Rem(70),
+    paddingTop: Rem(100),
   },
 }));
 
-export const StyledHeroTextWrapper = styled(Box)(() => ({
+export const StyledHeroTextWrapper = styled(Box)(({ theme }) => ({
   justifySelf: 'center',
   maxWidth: Rem(650),
   textAlign: 'center',
-  // [theme.breakpoints.up('md')]: {
-  //   justifySelf: 'start',
-  //   maxWidth: Rem(550),
-  //   textAlign: 'left',
-  // },
+  [theme.breakpoints.up('md')]: {
+    justifySelf: 'start',
+    maxWidth: Rem(550),
+    textAlign: 'left',
+  },
 }));
 
-export const StyledHeroTextHeading = styled('h2')(() => ({
+export const StyledHeroTextHeading = styled('h2')(({ theme }) => ({
   fontSize: Rem(45),
   lineHeight: Rem(45),
   marginBottom: Rem(15),
-  // [theme.breakpoints.up('sm')]: {
-  //   fontSize: Rem(52),
-  //   lineHeight: Rem(52),
-  //   marginBottom: Rem(20),
-  // },
-  // [theme.breakpoints.up('md')]: {
-  //   fontSize: Rem(60),
-  //   lineHeight: Rem(60),
-  //   marginBottom: Rem(25),
-  // },
+  [theme.breakpoints.up('sm')]: {
+    fontSize: Rem(52),
+    lineHeight: Rem(52),
+    marginBottom: Rem(20),
+  },
+  [theme.breakpoints.up('md')]: {
+    fontSize: Rem(60),
+    lineHeight: Rem(60),
+    marginBottom: Rem(25),
+  },
 }));
 
 export const StyledHeroTextSubHeading = styled('p')(() => ({
@@ -80,10 +80,10 @@ export const StyledHeroImage = styled('img')(() => ({
   height: 'auto',
   justifySelf: 'end',
   '@media (max-width: 899px)': {
-    maxWidth: '90%',
+    maxWidth: '80%',
     justifySelf: 'center',
   },
-  '@media (max-width: 600px)': {
+  '@media (max-width: 650px)': {
     maxWidth: '100%',
   },
 }));

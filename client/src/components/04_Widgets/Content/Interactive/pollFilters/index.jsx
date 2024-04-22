@@ -1,111 +1,85 @@
 import React, { useState } from 'react';
 import {
-  Box,
-  Typography,
-  FormControl,
+  TextField,
+  Button,
   FormGroup,
   FormControlLabel,
-  Checkbox,
+  Typography,
   useMediaQuery,
-  Button,
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { FiltersButton, FiltersWrapper } from './styled';
+import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
+import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
+import { appTypesFilter } from '@/data/fields';
+import { applyFiltersFx } from './models/apply-filters';
 
-const PollFilters = () => {
-  const [state, setState] = useState({
-    filterOne: false,
-    filterTwo: false,
-    filterThree: false,
+const PollFilters = ({ setPolls }) => {
+  const [filters, setFilters] = useState({
+    name: '',
+    poll_type: '',
+    is_anonymous: false,
   });
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const matches = useMediaQuery('(max-width:1000px)');
 
   const handleChange = (event) => {
-    setState({
-      ...state,
-      [event.target.name]: event.target.checked,
-    });
+    const { name, value, checked, type } = event.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
+
+  const handleApplyFilters = async () => await applyFiltersFx({ filters, setPolls });
 
   const toggleFilters = () => setIsFiltersOpen(!isFiltersOpen);
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        border: '1px solid black',
-        borderRadius: '10px',
-        position: 'sticky',
-        top: '20px',
-        zIndex: 1000,
-        backgroundColor: '#fff',
-        marginBottom: '20px',
-      }}
-    >
+    <FiltersWrapper>
       {matches ? (
-        <Box>
-          <Button
-            onClick={toggleFilters}
-            sx={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              py: 2,
-            }}
-          >
-            <FilterListIcon sx={{ mr: 1 }} /> Фильтры
-          </Button>
-          {isFiltersOpen && (
-            <Box sx={{ p: 2 }}>
-              <FormControl component="fieldset" variant="standard">
-                <FormGroup>
-                  {Object.keys(state).map((key) => (
-                    <FormControlLabel
-                      key={key}
-                      control={<Checkbox checked={state[key]} onChange={handleChange} name={key} />}
-                      label={`Фильтр ${key.slice(-1)}`}
-                    />
-                  ))}
-                </FormGroup>
-              </FormControl>
-            </Box>
-          )}
-        </Box>
+        <FiltersButton onClick={toggleFilters}>
+          <FilterListIcon sx={{ mr: 1 }} /> Фильтры
+        </FiltersButton>
       ) : (
-        <Box>
-          <Typography variant="h6" sx={{ my: 2 }}>
-            <FilterListIcon /> Фильтры
-          </Typography>
-          <FormControl component="fieldset" variant="standard">
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox checked={state.filterOne} onChange={handleChange} name="filterOne" />
-                }
-                label="Фильтр 1"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox checked={state.filterTwo} onChange={handleChange} name="filterTwo" />
-                }
-                label="Фильтр 2"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={state.filterThree}
-                    onChange={handleChange}
-                    name="filterThree"
-                  />
-                }
-                label="Фильтр 3"
-              />
-            </FormGroup>
-          </FormControl>
-        </Box>
+        <Typography variant="h6">
+          <FilterListIcon sx={{ mr: 1 }} /> Фильтры
+        </Typography>
       )}
-    </Box>
+      {(!matches || isFiltersOpen) && (
+        <FormGroup>
+          <TextField
+            label="Поиск"
+            name="name"
+            variant="outlined"
+            value={filters.name}
+            onChange={handleChange}
+            fullWidth
+            sx={{ my: 2 }}
+          />
+          <FilterSelect
+            label="Выберите тип"
+            options={appTypesFilter}
+            value={filters.poll_type}
+            onChange={handleChange}
+            name="poll_type"
+          />
+          <FormControlLabel
+            control={
+              <CustomSwitch
+                checked={filters.is_anonymous}
+                onChange={handleChange}
+                name="is_anonymous"
+              />
+            }
+            label="Анонимный"
+          />
+          <Button variant="contained" onClick={handleApplyFilters} sx={{ mt: 2 }}>
+            Применить фильтры
+          </Button>
+        </FormGroup>
+      )}
+    </FiltersWrapper>
   );
 };
 

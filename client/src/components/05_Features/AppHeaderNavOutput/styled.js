@@ -1,10 +1,13 @@
 import styled from '@emotion/styled';
 import { Rem } from '@/utils/convertToRem';
 import { NavLink } from 'react-router-dom';
-import { designTokens } from '@/constants/designTokens';
 import { colorConfig } from '@/app/template/config/color.config';
 
-export const StyledNavigation = styled('nav')(() => ({}));
+export const StyledNavigation = styled('nav')(() => ({
+  '@media (max-width: 900px)': {
+    display: 'none',
+  },
+}));
 
 export const StyledNavigationList = styled('ul')(() => ({
   display: 'flex',

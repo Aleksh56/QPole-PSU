@@ -11,11 +11,13 @@ import {
 } from './styled';
 import SurveyImage from '@assets/survey.svg';
 import { useTranslation } from 'react-i18next';
+import { ThemeProvider, useTheme } from '@mui/material';
 
 const Hero = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <Header />
       <StyledHeroContainer>
         <StyledHero>
@@ -34,7 +36,7 @@ const Hero = () => {
           <StyledHeroImage src={SurveyImage} alt="Hero Image" />
         </StyledHero>
       </StyledHeroContainer>
-    </>
+    </ThemeProvider>
   );
 };
 

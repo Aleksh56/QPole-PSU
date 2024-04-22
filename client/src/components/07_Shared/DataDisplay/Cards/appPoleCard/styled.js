@@ -13,18 +13,24 @@ export const StyledChip = styled(Chip)(() => ({
 }));
 
 export const StyledCard = styled(Card)(() => ({
-  height: Rem(280),
-  maxHeight: Rem(280),
-  width: Rem(550),
   borderRadius: Rem(16),
   boxShadow: 'none',
   display: 'grid',
-  gridTemplateColumns: '0.9fr 1fr',
+  gridTemplateColumns: '1fr 1fr', // Equal division for two columns
   border: `1px solid ${colorConfig.primaryGray}`,
   position: 'relative',
+  overflow: 'hidden',
   transition: 'transform 0.3s ease',
+  minHeight: Rem(280), // Set a minimum height to avoid compression
+  width: '100%', // Card width is flexible within grid column
+
   '&:hover': {
     transform: 'translateY(-8px)',
+  },
+
+  '@media (max-width: 768px)': {
+    flexDirection: 'column',
+    gridTemplateColumns: '1fr',
   },
 }));
 

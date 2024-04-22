@@ -7,3 +7,7 @@
 a {
   text-decoration: none;
 }
+
+.base-Popup-root:not(.base--expanded) {
+  display: none;
+}

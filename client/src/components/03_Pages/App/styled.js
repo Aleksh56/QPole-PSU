@@ -16,10 +16,7 @@ export const StyledAppContentWrapper = styled(Box)(() => ({
     maxWidth: Rem(760),
   },
   '@media (max-width: 768px)': {
-    padding: `${Rem(50)} ${Rem(20)}`,
-  },
-  '@media (max-width: 480px)': {
-    padding: `${Rem(30)} ${Rem(10)}`,
+    padding: 0,
   },
 }));
 
@@ -32,12 +29,14 @@ export const ContentWrapper = styled(Box)({
 
 export const PollsGrid = styled(Box)({
   display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
-  justifyContent: 'space-between',
-  gap: Rem(70),
-  '@media (max-width: 768px)': {
-    gridTemplateColumns: 'repeat(1, 1fr)',
-    gap: Rem(35),
+  gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+  gap: '3rem',
+  justifyContent: 'center',
+  padding: '1rem',
+  width: '100%',
+
+  '@media (max-width: 500px)': {
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
   },
 });
 

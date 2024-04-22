@@ -1,10 +1,12 @@
 import React from 'react';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import GroupIcon from '@mui/icons-material/Group';
 
 export const appHeaderData = [
-  { caption: 'Ваши опросы', to: '/app' },
-  { caption: 'Общедоступные опросы', to: '/polls' },
+  { caption: 'Ваши опросы', to: '/app', icon: DashboardIcon },
+  { caption: 'Общедоступные опросы', to: '/polls', icon: GroupIcon },
 ];
 
 export const commonHeaderLinksData = [

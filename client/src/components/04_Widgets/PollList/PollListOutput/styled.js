@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import { Rem } from '@/utils/convertToRem';
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
 
 export const PollListGridContainer = styled(Box)(() => ({
-  display: 'flex',
+  display: 'grid',
   gridTemplateColumns: 'repeat(2, 1fr)',
   columnGap: Rem(50),
   rowGap: Rem(25),
@@ -12,5 +12,4 @@ export const PollListGridContainer = styled(Box)(() => ({
     gridTemplateColumns: '1fr',
     gap: Rem(20),
   },
-
 }));

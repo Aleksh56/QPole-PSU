@@ -54,6 +54,9 @@ const AppPage = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 rowGap: '30px',
+                '@media (max-width: 768px)': {
+                  padding: '20px',
+                },
               }}
             >
               <PollsGrid>
