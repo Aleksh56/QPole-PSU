@@ -103,7 +103,7 @@ def my_poll(request):
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
                                 'answer_options'
-                        ).all()))
+                        ).filter(poll_poll_id=poll_id)))
                         .first()
                     )
                 if not poll:
@@ -375,7 +375,7 @@ def my_poll_stats(request):
                 .values('poll_answer_group__poll__poll_id')
                 .annotate(
                     total_answers=Count('id'),
-                    correct_answers=Count(Case(When(points=1, then=1))),
+                    correct_answers=Count(Case(When(is_correct=True, then=1))),
                     correct_percentage=ExpressionWrapper(
                         100 * F('correct_answers') / F('total_answers'),
                         output_field=FloatField()
@@ -397,13 +397,13 @@ def my_poll_stats(request):
                     )
                 )
             )
-
+  
             question_statistics = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
                 .values('poll_answer_group__profile')
                 .distinct()
-                .values('question_id', 'answer_option_id')
+                .values('poll_answer_group__profile', 'question_id')
                 .annotate(
                     quantity=Count('poll_answer_group__profile'),
                     correct_answers_quantity = Count(Case(
@@ -412,7 +412,7 @@ def my_poll_stats(request):
                     )),
                     incorrect_answers_quantity=Count(Case(
                         When(points=0, then=1),
-                        When(points=1, then=0),
+                        When(points=0, then=0),
                         default=None
                     )),
                     possible_question_points_count=Subquery(
@@ -423,11 +423,25 @@ def my_poll_stats(request):
                         100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
                         / F('possible_question_points_count'),
                         output_field=FloatField()
-                    )
+                    ),
                 )
             ) 
-            print(question_statistics)
-            
+            # print(question_statistics)
+
+            questions_percentage = (
+                question_statistics
+                .values('question_id')
+                .annotate(
+                    answers_quantity=Count('poll_answer_group__profile', distinct=True),
+                    correct_percentage=ExpressionWrapper(
+                        100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
+                        / F('possible_question_points_count') / F('answers_quantity'),
+                        output_field=FloatField()
+                    ),
+                )
+            )
+            print(questions_percentage)
+
             options_answers_count = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
@@ -451,14 +465,18 @@ def my_poll_stats(request):
                 )
             )
 
+
             context = {
                 'poll_statistics': poll_statistics,
                 'question_statistics': question_statistics,
+                'questions_percentage': questions_percentage,
                 'options_answers_count': options_answers_count,
                 'free_answers': free_answers
             }
 
 
+            stats = PollStatsSerializer(poll, context=context)
+            return Response(stats.data)
             stats = PollStatsSerializer(poll, context=context)
             return Response(stats.data)
 
@@ -1138,7 +1156,7 @@ def poll(request):
                         raise ObjectNotFoundException(model='PollType')
                     filters &= Q(poll_type=poll_type)
                 if name:
-                    filters &= Q(name__istartswith=name)
+                    filters &= Q(name__icontains=name)
                 if is_anonymous:
                     filters &= Q(is_anonymous=is_anonymous)
                 if is_paused:
@@ -1185,14 +1203,14 @@ def poll(request):
             return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
         
     except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
-def my_poll_votes(request):
+def my_poll_users_votes(request):
     try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
@@ -1205,30 +1223,40 @@ def my_poll_votes(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
 
-            poll = Poll.objects.filter(poll_id=poll_id).first()
+            poll = (
+               Poll.objects.filter(poll_id=poll_id)
+                        .select_related('author', 'poll_type')
+                        .prefetch_related(
+                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                                'answer_options').filter(poll__poll_id=poll_id)))
+                        .prefetch_related(
+                            Prefetch('user_answers', queryset=PollAnswerGroup.objects
+                                                            .filter(poll__poll_id=poll_id)
+                                                            .select_related('profile', 'profile__user')
+                                                            .prefetch_related('answers')))
+                        .first()
+            )
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
-            page = int(request.GET.get('page', 1))
-            page_size = int(request.GET.get('page_size', 20))  
+            user_id = request.GET.get('user_id', None)
 
+            if user_id:
+                answers = (
+                    poll.user_answers.filter(profile__user_id=user_id).order_by('-voting_date')      
+                )
+            else:
+                answers = poll.user_answers.all().order_by('-voting_date')
 
-            all_answers = poll.user_answers.all().order_by('-voting_date')
-            paginator = PageNumberPagination()
-            paginator.page_size = page_size  # Устанавливаем количество элементов на странице
-            paginated_result = paginator.paginate_queryset(all_answers, request)
-
-            # Устанавливаем номер текущей страницы в пагинаторе
-            paginator.page.number = page
-
-            serializer = PollAnswerGroupSerializer(paginated_result, many=True)
-            return paginator.get_paginated_response(serializer.data)
+            paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer)
+            return Response(paginated_result)
 
     except APIException as api_exception:
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['GET', 'POST', 'DELETE'])

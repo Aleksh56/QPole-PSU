@@ -178,6 +178,80 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
+    answers = PollAnswerSerializer(many=True, read_only=True)
+    author = serializers.SerializerMethodField()
+
+
+    def get_author(self, instance):
+        return MiniProfileSerializer(instance=instance.profile).data
+    
+    def to_representation(self, instance):
+        my_answers = super().to_representation(instance)
+                
+        poll_points = 0
+        poll_gained_points = 0
+
+        data = {
+                    'questions': PollQuestionSerializer(instance.poll.questions.all(), many=True).data,
+                }
+
+        for question in data['questions']: # проходим по всем вопросам 
+            question_correct_quantity = 0
+            question_gained_quantity = 0
+            if question.get('is_answered') is None: # проверка чтобы не занулять вопрос на который дан ответ
+                question['is_answered'] = False # если ответ уже дан, то не делаем его False
+                question['points'] = 0  # изначально начисляем 0 баллов за каждый
+                question['options_quantity'] = 0  # изначально считаем колво верных вариантов ответа
+            for answer_option in question['answer_options']: # проходим по всем вариантам ответа 
+                if answer_option.get('is_correct') is not None: # проеряем, что у нас викторина
+                    if answer_option.get('is_correct') == True:
+                        question_correct_quantity += 1
+
+                if answer_option.get('is_answered') is None: # проверка на то что на вариант ответа еще не ответили
+                    answer_option['is_chosen'] = False # отмечаем, что вариант ответа изначально не выбран
+                    answer_option['text'] = None # отмечаем, что текст для варианта ответа изначально не указан
+                    answer_option['points'] = 0 # отмечаем, сколько баллов получили за ответ
+
+                for answer in my_answers['answers']: # проходим по всем моим ответам
+                    if answer['answer_option'] == answer_option['id']: # выбираем ответ по совпавшим id
+                        question['is_answered'] = True # отмечаем, что вопрос отвечен
+                        answer_option['is_chosen'] = True # отмечаем, что вариант ответа был выбран
+                        answer_option['text'] = answer.get('text', None) # добавляем текст ответа, если он был дан
+                        answer_option['points'] = answer['points'] # начисляем очки, которые получили после проверки правильности
+
+                        if answer_option['points'] is not None: # проверяем что очки вообще есть
+                            if answer_option['points'] > 0: # если выбрали верную опцию, то добавляем балл
+                                question_gained_quantity += answer_option['points']
+                            else:
+                                answer_option['points'] = -1 # если выбрали неверную опцию, то убавляем балл
+                                question_gained_quantity += answer_option['points']
+            
+
+            if question_correct_quantity:
+                question['points'] += round(question_gained_quantity / question_correct_quantity, 2) # начисляем очки, которые получили после проверки правильности
+                if question['points'] < 0:
+                    question['points'] = 0
+                poll_gained_points += question['points']
+                poll_points += 1
+
+                results = {
+                        'total': poll_points,
+                        'correct': poll_gained_points,
+                        'wrong': poll_points - poll_gained_points,
+                        'percentage': round(float(poll_gained_points / poll_points), 2) * 100,
+                    }
+                
+                data['results'] = results
+
+        return data
+    
+
+
+    class Meta:
+        model = PollAnswerGroup
+        fields = '__all__'
+
 # сериализаторы опросов
 
 class BasePollSerializer(serializers.ModelSerializer):
@@ -385,7 +459,7 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionStatsSerializer(many=True)
 
     votes_quantity = serializers.SerializerMethodField()
-    correct_answer_percentage = serializers.SerializerMethodField()
+    average_correctness_percentage = serializers.SerializerMethodField()
 
     def get_votes_quantity(self, instance):
         question_id = instance.id
@@ -395,12 +469,12 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
             if item['question_id'] == question_id:
                 return item['quantity']
         return 0
-
-    def get_correct_answer_percentage(self, instance):
+ 
+    def get_average_correctness_percentage(self, instance):
         question_id = instance.id
-        question_statistics = self.context.get('question_statistics', {})
+        questions_percentage = self.context.get('questions_percentage', {})
 
-        for item in question_statistics:
+        for item in questions_percentage:
             if item['question_id'] == question_id:
                 return item['correct_percentage']
         return 0
@@ -408,7 +482,7 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PollQuestion
         fields = ['id', 'answer_options', 'name', 'votes_quantity', 'has_multiple_choices',
-                  'correct_answer_percentage']
+                  'average_correctness_percentage']
 
 
 

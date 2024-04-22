@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, Prefetch, Subquery, OuterRef
+from django.db.models import Q, Prefetch, Subquery, OuterRef, Avg
 from django.db.models import Count, Case, When, F, ExpressionWrapper, FloatField, Sum
 from django.db import transaction
 
@@ -294,13 +294,13 @@ def my_poll_stats_test(request):
                     )
                 )
             )
-
+  
             question_statistics = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
                 .values('poll_answer_group__profile')
                 .distinct()
-                .values('question_id', 'answer_option_id')
+                .values('poll_answer_group__profile', 'question_id')
                 .annotate(
                     quantity=Count('poll_answer_group__profile'),
                     correct_answers_quantity = Count(Case(
@@ -320,10 +320,26 @@ def my_poll_stats_test(request):
                         100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
                         / F('possible_question_points_count'),
                         output_field=FloatField()
-                    )
+                    ),
                 )
             ) 
+            # print(question_statistics)
+
             
+            questions_percentage = (
+                question_statistics
+                .values('question_id')
+                .annotate(
+                    answers_quantity=Count('poll_answer_group__profile', distinct=True),
+                    correct_percentage=ExpressionWrapper(
+                        100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
+                        / F('possible_question_points_count') / F('answers_quantity'),
+                        output_field=FloatField()
+                    ),
+                )
+            )
+            print(questions_percentage)
+
             options_answers_count = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
@@ -351,6 +367,7 @@ def my_poll_stats_test(request):
             context = {
                 'poll_statistics': poll_statistics,
                 'question_statistics': question_statistics,
+                'questions_percentage': questions_percentage,
                 'options_answers_count': options_answers_count,
                 'free_answers': free_answers
             }
