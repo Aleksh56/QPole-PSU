@@ -89,189 +89,119 @@ def create_totp_device(user, secret_key, name='default'):
     return device
 
 
+import json
+
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
+from api.models import Poll
 
 
-# from django.views.decorators.http import require_POST
-# from .blockchain import web3, contract, PRIVATE_KEY
-# from web3.middleware import geth_poa_middleware
+from web3 import Web3
+from web3.datastructures import AttributeDict
 
-# from django.http import JsonResponse
-# from web3 import Web3
-# from web3.middleware import geth_poa_middleware
+@api_view(['GET'])
+def test_api(request):
 
-# # Настройка Web3
-# w3 = Web3(Web3.HTTPProvider('https://<network>.infura.io/v3/your_project_id'))
-# w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+    # Замените 'your-infura-project-id' на ваш Project ID от Infura
+    w3 = Web3(Web3.HTTPProvider('http://188.225.45.226:8545'))
 
-# @require_POST
-# def answer_survey(request):
-#     if request.method == 'POST':
-#         survey_id = request.POST.get('surveyId')
-#         answer = request.POST.get('answer')
+    # Убедитесь, что подключение установлено
+    if w3.is_connected():
+        w3.eth.contract()
+        print("Connected to Ethereum node")
+        # return Response("Connected to Ethereum node")
+    else:
+        print("Failed to connect to Ethereum node")
+        # return Response("Failed to connect to Ethereum node")
 
-#         # Адрес смарт-контракта и ABI
-#         contract_address = '0x5c6D168dEc2f1D97a1c88B8390BbD8cE39d8Ae91'
-#         contract_abi = [
-#     {
-#       "anonymous": False,
-#       "inputs": [
-#         {
-#           "indexed": False,
-#           "internalType": "uint256",
-#           "name": "surveyId",
-#           "type": "uint256"
-#         },
-#         {
-#           "indexed": False,
-#           "internalType": "string",
-#           "name": "answer",
-#           "type": "string"
-#         }
-#       ],
-#       "name": "AnswerReceived",
-#       "type": "event"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "uint256",
-#           "name": "",
-#           "type": "uint256"
-#         },
-#         {
-#           "internalType": "uint256",
-#           "name": "",
-#           "type": "uint256"
-#         }
-#       ],
-#       "name": "answers",
-#       "outputs": [
-#         {
-#           "internalType": "string",
-#           "name": "",
-#           "type": "string"
-#         }
-#       ],
-#       "stateMutability": "view",
-#       "type": "function"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "uint256",
-#           "name": "",
-#           "type": "uint256"
-#         }
-#       ],
-#       "name": "surveys",
-#       "outputs": [
-#         {
-#           "internalType": "uint256",
-#           "name": "id",
-#           "type": "uint256"
-#         },
-#         {
-#           "internalType": "string",
-#           "name": "question",
-#           "type": "string"
-#         }
-#       ],
-#       "stateMutability": "view",
-#       "type": "function"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "string",
-#           "name": "_question",
-#           "type": "string"
-#         }
-#       ],
-#       "name": "createSurvey",
-#       "outputs": [],
-#       "stateMutability": "nonpayable",
-#       "type": "function"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "uint256",
-#           "name": "_surveyId",
-#           "type": "uint256"
-#         },
-#         {
-#           "internalType": "string",
-#           "name": "_answer",
-#           "type": "string"
-#         }
-#       ],
-#       "name": "answerSurvey",
-#       "outputs": [],
-#       "stateMutability": "nonpayable",
-#       "type": "function"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "uint256",
-#           "name": "_surveyId",
-#           "type": "uint256"
-#         }
-#       ],
-#       "name": "getSurveyQuestion",
-#       "outputs": [
-#         {
-#           "internalType": "string",
-#           "name": "",
-#           "type": "string"
-#         }
-#       ],
-#       "stateMutability": "view",
-#       "type": "function"
-#     },
-#     {
-#       "inputs": [
-#         {
-#           "internalType": "uint256",
-#           "name": "_surveyId",
-#           "type": "uint256"
-#         }
-#       ],
-#       "name": "getSurveyAnswers",
-#       "outputs": [
-#         {
-#           "internalType": "string[]",
-#           "name": "",
-#           "type": "string[]"
-#         }
-#       ],
-#       "stateMutability": "view",
-#       "type": "function"
-#     }
-#   ]  # ABI вашего контракта
+    # Замените 'contract_abi' на ABI вашего контракта
 
-#         contract = w3.eth.contract(address=contract_address, abi=contract_abi)
-#         nonce = w3.eth.get_transaction_count('0x5c6D168dEc2f1D97a1c88B8390BbD8cE39d8Ae91')
+    contract_address = w3.to_checksum_address("0x846b142c1ac1d6a2d112a4417621b32428bf1ffd")
+    abi = '[{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"polls","outputs":[{"internalType":"string","name":"question","type":"string"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"string[]","name":"options","type":"string[]"}],"name":"createPoll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"pollIndex","type":"uint256"},{"internalType":"uint256[]","name":"answerOptions","type":"uint256[]"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"pollIndex","type":"uint256"}],"name":"getPollResults","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"string[]","name":"options","type":"string[]"},{"internalType":"uint256[]","name":"votes","type":"uint256[]"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[],"name":"getAllPolls","outputs":[{"internalType":"string[]","name":"questions","type":"string[]"}],"stateMutability":"view","type":"function","constant":true}]'
 
-#         # Создание транзакции
-#         txn = contract.functions.answerSurvey(survey_id, answer).buildTransaction({
-#             'chainId': 1,
-#             'gas': 2000000,
-#             'gasPrice': w3.toWei('50', 'gwei'),
-#             'nonce': nonce,
-#         })
+    contract = w3.eth.contract(address=contract_address, abi=abi)
+    question = "Какой ваш любимый цвет?"
+    options = ["Красный", "Синий", "Зеленый"]
+    
+    try:
+      # Получение списка аккаунтов
+        accounts = w3.eth.accounts
+        print("Using account:", accounts[0])
 
-#         # Подпись транзакции с использованием приватного ключа
-#         private_key = 'cfd2f54fc3764a2e5b8248a657aeaaf9611cfe916a9daa564f7a8d9fcdcbe9e6'
-#         signed_txn = w3.eth.account.signTransaction(txn, private_key=private_key)
+        # Выполнение транзакции через метод set
+        print("Sending set(555) transaction...")
+        # poll_index = 'b1a83779-89d1-4b02-8d24-7d61ee5da62b'
+        poll_index = 9
+        answers = [
+                {
+                    "question": 1832,
+                    "answer_option": 10884
+                },
+                {
+                    "question": 1833,
+                    "answer_option": 10889,
 
-#         # Отправка транзакции
-#         txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-#         txn_receipt = w3.eth.waitForTransactionReceipt(txn_hash)
+                },
+                {
+                    "question": 1834,
+                    "answer_option": 10890,
 
-#         return JsonResponse({'status': 'success', 'txn_receipt': txn_receipt})
-#     else:
-#         return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+                }
+            ]
+        tx_hash = contract.functions.createPoll(question, options).transact({
+            'from': accounts[0],
+            'gasPrice': "20000000000",
+            'gas': "210000"
+        })
+        print(tx_hash)
+        # Получение квитанции транзакции
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        print("Transaction receipt:", receipt)
+        tx_hash = contract.functions.getAllPolls().transact({
+            'from': accounts[0],
+            'gasPrice': "20000000000",
+            'gas': "210000"
+        })
+        print(tx_hash)
+
+        polls = contract.functions.getAllPolls().call()
+        print("Available Polls:", polls)
+
+    except Exception as e:
+        print("Error occurred:", e)
 
 
+    return Response('ok')
+    # print(contract.address)
+    # print(contract.abi)
 
+    # try:
+    #     stored_data = contract.functions.set(15).call()
+    #     print("Stored data from contract:", stored_data)
+    # except Exception as e:
+    #     print("Error reading from contract:", e)
+        
+    # nonce = w3.eth.get_transaction_count(contract.address)
+    # print(nonce)
+
+    # new_value = 228
+    # transaction = contract.functions.set(new_value).build_transaction({
+    #     'gas': 200000,
+    #     'gasPrice': w3.to_wei('50', 'gwei'),
+    #     'nonce': nonce,
+    # })
+    # signed_txn = w3.eth.account.sign_transaction(transaction, private_key='cfd2f54fc3764a2e5b8248a657aeaaf9611cfe916a9daa564f7a8d9fcdcbe9e6')
+
+    # # Отправка транзакции в сеть Ethereum
+    # try:
+    #     tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    #     print("Transaction hash:", tx_hash.hex())
+    #     # Ожидание подтверждения транзакции
+    #     tx_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    #     print("Transaction receipt:", tx_receipt)
+    # except Exception as e:
+    #     print("Error sending transaction:", e)
+
+    # return Response('contract')
+    

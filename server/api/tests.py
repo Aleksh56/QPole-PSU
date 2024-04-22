@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, Prefetch
-from django.db.models import Count, Case, When, F, ExpressionWrapper, FloatField
+from django.db.models import Q, Prefetch, Subquery, OuterRef
+from django.db.models import Count, Case, When, F, ExpressionWrapper, FloatField, Sum
 from django.db import transaction
 
 
@@ -280,15 +280,45 @@ def my_poll_stats_test(request):
                 )
             )
 
+            possible_question_points_count = (
+                AnswerOption.objects
+                .filter(question__poll=poll)
+                .values('question_id')
+                .annotate(
+                    correct_options_quantity=Sum(
+                        Case(
+                            When(is_correct=True, then=1),
+                            default=0,
+                            output_field=models.IntegerField()
+                        )
+                    )
+                )
+            )
+
             question_statistics = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
-                .values('question_id')
+                .values('poll_answer_group__profile')
+                .distinct()
+                .values('question_id', 'answer_option_id')
                 .annotate(
-                    quantity=Count('id'),
-                    correct_quantity=Count(Case(When(is_correct=True, then=1))),
+                    quantity=Count('poll_answer_group__profile'),
+                    correct_answers_quantity = Count(Case(
+                        When(points=1, then=1),
+                        default=0
+                    )),
+                    incorrect_answers_quantity=Count(Case(
+                        When(points=0, then=1),
+                        When(points=0, then=0),
+                        default=None
+                    )),
+                    possible_question_points_count=Subquery(
+                        possible_question_points_count.filter(question_id=OuterRef('question_id'))
+                                                              .values('correct_options_quantity')[:1]
+                    ),
                     correct_percentage=ExpressionWrapper(
-                        100 * F('correct_quantity') / F('quantity'),
+                        100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
+                        / F('possible_question_points_count'),
                         output_field=FloatField()
                     )
                 )
@@ -316,7 +346,6 @@ def my_poll_stats_test(request):
                     profile_surname=F('poll_answer_group__profile__surname')
                 )
             )
-            print(free_answers)
 
 
             context = {

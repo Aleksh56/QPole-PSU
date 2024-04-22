@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField
-from django.db.models import Count, Case, When, F
+from django.db.models import Count, Case, When, F, Sum, Subquery, OuterRef
 from django.db import transaction
 from django.contrib.auth.models import AnonymousUser
 
@@ -383,23 +383,50 @@ def my_poll_stats(request):
                 )
             )
 
+            possible_question_points_count = (
+                AnswerOption.objects
+                .filter(question__poll=poll)
+                .values('question_id')
+                .annotate(
+                    correct_options_quantity=Sum(
+                        Case(
+                            When(is_correct=True, then=1),
+                            default=0,
+                            output_field=models.IntegerField()
+                        )
+                    )
+                )
+            )
+
             question_statistics = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
-                .values('question_id', 'poll_answer_group__profile')
+                .values('poll_answer_group__profile')
                 .distinct()
+                .values('question_id', 'answer_option_id')
                 .annotate(
-                    quantity=Count('id'),
-                    correct_quantity=Count(Case(
+                    quantity=Count('poll_answer_group__profile'),
+                    correct_answers_quantity = Count(Case(
                         When(points=1, then=1),
                         default=0
                     )),
+                    incorrect_answers_quantity=Count(Case(
+                        When(points=0, then=1),
+                        When(points=1, then=0),
+                        default=None
+                    )),
+                    possible_question_points_count=Subquery(
+                        possible_question_points_count.filter(question_id=OuterRef('question_id'))
+                                                              .values('correct_options_quantity')[:1]
+                    ),
                     correct_percentage=ExpressionWrapper(
-                        100 * F('correct_quantity') / F('quantity'),
+                        100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
+                        / F('possible_question_points_count'),
                         output_field=FloatField()
                     )
                 )
             ) 
+            print(question_statistics)
             
             options_answers_count = (
                 PollAnswer.objects
