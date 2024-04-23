@@ -101,9 +101,8 @@ def my_poll(request):
                         Q(author__user=current_user) & Q(poll_id=poll_id))
                         .select_related('author', 'poll_type')
                         .prefetch_related(
-                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                                'answer_options'
-                        ).filter(poll_poll_id=poll_id)))
+                            Prefetch('questions', queryset=PollQuestion.objects.prefetch_related('answer_options').all())
+                        )
                         .first()
                     )
                 if not poll:
@@ -519,7 +518,8 @@ def my_poll_user_answers(request):
                 if not answer:
                     raise MyCustomException(detail="Данный юзер еще не принял участие в опросе")
         
-                answer = PollAnswerGroupSerializer(answer)
+                # answer = PollAnswerGroupSerializer(answer)
+                answer = MyPollUsersAnswersSerializer(answer)
                 return Response(answer.data)
 
             else:
@@ -540,7 +540,8 @@ def my_poll_user_answers(request):
                 total_items = answers.count()
                 total_pages = paginator.page.paginator.num_pages
 
-                answers = PollAnswerGroupSerializer(paginated_result, many=True)
+                # answers = PollAnswerGroupSerializer(paginated_result, many=True)
+                answers = MyPollUsersAnswersSerializer(paginated_result, many=True)
 
                 pagination_data = {
                     'total_items': total_items,
@@ -1012,12 +1013,12 @@ def poll_voting(request):
                 
                 my_answer.poll = poll
 
-                serializer = PollAnswerGroupSerializer(my_answer)
+                serializer = PollVotingResultSerializer(my_answer)
                 return Response(serializer.data)
             
             else:
                 my_answers = PollAnswerGroup.objects.filter(profile=my_profile)
-                serializer = PollAnswerGroupSerializer(my_answers, many=True)
+                serializer = PollVotingResultSerializer(my_answers, many=True)
                 return Response(serializer.data)
 
         elif request.method == 'POST':
@@ -1067,7 +1068,7 @@ def poll_voting(request):
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
             poll_answer_group, answers = save_votes(answers, poll, my_profile)
-            serializer = PollAnswerGroupSerializer(poll_answer_group)
+            serializer = PollVotingResultSerializer(poll_answer_group)
         
 
             return Response({'message':"Вы успешно проголосовали", 'data':serializer.data,}, status=status.HTTP_200_OK)
@@ -1211,7 +1212,7 @@ def poll(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_users_votes(request):
-    try:
+    # try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -1228,10 +1229,9 @@ def my_poll_users_votes(request):
                         .select_related('author', 'poll_type')
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                                'answer_options').filter(poll__poll_id=poll_id)))
+                                'answer_options').all()))
                         .prefetch_related(
-                            Prefetch('user_answers', queryset=PollAnswerGroup.objects
-                                                            .filter(poll__poll_id=poll_id)
+                            Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
                                                             .select_related('profile', 'profile__user')
                                                             .prefetch_related('answers')))
                         .first()
@@ -1251,11 +1251,11 @@ def my_poll_users_votes(request):
             paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer)
             return Response(paginated_result)
 
-    except APIException as api_exception:
-        return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
-    except Exception as ex:
-        return Response({'message': f"Внутренняя ошибка сервера в my_poll_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # except Exception as ex:
+    #     return Response({'message': f"Внутренняя ошибка сервера в my_poll_users_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
