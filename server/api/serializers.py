@@ -173,6 +173,7 @@ class PollVotingResultSerializer(PollAnswerGroupSerializer):
                 if question['points'] < 0:
                     question['points'] = 0
                 poll_gained_points += question['points']
+                print(question['id'], '-', question['points'])
                 poll_points += 1
 
                 results = {
@@ -325,9 +326,6 @@ class PollQuestionSerializer(serializers.ModelSerializer):
                 )
 
 
-
-
-
     def create(self, validated_data):
         instance = super().create(validated_data)
         for attr, value in self.initial_data.items():
@@ -360,15 +358,38 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         model = AnswerOption
         fields = '__all__'
 
+    # если вопрос с открытым вариантом ответа верный, то обнуляем все остальные варианты ответа
+    def set_is_correct(self, value):
+        if value:
+            if self.instance.is_free_response:
+                options_to_update = self.instance.question.answer_options.all()
+                new_options = []
+                for option in options_to_update:
+                    if not self.instance.id == option.id:
+                        option.is_correct = False
+                        new_options.append(option)
+                AnswerOption.objects.bulk_update(new_options, ['is_correct'])
+
+
     def create(self, validated_data):
         if validated_data.get('is_free_response'):
             if self.context.get('has_free_option', None):
                 raise MyValidationError(detail="В данном вопросе уже есть свободная форма ответа")
 
-        
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+
         return super().create(validated_data)  
 
-
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
 
 # сериализаторы статистики опросов
 
