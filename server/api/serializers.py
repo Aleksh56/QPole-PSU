@@ -173,14 +173,13 @@ class PollVotingResultSerializer(PollAnswerGroupSerializer):
                 if question['points'] < 0:
                     question['points'] = 0
                 poll_gained_points += question['points']
-                print(question['id'], '-', question['points'])
                 poll_points += 1
 
                 results = {
                         'total': poll_points,
                         'correct': poll_gained_points,
                         'wrong': poll_points - poll_gained_points,
-                        'percentage': round(float(poll_gained_points / poll_points), 2) * 100,
+                        'percentage': round(float(poll_gained_points / poll_points) * 100, 2),
                     }
                 
                 data['results'] = results
@@ -475,7 +474,9 @@ class PollStatsSerializer(serializers.ModelSerializer):
         poll_statistics = self.context.get('poll_statistics', None)
 
         if poll_statistics:
-            return poll_statistics[0].get('correct_percentage', None)
+            average_correct_percentage = poll_statistics.get('average_correct_percentage', None)
+            if average_correct_percentage:
+                return round(average_correct_percentage, 2)
             
         return None
     

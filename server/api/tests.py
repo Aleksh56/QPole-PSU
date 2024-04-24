@@ -2,8 +2,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, Prefetch, Subquery, OuterRef, Avg
-from django.db.models import Count, Case, When, F, ExpressionWrapper, FloatField, Sum
+from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField, Value
+from django.db.models import Count, Case, When, F, Sum, Subquery, OuterRef, Max
+from django.db.models.functions import Coalesce
 from django.db import transaction
 
 
@@ -265,19 +266,8 @@ def my_poll_stats_test(request):
             ).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
-
-            poll_statistics = (
-                PollAnswer.objects
-                .filter(poll_answer_group__poll=poll)
-                .values('poll_answer_group__poll__poll_id')
-                .annotate(
-                    total_answers=Count('id'),
-                    correct_answers=Count(Case(When(is_correct=True, then=1))),
-                    correct_percentage=ExpressionWrapper(
-                        100 * F('correct_answers') / F('total_answers'),
-                        output_field=FloatField()
-                    )
-                )
+            poll_members_quantity = (
+                PollAnswerGroup.objects.filter(poll__poll_id=poll_id).count()
             )
 
             possible_question_points_count = (
@@ -298,18 +288,15 @@ def my_poll_stats_test(request):
             question_statistics = (
                 PollAnswer.objects
                 .filter(poll_answer_group__poll=poll)
-                .values('poll_answer_group__profile')
-                .distinct()
                 .values('poll_answer_group__profile', 'question_id')
                 .annotate(
-                    quantity=Count('poll_answer_group__profile'),
+                    quantity=Count('poll_answer_group__profile', distinct=True),
                     correct_answers_quantity = Count(Case(
                         When(points=1, then=1),
                         default=0
                     )),
                     incorrect_answers_quantity=Count(Case(
                         When(points=0, then=1),
-                        When(points=0, then=0),
                         default=None
                     )),
                     possible_question_points_count=Subquery(
@@ -325,20 +312,33 @@ def my_poll_stats_test(request):
             ) 
             # print(question_statistics)
 
-            
             questions_percentage = (
                 question_statistics
                 .values('question_id')
                 .annotate(
                     answers_quantity=Count('poll_answer_group__profile', distinct=True),
-                    correct_percentage=ExpressionWrapper(
-                        100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
-                        / F('possible_question_points_count') / F('answers_quantity'),
+                    answer_percentage=F('answers_quantity') / Value(poll_members_quantity) * 100,
+                    correct_percentage=ExpressionWrapper((F('correct_percentage') / F('answers_quantity')),
+                        output_field=FloatField()
+                    ),
+                )
+            )  
+            print(questions_percentage)
+
+
+            poll_statistics = (
+                questions_percentage
+                .aggregate(
+                    total_questions=Count('question_id'),
+                    total_participants=Max('answers_quantity'),
+                    average_correct_percentage=Coalesce(
+                        Sum('correct_percentage') / Count('question_id'),
+                        Value(0),
                         output_field=FloatField()
                     ),
                 )
             )
-            print(questions_percentage)
+            # print(poll_statistics)
 
             options_answers_count = (
                 PollAnswer.objects

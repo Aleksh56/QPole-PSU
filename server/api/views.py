@@ -1,6 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField, Value
@@ -133,26 +132,9 @@ def my_poll(request):
                 filters &= Q(is_paused=is_paused)
                 filters &= Q(is_closed=is_closed)
 
-                page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 20))  
-
                 polls = Poll.objects.filter(filters).select_related('author', 'poll_type').order_by('-created_date')
-                
-                page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 3))  
 
-                paginator = PageNumberPagination()
-                paginator.page_size = page_size 
-                paginated_result = paginator.paginate_queryset(polls, request)
-                paginator.page.number = page
-                total_items = polls.count()
-                total_pages = paginator.page.paginator.num_pages
-                serializer = MiniPollSerializer(paginated_result, many=True)
-                pagination_data = {
-                    'total_items': total_items,
-                    'total_pages': total_pages,
-                    'results': serializer.data 
-                }
+                pagination_data = get_paginated_response(request, polls, MiniPollSerializer)
                 return Response(pagination_data)
 
         elif request.method == 'POST':
@@ -347,7 +329,6 @@ def my_poll(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@transaction.atomic
 def my_poll_stats(request):
     try:
         current_user = request.user
@@ -368,7 +349,9 @@ def my_poll_stats(request):
             ).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
-
+            poll_members_quantity = (
+                PollAnswerGroup.objects.filter(poll__poll_id=poll_id).count()
+            )
 
             possible_question_points_count = (
                 AnswerOption.objects
@@ -417,12 +400,13 @@ def my_poll_stats(request):
                 .values('question_id')
                 .annotate(
                     answers_quantity=Count('poll_answer_group__profile', distinct=True),
+                    answer_percentage=F('answers_quantity') / Value(poll_members_quantity) * 100,
                     correct_percentage=ExpressionWrapper((F('correct_percentage') / F('answers_quantity')),
                         output_field=FloatField()
                     ),
                 )
             )  
-            print(questions_percentage)
+            # print(questions_percentage)
 
 
             poll_statistics = (
@@ -437,7 +421,7 @@ def my_poll_stats(request):
                     ),
                 )
             )
-            print(poll_statistics)
+            # print(poll_statistics)
 
             options_answers_count = (
                 PollAnswer.objects
@@ -452,7 +436,6 @@ def my_poll_stats(request):
                     poll_answer_group__poll__poll_id=poll_id,
                     text__isnull=False
                 )
-                # .select_related('poll_answer_group__profile')
                 .values(
                     'text',
                     'question_id',
@@ -474,8 +457,6 @@ def my_poll_stats(request):
 
             stats = PollStatsSerializer(poll, context=context)
             return Response(stats.data)
-            stats = PollStatsSerializer(poll, context=context)
-            return Response(stats.data)
 
 
     except APIException as api_exception:
@@ -488,7 +469,6 @@ def my_poll_stats(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@transaction.atomic
 def my_poll_user_answers(request):
     try:
         current_user = request.user
@@ -528,24 +508,7 @@ def my_poll_user_answers(request):
                     .order_by('-voting_date')
                 )
 
-                page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 10))  
-
-                paginator = PageNumberPagination()
-                paginator.page_size = page_size 
-                paginated_result = paginator.paginate_queryset(answers, request)
-                paginator.page.number = page
-                total_items = answers.count()
-                total_pages = paginator.page.paginator.num_pages
-
-                # answers = PollAnswerGroupSerializer(paginated_result, many=True)
-                answers = MyPollUsersAnswersSerializer(paginated_result, many=True)
-
-                pagination_data = {
-                    'total_items': total_items,
-                    'total_pages': total_pages,
-                    'results': answers.data 
-                }
+                pagination_data = get_paginated_response(request, answers, MyPollUsersAnswersSerializer)
                 return Response(pagination_data)
 
 
@@ -1114,13 +1077,6 @@ def poll_voting(request):
 @permission_classes([AllowAny])
 def poll(request):
     try:
-        current_user = request.user
-        if isinstance(current_user, AnonymousUser):
-            my_profile = None
-        else:
-            my_profile = Profile.objects.filter(user=current_user).first()
-
-
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
 
@@ -1138,7 +1094,7 @@ def poll(request):
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
-                serializer = PollSerializer(poll, context={'profile': my_profile})
+                serializer = PollSerializer(poll)
                 return Response(serializer.data)
             
             else:
@@ -1175,26 +1131,7 @@ def poll(request):
                     .filter(filters)  
                 )
 
-
-                page = int(request.GET.get('page', 1))
-                page_size = int(request.GET.get('page_size', 3))  
-
-                paginator = PageNumberPagination()
-                paginator.page_size = page_size 
-                paginated_result = paginator.paginate_queryset(polls, request)
-                paginator.page.number = page
-                total_items = polls.count()
-                total_pages = paginator.page.paginator.num_pages
-
-                context = {
-                    'profile': my_profile
-                }
-                serializer = MiniPollSerializer(paginated_result, context=context, many=True)
-                pagination_data = {
-                    'total_items': total_items,
-                    'total_pages': total_pages,
-                    'results': serializer.data 
-                }
+                pagination_data = get_paginated_response(request, polls, MiniPollSerializer)
                 return Response(pagination_data)
 
             
@@ -1210,7 +1147,7 @@ def poll(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_users_votes(request):
-    # try:
+    try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -1249,11 +1186,11 @@ def my_poll_users_votes(request):
             paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer)
             return Response(paginated_result)
 
-    # except APIException as api_exception:
-    #     return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
-    # except Exception as ex:
-    #     return Response({'message': f"Внутренняя ошибка сервера в my_poll_users_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_users_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

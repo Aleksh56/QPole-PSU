@@ -1,11 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q
 from django.db import transaction
-from django.contrib.auth.models import AnonymousUser
 
 
 from api.exсeptions import *
