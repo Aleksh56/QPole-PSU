@@ -30,5 +30,6 @@ jobs:
           port: 22
           script: |
             cd /home/blockchain
-            pkill -f ganache-cli
+            pkill -f ganache-cli || true
+            sleep 5
             node run_and_monitor.js
