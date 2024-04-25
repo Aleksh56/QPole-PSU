@@ -262,9 +262,9 @@ def connect_to_web3():
     my_abi = None
     my_contract_address = None
         
-    with open('qpoll/contract_address.txt', 'r') as file:
-        my_contract_address = file.read()
-	my_contract_address = my_contract_address.strip()
+ #    with open('qpoll/contract_address.txt', 'r') as file:
+ #        my_contract_address = file.read()
+	# my_contract_address = my_contract_address.strip()
 
 
     with open('qpoll/MiniPoll.json', 'r') as f:
@@ -272,7 +272,7 @@ def connect_to_web3():
         my_abi = data['abi']
 
         
-    contract_address = w3.to_checksum_address(my_contract_address)
+    contract_address = w3.to_checksum_address('0xedd273449312c66e29fc9b8ce286db2f032f2931')
     # abi = '[{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"polls","outputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"poll_type","type":"string"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"components":[{"internalType":"uint256","name":"question","type":"uint256"},{"internalType":"uint256","name":"answer_option","type":"uint256"},{"internalType":"string","name":"text","type":"string"}],"internalType":"struct MiniPoll.VoteInput[]","name":"votes","type":"tuple[]"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"string","name":"poll_type","type":"string"}],"name":"createPoll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"string","name":"field","type":"string"},{"internalType":"string","name":"value","type":"string"}],"name":"patchPoll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getAllPolls","outputs":[{"internalType":"string[]","name":"","type":"string[]"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"uint256","name":"question_id","type":"uint256"}],"name":"addAnswerToQuestion","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"}],"name":"addQuestionToPoll","outputs":[],"stateMutability":"nonpayable","type":"function"}]'
 
     abi = my_abi
