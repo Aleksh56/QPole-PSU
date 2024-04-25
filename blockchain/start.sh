@@ -1,14 +1,19 @@
 #!/bin/bash
 
 # Step 1: Stop ganache-cli if running
-pkill ganache-cli
+pkill -f ganache-cli
+killall -q ganache-cli
+ps aux | grep ganache
 
 # Step 2: Run truffle migrate
-truffle migrate
 
 # Step 3: Start ganache-cli
-ganache-cli --host 0.0.0.0 > ganache_output.txt 2>&1 &
+nohup ganache-cli --host 0.0.0.0 > ganache_output.txt 2>&1 &
 GANACHE_PID=$!
+
+sleep 5
+
+truffle migrate
 
 # Wait a little for ganache to initialize
 sleep 5

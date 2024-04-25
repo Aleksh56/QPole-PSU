@@ -1,4 +1,4 @@
-name: Deploy Front-end to Server
+name: Deploy Blockchain to Server
 
 on:
   push:
@@ -30,4 +30,9 @@ jobs:
           port: 22
           script: |
             cd /home/blockchain
-            node run_and_monitor.js
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 16
+            nvm use 16
+            npm install
+            bash start.sh
