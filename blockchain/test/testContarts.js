@@ -1,7 +1,7 @@
 import Web3 from "web3";
 const web3 = new Web3("http://188.225.45.226:8545");
 
-const contractAddress = "0xbfc617a953e04b29b5c399c222551959480ab167";
+const contractAddress = "0xb473b752ab43717e5203117e6f55df2d2e014839";
 const abi = [
   {
     inputs: [
@@ -51,11 +51,6 @@ const abi = [
             internalType: "uint256",
             name: "answer_option",
             type: "uint256",
-          },
-          {
-            internalType: "string",
-            name: "text",
-            type: "string",
           },
         ],
         internalType: "struct MiniPoll.VoteInput[]",
@@ -135,6 +130,11 @@ const abi = [
         name: "question_id",
         type: "uint256",
       },
+      {
+        internalType: "uint256",
+        name: "ans_id",
+        type: "uint256",
+      },
     ],
     name: "addAnswerToQuestion",
     outputs: [],
@@ -147,6 +147,11 @@ const abi = [
         internalType: "string",
         name: "poll_id",
         type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "question_id",
+        type: "uint256",
       },
     ],
     name: "addQuestionToPoll",
@@ -203,9 +208,9 @@ async function createQue(pollId) {
     const accounts = await web3.eth.getAccounts();
 
     const txReceipt = await contract.methods.addQuestionToPoll(pollId).send({
-      from: accounts[1], // Using the first account in the list
-      gas: 3000000, // Setting the gas limit for the transaction
-      gasPrice: "20000000000", // Setting the gas price
+      from: accounts[1],
+      gas: 3000000,
+      gasPrice: "20000000000",
     });
 
     console.log("Poll que created successfully!");
@@ -252,11 +257,17 @@ async function vote(pollId, answers) {
         gasPrice: "20000000000", // Setting the gas price
       });
 
-    console.log("Poll answ created successfully!");
+    console.log("Success vote!");
     await fetchAllPolls();
   } catch (error) {
     console.error("Failed to create poll:", error);
   }
 }
 
-createPoll("3", "Test poll 2");
+// createPoll("3", "Test poll 2");
+
+// vote("44a958f5-5fa9-44df-b9e4-75297a7089", [
+//   { question: 1884, answer_option: 11005 },
+// ]);
+
+fetchAllPolls();

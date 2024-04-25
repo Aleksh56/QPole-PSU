@@ -5,7 +5,6 @@ contract MiniPoll {
     struct VoteInput {
         uint question;
         uint answer_option;
-        string text;
     }
 
     struct AnswerOption{
@@ -30,8 +29,6 @@ contract MiniPoll {
     }
 
     Poll[] public polls;
-    uint private questionIdCounter = 0;
-    uint private answerIdCounter = 0;
     mapping(string => bool) private existingPollIDs;
 
      function vote(string memory poll_id, VoteInput[] memory votes) public {
@@ -149,7 +146,7 @@ function getAllPolls() public view returns (string[] memory) {
         return (0, false);
     }
 
-    function addAnswerToQuestion(string memory poll_id, uint question_id) public {
+    function addAnswerToQuestion(string memory poll_id, uint question_id, uint ans_id) public {
         (uint pollIndex, bool pollFound) = findPollIndex(poll_id);
         require(pollFound, "Poll not found");
 
@@ -158,20 +155,20 @@ function getAllPolls() public view returns (string[] memory) {
 
         AnswerOption storage newAnswer = polls[pollIndex].questions[questionIndex].answer_options.push();
 
-        newAnswer.id = answerIdCounter++;
+        newAnswer.id = ans_id;
         newAnswer.question = polls[pollIndex].questions[questionIndex].id;
 
         polls[pollIndex].questions[questionIndex].answer_options.push(newAnswer);
     }
     
 
-    function addQuestionToPoll(string memory poll_id) public {
+    function addQuestionToPoll(string memory poll_id, uint question_id) public {
         (uint pollIndex, bool found) = findPollIndex(poll_id);
         require(found, "Poll not found");
 
         Question storage newQuestion = polls[pollIndex].questions.push();
-        newQuestion.id = questionIdCounter++; 
-        newQuestion.name = "Test que name 1";
+        newQuestion.id = question_id; 
+        newQuestion.name = "";
 
         polls[pollIndex].questions.push(newQuestion);
     }
