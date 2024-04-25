@@ -229,7 +229,7 @@ class BasePollSerializer(serializers.ModelSerializer):
     is_opened_for_voting = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
 
-    def get_members_quantity(self, instance):
+    def get_participants_quantity(self, instance):
         return instance.participants_quantity
 
 
