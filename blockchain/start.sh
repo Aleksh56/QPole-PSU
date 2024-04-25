@@ -3,6 +3,8 @@
 # Step 1: Stop ganache-cli if running
 pkill ganache-cli
 
+npm install
+
 # Step 2: Run truffle migrate
 truffle migrate
 
