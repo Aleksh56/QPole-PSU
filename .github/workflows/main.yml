@@ -11,12 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
