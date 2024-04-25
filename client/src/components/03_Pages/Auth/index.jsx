@@ -6,9 +6,11 @@ import useAuth from '@/hooks/useAuth';
 import FrmAuth from '@/components/04_Widgets/Data/Forms/frmAuth';
 import AuthIllustration from '@/components/05_Features/AuthIllustration';
 import usePageTitle from '@/hooks/usePageTitle';
+import { ThemeProvider, useTheme } from '@mui/material';
 
 const AuthPage = () => {
   const { setAuth } = useAuth();
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const path = useMemo(() => location.pathname, [location.pathname]);
@@ -46,16 +48,18 @@ const AuthPage = () => {
   );
 
   return (
-    <StyledAuthWrapper component="main">
-      <OverlayWrapper container>
-        <AuthIllustration />
-        <FrmAuth
-          isSignIn={isSignIn}
-          handleFormSwitch={handleFormSwitch}
-          handleFormSubmit={handleFormSubmit}
-        />
-      </OverlayWrapper>
-    </StyledAuthWrapper>
+    <ThemeProvider theme={theme}>
+      <StyledAuthWrapper component="main">
+        <OverlayWrapper container>
+          <AuthIllustration />
+          <FrmAuth
+            isSignIn={isSignIn}
+            handleFormSwitch={handleFormSwitch}
+            handleFormSubmit={handleFormSubmit}
+          />
+        </OverlayWrapper>
+      </StyledAuthWrapper>
+    </ThemeProvider>
   );
 };
 
