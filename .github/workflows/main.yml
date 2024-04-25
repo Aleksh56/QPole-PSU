@@ -21,6 +21,11 @@ jobs:
           source: "."
           target: "/home"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
       - name: Execute docker commands
         uses: appleboy/ssh-action@v0.1.4
         with:
