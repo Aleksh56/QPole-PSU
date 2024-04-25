@@ -1,4 +1,4 @@
-name: Deploy Front-end to Server
+name: Deploy Blockchain to Server
 
 on:
   push:
@@ -11,6 +11,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -20,11 +26,6 @@ jobs:
           port: 22
           source: "."
           target: "/home"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
 
       - name: Execute docker commands
         uses: appleboy/ssh-action@v0.1.4
