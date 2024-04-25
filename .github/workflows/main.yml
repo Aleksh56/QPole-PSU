@@ -30,4 +30,5 @@ jobs:
           port: 22
           script: |
             cd /home/blockchain
+            npm install
             bash start.sh
