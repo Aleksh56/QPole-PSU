@@ -1083,7 +1083,7 @@ def poll_voting(request):
             poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, raw_answers)
 
             if tx_hash:
-                poll_answer_group.tx_hash = tx_hash
+                poll_answer_group.tx_hash = str(tx_hash)
                 poll_answer_group.save()
 
 

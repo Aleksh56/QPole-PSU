@@ -276,11 +276,11 @@ def PollVoting(w3, contract, poll_data):
         
         # receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
-        tx_hash_str = tx_hash.hex()
+        # tx_hash_str = tx_hash.hex()
 
         # polls = contract.functions.getAllPolls().call()
 
-        return tx_hash_str
+        return tx_hash
     
     except Exception as ex:
         return False
