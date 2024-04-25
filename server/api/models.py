@@ -217,7 +217,7 @@ class Poll(models.Model):
     
     @property
     def participants_quantity(self):   # число участников опроса
-        return self.user_answers.count()
+        return self.user_participations.count()
 
     @property
     def questions_quantity(self):   # число вопросов опроса
