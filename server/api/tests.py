@@ -270,6 +270,12 @@ def my_poll_stats_test(request):
                 PollAnswerGroup.objects.filter(poll__poll_id=poll_id).count()
             )
 
+            poll_user_answers = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll=poll)
+                .select_related('question', 'answer_option', 'poll_answer_group__profile')
+            )
+
             possible_question_points_count = (
                 AnswerOption.objects
                 .filter(question__poll=poll)
@@ -286,7 +292,7 @@ def my_poll_stats_test(request):
             )
   
             question_statistics = (
-                PollAnswer.objects
+                poll_user_answers
                 .filter(poll_answer_group__poll=poll)
                 .values('poll_answer_group__profile', 'question_id')
                 .annotate(
@@ -323,7 +329,7 @@ def my_poll_stats_test(request):
                     ),
                 )
             )  
-            print(questions_percentage)
+            # print(questions_percentage)
 
 
             poll_statistics = (
@@ -341,19 +347,21 @@ def my_poll_stats_test(request):
             # print(poll_statistics)
 
             options_answers_count = (
-                PollAnswer.objects
+                poll_user_answers
                 .filter(poll_answer_group__poll=poll)
                 .values('answer_option')
-                .annotate(quantity=Count('id'))
+                .annotate(
+                    quantity=Count('id'),
+                    # choosing_percentage=F('quantity') / OuterRef(),
+                )
             )
 
             free_answers = (
-                PollAnswer.objects
+                poll_user_answers
                 .filter(
                     poll_answer_group__poll__poll_id=poll_id,
                     text__isnull=False
                 )
-                # .select_related('poll_answer_group__profile')
                 .values(
                     'text',
                     'question_id',

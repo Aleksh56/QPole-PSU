@@ -353,6 +353,12 @@ def my_poll_stats(request):
                 PollAnswerGroup.objects.filter(poll__poll_id=poll_id).count()
             )
 
+            poll_user_answers = (
+                PollAnswer.objects
+                .filter(poll_answer_group__poll=poll)
+                .select_related('question', 'answer_option', 'poll_answer_group__profile')
+            )
+
             possible_question_points_count = (
                 AnswerOption.objects
                 .filter(question__poll=poll)
@@ -367,9 +373,9 @@ def my_poll_stats(request):
                     )
                 )
             )
-  
+
             question_statistics = (
-                PollAnswer.objects
+                poll_user_answers
                 .filter(poll_answer_group__poll=poll)
                 .values('poll_answer_group__profile', 'question_id')
                 .annotate(
@@ -393,7 +399,6 @@ def my_poll_stats(request):
                     ),
                 )
             ) 
-            # print(question_statistics)
 
             questions_percentage = (
                 question_statistics
@@ -424,14 +429,17 @@ def my_poll_stats(request):
             # print(poll_statistics)
 
             options_answers_count = (
-                PollAnswer.objects
+                poll_user_answers
                 .filter(poll_answer_group__poll=poll)
                 .values('answer_option')
-                .annotate(quantity=Count('id'))
+                .annotate(
+                    quantity=Count('id'),
+                    # choosing_percentage=F('quantity') / OuterRef(),
+                )
             )
 
             free_answers = (
-                PollAnswer.objects
+                poll_user_answers
                 .filter(
                     poll_answer_group__poll__poll_id=poll_id,
                     text__isnull=False
@@ -1139,7 +1147,8 @@ def poll(request):
             return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
         
     except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -1190,7 +1199,8 @@ def my_poll_users_votes(request):
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
-        return Response({'message': f"Внутренняя ошибка сервера в my_poll_users_votes: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_users_votes: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 

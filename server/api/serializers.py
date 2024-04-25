@@ -224,13 +224,13 @@ class BasePollSerializer(serializers.ModelSerializer):
     is_in_production = serializers.BooleanField(validators=[PollValidator.is_in_production], required=False)    
 
 
-    members_quantity = serializers.SerializerMethodField()
+    participants_quantity = serializers.SerializerMethodField()
     questions_quantity = serializers.SerializerMethodField()
     is_opened_for_voting = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
 
     def get_members_quantity(self, instance):
-        return instance.members_quantity
+        return instance.participants_quantity
 
 
     def get_questions_quantity(self, instance):
@@ -429,6 +429,7 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionStatsSerializer(many=True)
 
     votes_quantity = serializers.SerializerMethodField()
+    answer_percentage = serializers.SerializerMethodField()
     average_correctness_percentage = serializers.SerializerMethodField()
 
     def get_votes_quantity(self, instance):
@@ -449,22 +450,31 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
                 return item['correct_percentage']
         return 0
     
+    def get_answer_percentage(self, instance):
+        question_id = instance.id
+        question_statistics = self.context.get('questions_percentage', {})
+        for question in question_statistics:
+            if question['question_id'] == question_id:
+                return question['answer_percentage']
+        return None
+    
+    
     class Meta:
         model = PollQuestion
         fields = ['id', 'answer_options', 'name', 'votes_quantity', 'has_multiple_choices',
-                  'average_correctness_percentage']
+                  'average_correctness_percentage', 'answer_percentage']
 
 
 
 class PollStatsSerializer(serializers.ModelSerializer):
-    members_quantity = serializers.SerializerMethodField()
+    participants_quantity = serializers.SerializerMethodField()
     questions_quantity = serializers.SerializerMethodField()
     correct_answer_percentage = serializers.SerializerMethodField()
 
     questions = PollQuestionStatsSerializer(many=True)
 
-    def get_members_quantity(self, instance):
-        return instance.members_quantity
+    def get_participants_quantity(self, instance):
+        return instance.participants_quantity
 
 
     def get_questions_quantity(self, instance):
@@ -482,7 +492,7 @@ class PollStatsSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Poll
-        fields = ['members_quantity', 'questions_quantity', 'questions', 'correct_answer_percentage']
+        fields = ['participants_quantity', 'questions_quantity', 'questions', 'correct_answer_percentage']
 
 
 

@@ -206,7 +206,7 @@ class Poll(models.Model):
         return False
     
     @property
-    def members_quantity(self):   # число участников опроса
+    def participants_quantity(self):   # число участников опроса
         return self.user_answers.count()
 
     @property
