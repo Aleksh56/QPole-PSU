@@ -180,3 +180,108 @@ def get_paginated_response(request, objects, serializer):
         'results': serializer.data 
     }
     return pagination_data
+
+
+def is_web3_connected(w3):
+    if w3.is_connected():
+        w3.eth.contract()
+        return True
+    else:
+        return False
+
+
+
+def createPoll(w3, contract, poll_data):
+    try:
+        accounts = w3.eth.accounts
+
+        poll_id = poll_data['poll_id']
+        poll_type = poll_data['poll_type']
+
+        contract.functions.createPoll(poll_id, poll_type).transact({
+                'from': accounts[0],
+                'gasPrice': "20000000000",
+                'gas': "210000"
+            })
+        
+        # polls = contract.functions.getAllPolls().call()
+        # print("Available Polls:", polls)
+
+        return True
+    
+    except Exception as ex:
+        print(ex)
+        return False
+
+
+def addQuestionToPoll(w3, contract, poll_data):
+    try:
+        accounts = w3.eth.accounts
+
+        poll_id = poll_data['poll_id']
+        question_id = int(poll_data['question_id'])
+
+        contract.functions.addQuestionToPoll(poll_id, question_id).transact({
+                'from': accounts[0],
+                'gasPrice': "20000000000",
+                'gas': "210000"
+            })
+        
+        polls = contract.functions.getAllPolls().call()
+        print("Available Polls:", polls)
+
+        return True
+    
+    except Exception as ex:
+        print(ex)
+        return False
+    
+
+def addAnswerToQuestion(w3, contract, poll_data):
+    try:
+        accounts = w3.eth.accounts
+
+        poll_id = poll_data['poll_id']
+        question_id = int(poll_data['question_id'])
+        option_id = int(poll_data['option_id'])
+
+
+        contract.functions.addAnswerToQuestion(poll_id, question_id, option_id).transact({
+                'from': accounts[0],
+                'gasPrice': "20000000000",
+                'gas': "210000"
+            })
+        
+        # polls = contract.functions.getAllPolls().call()
+        # print("Available Polls:", polls)
+
+        return True
+    
+    except Exception as ex:
+        return False
+    
+
+def PollVoting(w3, contract, poll_data):
+    try:
+        accounts = w3.eth.accounts
+
+        poll_id = poll_data['poll_id']
+        answers = poll_data['answers']
+
+        tx_hash = contract.functions.vote(poll_id, answers).transact({
+                'from': accounts[0],
+                'gasPrice': "20000000000",
+                'gas': "210000"
+            })
+        
+        # receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        tx_hash_str = tx_hash.hex()
+
+        # polls = contract.functions.getAllPolls().call()
+
+        return tx_hash_str
+    
+    except Exception as ex:
+        return False
+

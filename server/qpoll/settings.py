@@ -7,6 +7,8 @@ from datetime import timedelta
 env = environ.Env()
 environ.Env.read_env()
 
+from web3 import Web3
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -249,3 +251,33 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = env('SERVER_EMAIL')
+
+
+
+w3 = Web3(Web3.HTTPProvider('http://188.225.45.226:8545'))
+
+import json
+
+def connect_to_web3():
+    my_abi = None
+    my_contract_address = None
+        
+    with open('qpoll/contract_address.txt', 'r') as file:
+        my_contract_address = file.read()
+
+
+    with open('qpoll/MiniPoll.json', 'r') as f:
+        data = json.load(f)
+        my_abi = data['abi']
+
+        
+    contract_address = w3.to_checksum_address(my_contract_address)
+    # abi = '[{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"polls","outputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"string","name":"name","type":"string"},{"internalType":"string","name":"poll_type","type":"string"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"components":[{"internalType":"uint256","name":"question","type":"uint256"},{"internalType":"uint256","name":"answer_option","type":"uint256"},{"internalType":"string","name":"text","type":"string"}],"internalType":"struct MiniPoll.VoteInput[]","name":"votes","type":"tuple[]"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"string","name":"poll_type","type":"string"}],"name":"createPoll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"string","name":"field","type":"string"},{"internalType":"string","name":"value","type":"string"}],"name":"patchPoll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getAllPolls","outputs":[{"internalType":"string[]","name":"","type":"string[]"}],"stateMutability":"view","type":"function","constant":true},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"},{"internalType":"uint256","name":"question_id","type":"uint256"}],"name":"addAnswerToQuestion","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"poll_id","type":"string"}],"name":"addQuestionToPoll","outputs":[],"stateMutability":"nonpayable","type":"function"}]'
+
+    abi = my_abi
+    return contract_address, abi
+
+
+contract_address, abi = connect_to_web3()
+
+contract = w3.eth.contract(address=contract_address, abi=abi)

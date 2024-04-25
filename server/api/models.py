@@ -67,7 +67,9 @@ class PollAnswer(models.Model):
     
 
 class PollAnswerGroup(models.Model):
-    profile = models.ForeignKey(Profile, related_name='answer_groups', on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, related_name='answer_groups', on_delete=models.CASCADE, null=True)
+    tx_hash = models.CharField(max_length=255, default=None, null=True)
+
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
     voting_date = models.DateTimeField(auto_now_add=True)
 
@@ -76,6 +78,14 @@ class PollAnswerGroup(models.Model):
         return f"Группа ответов на {self.poll} от {self.profile}"
 
 
+class PollParticipantsGroup(models.Model):
+    profile = models.ForeignKey(Profile, related_name='participation_groups', on_delete=models.CASCADE, null=True)
+    poll = models.ForeignKey('Poll', related_name='user_participations', on_delete=models.CASCADE)
+
+
+    def __str__(self):
+        return f"Группа ответов на {self.poll} от {self.profile}"
+    
 class AnswerOption(models.Model):
     name = models.CharField(max_length=100, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото варианта ответа', upload_to=f'images/poll_options/', blank=True, null=True, default=None)
@@ -190,7 +200,7 @@ class Poll(models.Model):
         if not user_profile:
             return None
         
-        return self.user_answers.filter(
+        return self.user_participations.filter(
             profile=user_profile
         ).exists()
     

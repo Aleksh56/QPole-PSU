@@ -4,9 +4,10 @@ from functools import partial
 
 from .validators import *
 from .models import *
-from .utils import generate_poll_qr, get_qrcode_img_bytes 
+from .utils import generate_poll_qr, get_qrcode_img_bytes, is_web3_connected, createPoll
 from .exсeptions import *
 
+from qpoll.settings import w3, contract
 
 class MiniUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -111,6 +112,18 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
         
     class Meta:
         model = PollAnswerGroup
+        fields = '__all__'
+
+class PollParticipantsGroupSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+
+
+    def get_author(self, instance):
+        return MiniProfileSerializer(instance=instance.profile).data
+    
+        
+    class Meta:
+        model = PollParticipantsGroup
         fields = '__all__'
 
 
@@ -261,9 +274,19 @@ class PollSerializer(BasePollSerializer):
     author = MyProfileSerializer(required=True)
 
     questions = QuestionSerializer(many=True, required=False)
-    # user_answers = PollAnswerGroupSerializer(many=True, required=False)
 
     qrcode_img = serializers.SerializerMethodField()
+
+    # def set_is_anonymous(self, value):
+    #     if value:
+    #         if is_web3_connected(w3):
+    #             poll_data = {
+    #                 'poll_id': self.instance.poll_id,
+    #                 'poll_type': self.instance.poll_type.name,
+    #             }
+    #             createPoll(w3, contract, poll_data)
+    #         else:
+    #             raise MyCustomException(detail="is_web3_connected не подключился")
 
     def get_qrcode_img(self, instance):
         qrcode_path = instance.qrcode
@@ -273,6 +296,22 @@ class PollSerializer(BasePollSerializer):
 
         return None
 
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
+    
 class MiniPollSerializer(BasePollSerializer):
     poll_type = serializers.CharField(source='poll_type.name')
     author = MiniProfileSerializer()

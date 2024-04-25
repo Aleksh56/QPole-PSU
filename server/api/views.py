@@ -8,6 +8,7 @@ from django.db.models.functions import Coalesce
 from django.db import transaction
 from django.contrib.auth.models import AnonymousUser
 
+from datetime import date, timedelta
 
 from .exсeptions import *
 from .serializers import *
@@ -155,14 +156,24 @@ def my_poll(request):
             poll_type = PollType.objects.filter(name=poll_type_name).first()
             if not poll_type:
                 raise ObjectNotFoundException(model='PollType')
-            
+                       
             data['poll_type'] = poll_type.id
             data['author'] = my_profile
 
 
             serializer = BasePollSerializer(data=data)
             if serializer.is_valid():
-                serializer.save()
+                poll = serializer.save()
+                if poll.poll_type.name == 'Анонимный':
+                    if is_web3_connected(w3):
+                        poll_data = {
+                            'poll_id': poll.poll_id,
+                            'poll_type': 'Анонимный',
+                        }
+                        createPoll(w3, contract, poll_data)
+                    else:
+                        raise MyCustomException(detail="is_web3_connected не подключился")
+                
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -585,6 +596,18 @@ def my_poll_question(request):
             poll_question = PollQuestionSerializer(data=data)
             if poll_question.is_valid():
                 poll_question = poll_question.save()
+
+                if poll.poll_type.name == 'Анонимный':
+                    if is_web3_connected(w3):
+                        poll_data = {
+                            'poll_id': poll.poll_id,
+                            'question_id': poll_question.id,
+                        }
+                        addQuestionToPoll(w3, contract, poll_data)
+                    else:
+                        raise MyCustomException(detail="is_web3_connected не подключился")
+
+
                 return Response(f"Вопрос {poll_question} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
                 return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -811,6 +834,17 @@ def my_poll_question_option(request):
             answer_option_serializer = PollQuestionOptionSerializer(data=data, context={'has_free_option': has_free_option})
             if answer_option_serializer.is_valid():
                 answer_option = answer_option_serializer.save()
+                if poll.poll_type.name == 'Анонимный':
+                    if is_web3_connected(w3):
+                        poll_data = {
+                            'poll_id': poll.poll_id,
+                            'question_id': poll_question.id,
+                            'option_id': answer_option.id,
+                        }
+                        addAnswerToQuestion(w3, contract, poll_data)
+                    else:
+                        raise MyCustomException(detail="is_web3_connected не подключился")
+                    
                 return Response(f"Вариант ответа {answer_option} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
                 return Response(answer_option_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -956,7 +990,7 @@ def my_poll_question_option(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting(request):
-    try:
+    # try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -1019,9 +1053,17 @@ def poll_voting(request):
                 if not poll.is_revote_allowed:
                     raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе")
                 else:
-                    PollAnswerGroup.objects.filter(
+                    group_to_delete = PollAnswerGroup.objects.filter(
                         Q(poll=poll) & Q(profile=my_profile)      
-                    ).first().delete()
+                    ).first()
+                    if group_to_delete:
+                        group_to_delete.delete()
+
+                    group_to_delete_2 = PollParticipantsGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile)      
+                    ).first()
+                    if group_to_delete_2:
+                        group_to_delete_2.delete()
 
                         
             answers = data.get('answers', None)
@@ -1033,10 +1075,18 @@ def poll_voting(request):
                 answers = poll_voting_handler(answers, poll)
             elif poll.poll_type.name == 'Викторина':
                 answers = quizz_voting_handler(answers, poll)
+            elif poll.poll_type.name == 'Анонимный':
+                answers, raw_answers = poll_voting_handler(answers, poll)
             else:
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
-            poll_answer_group, answers = save_votes(answers, poll, my_profile)
+            poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, raw_answers)
+
+            if tx_hash:
+                poll_answer_group.tx_hash = tx_hash
+                poll_answer_group.save()
+
+
             serializer = PollVotingResultSerializer(poll_answer_group)
         
 
@@ -1073,11 +1123,11 @@ def poll_voting(request):
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
-    except Exception as ex:
-        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    # except Exception as ex:
+    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 

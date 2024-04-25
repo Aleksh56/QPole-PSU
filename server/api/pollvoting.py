@@ -1,8 +1,12 @@
 from .exсeptions import *
-from .serializers import PollAnswerGroupSerializer
-from .models import PollAnswer
+from .serializers import PollAnswerGroupSerializer, PollParticipantsGroupSerializer
+from .models import PollAnswer, PollParticipantsGroup
+
+from .utils import PollVoting
+from qpoll.settings import w3, contract
 
 def poll_voting_handler(answers, poll):
+    raw_answers = answers
     required_questions = {question for question in poll.questions.all() if question.is_required}
     answered_questions = set()
 
@@ -63,7 +67,7 @@ def poll_voting_handler(answers, poll):
         difference = list(required_questions.difference(answered_questions))
         raise PollAnsweringException(detail=f"Вы ответили не на все обязательные вопросы: {difference}")
 
-    return parsed_answers
+    return parsed_answers, raw_answers
 
 
 def quizz_voting_handler(answers, poll):
@@ -130,17 +134,35 @@ def quizz_voting_handler(answers, poll):
     return parsed_answers
 
 
-def save_votes(answers, poll, my_profile):
+def save_votes(answers, poll, my_profile, raw_answers):
     poll_answer_group_data = {
                 'profile': my_profile.user_id,
                 'poll': poll.id,
-            }
+    }
+    
+    if poll.poll_type.name == "Анонимный":
+        poll_answer_group_data['profile'] = None
+
 
     poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
     if poll_answer_group.is_valid():
         poll_answer_group = poll_answer_group.save()
     else:
         raise MyCustomException(detail=poll_answer_group.errors)
+    
+
+    poll_participation_group_data = {
+                'profile': my_profile.user_id,
+                'poll': poll.id,
+    }
+
+    print(poll_participation_group_data)
+    poll_participation_group = PollParticipantsGroupSerializer(data=poll_participation_group_data)
+    if poll_participation_group.is_valid():
+        poll_participation_group = poll_participation_group.save()
+    else:
+        raise MyCustomException(detail=poll_participation_group.errors)
+    
     
 
     data = answers
@@ -187,7 +209,13 @@ def save_votes(answers, poll, my_profile):
         PollAnswer(**item) for item in data
     ])
 
-    return poll_answer_group, poll_answers
+    poll_data = {
+        'poll_id': poll.poll_id,
+        'answers': raw_answers,
+    }
+
+    tx_hash = PollVoting(w3, contract, poll_data)
+    return poll_answer_group, poll_answers, tx_hash
 
 
 
