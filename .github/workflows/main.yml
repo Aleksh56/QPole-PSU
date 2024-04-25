@@ -33,6 +33,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASS }}
           port: 22
+          using: node16
           script: |
             cd /home/blockchain
             bash start.sh
