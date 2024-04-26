@@ -42,7 +42,7 @@ def my_profile(request):
             return Response(profile_serializer.data, status=status.HTTP_200_OK)
 
         elif request.method == 'POST':
-            current_user_profile = Profile.objects.filter(user=current_user).select_related('role').first()
+            current_user_profile = Profile.objects.filter(user=current_user).exists()
             request.data['user'] = current_user.id
             if current_user_profile:
                 return Response("Профиль данного пользователя уже существует.", status=status.HTTP_400_BAD_REQUEST)
@@ -99,7 +99,7 @@ def my_poll(request):
             if poll_id:
                 poll = (
                     Poll.objects.filter(
-                        Q(author__user=current_user) & Q(poll_id=poll_id))
+                        Q(author=my_profile) & Q(poll_id=poll_id))
                         .select_related('author', 'poll_type')
                         .prefetch_related(
                             Prefetch('questions', queryset=PollQuestion.objects.prefetch_related('answer_options').all())
@@ -119,7 +119,7 @@ def my_poll(request):
                 is_paused = request.GET.get('is_paused', False)
                 is_closed = request.GET.get('is_closed', False)
 
-                filters = Q(author__user=current_user)
+                filters = Q(author=my_profile)
                 if poll_type:
                     poll_type = PollType.objects.filter(name=poll_type).first()
                     if not poll_type:
@@ -139,7 +139,7 @@ def my_poll(request):
                 return Response(pagination_data)
 
         elif request.method == 'POST':
-
+            # вынести в настройки колво ограничений
             if not my_profile.user.is_staff:
                 if len(my_profile.my_polls.all()) > 10:
                     raise TooManyInstancesException(detail=f"Вы не можете создавать более {10} опросов.")
@@ -210,10 +210,17 @@ def my_poll(request):
                 
             
             if request_type == 'change_questions_order':
-                poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
+                poll = (
+                    Poll.objects.filter(poll_id=poll_id, author=my_profile)
+                        # .prefetch_related('questions')
+                        .first()    
+                )
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
-            
+                # poll_questions = poll.questions
+                
+                # В БУДУЩЕМ ВОЗМОЖНО НУЖНО БУДЕТ ПЕРЕБИРАТЬ ТОЛЬКО СВЯЗАННЫЕ ВОПРОСЫ А НЕ ДЕЛАТЬ ЗАПРОС К БД 
+
                 new_questions = []
                 questions_data = data['questions_data']
                 question_ids = list(questions_data.keys())
@@ -353,11 +360,15 @@ def my_poll_stats(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
 
-            poll = Poll.objects.filter(poll_id=poll_id).prefetch_related(
-                Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                    'answer_options'
-                ).all())
-            ).first()
+            poll = (
+                Poll.objects.filter(poll_id=poll_id)
+                    .prefetch_related(
+                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                        'answer_options'
+                    ).all()))
+                    .first()
+            )
+            
             if not poll:
                 raise ObjectNotFoundException('Poll')
             poll_members_quantity = (
@@ -366,6 +377,7 @@ def my_poll_stats(request):
 
             poll_user_answers = (
                 PollAnswer.objects
+                # poll.user_answers.answers
                 .filter(poll_answer_group__poll=poll)
                 .select_related('question', 'answer_option', 'poll_answer_group__profile')
             )
@@ -552,7 +564,11 @@ def my_poll_question(request):
                 raise MissingParameterException(field_name='poll_id')
 
             poll_question_id = request.GET.get('poll_question_id', None)
-            poll = Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id)).first()
+            poll = (
+                Poll.objects
+                    .filter(Q(author__user=current_user) and Q(poll_id=poll_id))
+                    .first()
+            )
 
             if not poll:
                 raise ObjectNotFoundException(model='Poll') 
@@ -1071,6 +1087,7 @@ def poll_voting(request):
                 raise MissingFieldException(field_name='answers')
             
             # валидация и парсинг ответов
+            raw_answers = []
             if poll.poll_type.name == 'Опрос':
                 answers = poll_voting_handler(answers, poll)
             elif poll.poll_type.name == 'Викторина':

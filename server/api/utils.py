@@ -65,8 +65,9 @@ def clone_poll(poll, new_poll_id):
                         .first()
                 )   
         answer_options_to_create = []
+        cloned_poll_questions = cloned_poll.questions.all()
         for i, question in enumerate(poll.questions.all(), 0):
-            new_question = cloned_poll.questions.all()[i]
+            new_question = cloned_poll_questions[i]
 
             answer_options_to_add = []
             for answer_option in question.answer_options.all():

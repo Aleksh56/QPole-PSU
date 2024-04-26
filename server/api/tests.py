@@ -75,7 +75,6 @@ def optimization_test(request):
 
 
 
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @transaction.atomic
