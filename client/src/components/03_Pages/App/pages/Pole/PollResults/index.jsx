@@ -9,6 +9,7 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
 import PollResultsPDF from '@/components/06_Entities/pollResultsPDF';
+import NoResultsPoll from '@/components/05_Features/NoResultsPoll';
 
 const PollResultsPage = () => {
   const { id } = useParams();
@@ -25,11 +26,10 @@ const PollResultsPage = () => {
 
   const handleChartTypeChange = (event) => setChartType(event.target.value);
 
-  return (
+  return questions.length > 0 ? (
     <Wrapper>
       <SettingsWrapper>
         <Select value={chartType} onChange={handleChartTypeChange} displayEmpty>
-          {/* Move to fields.js */}
           <MenuItem value="pie">
             <PieChartIcon /> Pie Chart
           </MenuItem>
@@ -46,6 +46,8 @@ const PollResultsPage = () => {
         ))}
       </ResultsGridWrapper>
     </Wrapper>
+  ) : (
+    <NoResultsPoll />
   );
 };
 

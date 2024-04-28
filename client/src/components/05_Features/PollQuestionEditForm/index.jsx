@@ -64,6 +64,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
       setSelectedOption([value]);
       await handleChangeAnswerRequest(id, q_id, value, 1);
     }
+    fetchOptions();
   };
 
   const fetchOptions = async () => {
@@ -74,6 +75,11 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
         setOptions(res.data);
         const hasFreeResponse = res.data.some((option) => option.is_free_response);
         setIsFreeResponse(hasFreeResponse);
+
+        const correctOptions = res.data
+          .filter((option) => option.is_correct)
+          .map((item) => item.id);
+        setSelectedOption(correctOptions);
       });
     }
   };
@@ -96,6 +102,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
         option.id === opt_id ? { ...option, [fieldName]: value } : option
       )
     );
+    await fetchOptions();
   };
 
   const handleDeleteOption = async (opt_id, q_id) => {

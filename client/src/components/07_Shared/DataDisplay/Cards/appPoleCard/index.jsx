@@ -58,7 +58,9 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
       />
       <StyledCardContent>
         <ActionsWrapper>
+          {/* TODO - Пофиксить стили label */}
           <StyledChip label={!pollData.is_closed ? 'Открыт' : 'Закрыт'} />
+          <StyledChip label={!pollData.is_in_production ? 'Недоступен' : 'Доступен'} />
           {!cardButton && (
             <Box zIndex="tooltip">
               <MoreHorizIcon onClick={handleMenuOpen} />
