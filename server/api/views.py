@@ -6,9 +6,6 @@ from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField, Value
 from django.db.models import Count, Case, When, F, Sum, Subquery, OuterRef, Max
 from django.db.models.functions import Coalesce
 from django.db import transaction
-from django.contrib.auth.models import AnonymousUser
-
-from datetime import date, timedelta
 
 from .exсeptions import *
 from .serializers import *
@@ -974,20 +971,7 @@ def my_poll_question_option(request):
             
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
-            
-            is_correct = data.get('is_correct', None)
-            if poll_question.has_multiple_choices == False:
-                if is_correct:
-                    data['is_correct'] = bool(data.get('is_correct', None))
-                    all_options = poll_question.answer_options.all()
-                    new_options = []
-                    for option in all_options:
-                        if option.is_correct:
-                            option.is_correct = False
-                            new_options.append(option)
 
-
-                    AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
             serializer = PollQuestionOptionSerializer(instance=question_option, data=data, partial=True)
 

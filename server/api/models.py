@@ -73,6 +73,7 @@ class PollAnswerGroup(models.Model):
 
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
     voting_date = models.DateTimeField(auto_now_add=True)
+    # voting_finish = models.DateTimeField(default=None, null=True)
 
 
     def __str__(self):
@@ -213,9 +214,7 @@ class Poll(models.Model):
         return self.questions.count()
 
     @property
-    def opened_for_voting(self):   # доступно ли для голосования по времени
-        return True
-    
+    def opened_for_voting(self):   # доступно ли для голосования по времени   
         if self.poll_setts:
             if self.poll_setts.start_time and self.poll_setts.end_time:
                 return (timezone.now() > self.poll_setts.start_time

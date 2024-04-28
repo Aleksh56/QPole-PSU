@@ -216,6 +216,46 @@ class MyPollUsersAnswersSerializer(PollVotingResultSerializer):
 
 # сериализаторы опросов
 
+class PollSettingsSerializer(serializers.ModelSerializer):
+    completion_time = serializers.DurationField(validators=[BasePollSettingsValidator.completion_time])
+    start_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.start_time])
+    end_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.end_time])
+    duration = serializers.DurationField(validators=[BasePollSettingsValidator.duration])
+
+    max_revotes_quantity = serializers.IntegerField(validators=[partial(BasePollSettingsValidator.max_revotes_quantity, num=10)])
+
+    # если установлена длительноть доступа к опросу, то обнулить end_time
+    def set_duration(self, value):
+        if value:
+            if self.instance.end_time:
+                self.instance.end_time = None
+            
+    # если установлен end_time, то обнулить duration
+    def set_end_time(self, value):
+        if value:
+            if self.instance.duration:
+                self.instance.duration = None
+
+    def create(self, validated_data):
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+
+        return super().create(validated_data)  
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
+
+    class Meta:
+        model = PollSettings
+        fields = '__all__'
+
 class BasePollSerializer(serializers.ModelSerializer):
     name = serializers.CharField(validators=[BaseValidator.name], required=False)
     description = serializers.CharField(validators=[BaseValidator.description], required=False)
@@ -261,21 +301,11 @@ class BasePollSerializer(serializers.ModelSerializer):
 class PollSerializer(BasePollSerializer):
     poll_type = PollTypeSerializer(required=True)
     author = MyProfileSerializer(required=True)
-
+    poll_setts = PollSettingsSerializer(required=False)
     questions = QuestionSerializer(many=True, required=False)
 
     qrcode_img = serializers.SerializerMethodField()
 
-    # def set_is_anonymous(self, value):
-    #     if value:
-    #         if is_web3_connected(w3):
-    #             poll_data = {
-    #                 'poll_id': self.instance.poll_id,
-    #                 'poll_type': self.instance.poll_type.name,
-    #             }
-    #             createPoll(w3, contract, poll_data)
-    #         else:
-    #             raise MyCustomException(detail="is_web3_connected не подключился")
 
     def get_qrcode_img(self, instance):
         qrcode_path = instance.qrcode
@@ -310,46 +340,6 @@ class MiniPollSerializer(BasePollSerializer):
         exclude = ['qrcode']
 
 
-class PollSettingsSerializer(serializers.ModelSerializer):
-    completion_time = serializers.DurationField(validators=[BasePollSettingsValidator.completion_time])
-    start_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.start_time])
-    end_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.end_time])
-    duration = serializers.DurationField(validators=[BasePollSettingsValidator.duration])
-
-    max_revotes_quantity = serializers.IntegerField(validators=[partial(BasePollSettingsValidator.max_revotes_quantity, num=10)])
-
-    # если установлена длительноть доступа к опросу, то обнулить end_time
-    def set_duration(self, value):
-        if value:
-            if self.instance.end_time:
-                self.instance.end_time = None
-            
-    # если установлен end_time, то обнулить duration
-    def set_end_time(self, value):
-        if value:
-            if self.instance.duration:
-                self.instance.duration = None
-
-    def create(self, validated_data):
-        for attr, value in self.initial_data.items():
-            setter_name = f"set_{attr}"
-            if hasattr(self, setter_name):
-                getattr(self, setter_name)(value)
-
-        return super().create(validated_data)  
-
-    def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        for attr, value in self.initial_data.items():
-            setter_name = f"set_{attr}"
-            if hasattr(self, setter_name):
-                getattr(self, setter_name)(value)
-        return instance
-
-    class Meta:
-        model = PollSettings
-        fields = '__all__'
-
 
 # сериализаторы воросов
 
@@ -369,22 +359,16 @@ class PollQuestionSerializer(serializers.ModelSerializer):
             new_options.append(option)
         AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
-        if value:
-            if not self.instance.is_free:
-                option_to_delete = self.instance.answer_options.filter(is_free_response=True).first()
-                if option_to_delete:
-                    option_to_delete.delete()
+        # if value:
+        #     if not self.instance.is_free:
+        #         option_to_delete = self.instance.answer_options.filter(is_free_response=True).first()
+        #         if option_to_delete:
+        #             option_to_delete.delete()
 
-
-    # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом
+    # если вопрос с открытым вариантом ответа, то создаем вариант ответа с текстом и удаляем остальные
     def set_is_free(self, value):
         if value:
-            options_to_update = self.instance.answer_options.all()
-            new_options = []
-            for option in options_to_update:
-                option.is_correct = False
-                new_options.append(option)
-            AnswerOption.objects.bulk_update(new_options, ['is_correct'])
+            self.instance.answer_options.all().delete()
             
             if not self.instance.answer_options.filter(is_free_response=True).exists():
                 free_option = AnswerOption.objects.create(
@@ -426,9 +410,17 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         model = AnswerOption
         fields = '__all__'
 
-    # если вопрос с открытым вариантом ответа верный, то обнуляем все остальные варианты ответа
+
     def set_is_correct(self, value):
+        question = self.instance.question
         if value:
+            # если выбран верным вариант ответа, то делаем неверным свободный вариант ответа
+            free_option = question.answer_options.filter(is_free=True).first()
+            if free_option and free_option.is_correct:
+                free_option.is_correct = False
+                free_option.save()
+
+            # если вопрос с открытым вариантом ответа верный, то обнуляем все остальные варианты ответа
             if self.instance.is_free_response:
                 options_to_update = self.instance.question.answer_options.all()
                 new_options = []
@@ -436,6 +428,17 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
                     if not self.instance.id == option.id:
                         option.is_correct = False
                         new_options.append(option)
+                AnswerOption.objects.bulk_update(new_options, ['is_correct'])
+
+            # если у вопроса не множестенный выбор, то надо сделать неверными все варианты ответа
+            if not question.has_multiple_choices:
+                all_options = question.answer_options.all()
+                new_options = []
+                for option in all_options:
+                    if option.is_correct:
+                        option.is_correct = False
+                        new_options.append(option)
+
                 AnswerOption.objects.bulk_update(new_options, ['is_correct'])
 
 
