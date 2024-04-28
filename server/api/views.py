@@ -16,6 +16,9 @@ from .models import *
 from .utils import *
 from .pollvoting import *
 
+from admin_api.models import Settings
+
+
 import os
 
 import logging
@@ -81,6 +84,7 @@ def my_profile(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_profile: {ex}")
         return Response(f"Внутренняя ошибка сервера в my_profile: {ex}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
@@ -92,6 +96,7 @@ def my_poll(request):
     try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
+        # my_profile = Profile.objects.filter(user__id=1).first()
         
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
@@ -100,9 +105,10 @@ def my_poll(request):
                 poll = (
                     Poll.objects.filter(
                         Q(author=my_profile) & Q(poll_id=poll_id))
-                        .select_related('author', 'poll_type')
+                        .select_related('author', 'author__user', 'poll_type')
                         .prefetch_related(
-                            Prefetch('questions', queryset=PollQuestion.objects.prefetch_related('answer_options').all())
+                            Prefetch('questions', queryset=PollQuestion.objects
+                                                                .prefetch_related('answer_options').all())
                         )
                         .first()
                     )
@@ -133,7 +139,16 @@ def my_poll(request):
                 filters &= Q(is_paused=is_paused)
                 filters &= Q(is_closed=is_closed)
 
-                polls = Poll.objects.filter(filters).select_related('author', 'poll_type').order_by('-created_date')
+                polls = (
+                    Poll.objects
+                        .select_related('author', 'poll_type', 'author__user')
+                        .prefetch_related('questions')
+                        .prefetch_related('user_participations')
+                        .filter(filters)
+                        .order_by('-created_date')
+                )
+                
+                
 
                 pagination_data = get_paginated_response(request, polls, MiniPollSerializer)
                 return Response(pagination_data)
@@ -141,8 +156,9 @@ def my_poll(request):
         elif request.method == 'POST':
             # вынести в настройки колво ограничений
             if not my_profile.user.is_staff:
-                if len(my_profile.my_polls.all()) > 10:
-                    raise TooManyInstancesException(detail=f"Вы не можете создавать более {10} опросов.")
+                max_users_polls_quantity = Settings.objects.all().first().max_users_polls_quantity
+                if len(my_profile.my_polls.all()) > max_users_polls_quantity:
+                    raise TooManyInstancesException(detail=f"Вы не можете создавать более {max_users_polls_quantity} опросов.")
 
             data = request.data.copy()
             poll_id = data.get('poll_id', None)
@@ -342,6 +358,7 @@ def my_poll(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_poll: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -399,6 +416,7 @@ def my_poll_settings(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_poll_settings: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_settings: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -408,6 +426,7 @@ def my_poll_stats(request):
     try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
+        # my_profile = Profile.objects.filter(user__id=1).first()
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -423,18 +442,17 @@ def my_poll_stats(request):
                     Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
                         'answer_options'
                     ).all()))
+                    .prefetch_related('all_answers')
+                    .prefetch_related('user_participations')
                     .first()
             )
             
             if not poll:
                 raise ObjectNotFoundException('Poll')
-            poll_members_quantity = (
-                PollAnswerGroup.objects.filter(poll__poll_id=poll_id).count()
-            )
+            poll_members_quantity = poll.user_participations.count()
 
             poll_user_answers = (
-                PollAnswer.objects
-                # poll.user_answers.answers
+                poll.all_answers
                 .filter(poll_answer_group__poll=poll)
                 .select_related('question', 'answer_option', 'poll_answer_group__profile')
             )
@@ -551,6 +569,7 @@ def my_poll_stats(request):
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_poll_stats: {ex}")
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_stats: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -605,6 +624,7 @@ def my_poll_user_answers(request):
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_poll_answers: {ex}")
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_answers: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -658,8 +678,9 @@ def my_poll_question(request):
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
 
-            if len(poll.questions.all()) > 50:
-                raise TooManyInstancesException(model='PollQuestion', limit=50)
+            max_questions_quantity = Settings.objects.all().first().max_questions_quantity
+            if len(poll.questions.all()) > max_questions_quantity:
+                raise TooManyInstancesException(model='PollQuestion', limit=max_questions_quantity)
 
             data['poll'] = poll.id
             last_question = poll.questions.order_by('order_id', 'id').last()
@@ -812,6 +833,7 @@ def my_poll_question(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_poll_question: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_question: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
@@ -889,8 +911,9 @@ def my_poll_question_option(request):
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
-            if len(poll_question.answer_options.all()) > 10:
-                raise TooManyInstancesException(model='PollQuestion', limit=10)
+            max_question_options_quantity = Settings.objects.all().first().max_question_options_quantity
+            if len(poll_question.answer_options.all()) > max_question_options_quantity:
+                raise TooManyInstancesException(model='AnswerOption', limit=max_question_options_quantity)
 
             data['question'] = poll_question.id
 
@@ -1054,6 +1077,7 @@ def my_poll_question_option(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_poll_question_option: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_question_option: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
@@ -1201,6 +1225,7 @@ def poll_voting(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_voting: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
@@ -1217,7 +1242,7 @@ def poll(request):
                 poll = (
                     Poll.objects
                         .filter(Q(poll_id=poll_id) & Q(is_in_production=True))
-                        .select_related('author', 'poll_type')
+                        .select_related('author', 'author__user', 'poll_type')
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
                                 'answer_options'
@@ -1257,10 +1282,7 @@ def poll(request):
                     Poll.objects
                     .select_related('author', 'poll_type', 'author__user')
                     .prefetch_related('questions')
-                    .prefetch_related(
-                        Prefetch('user_answers', queryset=PollAnswerGroup.objects.prefetch_related(
-                            'answers'
-                        ).all()))
+                    .prefetch_related('user_participations')
                     .filter(filters)  
                 )
 
@@ -1272,6 +1294,7 @@ def poll(request):
             return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
         
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -1324,6 +1347,7 @@ def my_poll_users_votes(request):
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_poll_users_votes: {ex}")
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_users_votes: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -1438,6 +1462,7 @@ def my_support_requests(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в support_request: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в support_request: {ex}"},
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 

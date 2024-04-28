@@ -1,14 +1,12 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from functools import partial
-from datetime import timedelta
 
 from .validators import *
 from .models import *
-from .utils import generate_poll_qr, get_qrcode_img_bytes, is_web3_connected, createPoll
+from .utils import generate_poll_qr, get_qrcode_img_bytes
 from .exсeptions import *
 
-from qpoll.settings import w3, contract
 
 class MiniUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -223,17 +221,7 @@ class BasePollSerializer(serializers.ModelSerializer):
     description = serializers.CharField(validators=[BaseValidator.description], required=False)
     tags = serializers.CharField(validators=[BaseValidator.description], required=False)
     image = serializers.ImageField(validators=[BaseValidator.image], required=False)
-    duration = serializers.DurationField(validators=[PollValidator.duration], required=False)
-    # has_correct_answer = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # has_multiple_choices = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # is_anonymous = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # can_cancel_vote = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # mix_questions = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # mix_options = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # hide_participants_quantity = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # hide_options_percentage = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # is_paused = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)
-    # is_closed = serializers.BooleanField(validators=[BaseValidator.bolean], required=False)    
+    duration = serializers.DurationField(validators=[PollValidator.duration], required=False)  
     
     is_in_production = serializers.BooleanField(validators=[PollValidator.is_in_production], required=False)    
 

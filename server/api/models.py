@@ -54,7 +54,7 @@ class PollType(models.Model):
 
 class PollAnswer(models.Model):
     poll_answer_group = models.ForeignKey('PollAnswerGroup', related_name='answers', on_delete=models.CASCADE)
-    # poll = models.ForeignKey('Poll', related_name='all_answers', on_delete=models.CASCADE)
+    poll = models.ForeignKey('Poll', related_name='all_answers', on_delete=models.CASCADE, db_index=True)
     question = models.ForeignKey('PollQuestion', on_delete=models.CASCADE)
     answer_option = models.ForeignKey('AnswerOption', on_delete=models.CASCADE)
     is_correct = models.BooleanField(default=None, null=True)
