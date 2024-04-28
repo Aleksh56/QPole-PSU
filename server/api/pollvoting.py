@@ -176,6 +176,7 @@ def save_votes(answers, poll, my_profile, raw_answers):
 
     for answer in data:
         answer['poll_answer_group'] = poll_answer_group
+        answer['poll'] = poll
         question_id = answer['question']
         question = questions_dict.get(question_id)
         if question:
