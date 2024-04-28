@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from functools import partial
+from datetime import timedelta
 
 from .validators import *
 from .models import *
@@ -319,6 +320,47 @@ class MiniPollSerializer(BasePollSerializer):
     class Meta:
         model = Poll
         exclude = ['qrcode']
+
+
+class PollSettingsSerializer(serializers.ModelSerializer):
+    completion_time = serializers.DurationField(validators=[BasePollSettingsValidator.completion_time])
+    start_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.start_time])
+    end_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.end_time])
+    duration = serializers.DurationField(validators=[BasePollSettingsValidator.duration])
+
+    max_revotes_quantity = serializers.IntegerField(validators=[partial(BasePollSettingsValidator.max_revotes_quantity, num=10)])
+
+    # если установлена длительноть доступа к опросу, то обнулить end_time
+    def set_duration(self, value):
+        if value:
+            if self.instance.end_time:
+                self.instance.end_time = None
+            
+    # если установлен end_time, то обнулить duration
+    def set_end_time(self, value):
+        if value:
+            if self.instance.duration:
+                self.instance.duration = None
+
+    def create(self, validated_data):
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+
+        return super().create(validated_data)  
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
+
+    class Meta:
+        model = PollSettings
+        fields = '__all__'
 
 
 # сериализаторы воросов

@@ -156,7 +156,6 @@ def save_votes(answers, poll, my_profile, raw_answers):
                 'poll': poll.id,
     }
 
-    print(poll_participation_group_data)
     poll_participation_group = PollParticipantsGroupSerializer(data=poll_participation_group_data)
     if poll_participation_group.is_valid():
         poll_participation_group = poll_participation_group.save()

@@ -154,12 +154,11 @@ class Poll(models.Model):
     description = models.TextField(blank=True, null=True) # текст начать опрос
     tags = models.TextField(blank=True, null=True) # тэги
 
-    poll_type = models.ForeignKey(PollType, on_delete=models.CASCADE, blank=True, null=True) # тип опроса
-    created_date = models.DateTimeField(auto_now_add=True) # дата создания
-    duration = models.DurationField(blank=True, null=True) # таймер
+    poll_type = models.ForeignKey(PollType, related_name='poll', on_delete=models.CASCADE, null=True) # тип опроса
+    poll_setts = models.OneToOneField('PollSettings', on_delete=models.SET_NULL, null=True) # настройки опроса
 
-    has_multiple_choices = models.BooleanField(default=True) # множественный выбор
-    has_correct_answer = models.BooleanField(default=False) # есть ли верные ответы или опрос
+    created_date = models.DateTimeField(auto_now_add=True) # дата создания
+
     is_anonymous = models.BooleanField(default=False) # анонимное
 
     is_revote_allowed = models.BooleanField(default=False) # разрешить повторное
@@ -183,17 +182,6 @@ class Poll(models.Model):
             return f"Опрос '{self.name}'"
         else:
             return f"Опрос №{self.id}"
-    
-    def __init__(self, *args, **kwargs):
-        # if self.poll_type:
-        #     self.has_multiple_choices = self.poll_type.has_multiple_choices
-        #     self.has_correct_answer = self.poll_type.has_correct_answer
-        #     self.is_anonymous = self.poll_type.is_anonymous
-
-        #     if self.poll_type.name == 'Летучка':
-        #         self.duration = self.poll_type.duration
-        
-        super().__init__(*args, **kwargs)
 
         
     # Проверка наличия участия пользователя в опросе
@@ -226,9 +214,32 @@ class Poll(models.Model):
 
     @property
     def opened_for_voting(self):   # доступно ли для голосования по времени
-        if self.duration:     
-            return timezone.now() < self.created_date + self.duration
-        else: return True
+        return True
+    
+        if self.poll_setts:
+            if self.poll_setts.start_time and self.poll_setts.end_time:
+                return (timezone.now() > self.poll_setts.start_time
+                        and timezone.now() < self.poll_setts.end_time)
+
+            if self.poll_setts.duration:     
+                return timezone.now() < self.created_date + self.poll_setts.duration
+            else: return True
+        else:
+            return True
+
+
+class PollSettings(models.Model):
+
+    max_revotes_quantity = models.PositiveSmallIntegerField(default=2)
+
+    # настройки времени
+    completion_time = models.DurationField(null=True) # время на прохождение
+    duration = models.DurationField(null=True) # время с момента start_time в течение которого доступен опрос
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return f"Настройки {self.poll}"
 
 
 class SupportRequestType(models.Model):

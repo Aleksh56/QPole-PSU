@@ -11,7 +11,8 @@ from api.serializers import PollSerializer, SupportRequestSerializer
 from api.models import *
 from api.utils import *
 
-from .serializers import ProfileSerializer
+from .serializers import *
+from .models import *
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -303,5 +304,50 @@ def support_request(request):
         return Response({'message':f"Внутренняя ошибка сервера в adnmin_api support_request: {ex}"},
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAdminUser])
+@transaction.atomic
+def project_settings(request):
+    try:
+        if request.method == 'GET':
+
+            settings = Settings.objects.all().first()
+            if not settings:
+                raise ObjectNotFoundException(model='Settings')
+                        
+            
+            serializer = ProjectSettingsSerializer(settings)
+            return Response(serializer.data)
+
+        elif request.method == 'PATCH':
+            data = request.data
+
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+            
+            settings = Settings.objects.all().first()
+            if not settings:
+                raise ObjectNotFoundException(model='Settings')
+    
+            serializer = ProjectSettingsSerializer(instance=settings, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+
+    
+    except PollValidationException as exception:
+        return Response(exception.detail, exception.status_code)
+    
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в admin project_settings: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

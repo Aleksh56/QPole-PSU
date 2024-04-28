@@ -2,7 +2,10 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from api.models import Profile, SupportRequest, SupportRequestType
+from .models import *
+from .validators import *
 
+from functools import partial
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,3 +37,15 @@ class SupportRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupportRequest
         fields = '__all__'
+
+
+class ProjectSettingsSerializer(serializers.ModelSerializer):
+    max_questions_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=100)])
+    min_questions_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=1)])
+    max_question_options_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=15)])
+    min_question_options_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=1)])
+    
+    class Meta:
+        model = Settings
+        fields = '__all__'
+

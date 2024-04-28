@@ -345,6 +345,63 @@ def my_poll(request):
         return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def my_poll_settings(request):
+    try:
+        current_user = request.user
+        my_profile = Profile.objects.filter(user=current_user).first()
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+
+            if poll_id:
+                poll_setts = PollSettings.objects.filter(
+                    Q(poll__poll_id=poll_id) and Q(poll__author=my_profile)
+                ).first()
+                         
+                if not poll_setts:
+                    raise ObjectNotFoundException(model='PollSettings')
+                
+                serializer = PollSettingsSerializer(poll_setts)
+                return Response(serializer.data)
+
+        elif request.method == 'PATCH':
+            data = request.data
+
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+            
+            poll_setts = PollSettings.objects.filter(
+                    Q(poll__poll_id=poll_id) and Q(poll__author=my_profile)
+                ).first()
+            if not poll_setts:
+                raise ObjectNotFoundException(model='PollSettings')
+    
+            serializer = PollSettingsSerializer(instance=poll_setts, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+
+    
+    except PollValidationException as exception:
+        return Response(exception.detail, exception.status_code)
+    
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в my_poll_settings: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_poll_stats(request):

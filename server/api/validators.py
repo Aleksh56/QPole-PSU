@@ -3,7 +3,9 @@ from rest_framework.validators import UniqueValidator
 from .exсeptions import PollValidationException
 from api.utils import check_file
 
-from math import ceil
+from datetime import datetime, timedelta
+
+import re
 
 class BaseValidator:
 
@@ -94,18 +96,43 @@ class PollValidator(BaseValidator):
             if value == False:
                 raise ValidationError("Нельзя убрать опрос из продакшена, можно только удалить сам опрос.")
 
+class BasePollSettingsValidator(BaseValidator):
+
+    def max_revotes_quantity(value, num=None):
+        if num:
+            if value > num:
+                raise ValidationError(f"Количество повторных голосований не может превышать {num}")
+        else:
+            if value > 5:
+                raise ValidationError(f"Количество повторных голосований ответа не может быть более {10}")
+            
+    def completion_time(value):
+        if value >= timedelta(hours=24):
+            raise ValidationError("Время прохождения опроса не может превышать 24 часа.")
+        
+    def duration(value):
+        if value >= timedelta(hours=24):
+            raise ValidationError("Длительность не может превышать 24 часа.")
+    
+    def start_time(value):
+        current_time = datetime.now(value.tzinfo)
+        if value < current_time:
+            raise ValidationError("Время начала не может быть раньше текущего времени.")
+        
+    def end_time(value):
+        current_time = datetime.now(value.tzinfo)
+        if value < current_time:
+            raise ValidationError("Время начала не может быть раньше текущего времени.")
+
+
 
 def is_number_valid(value):
-    import re
-
     pattern = r'^(\+7|8)[\d]{10}$'
     if re.match(pattern, value):
         return True
     return False
 
 def is_email_valid(value):
-    import re
-
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if re.match(pattern, value):
         return True
