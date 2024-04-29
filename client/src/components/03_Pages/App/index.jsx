@@ -1,16 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import AppCreateFirstPoll from '@/components/05_Features/AppCreateFirstPoll';
+import InboxIcon from '@mui/icons-material/Inbox';
+import { CircularProgress } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { getAllPoles } from './api/apiRequests';
+import { _settings } from './config/settings';
+import {
+  ContentWrapper,
+  PollsGrid,
+  PollsGridWrapper,
+  StyledAppContentWrapper,
+  StyledArchiveLink,
+} from './styled';
+
 import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
 import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
+import AppCreateFirstPoll from '@/components/05_Features/AppCreateFirstPoll';
 import AppPoleCard from '@/components/07_Shared/DataDisplay/Cards/appPoleCard';
-import { getAllPoles } from './api/apiRequests';
-import { Link } from 'react-router-dom';
-import { ContentWrapper, PollsGrid, StyledAppContentWrapper, StyledArchiveLink } from './styled';
-import { _settings } from './config/settings';
-import { CircularProgress, Box } from '@mui/material';
-import InboxIcon from '@mui/icons-material/Inbox';
-import usePageTitle from '@/hooks/usePageTitle';
 import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
+import usePageTitle from '@/hooks/usePageTitle';
 import usePagination from '@/hooks/usePagination';
 
 const AppPage = () => {
@@ -48,17 +56,7 @@ const AppPage = () => {
               <InboxIcon />
               Архив
             </StyledArchiveLink>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                rowGap: '30px',
-                '@media (max-width: 768px)': {
-                  padding: '20px',
-                },
-              }}
-            >
+            <PollsGridWrapper>
               <PollsGrid>
                 {pollData &&
                   pollData
@@ -76,7 +74,7 @@ const AppPage = () => {
                 handlePageChange={handlePageChange}
                 handlePageSizeChange={handlePageSizeChange}
               />
-            </Box>
+            </PollsGridWrapper>
           </ContentWrapper>
         </StyledAppContentWrapper>
       )}

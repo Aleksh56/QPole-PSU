@@ -1,17 +1,17 @@
-import { defineConfig } from 'vite';
+import { babel } from '@rollup/plugin-babel';
 import react from '@vitejs/plugin-react';
 import copy from 'rollup-plugin-copy';
-import { babel } from '@rollup/plugin-babel';
+import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react(), // Handles JSX, Fast Refresh
+    react(),
     babel({
       babelHelpers: 'runtime',
       exclude: 'node_modules/**',
-      extensions: ['.js', '.jsx', '.es6', '.es', '.mjs', 'cjs'],
-      presets: [['@babel/preset-env', { modules: false }], '@babel/preset-react'],
+      extensions: ['.js', '.jsx', '.es6', '.es', '.mjs'],
+      presets: [['@babel/preset-env', { modules: false }]],
       plugins: [
         [
           '@babel/plugin-transform-runtime',
@@ -37,6 +37,7 @@ export default defineConfig({
       '@features': '/src/features',
       '@pages': '/src/pages',
       '@shared': '/src/shared',
+      '@locale': '/src/locale',
       '@utils': '/src/utils',
       '@widgets': '/src/widgets',
       '@constants': '/src/constants',

@@ -1,5 +1,6 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogTitle, Typography, Box } from '@mui/material';
+import { Box, Dialog, DialogContent, DialogTitle, Typography } from '@mui/material';
+
+import { nameReducer } from '@/utils/js/nameReducer';
 
 const FrmOtherResults = ({ open, onClose, data }) => {
   const filteredData = data.answer_options.filter((option) => option.is_free_response);
@@ -13,23 +14,22 @@ const FrmOtherResults = ({ open, onClose, data }) => {
             <Box
               key={index}
               sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
+                display: 'grid',
+                gridTemplateColumns: '0.35fr 1fr',
                 padding: '8px 0',
                 borderBottom: index < data.length - 1 ? '1px solid #e0e0e0' : 'none',
               }}
             >
-              <Typography variant="body1" component="span">
-                {item.name}
+              <Typography variant="body1" component="p">
+                {nameReducer(item.name)}
               </Typography>
-              <Typography variant="body2" component="span">
+              <Typography variant="body2" component="p">
                 {item.text}
-                {/* Fix for long text */}
               </Typography>
             </Box>
           ))
         ) : (
-          <p>Ответов "Другое" не найдено</p>
+          <p>Ответов &apos;Другое&apos; не найдено</p>
         )}
       </DialogContent>
     </Dialog>

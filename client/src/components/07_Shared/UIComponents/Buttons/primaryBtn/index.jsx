@@ -1,11 +1,12 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
+
 import { StyledButton } from './styled';
 
 const PrimaryButton = ({
   caption = '',
   handleClick = () => {},
   to,
+  disabled = false,
   ...linkProps
 }) => {
   const buttonElement = to ? (
@@ -13,7 +14,9 @@ const PrimaryButton = ({
       <StyledButton onClick={handleClick}>{caption}</StyledButton>
     </Link>
   ) : (
-    <StyledButton onClick={handleClick}>{caption}</StyledButton>
+    <StyledButton onClick={handleClick} disabled={disabled}>
+      {caption}
+    </StyledButton>
   );
 
   return buttonElement;

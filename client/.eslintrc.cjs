@@ -1,7 +1,6 @@
 module.exports = {
   root: true,
   env: { browser: true, es2020: true, node: true },
-  parser: '@babel/eslint-parser',
   extends: [
     'eslint:recommended',
     'plugin:prettier/recommended',
@@ -12,7 +11,7 @@ module.exports = {
   ignorePatterns: ['dist', '.eslintrc.js'],
   parserOptions: {
     requireConfigFile: false,
-    ecmaVersion: 'latest',
+    ecmaVersion: 2020,
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
@@ -32,6 +31,7 @@ module.exports = {
           ['@hooks', './src/hooks'],
           ['@config', './src/config'],
           ['@constants', './src/constants'],
+          ['@locale', './src/locale'],
         ],
         extensions: ['.js', '.jsx', '.json'],
       },
@@ -40,15 +40,16 @@ module.exports = {
   plugins: ['react', 'react-refresh', 'import'],
   rules: {
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-    'prettier/prettier': ['error', { endOfLine: 'auto' }],
     'no-unused-vars': ['warn'],
-    'import/no-unresolved': 'error',
+    'react/prop-types': 'off',
     'import/order': [
       'error',
       {
         groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
         'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
       },
     ],
+    'import/newline-after-import': ['error', { count: 1 }],
   },
 };

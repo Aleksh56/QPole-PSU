@@ -1,6 +1,8 @@
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
-import { Typography, Box, Grid } from '@mui/material';
+
 import { DescriptionTagsWrapper, DescriptionWrapper, GraphWrapper, HeaderWrapper } from './styled';
+
 import CustomGauge from '@/components/07_Shared/DataDisplay/Charts/gauge';
 import { pollResTableFlds } from '@/data/fields';
 
@@ -29,12 +31,12 @@ const PollResultHeader = ({ res, data }) => {
         >
           {pollResTableFlds.map((item) => (
             <>
-              <Grid item xs={11} sx={{ padding: '2px' }}>
+              <Grid item xs={10} sx={{ padding: '2px' }}>
                 <Typography sx={{ fontSize: '13px', fontWeight: 'bold' }}>
                   {item.caption}
                 </Typography>
               </Grid>
-              <Grid item xs={1} sx={{ padding: '2px' }}>
+              <Grid item xs={2} sx={{ padding: '2px' }}>
                 <Typography sx={{ fontSize: '13px' }}>{res[item.field]}</Typography>
               </Grid>
             </>

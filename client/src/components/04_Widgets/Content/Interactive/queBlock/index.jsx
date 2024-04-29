@@ -1,28 +1,31 @@
-import React, { useEffect, useState } from 'react';
 import {
-  RadioGroup,
+  Checkbox,
   FormControlLabel,
   Radio,
-  Checkbox,
-  Typography,
+  RadioGroup,
   TextField,
+  Typography,
 } from '@mui/material';
+import { useEffect, useState } from 'react';
+
+import { StyledFormControl } from './styled';
+
 import {
   updateAnswer,
   updateMultipleAnswer,
-  resetAnswers,
 } from '@/components/03_Pages/Polls/ConductionPoll/store/answer-store';
 import { shuffleArray } from '@/utils/js/shuffleArray';
-import { StyledFormControl } from './styled';
 
-const QueBlock = ({ question, isMixed }) => {
+const QueBlock = ({ question, isMixed, setIsLong }) => {
   const [selectedValue, setSelectedValue] = useState('');
   const [selectedValues, setSelectedValues] = useState([]);
   const [fieldValue, setFieldValue] = useState('');
   const [options, setOptions] = useState(question.answer_options ?? []);
+  const [isTextLong, setIsTextLong] = useState(false);
 
   useEffect(() => {
     if (isMixed) {
+      console.log(111);
       const shuffled = shuffleArray([...question.answer_options]);
       const index = shuffled.findIndex((option) => option.order_id === 16);
       if (index !== -1) {
@@ -31,7 +34,7 @@ const QueBlock = ({ question, isMixed }) => {
       }
       setOptions(shuffled);
     }
-  }, [question]);
+  }, [isMixed, question]);
 
   const handleMultipleChoiceChange = (event, opt_id) => {
     const { checked } = event.target;
@@ -56,6 +59,8 @@ const QueBlock = ({ question, isMixed }) => {
     setSelectedValues([]);
     setFieldValue(value);
     updateMultipleAnswer({ answer_option: opt_id, question: question.id, text: value });
+    setIsTextLong(value.length > 100);
+    setIsLong(value.length > 100);
   };
 
   return (
@@ -64,11 +69,14 @@ const QueBlock = ({ question, isMixed }) => {
       {question.is_free ? (
         options.map((option) => (
           <TextField
+            key={option.id}
             label="Мой ответ"
             variant="outlined"
             fullWidth
+            error={isTextLong}
             value={fieldValue || ''}
             id={String(option.id)}
+            helperText={isTextLong ? 'Длина ответа не должна превышать 100 символов !' : ''}
             onChange={(e) => handleTextChange(e, option.id)}
             sx={{ marginTop: '10px' }}
           />
@@ -87,7 +95,9 @@ const QueBlock = ({ question, isMixed }) => {
                 label="Введите ваш ответ"
                 variant="outlined"
                 fullWidth
+                error={isTextLong}
                 value={fieldValue || ''}
+                helperText={isTextLong ? 'Длина ответа не должна превышать 100 символов !' : ''}
                 onChange={(e) => handleTextChange(e, option.id)}
                 sx={{ marginTop: '10px' }}
               />
@@ -107,7 +117,7 @@ const QueBlock = ({ question, isMixed }) => {
                 }
                 label={option.name}
               />
-            )
+            ),
           )}
         </RadioGroup>
       )}

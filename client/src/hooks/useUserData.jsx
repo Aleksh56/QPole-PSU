@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { useUserRole } from '@app/context/UserRoleProvider';
+import { useEffect, useState } from 'react';
 
 import useAuth from './useAuth';
 

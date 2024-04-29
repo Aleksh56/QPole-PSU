@@ -1,13 +1,15 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from '@/components/03_Pages/Home';
-import AuthPage from '@/components/03_Pages/Auth';
 import AppPageRoutes from '@routes/AppPageRoutes';
 import { PrivateRoute } from '@routes/PrivateRoute';
-import PollListPage from '@/components/03_Pages/Polls/PollList';
-import ConductionPollPage from './components/03_Pages/Polls/ConductionPoll';
-import FrmRestore from '@/components/04_Widgets/Data/Forms/frmRestore';
-import AdminPanelPage from './components/03_Pages/Admin';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+
 import AdminPrivateRoute from './app/Routes/AdminPrivateRoute';
+import AdminPanelPage from './components/03_Pages/Admin';
+import ConductionPollPage from './components/03_Pages/Polls/ConductionPoll';
+
+import AuthPage from '@/components/03_Pages/Auth';
+import HomePage from '@/components/03_Pages/Home';
+import PollListPage from '@/components/03_Pages/Polls/PollList';
+import FrmRestore from '@/components/04_Widgets/Data/Forms/frmRestore';
 
 const App = () => {
   return (

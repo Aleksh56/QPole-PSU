@@ -1,17 +1,21 @@
-import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
-import React, { useEffect, useState } from 'react';
-import { fetchPollQuestions } from './model/fetch-questions';
+import { useUnit } from 'effector-react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
+import PollResult from '../PollResult';
+
+import { fetchPollQuestions } from './model/fetch-questions';
+import { sendAnswersRequestFx } from './model/send-answers';
+import { $answersStore, resetAnswers } from './store/answer-store';
+import { ConductionBackgroundWrapper, ConductionWrapper } from './styled';
+
+import { useAlert } from '@/app/context/AlertProvider';
 import ConductionHeader from '@/components/04_Widgets/Content/Display/conductionHeader';
 import QueBlock from '@/components/04_Widgets/Content/Interactive/queBlock';
-import { ConductionBackgroundWrapper, ConductionWrapper } from './styled';
-import { useUnit } from 'effector-react';
-import { $answersStore, resetAnswers } from './store/answer-store';
-import { sendAnswersRequestFx } from './model/send-answers';
+import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
+import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import useAuth from '@/hooks/useAuth';
 import { shuffleArray } from '@/utils/js/shuffleArray';
-import PollResult from '../PollResult';
-import { useAlert } from '@/app/context/AlertProvider';
 
 const ConductionPollPage = () => {
   const { id } = useParams();
@@ -22,6 +26,8 @@ const ConductionPollPage = () => {
   const [pollData, setPollData] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState({});
+  const [isTextLong, setIsTextLong] = useState(false);
+  const [isSubmitEnabled, setIsSubmitEnabled] = useState(true);
 
   useEffect(() => {
     if (isLoading) return;
@@ -39,6 +45,18 @@ const ConductionPollPage = () => {
     };
     pollDataRequest();
   }, [isLoading, isAuthenticated, id]);
+
+  useEffect(() => {
+    const requiredQuestions = pollData.questions
+      ?.filter((q) => q.is_required)
+      .map((item) => item.id);
+    const answersSelected = answers.map((item) => item.question);
+
+    const areAllRequiredAnswered = requiredQuestions?.every((item) =>
+      answersSelected.includes(item),
+    );
+    setIsSubmitEnabled(areAllRequiredAnswered);
+  }, [pollData.questions, answers]);
 
   const handleSubmit = async () => {
     const response = await sendAnswersRequestFx({ answers, id });
@@ -65,9 +83,18 @@ const ConductionPollPage = () => {
           <>
             <ConductionHeader data={pollData} />
             {pollData?.questions?.map((item) => (
-              <QueBlock question={item} isMixed={pollData?.mix_options} />
+              <QueBlock
+                key={item.id}
+                question={item}
+                isMixed={pollData?.mix_options}
+                setIsLong={setIsTextLong}
+              />
             ))}
-            <button onClick={() => handleSubmit()}>Send</button>
+            <PrimaryButton
+              caption="Отправить"
+              handleClick={() => handleSubmit()}
+              disabled={!isSubmitEnabled || isTextLong}
+            />
           </>
         )}
       </ConductionWrapper>

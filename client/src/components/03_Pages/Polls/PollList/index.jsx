@@ -1,12 +1,14 @@
-import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
-import PollFilters from '@/components/04_Widgets/Content/Interactive/pollFilters';
-import React, { useEffect, useState } from 'react';
-import { ContentWrapper, PollListPageContentWrapper } from './styled';
-import PollListOutput from '@/components/04_Widgets/PollList/PollListOutput';
+import { useEffect, useState } from 'react';
+
 import { fetchAllPollsFx } from './model/fetch-polls';
+import { ContentWrapper, PollListPageContentWrapper } from './styled';
+
+import PollFilters from '@/components/04_Widgets/Content/Interactive/pollFilters';
+import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
+import PollListOutput from '@/components/04_Widgets/PollList/PollListOutput';
 import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
-import usePagination from '@/hooks/usePagination';
 import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
+import usePagination from '@/hooks/usePagination';
 
 const PollListPage = () => {
   const [polls, setPolls] = useState([]);

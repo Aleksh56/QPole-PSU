@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper, InfoButton } from './styled';
-import { PieChart, BarChart, LineChart } from '@mui/x-charts';
 import { Box } from '@mui/material';
+import { BarChart, LineChart, PieChart } from '@mui/x-charts';
+import React, { useState } from 'react';
+
 import FrmOtherResults from '../frmOtherResults';
+
+import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper, InfoButton } from './styled';
 
 const PollResultCard = ({ data, chartType }) => {
   const [infoOpen, setInfoOpen] = useState(false);
