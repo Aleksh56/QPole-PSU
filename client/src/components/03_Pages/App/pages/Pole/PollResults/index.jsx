@@ -9,7 +9,8 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
 import PollResultsPDF from '@/components/06_Entities/pollResultsPDF';
-import NoResultsPoll from '@/components/05_Features/NoResultsPoll';
+import NoDataHelper from '@/components/07_Shared/UIComponents/Utils/Helpers/noDataHelper';
+import PollResultsSVG from '@assets/Analytics.svg';
 
 const PollResultsPage = () => {
   const { id } = useParams();
@@ -47,7 +48,11 @@ const PollResultsPage = () => {
       </ResultsGridWrapper>
     </Wrapper>
   ) : (
-    <NoResultsPoll />
+    <NoDataHelper
+      title="Результатов еще нет"
+      description="Результаты появятся после первого прохождения опроса"
+      image={PollResultsSVG}
+    />
   );
 };
 

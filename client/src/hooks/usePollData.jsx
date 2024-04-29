@@ -1,8 +1,7 @@
 import { handleRequest } from '@/api/api';
 import { useState, useEffect } from 'react';
 
-const usePollType = (pollId) => {
-  //TODO - Переписать usePollType -> usePollData
+const usePollData = (pollId) => {
   const [pollType, setPollType] = useState(null);
   const [pollStatus, setPollStatus] = useState(false);
   const [isMultiple, setIsMultiple] = useState(null);
@@ -20,4 +19,4 @@ const usePollType = (pollId) => {
   return { pollType, pollStatus, isMultiple };
 };
 
-export default usePollType;
+export default usePollData;

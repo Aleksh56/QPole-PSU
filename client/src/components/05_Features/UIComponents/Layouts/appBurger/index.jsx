@@ -1,0 +1,46 @@
+import React from 'react';
+import {
+  BurgerList,
+  LinkWrapper,
+  StyledDrawer,
+  UserEmail,
+  UserInfo,
+  UserRole,
+  UserWrapper,
+} from './styled';
+import { Avatar, Typography } from '@mui/material';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import { appHeaderData } from '@/data/fields';
+import { v4 } from 'uuid';
+
+const AppBurgerMenu = ({ drawerOpen, toggleDrawer, userData, role }) => {
+  return (
+    <StyledDrawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+      <BurgerList>
+        <UserWrapper to={'/app/profile'}>
+          <Avatar src="/static/images/avatar/1.jpg" />
+          <UserInfo>
+            <UserEmail>{userData?.email ?? ''}</UserEmail>
+            <UserRole>{role}</UserRole>
+          </UserInfo>
+          <KeyboardArrowRightIcon />
+        </UserWrapper>
+        {appHeaderData.map((item) => (
+          <LinkWrapper key={v4()} to={item.to}>
+            <item.icon />
+            <Typography>{item.caption}</Typography>
+          </LinkWrapper>
+        ))}
+        {role === 'Админ' && (
+          <LinkWrapper key={v4()} to="/admin-panel">
+            <AdminPanelSettingsIcon />
+            <Typography>Админ-панель</Typography>
+          </LinkWrapper>
+        )}
+      </BurgerList>
+    </StyledDrawer>
+  );
+};
+
+export default AppBurgerMenu;

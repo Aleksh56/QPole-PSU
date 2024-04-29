@@ -10,7 +10,6 @@ import {
 import CreatePoleIllustration from '@assets/createPole.svg';
 
 const AppCreateFirstPoll = ({ settings = {}, handleOpenCreatePoleModal = () => {} }) => {
-  // TODO - переделать в один компонент с остальными иллюстрациями
   return (
     <StyledHeroWrapper>
       <StyledLeftColumn>

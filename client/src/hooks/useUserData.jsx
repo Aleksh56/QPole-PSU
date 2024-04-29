@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { handleRequest } from '@/api/api';
+import { useUserRole } from '@app/context/UserRoleProvider';
+
 import useAuth from './useAuth';
-import { useUserRole } from '@/app/context/UserRoleProvider';
+
+import { handleRequest } from '@/api/api';
 
 const useUserData = () => {
   const [userData, setUserData] = useState(null);

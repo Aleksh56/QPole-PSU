@@ -10,7 +10,7 @@ export default defineConfig({
     babel({
       babelHelpers: 'runtime',
       exclude: 'node_modules/**',
-      extensions: ['.js', '.jsx', '.es6', '.es', '.mjs'],
+      extensions: ['.js', '.jsx', '.es6', '.es', '.mjs', 'cjs'],
       presets: [['@babel/preset-env', { modules: false }], '@babel/preset-react'],
       plugins: [
         [

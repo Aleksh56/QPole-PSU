@@ -7,11 +7,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { publishPollFx } from './model/publish-poll';
 import { useAlert } from '@/app/context/AlertProvider';
 import FrmShare from '@/components/04_Widgets/Data/Forms/frmShare';
-import usePollType from '@/hooks/usePollType';
+import usePollData from '@/hooks/usePollData';
 
 const PollSettingsMenuNavigation = ({ buttons }) => {
   const { id } = useParams();
-  const { pollStatus } = usePollType(id);
+  const { pollStatus } = usePollData(id);
   const { showAlert } = useAlert();
   const [isPublished, setIsPublished] = useState(pollStatus);
   const [successOpen, setSuccessOpen] = useState(false);

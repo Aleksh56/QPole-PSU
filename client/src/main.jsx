@@ -17,5 +17,5 @@ root.render(
         <App />
       </UserRoleProvider>
     </AuthProvider>
-  </AlertProvider>
+  </AlertProvider>,
 );

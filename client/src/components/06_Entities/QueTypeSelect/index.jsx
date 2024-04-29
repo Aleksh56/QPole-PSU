@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import { TypeSelect } from './styled';
 import { useParams } from 'react-router-dom';
-import usePollType from '@/hooks/usePollType';
 import { changePollTypeFx } from './models/change-poll-type';
 import { RadioButtonChecked, CheckBox, ShortText } from '@mui/icons-material';
 
 const QueTypeSelect = ({ question, questionType, setQuestionType, setQuestion }) => {
   const { id } = useParams();
-  const { pollType, isMultiple } = usePollType(id);
 
   const queTypes = [
     {

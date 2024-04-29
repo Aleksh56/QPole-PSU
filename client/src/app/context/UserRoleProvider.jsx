@@ -5,9 +5,7 @@ const UserRoleContext = createContext();
 export const UserRoleProvider = ({ children }) => {
   const [role, setRole] = useState(null);
 
-  const setUserRole = (newRole) => {
-    setRole(newRole);
-  };
+  const setUserRole = (newRole) => setRole(newRole);
 
   return (
     <UserRoleContext.Provider value={{ role, setUserRole }}>{children}</UserRoleContext.Provider>

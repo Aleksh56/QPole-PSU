@@ -21,7 +21,7 @@ import {
 } from './api/apiRequests';
 import { useParams } from 'react-router-dom';
 import { DeleteOutline, DragIndicator } from '@mui/icons-material';
-import usePollType from '@/hooks/usePollType';
+import usePollData from '@/hooks/usePollData';
 import { deleteImageFx } from './model/delete-image';
 import { QueSettingsWrapper } from './styled';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
@@ -36,7 +36,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   const [questionType, setQuestionType] = useState('Один ответ');
   const [isFreeResponse, setIsFreeResponse] = useState(false);
   const [isRequired, setIsRequired] = useState(false);
-  const { pollType } = usePollType(id);
+  const { pollType } = usePollData(id);
 
   useEffect(() => {
     const correctOptions = question.answer_options.filter((option) => option.is_correct);

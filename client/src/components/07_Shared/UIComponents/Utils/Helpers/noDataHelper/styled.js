@@ -25,6 +25,14 @@ export const StyledTypography = styled(Typography)(() => ({
 
 export const StyledDescription = styled(Typography)(() => ({}));
 
+export const StyledButton = styled(Button)(() => ({
+  backgroundColor: '#007bff',
+  color: '#fff',
+  padding: `${Rem(10)} ${Rem(20)}`,
+  border: 'none',
+  cursor: 'pointer',
+}));
+
 export const StyledInfoWrapper = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr 0.75fr',
