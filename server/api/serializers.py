@@ -420,7 +420,7 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         question = self.instance.question
         if value:
             # если выбран верным вариант ответа, то делаем неверным свободный вариант ответа
-            free_option = question.answer_options.filter(is_free=True).first()
+            free_option = question.answer_options.filter(is_free_response=True).first()
             if free_option and free_option.is_correct:
                 free_option.is_correct = False
                 free_option.save()
