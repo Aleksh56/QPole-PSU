@@ -72,8 +72,41 @@ class PollAnswerGroup(models.Model):
     tx_hash = models.CharField(max_length=255, default=None, null=True)
 
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
+
     voting_date = models.DateTimeField(auto_now_add=True)
     # voting_finish = models.DateTimeField(default=None, null=True)
+
+    @property
+    def voting_time_left(self):
+        seconds_left = self.poll.time_left
+        if not seconds_left or not isinstance(seconds_left, tuple):
+            seconds_left = None
+        else:
+            seconds_left = seconds_left[1]
+
+        end_time = None
+        if self.poll.poll_setts.completion_time:
+            end_time = self.voting_date + self.poll.poll_setts.completion_time
+        elif self.poll.poll_setts.duration:
+            end_time = self.voting_date + self.poll.poll_setts.duration
+
+        if end_time:
+            current_time = timezone.now()
+            time_left = end_time - current_time
+            if time_left.total_seconds() < 0:
+                return "0 00:00:00", 0
+            else:
+                if seconds_left:
+
+                    time_left = min(time_left, timezone.timedelta(seconds=seconds_left))
+
+                days = time_left.days
+                hours, remainder = divmod(time_left.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                return "{:01} {:02}:{:02}:{:02}".format(days, hours, minutes, seconds), time_left.total_seconds()
+        else:
+            return None
+        
 
 
     def __str__(self):
@@ -183,7 +216,33 @@ class Poll(models.Model):
             return f"Опрос '{self.name}'"
         else:
             return f"Опрос №{self.id}"
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.poll_setts:
+            self.poll_setts = PollSettings.objects.create()
 
+    
+    @property
+    def time_left(self):
+        end_time = None
+        if self.poll_setts.end_time:
+            end_time = self.poll_setts.end_time
+        elif self.poll_setts.duration:
+            end_time = self.poll_setts.start_time + self.poll_setts.duration
+
+        if end_time:
+            current_time = timezone.now()
+            time_left = end_time - current_time
+            if time_left.total_seconds() < 0:
+                return "0 00:00:00", 0
+            else:
+                days = time_left.days
+                hours, remainder = divmod(time_left.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                return "{:01} {:02}:{:02}:{:02}".format(days, hours, minutes, seconds), time_left.total_seconds()
+        else:
+            return None
         
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):
@@ -214,17 +273,26 @@ class Poll(models.Model):
         return self.questions.count()
 
     @property
-    def opened_for_voting(self):   # доступно ли для голосования по времени   
+    def opened_for_voting(self):
         if self.poll_setts:
-            if self.poll_setts.start_time and self.poll_setts.end_time:
-                return (timezone.now() > self.poll_setts.start_time
-                        and timezone.now() < self.poll_setts.end_time)
+            if self.poll_setts.start_time:
+                if timezone.now() > self.poll_setts.start_time:
+                    return True, None, None
+                else: 
+                    time_left = self.poll_setts.start_time - timezone.now()
+                    time_left = min(time_left, timezone.timedelta(seconds=time_left.total_seconds()))
 
-            if self.poll_setts.duration:     
-                return timezone.now() < self.created_date + self.poll_setts.duration
-            else: return True
+                    days = time_left.days
+                    hours, remainder = divmod(time_left.seconds, 3600)
+                    minutes, seconds = divmod(remainder, 60)
+
+                    formatted_time_left = "{:01} {:02}:{:02}:{:02}".format(days, hours, minutes, seconds)
+                    return False, formatted_time_left, time_left.total_seconds()
+            else:
+                return True, None, None
         else:
-            return True
+            return True, None, None
+
 
 
 class PollSettings(models.Model):
@@ -238,7 +306,8 @@ class PollSettings(models.Model):
     end_time = models.DateTimeField(null=True)
 
     def __str__(self):
-        return f"Настройки {self.poll}"
+        if self.poll:
+            return f"Настройки {self.poll}"
 
 
 class SupportRequestType(models.Model):

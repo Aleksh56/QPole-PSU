@@ -102,7 +102,7 @@ def my_poll(request):
                 poll = (
                     Poll.objects.filter(
                         Q(author=my_profile) & Q(poll_id=poll_id))
-                        .select_related('author', 'author__user', 'poll_type')
+                        .select_related('author', 'author__user', 'poll_type', 'poll_setts')
                         .prefetch_related(
                             Prefetch('questions', queryset=PollQuestion.objects
                                                                 .prefetch_related('answer_options').all())
@@ -138,7 +138,7 @@ def my_poll(request):
 
                 polls = (
                     Poll.objects
-                        .select_related('author', 'poll_type', 'author__user')
+                        .select_related('author', 'poll_type', 'author__user', 'poll_setts')
                         .prefetch_related('questions')
                         .prefetch_related('user_participations')
                         .filter(filters)
@@ -363,6 +363,7 @@ def my_poll(request):
         return Response({'message':f"Внутренняя ошибка сервера в my_poll: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
@@ -419,6 +420,7 @@ def my_poll_settings(request):
     except Exception as ex:
         logger.error(f"Внутренняя ошибка сервера в my_poll_settings: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в my_poll_settings: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['GET'])
@@ -627,6 +629,7 @@ def my_poll_user_answers(request):
     except Exception as ex:
         logger.error(f"Внутренняя ошибка сервера в my_poll_answers: {ex}")
         return Response({'message': f"Внутренняя ошибка сервера в my_poll_answers: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
@@ -1070,6 +1073,140 @@ def my_poll_question_option(request):
     
 
 
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def poll_answer_group(request):
+    try:
+        current_user = request.user
+        my_profile = Profile.objects.filter(user=current_user).first()
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+            
+            my_answer = (
+                PollAnswerGroup.objects
+                    .filter(Q(profile=my_profile) & Q(poll__poll_id=poll_id))
+                    .select_related('profile')
+                    .prefetch_related('answers')
+                    .first()
+            )
+
+            if not my_answer:
+                raise ObjectNotFoundException(model='PollAnswerGroup')
+ 
+
+            poll_answer_group = PollAnswerGroupSerializer(my_answer)
+            return Response(poll_answer_group.data)
+        
+        if request.method == 'POST':
+            data = request.data.copy()
+
+            poll_id = request.GET.get('poll_id', None)
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+            
+            poll = (
+                Poll.objects.filter(poll_id=poll_id)
+                .select_related('author', 'poll_type', 'author__user')
+                .select_related('poll_setts')
+                .first()
+            )
+            
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+
+            opened_for_voting = poll.opened_for_voting
+            if not opened_for_voting[0]:
+                raise AccessDeniedException(detail=f'Опрос еще не открылся для прохождения, до начала: {opened_for_voting[1]}')
+
+            time_left = poll.time_left
+            if time_left:
+                time_left = time_left[1]
+
+                if time_left == 0:
+                    raise AccessDeniedException(detail='Время голосования истекло.')
+
+
+            my_answer = (
+                PollAnswerGroup.objects
+                    .filter(Q(profile=my_profile) & Q(poll__poll_id=poll_id))
+                    .last()
+            )
+            if my_answer:
+                if not poll.is_revote_allowed:
+                    if not my_answer.answers.all():
+                        raise ObjectAlreadyExistsException(detail='У Вас уже имеется незавершенное прохождение опроса')
+                else:
+                    PollAnswerGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile)      
+                    ).delete()
+                    PollParticipantsGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile)      
+                    ).delete()
+            
+            
+
+            data['profile'] = my_profile
+            data['poll'] = poll.id
+            poll_answer_group = PollAnswerGroupSerializer(data=data)
+            poll_partic_group = PollParticipantsGroupSerializer(data=data)
+
+            if poll_answer_group.is_valid():
+                poll_answer_group.save()
+                if poll_partic_group.is_valid():
+                    poll_partic_group.save()
+
+
+                poll_answer_group = (
+                    PollAnswerGroup.objects.filter(Q(poll=poll) & Q(profile=my_profile))
+                        .prefetch_related('answers')
+                        .select_related('poll', 'profile')
+                        .first()
+                )
+                poll_answer_group = PollAnswerGroupSerializer(poll_answer_group)
+                return Response({'message':"Вы успешно начали голосование.", 'data':poll_answer_group.data},
+                                                                                    status=status.HTTP_201_CREATED)
+            else:
+                return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST) 
+            
+        if request.method == 'DELETE':
+            poll_id = request.GET.get('poll_id', None)
+
+            if not poll_id:
+                raise MissingParameterException(field_name='poll_id')
+            
+            my_answer = (
+                PollAnswerGroup.objects
+                    .filter(Q(profile=my_profile) & Q(poll__poll_id=poll_id))
+                    .select_related('profile')
+                    .prefetch_related('answers')
+                    .first()
+            )
+
+            if not my_answer:
+                raise ObjectNotFoundException(model='PollAnswerGroup')
+ 
+
+            my_answer.delete()
+            return Response('Вы успешно отменили прохождение.')
+
+
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_answer_group: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в poll_answer_group: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+
+
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 @permission_classes([IsAuthenticated])
@@ -1238,7 +1375,7 @@ def poll(request):
                 poll = (
                     Poll.objects
                         .filter(Q(poll_id=poll_id) & Q(is_in_production=True))
-                        .select_related('author', 'author__user', 'poll_type')
+                        .select_related('author', 'author__user', 'poll_type', 'poll_setts')
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
                                 'answer_options'
@@ -1276,7 +1413,7 @@ def poll(request):
 
                 polls = (
                     Poll.objects
-                    .select_related('author', 'poll_type', 'author__user')
+                    .select_related('author', 'poll_type', 'author__user', 'poll_setts')
                     .prefetch_related('questions')
                     .prefetch_related('user_participations')
                     .filter(filters)  

@@ -104,14 +104,30 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
     answers = PollAnswerSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
 
+    class Meta:
+        model = PollAnswerGroup
+        fields = '__all__'
+    
+    voting_time_left = serializers.SerializerMethodField()
+    voting_seconds_left = serializers.SerializerMethodField()
+
+    def get_voting_time_left(self, instance):
+        voting_time_left = instance.voting_time_left
+        if voting_time_left and isinstance(voting_time_left, tuple):
+            return voting_time_left[0]
+        return None
+        
+    def get_voting_seconds_left(self, instance):
+        voting_time_left = instance.voting_time_left
+        if voting_time_left and isinstance(voting_time_left, tuple):
+            return voting_time_left[1]
+        return None
 
     def get_author(self, instance):
         return MiniProfileSerializer(instance=instance.profile).data
     
         
-    class Meta:
-        model = PollAnswerGroup
-        fields = '__all__'
+
 
 class PollParticipantsGroupSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
@@ -257,9 +273,9 @@ class PollSettingsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BasePollSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(validators=[BaseValidator.name], required=False)
-    description = serializers.CharField(validators=[BaseValidator.description], required=False)
-    tags = serializers.CharField(validators=[BaseValidator.description], required=False)
+    name = serializers.CharField(validators=[BaseValidator.name], required=False, allow_blank=True)
+    description = serializers.CharField(validators=[BaseValidator.description], required=False, allow_blank=True)
+    tags = serializers.CharField(validators=[BaseValidator.description], required=False, allow_blank=True)
     image = serializers.ImageField(validators=[BaseValidator.image], required=False)
     duration = serializers.DurationField(validators=[PollValidator.duration], required=False)  
     
@@ -268,9 +284,24 @@ class BasePollSerializer(serializers.ModelSerializer):
 
     participants_quantity = serializers.SerializerMethodField()
     questions_quantity = serializers.SerializerMethodField()
-    is_opened_for_voting = serializers.SerializerMethodField()
+    opened_for_voting = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
 
+    time_left = serializers.SerializerMethodField()
+    seconds_left = serializers.SerializerMethodField()
+
+    def get_time_left(self, instance):
+        poll_time_left = instance.time_left
+        if poll_time_left and isinstance(poll_time_left, tuple):
+            return poll_time_left[0]
+        return None
+    
+    def get_seconds_left(self, instance):
+        poll_time_left = instance.time_left
+        if poll_time_left and isinstance(poll_time_left, tuple):
+            return poll_time_left[1]
+        return None
+    
     def get_participants_quantity(self, instance):
         return instance.participants_quantity
 
@@ -279,7 +310,7 @@ class BasePollSerializer(serializers.ModelSerializer):
         return instance.questions_quantity
 
     
-    def get_is_opened_for_voting(self, instance):   
+    def get_opened_for_voting(self, instance):   
         return instance.opened_for_voting
 
 
@@ -306,7 +337,7 @@ class PollSerializer(BasePollSerializer):
 
     qrcode_img = serializers.SerializerMethodField()
 
-
+   
     def get_qrcode_img(self, instance):
         qrcode_path = instance.qrcode
         
@@ -314,6 +345,15 @@ class PollSerializer(BasePollSerializer):
             return get_qrcode_img_bytes(qrcode_path.path)
 
         return None
+
+    def set_is_in_production(self, value):
+        # если убрали из продакшена, удаляем все ответы
+        value = bool(int(value))
+        if value == False:
+            poll = self.instance
+            answers = PollAnswerGroup.objects.filter(poll=poll).delete()
+            participants = PollParticipantsGroup.objects.filter(poll=poll).delete()
+
 
     def create(self, validated_data):
         instance = super().create(validated_data)
@@ -345,10 +385,14 @@ class MiniPollSerializer(BasePollSerializer):
 
 class PollQuestionSerializer(serializers.ModelSerializer):
     answer_options = AnswerOptionSerializer(many=True, required=False)
-    name = serializers.CharField(validators=[BaseValidator.name], required=False)
+    name = serializers.CharField(validators=[BaseValidator.name], required=False, allow_blank=True)
+    info = serializers.CharField(validators=[BaseValidator.info], required=False, allow_blank=True)
 
     image = serializers.ImageField(validators=[BaseValidator.image], required=False)
 
+    class Meta:
+        model = PollQuestion
+        fields = '__all__'
 
     # обнуляем правильность ответов при изменении has_multiple_choices или is_free
     def set_has_multiple_choices(self, value):
@@ -399,16 +443,14 @@ class PollQuestionSerializer(serializers.ModelSerializer):
                 getattr(self, setter_name)(value)
         return instance
     
-    class Meta:
-        model = PollQuestion
-        fields = '__all__'
+
 
 
 # сериализаторы вариантов ответа
         
 class PollQuestionOptionSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(validators=[partial(BaseValidator.name, chars=100)], required=False)
-    info = serializers.CharField(validators=[partial(BaseValidator.info, chars=500)], required=False)
+    name = serializers.CharField(validators=[partial(BaseValidator.name, chars=100)], required=False, allow_blank=True)
+    info = serializers.CharField(validators=[partial(BaseValidator.info, chars=500)], required=False, allow_blank=True)
     image = serializers.ImageField(validators=[BaseValidator.image], required=False)
 
     class Meta:
@@ -420,10 +462,11 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
         question = self.instance.question
         if value:
             # если выбран верным вариант ответа, то делаем неверным свободный вариант ответа
-            free_option = question.answer_options.filter(is_free_response=True).first()
-            if free_option and free_option.is_correct:
-                free_option.is_correct = False
-                free_option.save()
+            if not self.instance.is_free_response:
+                free_option = question.answer_options.filter(is_free_response=True).first()
+                if free_option and free_option.is_correct:
+                    free_option.is_correct = False
+                    free_option.save()
 
             # если вопрос с открытым вариантом ответа верный, то обнуляем все остальные варианты ответа
             if self.instance.is_free_response:
@@ -440,7 +483,7 @@ class PollQuestionOptionSerializer(serializers.ModelSerializer):
                 all_options = question.answer_options.all()
                 new_options = []
                 for option in all_options:
-                    if option.is_correct:
+                    if option.is_correct and not option.id == self.instance.id:
                         option.is_correct = False
                         new_options.append(option)
 

@@ -76,7 +76,7 @@ def quizz_voting_handler(answers, poll):
 
     parsed_answers = []
     
-    questions_with_answer_options = poll.questions
+    questions_with_answer_options = poll.questions.all()
     
     for answer in answers:
         question_id = answer.get('question', None)

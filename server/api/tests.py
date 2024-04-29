@@ -362,3 +362,81 @@ def my_poll_stats_test(request):
     # except Exception as ex:
     #     return Response({'message': f"Внутренняя ошибка сервера в my_poll_stats: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+@api_view(['GET'])
+@transaction.atomic
+def poll_answer_group_test(request):
+    data = request.data.copy()
+
+    my_profile = Profile.objects.filter(user__id=1).first()
+
+    poll_id = request.GET.get('poll_id', None)
+    if not poll_id:
+        raise MissingParameterException(field_name='poll_id')
+    
+    poll = (
+        Poll.objects.filter(poll_id=poll_id)
+        .select_related('author', 'poll_type', 'author__user')
+        .select_related('poll_setts')
+        .first()
+    )
+    
+    if not poll:
+        raise ObjectNotFoundException(model='Poll')
+
+    opened_for_voting = poll.opened_for_voting
+    if not opened_for_voting[0]:
+        raise AccessDeniedException(detail=f'Опрос еще не открылся для прохождения, до начала: {opened_for_voting[1]}')
+
+    time_left = poll.time_left
+    if time_left:
+        time_left = time_left[1]
+
+        if time_left == 0:
+            raise AccessDeniedException(detail='Время голосования истекло.')
+
+
+    my_answer = (
+        PollAnswerGroup.objects
+            .filter(Q(profile=my_profile) & Q(poll__poll_id=poll_id))
+            .last()
+    )
+    if my_answer:
+        if not poll.is_revote_allowed:
+            if not my_answer.answers.all():
+                raise ObjectAlreadyExistsException(detail='У Вас уже имеется незавершенное прохождение опроса')
+        else:
+            PollAnswerGroup.objects.filter(
+                Q(poll=poll) & Q(profile=my_profile)      
+            ).delete()
+            PollParticipantsGroup.objects.filter(
+                Q(poll=poll) & Q(profile=my_profile)      
+            ).delete()
+    
+    
+
+    data['profile'] = my_profile
+    data['poll'] = poll.id
+    poll_answer_group = PollAnswerGroupSerializer(data=data)
+    poll_partic_group = PollParticipantsGroupSerializer(data=data)
+
+    if poll_answer_group.is_valid():
+        poll_answer_group.save()
+        if poll_partic_group.is_valid():
+            poll_partic_group.save()
+
+        # return Response('ok')
+
+        poll_answer_group = (
+            PollAnswerGroup.objects.filter(Q(poll=poll) & Q(profile=my_profile))
+                .prefetch_related('answers')
+                .first()
+        )
+        poll_answer_group.poll = poll
+        poll_answer_group.profile = my_profile
+        poll_answer_group = PollAnswerGroupSerializer(poll_answer_group)
+        return Response({'message':"Вы успешно начали голосование.", 'data':poll_answer_group.data},
+                                                                            status=status.HTTP_201_CREATED)
+    else:
+        return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -13,6 +13,7 @@ urlpatterns = [
     path('my_poll_users_votes/', my_poll_users_votes, name='my_poll_users_votes'),
     path('my_poll_stats/', my_poll_stats, name='my_poll_stats'),
     path('my_poll_user_answers/', my_poll_user_answers, name='my_poll_user_answers'),
+    path('poll_answer_group/', poll_answer_group, name='poll_answer_group'),
     path('poll/', poll, name='poll'),
     path('poll_voting/', poll_voting, name='poll_voting'),
     path('my_support_requests/', my_support_requests, name='my_support_requests'),
@@ -21,5 +22,6 @@ urlpatterns = [
     path('optimization_test/', optimization_test, name='optimization_test'),
     path('poll_voting_test/', poll_voting_test, name='poll_voting_test'),
     path('my_poll_stats_test/', my_poll_stats_test, name='my_poll_stats_test'),
+    path('poll_answer_group_test/', poll_answer_group_test, name='poll_answer_group_test'),
 
 ]
