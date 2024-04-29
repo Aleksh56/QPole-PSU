@@ -80,40 +80,28 @@ def optimization_test(request):
 @transaction.atomic
 def poll_voting_test(request):
     # try:
-        my_profile = Profile.objects.filter(user_id=1).first()
+        my_profile = Profile.objects.filter(user_id=1).select_related('user').first()
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
 
-        if request.method == '5555':
-            data = {
-                    "answers": [
-                        {
-                            "question":1700,
-                            "answer_option": 10584
-                        },
-                        {
-                            "question":1701,
-                            "answer_option": 10586
-
-                        },
-                        {
-                            "question":1702,
-                            "answer_option": 10588
-
-                        },
-                        {
-                            "question":1703,
-                            "answer_option": 10590
-
-                        },
-                        {
-                            "question":1704,
-                            "answer_option": 10592
-
-                        }
-                    ]
-                }   
+        if request.method == 'GET':
+            data = {'answers': [
+        {
+            "question":2206,
+            "answer_option": 14439
+        },
+        {
+            "question":2209,
+            "answer_option": 14453
+        },
+        {
+            "question":2210,
+            "answer_option": 14457
+        }
+    ] }
+    
+    
 
             poll_id = request.GET.get('poll_id', None)
             if not poll_id:
@@ -130,6 +118,7 @@ def poll_voting_test(request):
                         Prefetch('user_answers', queryset=PollAnswerGroup.objects.prefetch_related(
                             'answers'
                         ).all()))
+                    .prefetch_related('user_participations')
                     .first()
                 )
             
@@ -141,10 +130,18 @@ def poll_voting_test(request):
                 if not poll.is_revote_allowed:
                     raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
                 else:
-                    PollAnswerGroup.objects.filter(
+                    to_delete = PollAnswerGroup.objects.filter(
                         Q(poll=poll) & Q(profile=my_profile)      
-                    ).first().delete()
+                    ).first()
+                    if to_delete:
+                        to_delete.delete()
+                    to_delete = PollParticipantsGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile)      
+                    ).first()
+                    if to_delete:
+                        to_delete.delete()
 
+            
                         
             answers = data.get('answers', None)
             if not answers:
@@ -152,57 +149,31 @@ def poll_voting_test(request):
             
             # валидация и парсинг ответов
             if poll.poll_type.name == 'Опрос':
-                answers = poll_voting_handler(answers, poll)
+                answers, _ = poll_voting_handler(answers, poll)
             elif poll.poll_type.name == 'Викторина':
                 answers = quizz_voting_handler(answers, poll)
             else:
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
-            poll_answer_group_data = {
-                'profile': my_profile.user_id,
-                'poll': poll.id,
-            }
 
-            poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
-            if poll_answer_group.is_valid():
-                poll_answer_group = poll_answer_group.save()
-            else:
-                return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST)
-            
+            poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, _)
 
-            data = answers
-            # Получите все вопросы в один запрос
-            questions_dict = {question.id: question for question in poll.questions.all()}
-
-            # Получите все варианты ответов в один запрос
-            answer_options_dict = {
-                question.id: {answer_option.id: answer_option for answer_option in question.answer_options.all()}
-                for question in poll.questions.all()
-            }
-
-            for answer in data:
-                answer['poll_answer_group'] = poll_answer_group
-                question_id = answer['question']
-                question = questions_dict.get(question_id)
-                if question:
-                    answer['question'] = question
-                    answer_option_id = answer['answer_option']
-                    answer_option = answer_options_dict.get(question_id, {}).get(answer_option_id)
-
-                    if poll.poll_type.name == 'Викторина':
-                        if not answer_option.is_correct == None:
-                            if answer_option.is_correct:
-                                answer['is_correct'] = True
-                            else:
-                                answer['is_correct'] = False
-
-                    answer['answer_option'] = answer_option
-
-            poll_answers = PollAnswer.objects.bulk_create([
-                PollAnswer(**item) for item in data
-            ])
-            serializer = PollAnswerGroupSerializer(poll_answer_group)
         
+            if tx_hash:
+                poll_answer_group.tx_hash = str(tx_hash)
+                poll_answer_group.save()
+
+            my_answer = PollAnswerGroup.objects.filter(
+                    Q(profile=my_profile) & Q(poll__poll_id=poll_id)
+                ).select_related('profile').prefetch_related('answers').first()
+
+            if not my_answer:
+                raise ObjectNotFoundException(model='PollAnswerGroup')
+            
+            my_answer.poll = poll
+
+            serializer = PollVotingResultSerializer(my_answer)
+                      
             return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK)
 
         elif request.method == 'GET':

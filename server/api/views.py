@@ -285,6 +285,10 @@ def my_poll(request):
 
             elif request_type == 'delete_image':
                 image_path = None
+                poll = Poll.objects.filter(poll_id=new_poll_id).first()
+                if not poll:
+                    raise ObjectNotFoundException(model='Poll')
+                
                 if poll.image:
                     image_path = poll.image.path
                 poll.image = None
@@ -1071,7 +1075,7 @@ def my_poll_question_option(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting(request):
-    try:
+    # try:
         current_user = request.user
         my_profile = Profile.objects.filter(user=current_user).first()
 
@@ -1123,6 +1127,7 @@ def poll_voting(request):
                         Prefetch('user_answers', queryset=PollAnswerGroup.objects.prefetch_related(
                             'answers'
                         ).all()))
+                    .prefetch_related('user_participations')
                     .first()
                 )
             
@@ -1132,47 +1137,54 @@ def poll_voting(request):
 
             if poll.has_user_participated_in(my_profile):
                 if not poll.is_revote_allowed:
-                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе")
+                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
                 else:
-                    group_to_delete = PollAnswerGroup.objects.filter(
+                    to_delete = PollAnswerGroup.objects.filter(
                         Q(poll=poll) & Q(profile=my_profile)      
                     ).first()
-                    if group_to_delete:
-                        group_to_delete.delete()
-
-                    group_to_delete_2 = PollParticipantsGroup.objects.filter(
+                    if to_delete:
+                        to_delete.delete()
+                    to_delete = PollParticipantsGroup.objects.filter(
                         Q(poll=poll) & Q(profile=my_profile)      
                     ).first()
-                    if group_to_delete_2:
-                        group_to_delete_2.delete()
+                    if to_delete:
+                        to_delete.delete()
 
+            
                         
             answers = data.get('answers', None)
             if not answers:
                 raise MissingFieldException(field_name='answers')
             
             # валидация и парсинг ответов
-            raw_answers = []
+            raw_answers = None
             if poll.poll_type.name == 'Опрос':
-                answers = poll_voting_handler(answers, poll)
+                answers, raw_answers = poll_voting_handler(answers, poll)
             elif poll.poll_type.name == 'Викторина':
                 answers = quizz_voting_handler(answers, poll)
-            elif poll.poll_type.name == 'Анонимный':
-                answers, raw_answers = poll_voting_handler(answers, poll)
             else:
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
+
             poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, raw_answers)
 
+        
             if tx_hash:
                 poll_answer_group.tx_hash = str(tx_hash)
                 poll_answer_group.save()
 
+            my_answer = PollAnswerGroup.objects.filter(
+                    Q(profile=my_profile) & Q(poll__poll_id=poll_id)
+                ).select_related('profile').prefetch_related('answers').first()
 
-            serializer = PollVotingResultSerializer(poll_answer_group)
-        
+            if not my_answer:
+                raise ObjectNotFoundException(model='PollAnswerGroup')
+            
+            my_answer.poll = poll
 
-            return Response({'message':"Вы успешно проголосовали", 'data':serializer.data,}, status=status.HTTP_200_OK)
+            serializer = PollVotingResultSerializer(my_answer)
+                      
+            return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK)
     
         elif request.method == 'DELETE':
             poll_id = request.GET.get('poll_id', None)
@@ -1205,13 +1217,13 @@ def poll_voting(request):
 
             return Response({'message':f"Ваш голос в опросе успешно отменен"}, status=status.HTTP_204_NO_CONTENT)
     
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
-    except Exception as ex:
-        logger.error(f"Внутренняя ошибка сервера в poll_voting: {ex}")
-        return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"},
-                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    # except Exception as ex:
+    #     logger.error(f"Внутренняя ошибка сервера в poll_voting: {ex}")
+    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"},
+    #                      status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
 
 

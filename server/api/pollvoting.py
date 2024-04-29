@@ -1,6 +1,6 @@
 from .exсeptions import *
 from .serializers import PollAnswerGroupSerializer, PollParticipantsGroupSerializer
-from .models import PollAnswer, PollParticipantsGroup
+from .models import PollAnswer
 
 from .utils import PollVoting
 from qpoll.settings import w3, contract
@@ -12,7 +12,7 @@ def poll_voting_handler(answers, poll):
 
     parsed_answers = []
     
-    questions_with_answer_options = poll.questions.prefetch_related('answer_options')
+    questions_with_answer_options = poll.questions.all()
     
     for answer in answers:
         question_id = answer.get('question', None)
@@ -76,7 +76,7 @@ def quizz_voting_handler(answers, poll):
 
     parsed_answers = []
     
-    questions_with_answer_options = poll.questions.prefetch_related('answer_options')
+    questions_with_answer_options = poll.questions
     
     for answer in answers:
         question_id = answer.get('question', None)
@@ -131,6 +131,7 @@ def quizz_voting_handler(answers, poll):
         difference = list(required_questions.difference(answered_questions))
         raise PollAnsweringException(detail=f"Вы ответили не на все обязательные вопросы: {difference}")
 
+    print(parsed_answers)
     return parsed_answers
 
 
@@ -166,12 +167,13 @@ def save_votes(answers, poll, my_profile, raw_answers):
 
     data = answers
     # Получите все вопросы в один запрос
-    questions_dict = {question.id: question for question in poll.questions.all()}
+    poll_questions = poll.questions.all()
+    questions_dict = {question.id: question for question in poll_questions}
 
     # Получите все варианты ответов в один запрос
     answer_options_dict = {
         question.id: {answer_option.id: answer_option for answer_option in question.answer_options.all()}
-        for question in poll.questions.all()
+        for question in poll_questions
     }
 
     for answer in data:
@@ -214,7 +216,11 @@ def save_votes(answers, poll, my_profile, raw_answers):
         'answers': raw_answers,
     }
 
-    tx_hash = PollVoting(w3, contract, poll_data)
+    tx_hash = None
+    if poll.poll_type.name == "Анонимный":
+        poll_answer_group_data['profile'] = None
+        tx_hash = PollVoting(w3, contract, poll_data)
+
     return poll_answer_group, poll_answers, tx_hash
 
 

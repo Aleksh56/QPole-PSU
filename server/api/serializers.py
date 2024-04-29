@@ -376,6 +376,11 @@ class PollQuestionSerializer(serializers.ModelSerializer):
                     is_free_response=True,
                     is_correct=True,
                 )
+        else:
+            if self.instance.is_free:
+                free_option = self.instance.answer_options.filter(is_free_response=True).first()
+                if free_option:
+                    free_option.delete()
 
 
     def create(self, validated_data):
