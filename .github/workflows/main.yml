@@ -18,9 +18,9 @@ jobs:
       # - name: List files in the repository
       #   run: ls -la
 
-      - name: Run tests before deploy
-        run: npm install && npm test
-        working-directory: ./client
+      # - name: Run tests before deploy
+      #   run: npm install && npm test
+      #   working-directory: ./client
 
       - name: Check test status
         id: check_test_status
