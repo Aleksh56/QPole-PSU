@@ -63,7 +63,8 @@ class MiniPollAnswerSerializer(serializers.ModelSerializer):
 class AnswerOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerOption
-        exclude = ['is_correct']
+        fields = '__all__' 
+        # exclude = ['is_correct']
 
 
 
@@ -198,6 +199,7 @@ class PollVotingResultSerializer(PollAnswerGroupSerializer):
                                 question_gained_quantity += answer_option['points']
             
 
+            print(question_correct_quantity)
             if question_correct_quantity:
                 question['points'] += round(question_gained_quantity / question_correct_quantity, 2) # начисляем очки, которые получили после проверки правильности
                 if question['points'] < 0:
