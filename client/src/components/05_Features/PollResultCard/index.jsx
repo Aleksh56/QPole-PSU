@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { BarChart, LineChart, PieChart } from '@mui/x-charts';
+import { BarChart, PieChart } from '@mui/x-charts';
 import { useState } from 'react';
 
 import FrmOtherResults from '../frmOtherResults';
@@ -16,11 +16,20 @@ const PollResultCard = ({ data, chartType }) => {
       label: option.is_free_response ? 'Другое' : option.name,
     }));
 
+    const xAxisData = data.answer_options.map((opt, index) => `Ответ - ${index}`);
+
+    const barChartData = data.answer_options.map((option) => option.votes_quantity);
+
     switch (chartType) {
       case 'bar':
-        return <BarChart series={[{ data: chartData }]} width={450} height={200} />;
-      case 'line':
-        return <LineChart series={[{ data: chartData }]} width={450} height={200} />;
+        return (
+          <BarChart
+            series={[{ data: barChartData }]}
+            xAxis={[{ data: xAxisData, scaleType: 'band' }]}
+            width={450}
+            height={200}
+          />
+        );
       case 'pie':
       default:
         return <PieChart series={[{ data: chartData }]} width={450} height={200} />;

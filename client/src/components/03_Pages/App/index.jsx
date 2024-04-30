@@ -14,9 +14,9 @@ import {
 } from './styled';
 
 import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
+import AppPoleCard from '@/components/04_Widgets/Data/Cards/appPoleCard';
 import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
 import AppCreateFirstPoll from '@/components/05_Features/AppCreateFirstPoll';
-import AppPoleCard from '@/components/07_Shared/DataDisplay/Cards/appPoleCard';
 import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
 import usePageTitle from '@/hooks/usePageTitle';
 import usePagination from '@/hooks/usePagination';

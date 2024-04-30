@@ -6,6 +6,8 @@ import CustomGauge from '@/components/07_Shared/DataDisplay/Charts/gauge';
 import { pollResTableFlds } from '@/data/fields';
 
 const PollResultHeader = ({ res, data }) => {
+  console.log('res', res);
+  console.log(data);
   return (
     <HeaderWrapper>
       <GraphWrapper>

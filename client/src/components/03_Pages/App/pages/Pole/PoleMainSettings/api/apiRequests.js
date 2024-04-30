@@ -27,21 +27,12 @@ export const changePoleData = async (field, value, id, fetchPoleData, showAlert)
     );
   }
 
-  // if (field === 'start_time' || field === 'end_time') {
-  //   const newValue = value.replace('T', ' ');
-  //   console.log(newValue);
-  //   handleRequest('patch', `/api/my_poll/?poll_id=${id}`, {
-  //     [field]: newValue,
-  //   }).then(() =>
-  //     fetchPoleData().then(() => {
-  //       showAlert('Данные об опросе успешно сохранены !', 'success');
-  //     }),
-  //   );
-  //   return;
-  // }
-
   timeouts[field] = setTimeout(() => {
-    handleRequest('patch', `/api/my_poll/?poll_id=${id}`, { [field]: value }).then(() =>
+    handleRequest(
+      'patch',
+      `/api/my_poll${field === 'start_time' || field === 'end_time' || field === 'duration' ? '_settings' : ''}/?poll_id=${id}`,
+      { [field]: value },
+    ).then(() =>
       fetchPoleData().then(() => {
         showAlert('Данные об опросе успешно сохранены !', 'success');
       }),

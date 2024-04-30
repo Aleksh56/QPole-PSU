@@ -100,7 +100,7 @@ const PoleMainSettingsPage = () => {
               value={
                 pendingChanges['start_time'] !== undefined
                   ? pendingChanges['start_time']
-                  : poleData?.description || ''
+                  : poleData?.poll_setts.start_time || ''
               }
               handleChange={(e) => handleFieldChange('start_time', e)}
             />
@@ -110,6 +110,11 @@ const PoleMainSettingsPage = () => {
               type="datetime-local"
               min="2024-01-01T00:00"
               max="9999-12-01T00:00"
+              value={
+                pendingChanges['start_time'] !== undefined
+                  ? pendingChanges['start_time']
+                  : poleData?.poll_setts.end_time || ''
+              }
               handleChange={(e) => handleFieldChange('end_time', e)}
             />
           </Box>

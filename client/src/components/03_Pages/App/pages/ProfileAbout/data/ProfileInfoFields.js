@@ -2,8 +2,9 @@ export const ProfileInfoFieldsConfig = [
   {
     id: 'Profile name field',
     label: 'Имя',
-    key: 'name',
+    keys: ['surname', 'name', 'patronymic'],
     initialValue: '',
+    disabled: true,
   },
   {
     label: 'Эл. почта',

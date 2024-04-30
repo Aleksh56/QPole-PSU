@@ -1,10 +1,10 @@
-import React from 'react';
-import { Grid } from '@mui/material';
-import { PollListGridContainer } from './styled';
-import useAuth from '@/hooks/useAuth';
-import AppPoleCard from '@/components/07_Shared/DataDisplay/Cards/appPoleCard';
+import AppPoleCard from '@/components/04_Widgets/Data/Cards/appPoleCard';
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
+import useAuth from '@/hooks/useAuth';
+import { Grid } from '@mui/material';
+import React from 'react';
 import { v4 } from 'uuid';
+import { PollListGridContainer } from './styled';
 
 const PollListOutput = ({ polls = [] }) => {
   const { isAuthenticated } = useAuth();

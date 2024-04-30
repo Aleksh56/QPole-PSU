@@ -1,7 +1,7 @@
-import PollResultHeader from '@/components/05_Features/Poll/PollResultHeader';
-import ConductionResCrd from '@/components/05_Features/conductionResCrd';
-import React from 'react';
 import { v4 } from 'uuid';
+
+import ConductionResCrd from '@/components/05_Features/conductionResCrd';
+import PollResultHeader from '@/components/05_Features/Poll/PollResultHeader';
 
 const PollResult = ({ data }) => {
   const { questions, result, results } = data;

@@ -1,12 +1,12 @@
 import { getAllPoles } from '@/components/03_Pages/App/api/apiRequests';
-import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
-import React, { useEffect, useState } from 'react';
-import { ContentWrapper, PollsGrid, StyledAppContentWrapper } from './styled';
-import { CircularProgress } from '@mui/material';
-import AppPoleCard from '@/components/07_Shared/DataDisplay/Cards/appPoleCard';
-import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
 import { _settings } from '@/components/03_Pages/App/config/settings';
+import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
+import AppPoleCard from '@/components/04_Widgets/Data/Cards/appPoleCard';
+import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
+import { CircularProgress } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ContentWrapper, PollsGrid, StyledAppContentWrapper } from './styled';
 
 const PolesArchivePage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState();

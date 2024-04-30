@@ -1,12 +1,13 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { StyledProfileAboutWrapper } from './styled';
-import ProfileUserData from '@/components/04_Widgets/Content/Interactive/profileUserData';
-import ProfileTimezone from '@/components/04_Widgets/Content/Interactive/profileTimezone';
-import Profile2AuthBlock from '@/components/04_Widgets/Content/Interactive/profile2Auth';
+import { Box, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
 import { ProfileInfoFieldsConfig } from './data/ProfileInfoFields';
+import { StyledProfileAboutWrapper } from './styled';
+
+import Profile2AuthBlock from '@/components/04_Widgets/Content/Interactive/profile2Auth';
+import ProfileTimezone from '@/components/04_Widgets/Content/Interactive/profileTimezone';
+import ProfileUserData from '@/components/04_Widgets/Content/Interactive/profileUserData';
 import useUserData from '@/hooks/useUserData';
 
 const ProfileAboutPage = () => {
@@ -16,7 +17,9 @@ const ProfileAboutPage = () => {
   const profileInfoFields = userData
     ? ProfileInfoFieldsConfig.map((field) => ({
         ...field,
-        initialValue: userData[field.key],
+        initialValue: field.keys
+          ? field.keys.map((key) => userData[key]).join(' ')
+          : userData[field.key],
       }))
     : [];
 

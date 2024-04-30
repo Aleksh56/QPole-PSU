@@ -8,6 +8,8 @@ const InvisibleLabeledField = ({
   type,
   max,
   min,
+  step,
+  defaultValue,
 }) => {
   return (
     <LabeledFieldWrapper>
@@ -19,6 +21,8 @@ const InvisibleLabeledField = ({
         onChange={(e) => handleChange(e.target.value)}
         value={value}
         type={type}
+        step={step}
+        defaultValue={defaultValue}
         inputProps={{ max: max, min: min }}
       />
     </LabeledFieldWrapper>

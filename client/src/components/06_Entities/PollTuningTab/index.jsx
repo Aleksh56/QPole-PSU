@@ -1,9 +1,10 @@
-import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { v4 } from 'uuid';
+
+import usePollSettings from './hooks/usePollSettings';
+
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import { StyledFormControlLabel } from '@/constants/styles';
-import { v4 } from 'uuid';
-import usePollSettings from './hooks/usePollSettings';
 import { pollTuningSettings } from '@/data/fields';
 
 const PollTuningTab = ({ pollData }) => {
@@ -12,7 +13,10 @@ const PollTuningTab = ({ pollData }) => {
   return (
     <Box spacing={2}>
       {pollTuningSettings.map((item) => (
-        <Box sx={{ borderBottom: '1px solid #e2e2e2', paddingBottom: '15px', marginTop: '10px' }}>
+        <Box
+          key={v4()}
+          sx={{ borderBottom: '1px solid #e2e2e2', paddingBottom: '15px', marginTop: '10px' }}
+        >
           <Typography sx={{ marginBottom: '10px' }}>{item.heading}</Typography>
           {item.switchSettings.map((item) => (
             <StyledFormControlLabel

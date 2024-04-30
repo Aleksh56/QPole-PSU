@@ -1,4 +1,3 @@
-import React from 'react';
 import { StyledLabel } from './styled';
 
 const ServicesLabel = ({ caption = '' }) => {

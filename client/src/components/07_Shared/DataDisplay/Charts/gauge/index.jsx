@@ -1,6 +1,7 @@
-import React from 'react';
 import { Typography } from '@mui/material';
+
 import { GaugeWrapper } from './styled';
+
 import { colorConfig } from '@/app/template/config/color.config';
 
 const CustomGauge = ({ value }) => {

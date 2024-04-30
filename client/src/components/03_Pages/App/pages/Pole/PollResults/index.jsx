@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Select, MenuItem } from '@mui/material';
-import { ResultsGridWrapper, SettingsWrapper, Wrapper } from './styled';
-import PollResultCard from '@/components/05_Features/PollResultCard';
-import { getPollResultsFx } from './model/get-results';
+import PollResultsSVG from '@assets/Analytics.svg';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import PieChartIcon from '@mui/icons-material/PieChart';
+import { MenuItem, Select } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { v4 } from 'uuid';
-import PieChartIcon from '@mui/icons-material/PieChart';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
+
+import { getPollResultsFx } from './model/get-results';
+import { ResultsGridWrapper, SettingsWrapper, Wrapper } from './styled';
+
+import PollResultCard from '@/components/05_Features/PollResultCard';
 import PollResultsPDF from '@/components/06_Entities/pollResultsPDF';
 import NoDataHelper from '@/components/07_Shared/UIComponents/Utils/Helpers/noDataHelper';
-import PollResultsSVG from '@assets/Analytics.svg';
+import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
 
 const PollResultsPage = () => {
   const { id } = useParams();
@@ -37,7 +39,6 @@ const PollResultsPage = () => {
           <MenuItem value="bar">
             <BarChartIcon /> Bar Chart
           </MenuItem>
-          <MenuItem value="line">Line Chart</MenuItem>
         </Select>
         <PdfExporter children={<PollResultsPDF data={questions} />} />
       </SettingsWrapper>

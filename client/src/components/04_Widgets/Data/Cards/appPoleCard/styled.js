@@ -4,7 +4,7 @@ import { Box, Card, CardContent, CardMedia, Chip, Typography } from '@mui/materi
 import { colorConfig } from '@/app/template/config/color.config';
 import { Rem } from '@/utils/convertToRem';
 
-export const StyledChip = styled(Chip)(() => ({
+export const StldChip = styled(Chip)(() => ({
   color: 'white',
   backgroundColor: colorConfig.primaryBlue,
   height: Rem(22),
@@ -13,7 +13,7 @@ export const StyledChip = styled(Chip)(() => ({
   },
 }));
 
-export const StyledCard = styled(Card)(() => ({
+export const StldCard = styled(Card)(() => ({
   borderRadius: Rem(16),
   boxShadow: 'none',
   display: 'grid',
@@ -35,13 +35,13 @@ export const StyledCard = styled(Card)(() => ({
   },
 }));
 
-export const StyledCardMedia = styled(CardMedia)(() => ({
+export const StldCardMedia = styled(CardMedia)(() => ({
   backgroundSize: 'cover',
   padding: Rem(25),
   borderRadius: Rem(16),
 }));
 
-export const StyledCardContent = styled(CardContent)(() => ({
+export const StldCardContent = styled(CardContent)(() => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'start',
@@ -62,7 +62,7 @@ export const ChipsWrapper = styled(Box)(() => ({
   columnGap: Rem(5),
 }));
 
-export const StyledTypographyName = styled(Typography)(() => ({
+export const StldPollName = styled(Typography)(() => ({
   color: '#aaa',
   fontSize: Rem(12),
   marginBottom: Rem(10),

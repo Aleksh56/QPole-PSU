@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyledButton, StyledNavLink } from './styled';
 import { useParams } from 'react-router-dom';
+
+import { StyledButton, StyledNavLink } from './styled';
 
 const PollSettingsMenuBtn = ({ icon: Icon, label, page, disabled }) => {
   const { id } = useParams();

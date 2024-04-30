@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+
+import { changeUserDataFx } from './models/change-user-data';
 import {
   BoxCaption,
   ProfileFieldsWrapper,
@@ -6,12 +8,14 @@ import {
   StyledProfileAvatar,
   StyledProfileContainer,
 } from './styled';
+
 import ProfileAccFld from '@/components/07_Shared/UIComponents/Fields/profileAccFld';
 import { StyledProfileFieldsBox } from '@/constants/styles';
-import { changeUserDataFx } from './models/change-user-data';
 
 const ProfileUserData = ({ caption = '', boxCaption = '', ProfileInfoFields = [], user_id }) => {
   const [fieldValues, setFieldValues] = useState({});
+
+  console.log(ProfileInfoFields);
 
   useEffect(() => {
     const initialFieldValues = ProfileInfoFields.reduce((acc, { key, initialValue }) => {
