@@ -7,6 +7,7 @@ from .models import *
 from .utils import generate_poll_qr, get_qrcode_img_bytes
 from .exсeptions import *
 
+from login.validators import validate_number
 
 class MiniUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,7 +32,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     name = serializers.CharField(validators=[ProfileValidator.name], required=False)
     surname = serializers.CharField(validators=[ProfileValidator.surname], required=False)
     patronymic = serializers.CharField(validators=[ProfileValidator.patronymic], required=False)
-    number = serializers.CharField(validators=[ProfileValidator.number], required=False)
+    number = serializers.CharField(required=True, validators=[validate_number])  
     email = serializers.CharField(validators=[ProfileValidator.email], required=True)
     sex = serializers.CharField(validators=[ProfileValidator.sex], required=False)
     joining_date = serializers.DateField(validators=[ProfileValidator.joining_date], required=False)
@@ -62,7 +63,8 @@ class MiniPollAnswerSerializer(serializers.ModelSerializer):
 class AnswerOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnswerOption
-        fields = '__all__'
+        exclude = ['is_correct']
+
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -233,10 +235,10 @@ class MyPollUsersAnswersSerializer(PollVotingResultSerializer):
 # сериализаторы опросов
 
 class PollSettingsSerializer(serializers.ModelSerializer):
-    completion_time = serializers.DurationField(validators=[BasePollSettingsValidator.completion_time])
-    start_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.start_time])
-    end_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.end_time])
-    duration = serializers.DurationField(validators=[BasePollSettingsValidator.duration])
+    completion_time = serializers.DurationField(validators=[BasePollSettingsValidator.completion_time], required=False)
+    start_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.start_time], required=False)
+    end_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.end_time], required=False)
+    duration = serializers.DurationField(validators=[BasePollSettingsValidator.duration], required=False)
 
     max_revotes_quantity = serializers.IntegerField(validators=[partial(BasePollSettingsValidator.max_revotes_quantity, num=10)])
 
@@ -246,6 +248,12 @@ class PollSettingsSerializer(serializers.ModelSerializer):
             if self.instance.end_time:
                 self.instance.end_time = None
             
+    # если установлен end_time, то обнулить duration
+    def set_start_time(self, value):
+        if not value:
+            if self.instance.duration:
+                self.instance.duration = None
+
     # если установлен end_time, то обнулить duration
     def set_end_time(self, value):
         if value:
@@ -287,20 +295,15 @@ class BasePollSerializer(serializers.ModelSerializer):
     opened_for_voting = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
 
-    time_left = serializers.SerializerMethodField()
-    seconds_left = serializers.SerializerMethodField()
-
-    def get_time_left(self, instance):
-        poll_time_left = instance.time_left
-        if poll_time_left and isinstance(poll_time_left, tuple):
-            return poll_time_left[0]
-        return None
+    start_time_left = serializers.SerializerMethodField()
+    end_time_left = serializers.SerializerMethodField()
     
-    def get_seconds_left(self, instance):
-        poll_time_left = instance.time_left
-        if poll_time_left and isinstance(poll_time_left, tuple):
-            return poll_time_left[1]
-        return None
+
+    def get_start_time_left(self, instance):
+        return instance.start_time_left
+    
+    def get_end_time_left(self, instance):
+        return instance.end_time_left
     
     def get_participants_quantity(self, instance):
         return instance.participants_quantity

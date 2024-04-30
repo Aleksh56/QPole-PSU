@@ -328,11 +328,10 @@ def my_poll(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
+            poll = Poll.objects.filter(poll_id=poll_id, author=my_profile).first()
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
    
-
             poll.delete()
 
             current_user_profile = Profile.objects.filter(user=current_user).first()
@@ -340,17 +339,7 @@ def my_poll(request):
             if not current_user_profile:
                 raise ObjectNotFoundException('Profile')
 
-
-            profile_serializer = GetProfileSerializer(current_user_profile)
-            user_polls = Poll.objects.filter(author=current_user_profile)
-            user_polls_serializer = MiniPollSerializer(user_polls, many=True)
-
-            response_data = {
-                'profile': profile_serializer.data,
-                'user_polls': user_polls_serializer.data
-            }
-
-            return Response({'message':f"Опрос успешно удален", 'data':response_data}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'message':f"Опрос успешно удален"}, status=status.HTTP_204_NO_CONTENT)
 
     except PollValidationException as exception:
         return Response(exception.detail, exception.status_code)
@@ -1123,15 +1112,20 @@ def poll_answer_group(request):
                 raise ObjectNotFoundException(model='Poll')
 
             opened_for_voting = poll.opened_for_voting
-            if not opened_for_voting[0]:
-                raise AccessDeniedException(detail=f'Опрос еще не открылся для прохождения, до начала: {opened_for_voting[1]}')
+            if not opened_for_voting:
+                start_time_left = poll.start_time_left
+                end_time_left = poll.end_time_left
+                if start_time_left:
+                    raise AccessDeniedException(detail=f'Опрос еще не открылся для прохождения, до начала: {start_time_left}')
+                elif not end_time_left:
+                    raise AccessDeniedException(detail=f'Опрос уже закрылся для прохождения')
 
-            time_left = poll.time_left
-            if time_left:
-                time_left = time_left[1]
 
-                if time_left == 0:
-                    raise AccessDeniedException(detail='Время голосования истекло.')
+            start_time_left = poll.start_time_left
+            if start_time_left:
+
+                if not start_time_left == 0:
+                    raise AccessDeniedException(detail='Голосование еще не началось.')
 
 
             my_answer = (

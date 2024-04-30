@@ -182,9 +182,9 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Yekaterinburg'
 
-USE_I18N = True
+# USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 # пути до всех медиа и статических файлов
 STATIC_URL = 'static/'

@@ -39,7 +39,6 @@ class UserRole(models.Model):
 class PollType(models.Model):
     name = models.CharField('Название типа', max_length=50)
     description = models.CharField('Описание', max_length=500, default="", blank=True)
-    duration = models.DurationField('Длительность', default=timezone.timedelta(hours=1))
 
     is_text = models.BooleanField(default=True, null=True)    # текст ли как ответ
     is_free = models.BooleanField(default=False, null=True)    # свободная ли форма ответа
@@ -74,15 +73,10 @@ class PollAnswerGroup(models.Model):
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
 
     voting_date = models.DateTimeField(auto_now_add=True)
-    # voting_finish = models.DateTimeField(default=None, null=True)
 
     @property
     def voting_time_left(self):
-        seconds_left = self.poll.time_left
-        if not seconds_left or not isinstance(seconds_left, tuple):
-            seconds_left = None
-        else:
-            seconds_left = seconds_left[1]
+        seconds_left = self.poll.end_time_left
 
         end_time = None
         if self.poll.poll_setts.completion_time:
@@ -98,7 +92,7 @@ class PollAnswerGroup(models.Model):
             else:
                 if seconds_left:
 
-                    time_left = min(time_left, timezone.timedelta(seconds=seconds_left))
+                    time_left = max(time_left, timezone.timedelta(seconds=seconds_left))
 
                 days = time_left.days
                 hours, remainder = divmod(time_left.seconds, 3600)
@@ -189,7 +183,7 @@ class Poll(models.Model):
     tags = models.TextField(blank=True, null=True) # тэги
 
     poll_type = models.ForeignKey(PollType, related_name='poll', on_delete=models.CASCADE, null=True) # тип опроса
-    poll_setts = models.OneToOneField('PollSettings', on_delete=models.SET_NULL, null=True) # настройки опроса
+    poll_setts = models.OneToOneField('PollSettings', on_delete=models.CASCADE, null=True, related_name='poll') # настройки опроса
 
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
 
@@ -222,28 +216,7 @@ class Poll(models.Model):
         if not self.poll_setts:
             self.poll_setts = PollSettings.objects.create()
 
-    
-    @property
-    def time_left(self):
-        end_time = None
-        if self.poll_setts.end_time:
-            end_time = self.poll_setts.end_time
-        elif self.poll_setts.duration:
-            end_time = self.poll_setts.start_time + self.poll_setts.duration
-
-        if end_time:
-            current_time = timezone.now()
-            time_left = end_time - current_time
-            if time_left.total_seconds() < 0:
-                return "0 00:00:00", 0
-            else:
-                days = time_left.days
-                hours, remainder = divmod(time_left.seconds, 3600)
-                minutes, seconds = divmod(remainder, 60)
-                return "{:01} {:02}:{:02}:{:02}".format(days, hours, minutes, seconds), time_left.total_seconds()
-        else:
-            return None
-        
+            
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):
         if not user_profile:
@@ -275,24 +248,59 @@ class Poll(models.Model):
     @property
     def opened_for_voting(self):
         if self.poll_setts:
-            if self.poll_setts.start_time:
-                if timezone.now() > self.poll_setts.start_time:
-                    return True, None, None
+            start_time = self.poll_setts.start_time
+            duration = self.poll_setts.duration
+            end_time = self.poll_setts.end_time
+
+            if start_time and duration:
+                if timezone.now() > start_time and timezone.now() < start_time + duration:
+                    return True
                 else: 
-                    time_left = self.poll_setts.start_time - timezone.now()
-                    time_left = min(time_left, timezone.timedelta(seconds=time_left.total_seconds()))
-
-                    days = time_left.days
-                    hours, remainder = divmod(time_left.seconds, 3600)
-                    minutes, seconds = divmod(remainder, 60)
-
-                    formatted_time_left = "{:01} {:02}:{:02}:{:02}".format(days, hours, minutes, seconds)
-                    return False, formatted_time_left, time_left.total_seconds()
+                    return False
+                 
+            elif start_time and end_time:    
+                if end_time > timezone.now() > start_time:
+                    return True
+                else: 
+                    return False
+                
+            elif start_time and not duration:
+                if timezone.now() > start_time:
+                    return True
+                else:
+                    return False
             else:
-                return True, None, None
+                return True
         else:
-            return True, None, None
+            return True
 
+    @property
+    def start_time_left(self):
+        if self.poll_setts:
+            start_time = self.poll_setts.start_time
+            
+            if start_time:
+                time_left = max((self.poll_setts.start_time - timezone.now()).total_seconds(), 0)
+                return time_left
+
+    @property
+    def end_time_left(self):
+        if self.poll_setts:
+            start_time = self.poll_setts.start_time
+            duration = self.poll_setts.duration
+            end_time = self.poll_setts.end_time
+
+            if end_time:
+                time_left = max((end_time - timezone.now()).total_seconds(), 0)
+                return time_left
+            
+            elif start_time and duration:
+                time_left = max((start_time + duration - timezone.now()).total_seconds(), 0)
+                return time_left
+            
+            else: return None    
+        else: return None
+            
 
 
 class PollSettings(models.Model):

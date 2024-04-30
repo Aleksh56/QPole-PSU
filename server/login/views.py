@@ -25,7 +25,7 @@ from api.utils import validation_error_wrapper
 @transaction.atomic
 def register(request):
     try:
-        data = request.data
+        data = request.data.copy()
         email = data.get('email', None)
         if not email:
             raise MissingFieldException(field_name='email')
@@ -45,12 +45,11 @@ def register(request):
             if serializer.is_valid():
                 with transaction.atomic():
                     user = serializer.save()
-                    user_profile = {
-                        'user': user.id,
-                        'email': email,
-                        'role': 2
-                    }
-                    serializer = ProfileSerializer(data=user_profile)
+                    data['user'] = user.id
+                    data['email'] = email
+                    data['role'] = 2
+
+                    serializer = ProfileSerializer(data=data)
                     if serializer.is_valid():
                         serializer.save()
                     else:
