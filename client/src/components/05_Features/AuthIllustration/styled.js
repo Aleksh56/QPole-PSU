@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { Grid } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
-import { colorConfig } from '@/app/template/config/color.config';
 
-export const IllustrationGridWrapper = styled(Grid)(({ theme }) => ({
+import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
+
+export const IllustrationGridWrapper = styled(Grid)(() => ({
   // ToDo - rewrite flex -> grid
   display: 'flex',
   flexDirection: 'column',
@@ -20,7 +21,7 @@ export const IllustrationGridWrapper = styled(Grid)(({ theme }) => ({
     height: '100%',
     alignSelf: 'center',
   },
-  [theme.breakpoints.down('lg')]: {
+  '@media (max-width: 1200px)': {
     display: 'none',
   },
 }));

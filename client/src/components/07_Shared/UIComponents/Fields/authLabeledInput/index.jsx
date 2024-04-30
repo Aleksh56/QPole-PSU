@@ -1,28 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { StyledPasswordWrapper } from './styled';
 import { TextField, Typography } from '@mui/material';
-import MaskedInput from 'react-text-mask';
+import { useEffect, useState } from 'react';
+import ReactInputMask from 'react-input-mask';
 
-const TextMaskCustom = React.forwardRef((props, ref) => {
-  const { mask, onChange, ...other } = props;
-  console.log(other);
-  console.log('Received mask:', mask);
-
-  const handleChange = (event) => {
-    onChange(event);
-  };
-
-  return (
-    <MaskedInput
-      {...other}
-      guide={false}
-      mask={mask}
-      placeholderChar={'\u2000'}
-      keepCharPositions={true}
-      onChange={handleChange}
-    />
-  );
-});
+import { StyledPasswordWrapper } from './styled';
 
 const LabeledInput = ({
   label = '',
@@ -50,30 +30,48 @@ const LabeledInput = ({
         </Typography>
         {children}
       </StyledPasswordWrapper>
-
-      <TextField
-        variant="outlined"
-        margin="normal"
-        required={required}
-        fullWidth
-        id={id}
-        name={id}
-        autoComplete={autoComplete}
-        autoFocus
-        error={error}
-        value={value}
-        type={id}
-        onChange={handleChange}
-        helperText={error ? errorMessage : ''}
-        placeholder={placeholder}
-        // InputProps={{
-        //   inputComponent: mask ? TextMaskCustom : undefined,
-        //   inputProps: {
-        //     mask: Array.isArray(mask) ? mask : [],
-        //     onChange: handleChange,
-        //   },
-        // }}
-      />
+      {mask ? (
+        <ReactInputMask
+          mask={mask}
+          maskChar="_"
+          value={value}
+          onChange={(e) => handleChange({ target: { id, value: e.target.value } })}
+        >
+          {(inputProps) => (
+            <TextField
+              {...inputProps}
+              variant="outlined"
+              margin="normal"
+              required={required}
+              fullWidth
+              id={id}
+              name={id}
+              autoComplete={autoComplete}
+              autoFocus
+              error={error}
+              helperText={error ? errorMessage : ''}
+              placeholder={placeholder}
+            />
+          )}
+        </ReactInputMask>
+      ) : (
+        <TextField
+          variant="outlined"
+          margin="normal"
+          required={required}
+          fullWidth
+          id={id}
+          name={id}
+          autoComplete={autoComplete}
+          autoFocus
+          error={error}
+          value={value}
+          type={id}
+          onChange={handleChange}
+          helperText={error ? errorMessage : ''}
+          placeholder={placeholder}
+        />
+      )}
     </>
   );
 };

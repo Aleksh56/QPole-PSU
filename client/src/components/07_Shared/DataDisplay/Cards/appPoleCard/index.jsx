@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { Typography, Menu, MenuItem, Box } from '@mui/material';
+import zaglushka from '@assets/zaglushka.jpg';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { Box, Menu, MenuItem, Typography } from '@mui/material';
+import React, { useState } from 'react';
+
+import { closePollFx } from './model/close-poll';
+import { deletePollFx } from './model/delete-poll';
+import { duplicatePollFx } from './model/duplicate-poll';
 import {
   ActionsWrapper,
+  ChipsWrapper,
   StyledCard,
   StyledCardContent,
   StyledCardMedia,
   StyledChip,
   StyledTypographyName,
 } from './styled';
-import { closePollFx } from './model/close-poll';
-import { duplicatePollFx } from './model/duplicate-poll';
+
 import config from '@/config';
-import { deletePollFx } from './model/delete-poll';
-import zaglushka from '@assets/zaglushka.jpg';
 
 const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -58,9 +61,15 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
       />
       <StyledCardContent>
         <ActionsWrapper>
-          {/* TODO - Пофиксить стили label */}
-          <StyledChip label={!pollData.is_closed ? 'Открыт' : 'Закрыт'} />
-          <StyledChip label={!pollData.is_in_production ? 'Недоступен' : 'Доступен'} />
+          <ChipsWrapper>
+            {pollData.is_anonymous && <StyledChip label="Анонимный" />}
+            {cardButton && (
+              <StyledChip label={pollData.is_in_production ? 'Открыт' : 'Регистрация'} />
+            )}
+            {!cardButton && (
+              <StyledChip label={!pollData.is_in_production ? 'Недоступен' : 'Доступен'} />
+            )}
+          </ChipsWrapper>
           {!cardButton && (
             <Box zIndex="tooltip">
               <MoreHorizIcon onClick={handleMenuOpen} />

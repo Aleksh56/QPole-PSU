@@ -1,6 +1,6 @@
 const pattern = {
   passwordLowerAndUpper: /^(?=.*[a-z])(?=.*[A-Z]).{8,50}$/,
-  // name: /^[A-Za-zА-Яа-я-\s]+$/,
+  name: /^[A-Za-zА-Яа-я-\s]+$/,
   // secure: /^[A-Za-zА-Яа-я0-9-_\s]+$/,
   // secureContent: /^[A-Za-zА-Яа-я0-9-_/\\(),.\s]+$/,
   // secureAddress: /^[A-Za-zА-Яа-я0-9-_/\\(),.\s]+$/,

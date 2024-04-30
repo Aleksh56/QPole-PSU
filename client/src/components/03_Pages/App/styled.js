@@ -45,7 +45,9 @@ export const PollsGrid = styled(Box)({
   justifyContent: 'start',
   padding: '1rem',
   width: '100%',
-
+  '@media (max-width: 1100px)': {
+    gridTemplateColumns: '1fr',
+  },
   '@media (max-width: 500px)': {
     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
   },

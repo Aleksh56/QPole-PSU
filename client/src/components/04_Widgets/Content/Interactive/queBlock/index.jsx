@@ -45,6 +45,8 @@ const QueBlock = ({ question, isMixed, setIsLong }) => {
       setSelectedValues((prev) => prev.filter((id) => id !== opt_id));
     }
     updateMultipleAnswer({ answer_option: opt_id, question: question.id, selected: checked });
+    setIsTextLong(false);
+    setIsLong(false);
   };
 
   const handleRadioChange = (event) => {
@@ -52,6 +54,8 @@ const QueBlock = ({ question, isMixed, setIsLong }) => {
     setFieldValue('');
     setSelectedValue(value);
     updateAnswer({ answer_option: Number(value), question: question.id });
+    setIsTextLong(false);
+    setIsLong(false);
   };
 
   const handleTextChange = (event, opt_id) => {

@@ -1,5 +1,4 @@
-import styled from '@emotion/styled';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid, styled } from '@mui/material';
 
 export const StyledAuthWrapper = styled(Box)(() => ({
   width: '100vw',
@@ -8,11 +7,11 @@ export const StyledAuthWrapper = styled(Box)(() => ({
   maxHeight: '100vh',
 }));
 
-export const OverlayWrapper = styled(Grid)(({ theme }) => ({
+export const OverlayWrapper = styled(Grid)(() => ({
   width: '100vw',
   height: '100vh',
   position: 'relative',
-  [theme.breakpoints.down('lg')]: {
+  '@media (max-width: 1200px)': {
     justifyContent: 'center',
   },
 }));

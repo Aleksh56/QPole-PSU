@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { BarChart, LineChart, PieChart } from '@mui/x-charts';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import FrmOtherResults from '../frmOtherResults';
 

@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
 
 import { DescriptionTagsWrapper, DescriptionWrapper, GraphWrapper, HeaderWrapper } from './styled';
 
@@ -7,7 +6,6 @@ import CustomGauge from '@/components/07_Shared/DataDisplay/Charts/gauge';
 import { pollResTableFlds } from '@/data/fields';
 
 const PollResultHeader = ({ res, data }) => {
-  console.log(res);
   return (
     <HeaderWrapper>
       <GraphWrapper>

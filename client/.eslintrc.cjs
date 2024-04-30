@@ -42,6 +42,8 @@ module.exports = {
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     'no-unused-vars': ['warn'],
     'react/prop-types': 'off',
+    'react/display-name': 'off',
+    'react/no-children-prop': 'off',
     'import/order': [
       'error',
       {

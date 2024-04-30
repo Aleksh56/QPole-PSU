@@ -1,18 +1,19 @@
 import styled from '@emotion/styled';
 import { Button, Grid } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
-import { colorConfig } from '@/app/template/config/color.config';
 
-export const FormGridWrapper = styled(Grid)(({ theme }) => ({
+import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
+
+export const FormGridWrapper = styled(Grid)(() => ({
   flexBasis: '30%',
   maxWidth: '100%',
-  [theme.breakpoints.down('lg')]: {
+  '@media (max-width: 1200px)': {
     flexBasis: '50%',
   },
-  [theme.breakpoints.down('md')]: {
+  '@media (max-width: 900px)': {
     flexBasis: '75%',
   },
-  [theme.breakpoints.down('sm')]: {
+  '@media (max-width: 600px)': {
     flexBasis: '100%',
   },
 }));
@@ -40,6 +41,9 @@ export const StyledForm = styled('form')(() => ({
   '& .MuiInputBase-root': {
     borderRadius: Rem(12),
     fontSize: Rem(16),
+  },
+  '& .MuiInputBase-root input': {
+    padding: Rem(12),
   },
   '& .css-md26zr-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
     {

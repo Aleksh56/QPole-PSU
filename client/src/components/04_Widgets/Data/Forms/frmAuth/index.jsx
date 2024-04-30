@@ -1,47 +1,72 @@
-import React, { useState } from 'react';
-import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from './styled';
-import AuthFormHeading from '@/components/05_Features/AuthFormHeading';
-import { useNavigate } from 'react-router-dom';
-import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+
+import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from './styled';
+
+import AuthFormHeading from '@/components/05_Features/AuthFormHeading';
+import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
 import { pattern } from '@/config/validation.patterns';
 import { validateField } from '@/utils/js/validateField';
-import { useAlert } from '@/app/context/AlertProvider';
-import { ThemeProvider, useTheme } from '@emotion/react';
 
 const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
-  const { showAlert } = useAlert();
+  // const { showAlert } = useAlert();
   const { t } = useTranslation();
-  const theme = useTheme();
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({
     email: '',
     password: '',
+    name: '',
+    surname: '',
+    patronymic: '',
   });
   const [formValues, setFormValues] = useState({
     email: '',
     password: '',
     number: '',
+    name: '',
+    surname: '',
+    patronymic: '',
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    showAlert('Это сообщение об успехе тест', 'success');
 
     const emailError = validateField(
       formValues.email,
       pattern.email,
-      'Некорректный адрес электронной почты'
+      'Некорректный адрес электронной почты',
     );
     const passwordError = validateField(
       formValues.password,
       pattern.passwordLowerAndUpper,
-      'Пароль должен содержать минимум 8 символов, включая строчные и заглавные буквы'
+      'Пароль должен содержать минимум 8 символов, включая строчные и заглавные буквы',
+    );
+
+    const nameError = validateField(
+      formValues.name,
+      pattern.name,
+      'Имя должно содержать только буквы кириллицы',
+    );
+
+    const surnameError = validateField(
+      formValues.name,
+      pattern.name,
+      'Фамилия должна содержать только буквы кириллицы',
+    );
+
+    const patronymicError = validateField(
+      formValues.name,
+      pattern.name,
+      'Отчество должно содержать только буквы кириллицы',
     );
 
     setFormErrors({
       email: emailError,
       password: passwordError,
+      name: nameError,
+      surname: surnameError,
+      patronymic: patronymicError,
     });
 
     if (!emailError && !passwordError) {
@@ -54,37 +79,61 @@ const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () 
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <FormGridWrapper item>
-        <FormContainer>
-          <AuthFormHeading isSignIn={isSignIn} handleFormSwitch={handleFormSwitch} />
-          <StyledForm onSubmit={handleSubmit}>
-            <LabeledInput
-              label="Ваша почта"
-              required={true}
-              autoComplete="email"
-              id="email"
-              placeholder="Эл. почта"
-              handleChange={handleInputChange}
-              errorMessage={formErrors.email}
-            />
-            <LabeledInput
-              label="Пароль"
-              required={true}
-              autoComplete="current-password"
-              id="password"
-              placeholder="Пароль"
-              handleChange={handleInputChange}
-              errorMessage={formErrors.password}
-              children={
-                isSignIn ? (
-                  <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
-                ) : (
-                  ''
-                )
-              }
-            />
-            {!isSignIn && (
+    <FormGridWrapper item>
+      <FormContainer>
+        <AuthFormHeading isSignIn={isSignIn} handleFormSwitch={handleFormSwitch} />
+        <StyledForm onSubmit={handleSubmit}>
+          <LabeledInput
+            label="Ваша почта"
+            required={true}
+            autoComplete="email"
+            id="email"
+            placeholder="Эл. почта"
+            handleChange={handleInputChange}
+            errorMessage={formErrors.email}
+          />
+          <LabeledInput
+            label="Пароль"
+            required={true}
+            autoComplete="current-password"
+            id="password"
+            placeholder="Пароль"
+            handleChange={handleInputChange}
+            errorMessage={formErrors.password}
+            children={
+              isSignIn ? (
+                <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
+              ) : (
+                ''
+              )
+            }
+          />
+          {!isSignIn && (
+            <>
+              <LabeledInput
+                label="Фамилия"
+                required={true}
+                autoComplete="additional-name"
+                id="surname"
+                handleChange={handleInputChange}
+                placeholder="Ваша фамилия"
+              />
+              <LabeledInput
+                label="Имя"
+                required={true}
+                autoComplete="given-name"
+                id="name"
+                handleChange={handleInputChange}
+                placeholder="Ваше имя"
+              />
+              <LabeledInput
+                label="Отчество"
+                required={true}
+                autoComplete="family-name"
+                id="patronymic"
+                handleChange={handleInputChange}
+                placeholder="Ваше отчество"
+              />
               <LabeledInput
                 label="Телефон"
                 required={true}
@@ -92,15 +141,16 @@ const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () 
                 id="number"
                 handleChange={handleInputChange}
                 placeholder="Телефон"
+                mask="+7\ (999) 999-99-99"
               />
-            )}
-            <StyledConfirmButton disabled={false} type="submit" fullWidth variant="contained">
-              {isSignIn ? t('button.login') : t('button.signup')}
-            </StyledConfirmButton>
-          </StyledForm>
-        </FormContainer>
-      </FormGridWrapper>
-    </ThemeProvider>
+            </>
+          )}
+          <StyledConfirmButton disabled={false} type="submit" fullWidth variant="contained">
+            {isSignIn ? t('button.login') : t('button.signup')}
+          </StyledConfirmButton>
+        </StyledForm>
+      </FormContainer>
+    </FormGridWrapper>
   );
 };
 export default FrmAuth;

@@ -1,5 +1,6 @@
-import { handleRequest } from '@/api/api';
 import axios from 'axios';
+
+import { handleRequest } from '@/api/api';
 import config from '@/config';
 
 const timeouts = {};
@@ -22,15 +23,28 @@ export const changePoleData = async (field, value, id, fetchPoleData, showAlert)
           Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
           'content-type': 'multipart/form-data',
         },
-      }
+      },
     );
   }
+
+  // if (field === 'start_time' || field === 'end_time') {
+  //   const newValue = value.replace('T', ' ');
+  //   console.log(newValue);
+  //   handleRequest('patch', `/api/my_poll/?poll_id=${id}`, {
+  //     [field]: newValue,
+  //   }).then(() =>
+  //     fetchPoleData().then(() => {
+  //       showAlert('Данные об опросе успешно сохранены !', 'success');
+  //     }),
+  //   );
+  //   return;
+  // }
 
   timeouts[field] = setTimeout(() => {
     handleRequest('patch', `/api/my_poll/?poll_id=${id}`, { [field]: value }).then(() =>
       fetchPoleData().then(() => {
         showAlert('Данные об опросе успешно сохранены !', 'success');
-      })
+      }),
     );
     delete timeouts[field];
   }, 0);

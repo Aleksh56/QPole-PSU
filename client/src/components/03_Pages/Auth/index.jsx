@@ -1,16 +1,16 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import { OverlayWrapper, StyledAuthWrapper } from './styled';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
 import { loginUser, registerUser } from '@/api/api';
-import useAuth from '@/hooks/useAuth';
 import FrmAuth from '@/components/04_Widgets/Data/Forms/frmAuth';
 import AuthIllustration from '@/components/05_Features/AuthIllustration';
+import useAuth from '@/hooks/useAuth';
 import usePageTitle from '@/hooks/usePageTitle';
-import { ThemeProvider, useTheme } from '@mui/material';
 
 const AuthPage = () => {
   const { setAuth } = useAuth();
-  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const path = useMemo(() => location.pathname, [location.pathname]);
@@ -33,7 +33,14 @@ const AuthPage = () => {
       const formData = {
         email: event.email,
         password: event.password,
-        ...(isSignIn ? {} : { number: event.number }),
+        ...(isSignIn
+          ? {}
+          : {
+              number: event.number,
+              name: event.name,
+              surname: event.surname,
+              patronymic: event.patronymic,
+            }),
       };
 
       const response = isSignIn ? await loginUser(formData) : await registerUser(formData);
@@ -44,22 +51,20 @@ const AuthPage = () => {
         navigate('/app');
       }
     },
-    [isSignIn]
+    [isSignIn],
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <StyledAuthWrapper component="main">
-        <OverlayWrapper container>
-          <AuthIllustration />
-          <FrmAuth
-            isSignIn={isSignIn}
-            handleFormSwitch={handleFormSwitch}
-            handleFormSubmit={handleFormSubmit}
-          />
-        </OverlayWrapper>
-      </StyledAuthWrapper>
-    </ThemeProvider>
+    <StyledAuthWrapper component="main">
+      <OverlayWrapper container>
+        <AuthIllustration />
+        <FrmAuth
+          isSignIn={isSignIn}
+          handleFormSwitch={handleFormSwitch}
+          handleFormSubmit={handleFormSubmit}
+        />
+      </OverlayWrapper>
+    </StyledAuthWrapper>
   );
 };
 

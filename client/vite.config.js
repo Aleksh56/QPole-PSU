@@ -11,7 +11,7 @@ export default defineConfig({
       babelHelpers: 'runtime',
       exclude: 'node_modules/**',
       extensions: ['.js', '.jsx', '.es6', '.es', '.mjs'],
-      presets: [['@babel/preset-env', { modules: false }]],
+      presets: [['@babel/preset-env', { modules: false }], '@babel/preset-react'],
       plugins: [
         [
           '@babel/plugin-transform-runtime',

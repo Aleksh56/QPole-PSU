@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
-import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
-import { v4 } from 'uuid';
-import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
-import useTabs from '@/hooks/useTabs';
+import { useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+
+import { changePoleData, getInfoAboutPole } from './api/apiRequests';
+import { poleTabsButtonsData } from './data/PoleTabsButtonsData';
+import { deleteImageFx } from './model/image-delete';
+import { MainSettingsContentWrapper, PoleInfoContainer } from './styled';
+
+import { useAlert } from '@/app/context/AlertProvider';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import PollMainSettingsTabs from '@/components/06_Entities/PollMainSettingsTabs';
-import { MainSettingsContentWrapper, PoleInfoContainer, PoleInfoSwitchContainer } from './styled';
-import { poleTabsButtonsData } from './data/PoleTabsButtonsData';
-import { StyledFormControlLabel } from '@/constants/styles';
-import { useLocation, useParams } from 'react-router-dom';
-import { changePoleData, getInfoAboutPole } from './api/apiRequests';
-import { deleteImageFx } from './model/image-delete';
-import { useAlert } from '@/app/context/AlertProvider';
+import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
+import useTabs from '@/hooks/useTabs';
 
 const PoleMainSettingsPage = () => {
   const { id } = useParams();
@@ -91,6 +90,29 @@ const PoleMainSettingsPage = () => {
             }
             handleChange={(e) => handleFieldChange('description', e)}
           />
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px' }}>
+            <InvisibleLabeledField
+              label="Время начала"
+              placeholder="Введите время начала опроса"
+              type="datetime-local"
+              min="0001-01-01T00:00"
+              max="9999-12-01T00:00"
+              value={
+                pendingChanges['start_time'] !== undefined
+                  ? pendingChanges['start_time']
+                  : poleData?.description || ''
+              }
+              handleChange={(e) => handleFieldChange('start_time', e)}
+            />
+            <InvisibleLabeledField
+              label="Время конца"
+              placeholder="Введите время конца опроса"
+              type="datetime-local"
+              min="2024-01-01T00:00"
+              max="9999-12-01T00:00"
+              handleChange={(e) => handleFieldChange('end_time', e)}
+            />
+          </Box>
         </PoleInfoContainer>
         <Box sx={{ width: '35%' }}>
           <PollMainSettingsTabs
