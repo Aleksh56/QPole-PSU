@@ -86,21 +86,17 @@ def poll_voting_test(request):
             raise ObjectNotFoundException(model='Profile')
 
         if request.method == 'GET':
-            data = {'answers': [
-        {
-            "question":2206,
-            "answer_option": 14439
-        },
-        {
-            "question":2209,
-            "answer_option": 14453
-        },
-        {
-            "question":2210,
-            "answer_option": 14457
-        }
-    ] }
-    
+            data = {
+                
+                "answers": [
+                    {
+                        "question": 2229,
+                        "answer_option": 14509
+                    }
+                ]
+            
+            }
+                
     
 
             poll_id = request.GET.get('poll_id', None)

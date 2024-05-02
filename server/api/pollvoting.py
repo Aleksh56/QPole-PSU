@@ -131,18 +131,16 @@ def quizz_voting_handler(answers, poll):
         difference = list(required_questions.difference(answered_questions))
         raise PollAnsweringException(detail=f"Вы ответили не на все обязательные вопросы: {difference}")
 
-    print(parsed_answers)
     return parsed_answers
 
 
 def save_votes(answers, poll, my_profile, raw_answers):
     poll_answer_group_data = {
-                'profile': my_profile.user_id,
                 'poll': poll.id,
     }
     
-    if poll.poll_type.name == "Анонимный":
-        poll_answer_group_data['profile'] = None
+    if not poll.poll_type.name in ("Анонимный", "Быстрый"):
+        poll_answer_group_data['profile'] = my_profile.user_id
 
 
     poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
@@ -151,11 +149,12 @@ def save_votes(answers, poll, my_profile, raw_answers):
     else:
         raise MyCustomException(detail=poll_answer_group.errors)
     
-
     poll_participation_group_data = {
-                'profile': my_profile.user_id,
-                'poll': poll.id,
+        'poll': poll.id,
     }
+    if not poll.poll_type.name in ("Быстрый"):
+        poll_participation_group_data['profile'] = my_profile.user_id
+        
 
     poll_participation_group = PollParticipantsGroupSerializer(data=poll_participation_group_data)
     if poll_participation_group.is_valid():

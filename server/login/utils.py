@@ -84,3 +84,46 @@ def generate_random_digits(length):
 def generate_username(email):
     random_digits = generate_random_digits(6)
     return f"{email}_{random_digits}"
+
+
+def check_email_confirmation_code_in_cache(email):
+    cache_key = f'email_confirmation_code:{email}'
+    reset_data = cache.get(cache_key)
+    if reset_data:
+        code = reset_data.get('code')
+        created_at = reset_data.get('created_at')
+        return code, created_at
+    return None, None
+
+def store_email_confirmation_code_in_cache(email, code):
+    cache_key = f'email_confirmation_code:{email}'
+    cache.set(cache_key, {'code': code, 'created_at': timezone.now()}, timeout=300)
+
+
+def check_email_confirmation_times_in_cache(email):
+    cache_key_times = f'email_confirmation_code_times:{email}'
+    cache_key_reset = f'email_confirmation_code:{email}'
+
+    email_confirmation_times = cache.get(cache_key_times, 1)
+
+    if email_confirmation_times < 2:
+        cache.set(cache_key_times, email_confirmation_times + 1, timeout=300)
+        remaining_time = None
+    elif email_confirmation_times >= 2:
+        reset_code_data = cache.get(cache_key_reset)
+        if reset_code_data:
+            created_at = reset_code_data.get('created_at')
+            time_elapsed = timezone.now() - created_at
+            remaining_time = max(0, 300 - time_elapsed.total_seconds())
+        else:
+            remaining_time = None
+
+    return email_confirmation_times, remaining_time
+
+def send_email_confirmation_code_email(email, code):
+    subject = 'Код подтверждения почты'
+    message = f'Ваш код подтверждения: {code}'
+    from_email = DEFAULT_FROM_EMAIL 
+    recipient_list = [email]
+
+    send_mail(subject, message, from_email, recipient_list)

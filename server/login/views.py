@@ -285,6 +285,75 @@ def reset_password(request):
         return Response({'message':f"Внутренняя ошибка сервера в reset_password: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def send_email_confirmation_code(request):
+    try:
+        email = request.user.email
+        if not email:
+            raise ObjectNotFoundException(model='email')
+        
+        profile = Profile.objects.filter(user=request.user).first()
+        if profile.is_email_confrimed:
+            raise MyCustomException(detail='Вы уже подтвердили почту.')
+          
+        # Проверяем, был ли уже отправлен код подтверждения почты для данного пользователя
+        if check_email_confirmation_code_in_cache(email):
+            reset_code_times, remaining_time = check_email_confirmation_times_in_cache(email)
+            if reset_code_times > 1:
+                if remaining_time is not None:
+                    remaining_seconds = int(remaining_time)
+                    return Response({'message':f'Код подтверждения почты уже отправлен. Повторная отправка будет доступна через {remaining_seconds} секунд.',
+                                     'seconds_left': remaining_seconds})
+                return Response({'message':'Код подтверждения почты уже отправлен. Попробуйте позже.'})
+
+        reset_code = generate_random_code()
+        store_email_confirmation_code_in_cache(email, reset_code)
+        send_email_confirmation_code_email(email, reset_code)
+        return Response({'message':'Код подтверждения почты отправлен на почту. Действителен в течение 5 минут.'})
+
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в send_email_confirmation_code: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+   
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def confirm_email(request):
+    try:
+        email = request.user.email
+        if not email:
+            raise ObjectNotFoundException(model='email')
+
+        email_confirmation_code = request.data.get('email_confirmation_code', None)
+        if not email_confirmation_code:
+            raise MissingFieldException(field_name='email_confirmation_code')
+         
+        if '-' in email_confirmation_code:
+            email_confirmation_code = email_confirmation_code.replace('-', '')
+
+        stored_code = check_email_confirmation_code_in_cache(email)[0]
+
+        if stored_code and int(stored_code) == int(email_confirmation_code):
+            Profile.objects.filter(user=request.user).update(is_email_confrimed=True)
+            return Response({'message': 'Ваша почта успешно подтверждена.'})
+        else:
+            return Response({'message': 'Неверный код, повторите попытку позже.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+    except APIException as api_exception:
+            return Response({'message':f"{api_exception}"}, api_exception.status_code)
+
+    except Exception as ex:
+        return Response({'message':f"Внутренняя ошибка сервера в check_email_confirmation_code: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    
+
 class EmailTokenObtainPairSerializer(serializers.Serializer):
     default_error_messages = {
         'no_active_account': 'No active account found with the given email address.'

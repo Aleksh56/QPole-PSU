@@ -52,7 +52,7 @@ def my_profile(request):
                     serializer.save(user=current_user)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    raise MyCustomException(detail=serializer.errors)   
 
         elif request.method == 'PATCH':
             current_user_profile = Profile.objects.filter(user=current_user).first()
@@ -66,7 +66,7 @@ def my_profile(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                raise MyCustomException(detail=serializer.errors)   
 
         elif request.method == 'DELETE':
             current_user_profile = Profile.objects.filter(user=current_user).first()
@@ -99,20 +99,34 @@ def my_poll(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = (
-                    Poll.objects.filter(
-                        Q(author=my_profile) & Q(poll_id=poll_id))
-                        .select_related('author', 'author__user', 'poll_type', 'poll_setts')
-                        .prefetch_related(
-                            Prefetch('questions', queryset=PollQuestion.objects
-                                                                .prefetch_related('answer_options').all())
+                detailed = int(request.GET.get('detailed', True))
+                if detailed:
+                    poll = (
+                        Poll.objects.filter(
+                            Q(author=my_profile) & Q(poll_id=poll_id))
+                            .select_related('author', 'author__user', 'poll_type', 'poll_setts')
+                            .prefetch_related(
+                                Prefetch('questions', queryset=PollQuestion.objects
+                                                                    .prefetch_related('answer_options').all())
+                            )
+                            .first()
                         )
-                        .first()
-                    )
-                if not poll:
-                    raise ObjectNotFoundException(model='Poll')
+                    if not poll:
+                        raise ObjectNotFoundException(model='Poll')
                 
-                serializer = PollSerializer(poll, context={'profile': my_profile})
+                    serializer = PollSerializer(poll, context={'profile': my_profile})
+                else:
+                    poll = (
+                        Poll.objects.filter(
+                            Q(author=my_profile) & Q(poll_id=poll_id))
+                            .select_related('author', 'author__user', 'poll_type', 'poll_setts')
+                            .first()
+                        )
+                    if not poll:
+                        raise ObjectNotFoundException(model='Poll')
+                
+                    serializer = MiniPollSerializer(poll, context={'profile': my_profile})
+
                 return Response(serializer.data)
             
             else:
@@ -145,7 +159,7 @@ def my_poll(request):
                         .order_by('-created_date')
                 )
                 
-                
+                # print(polls.explain(analyze=True))
 
                 pagination_data = get_paginated_response(request, polls, MiniPollSerializer)
                 return Response(pagination_data)
@@ -189,7 +203,7 @@ def my_poll(request):
                 
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                raise MyCustomException(detail=serializer.errors)   
 
         elif request.method == 'PATCH':
             data = request.data
@@ -208,7 +222,7 @@ def my_poll(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+                raise MyCustomException(detail=serializer.errors)       
 
         elif request.method == 'PUT':   
             data = request.data
@@ -332,6 +346,7 @@ def my_poll(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
    
+            poll.poll_setts.delete()
             poll.delete()
 
             current_user_profile = Profile.objects.filter(user=current_user).first()
@@ -385,19 +400,20 @@ def my_poll_settings(request):
             if not poll_id:
                 raise MissingParameterException(field_name='poll_id')
             
-            poll_setts = PollSettings.objects.filter(
-                    Q(poll__poll_id=poll_id) and Q(poll__author=my_profile)
-                ).first()
-            if not poll_setts:
-                raise ObjectNotFoundException(model='PollSettings')
+            poll = Poll.objects.filter(
+                    Q(poll_id=poll_id)
+                ).select_related('poll_setts').first()
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
     
+            poll_setts = poll.poll_setts
             serializer = PollSettingsSerializer(instance=poll_setts, data=data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+                raise MyCustomException(detail=serializer.errors)        
 
     
     except PollValidationException as exception:
@@ -438,7 +454,8 @@ def my_poll_stats(request):
                     .prefetch_related('user_participations')
                     .first()
             )
-            
+            # print(poll.explain(analyze=True))
+
             if not poll:
                 raise ObjectNotFoundException('Poll')
             poll_members_quantity = poll.user_participations.count()
@@ -680,9 +697,9 @@ def my_poll_question(request):
             if last_question:
                 data['order_id'] = last_question.order_id + 1
 
-            poll_question = PollQuestionSerializer(data=data)
-            if poll_question.is_valid():
-                poll_question = poll_question.save()
+            serializer = PollQuestionSerializer(data=data)
+            if serializer.is_valid():
+                poll_question = serializer.save()
 
                 if poll.poll_type.name == 'Анонимный':
                     if is_web3_connected(w3):
@@ -697,7 +714,7 @@ def my_poll_question(request):
 
                 return Response(f"Вопрос {poll_question} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
-                return Response(poll_question.errors, status=status.HTTP_400_BAD_REQUEST)
+                raise MyCustomException(detail=serializer.errors)
             
         elif request.method == 'PATCH':
             data = request.data
@@ -725,7 +742,7 @@ def my_poll_question(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                raise MyCustomException(detail=serializer.errors)
 
         elif request.method == 'DELETE':
             data = request.data
@@ -920,9 +937,9 @@ def my_poll_question_option(request):
                 data['order_id'] = 16
 
             has_free_option = poll_question.answer_options.filter(is_free_response=True).exists()
-            answer_option_serializer = PollQuestionOptionSerializer(data=data, context={'has_free_option': has_free_option})
-            if answer_option_serializer.is_valid():
-                answer_option = answer_option_serializer.save()
+            serializer = PollQuestionOptionSerializer(data=data, context={'has_free_option': has_free_option})
+            if serializer.is_valid():
+                answer_option = serializer.save()
                 if poll.poll_type.name == 'Анонимный':
                     if is_web3_connected(w3):
                         poll_data = {
@@ -936,7 +953,7 @@ def my_poll_question_option(request):
                     
                 return Response(f"Вариант ответа {answer_option} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
-                return Response(answer_option_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                raise MyCustomException(detail=serializer.errors)
             
         elif request.method == 'PATCH':
             data = request.data.copy()
@@ -975,7 +992,7 @@ def my_poll_question_option(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                raise MyCustomException(detail=serializer.errors)
 
         elif request.method == 'DELETE':
             
@@ -1149,13 +1166,15 @@ def poll_answer_group(request):
 
             data['profile'] = my_profile
             data['poll'] = poll.id
-            poll_answer_group = PollAnswerGroupSerializer(data=data)
+            serializer = PollAnswerGroupSerializer(data=data)
             poll_partic_group = PollParticipantsGroupSerializer(data=data)
 
-            if poll_answer_group.is_valid():
-                poll_answer_group.save()
+            if serializer.is_valid():
+                serializer.save()
                 if poll_partic_group.is_valid():
                     poll_partic_group.save()
+                else:
+                    raise MyCustomException(detail=poll_partic_group.errors)
 
 
                 poll_answer_group = (
@@ -1168,7 +1187,7 @@ def poll_answer_group(request):
                 return Response({'message':"Вы успешно начали голосование.", 'data':poll_answer_group.data},
                                                                                     status=status.HTTP_201_CREATED)
             else:
-                return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST) 
+                raise MyCustomException(detail=serializer.errors)
             
         if request.method == 'DELETE':
             poll_id = request.GET.get('poll_id', None)
@@ -1356,6 +1375,57 @@ def poll_voting(request):
         return Response({'message':f"Внутренняя ошибка сервера в poll_voting: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@transaction.atomic
+def quick_poll_voting(request):
+    try:
+        data = request.data.copy()
+
+        poll_id = request.GET.get('poll_id', None)
+        if not poll_id:
+            raise MissingParameterException(field_name='poll_id')
+        
+        poll = (
+                Poll.objects.filter(poll_id=poll_id, poll_type__name='Быстрый')
+                .select_related('author', 'poll_type', 'author__user')
+                .prefetch_related(
+                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                        'answer_options'
+                    ).all()))
+                .prefetch_related(
+                    Prefetch('user_answers', queryset=PollAnswerGroup.objects.prefetch_related(
+                        'answers'
+                    ).all()))
+                .prefetch_related('user_participations')
+                .first()
+            )
+        
+        if not poll:
+            raise ObjectNotFoundException(model='Poll')
+
+                    
+        answers = data.get('answers', None)
+        if not answers:
+            raise MissingFieldException(field_name='answers')
+        
+        # валидация и парсинг ответов
+        answers, _ = poll_voting_handler(answers, poll)
+
+        save_votes(answers, poll, my_profile, _)
+
+                    
+        return Response({'message':"Вы успешно проголосовали"}, status=status.HTTP_200_OK)  
+
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в quick_poll_voting: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в quick_poll_voting: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -1565,7 +1635,7 @@ def my_support_requests(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)     
+                raise MyCustomException(detail=serializer.errors)   
       
         elif request.method == 'DELETE':
             ticket_id = request.GET.get('ticket_id', None)

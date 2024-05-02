@@ -112,19 +112,10 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     voting_time_left = serializers.SerializerMethodField()
-    voting_seconds_left = serializers.SerializerMethodField()
 
     def get_voting_time_left(self, instance):
-        voting_time_left = instance.voting_time_left
-        if voting_time_left and isinstance(voting_time_left, tuple):
-            return voting_time_left[0]
-        return None
+        return instance.voting_time_left
         
-    def get_voting_seconds_left(self, instance):
-        voting_time_left = instance.voting_time_left
-        if voting_time_left and isinstance(voting_time_left, tuple):
-            return voting_time_left[1]
-        return None
 
     def get_author(self, instance):
         return MiniProfileSerializer(instance=instance.profile).data
@@ -378,7 +369,18 @@ class PollSerializer(BasePollSerializer):
     
 class MiniPollSerializer(BasePollSerializer):
     poll_type = serializers.CharField(source='poll_type.name')
+    poll_setts = PollSettingsSerializer(required=False)
     author = MiniProfileSerializer()
+
+    qrcode_img = serializers.SerializerMethodField()
+
+    def get_qrcode_img(self, instance):
+        qrcode_path = instance.qrcode
+        
+        if qrcode_path:
+            return get_qrcode_img_bytes(qrcode_path.path)
+
+        return None
 
     class Meta:
         model = Poll
@@ -559,16 +561,16 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
 
     def get_votes_quantity(self, instance):
         question_id = instance.id
-        question_statistics = self.context.get('question_statistics', {})
+        questions_percentage = self.context.get('questions_percentage', [])
 
-        for item in question_statistics:
+        for item in questions_percentage:
             if item['question_id'] == question_id:
-                return item['quantity']
+                return item['answers_quantity']
         return 0
  
     def get_average_correctness_percentage(self, instance):
         question_id = instance.id
-        questions_percentage = self.context.get('questions_percentage', {})
+        questions_percentage = self.context.get('questions_percentage', [])
 
         for item in questions_percentage:
             if item['question_id'] == question_id:
@@ -577,7 +579,7 @@ class PollQuestionStatsSerializer(serializers.ModelSerializer):
     
     def get_answer_percentage(self, instance):
         question_id = instance.id
-        question_statistics = self.context.get('questions_percentage', {})
+        question_statistics = self.context.get('questions_percentage', [])
         for question in question_statistics:
             if question['question_id'] == question_id:
                 return question['answer_percentage']

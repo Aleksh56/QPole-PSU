@@ -12,6 +12,9 @@ urlpatterns = [
     path('check_reset_code/', check_reset_code, name='check_reset_code'),
     path('reset_password/', reset_password, name='reset_password'),
 
+    path('send_email_confirmation_code/', send_email_confirmation_code, name='send_email_confirmation_code'),
+    path('confirm_email/', confirm_email, name='confirm_email'),
+
     path('token/', EmailTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

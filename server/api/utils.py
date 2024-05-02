@@ -44,8 +44,13 @@ def clone_poll(poll, new_poll_id):
         cloned_poll.is_in_production = False
         if cloned_poll.name:
             cloned_poll.name = cloned_poll.name + " (копия)"
-        cloned_poll.save()
 
+        cloned_poll_setts = deepcopy(poll.poll_setts)
+        cloned_poll_setts.id = None
+        cloned_poll_setts.save()
+        cloned_poll.poll_setts = cloned_poll_setts
+        cloned_poll.save()
+        
         new_questions = []
         for question in poll.questions.all():
             new_question = deepcopy(question)
@@ -116,15 +121,15 @@ def validation_error_wrapper(errors):
 
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
-import qrcode
+from qrcode import QRCode, constants
 from qpoll.settings import SERVER_URL
 
 
 def generate_poll_qr(poll):
     # Генерация QR-кода на основе poll_id
-        qr = qrcode.QRCode(
+        qr = QRCode(
             version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            error_correction=constants.ERROR_CORRECT_L,
             box_size=10,
             border=4,
         )
@@ -154,13 +159,13 @@ def generate_poll_qr(poll):
         return poll
 
 
-import base64
+from base64 import b64encode
 
 def get_qrcode_img_bytes(qrcode_path):
     with open(qrcode_path, 'rb') as f:
         qr_image_bytes = f.read()
         
-        qr_image_base64 = base64.b64encode(qr_image_bytes).decode()
+        qr_image_base64 = b64encode(qr_image_bytes).decode()
         return qr_image_base64
 
 

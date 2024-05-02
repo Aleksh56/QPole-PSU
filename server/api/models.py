@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+from datetime import timedelta
 
 from .exсeptions import *
 
@@ -21,6 +22,7 @@ class Profile(models.Model):
     
     
     is_banned = models.BooleanField('Заблокирован', default=False)
+    is_email_confrimed = models.BooleanField('Почта подтверждена', default=False)
 
 
     def __str__(self):
@@ -76,31 +78,17 @@ class PollAnswerGroup(models.Model):
 
     @property
     def voting_time_left(self):
-        seconds_left = self.poll.end_time_left
+        completion_time = self.poll.poll_setts.completion_time
 
-        end_time = None
-        if self.poll.poll_setts.completion_time:
-            end_time = self.voting_date + self.poll.poll_setts.completion_time
-        elif self.poll.poll_setts.duration:
-            end_time = self.voting_date + self.poll.poll_setts.duration
-
-        if end_time:
-            current_time = timezone.now()
-            time_left = end_time - current_time
-            if time_left.total_seconds() < 0:
-                return "0 00:00:00", 0
+        poll_time_left = self.poll.end_time_left
+        if poll_time_left:
+            if completion_time:
+                time_left = max(((self.voting_date + completion_time) - timezone.now()).total_seconds(), 0)
+                return min(time_left, poll_time_left)
             else:
-                if seconds_left:
-
-                    time_left = max(time_left, timezone.timedelta(seconds=seconds_left))
-
-                days = time_left.days
-                hours, remainder = divmod(time_left.seconds, 3600)
-                minutes, seconds = divmod(remainder, 60)
-                return "{:01} {:02}:{:02}:{:02}".format(days, hours, minutes, seconds), time_left.total_seconds()
-        else:
-            return None
-        
+                return poll_time_left
+            
+        return 0            
 
 
     def __str__(self):
@@ -215,7 +203,12 @@ class Poll(models.Model):
         super().__init__(*args, **kwargs)
         if not self.poll_setts:
             self.poll_setts = PollSettings.objects.create()
-
+        
+        if self.poll_type.name == 'Быстрый':
+            self.poll_setts.completion_time = timedelta(hours=1, minutes=30)
+            self.poll_setts.start_time = timezone.now()
+            self.poll_setts.end_time = self.poll_setts.start_time + timedelta(days=1)
+            self.is_anonymous = True
             
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):
