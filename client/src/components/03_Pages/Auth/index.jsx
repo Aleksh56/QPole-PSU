@@ -5,7 +5,7 @@ import { OverlayWrapper, StyledAuthWrapper } from './styled';
 
 import { loginUser, registerUser } from '@/api/api';
 import FrmAuth from '@/components/04_Widgets/Data/Forms/frmAuth';
-import AuthIllustration from '@/components/05_Features/AuthIllustration';
+import AuthIllustration from '@/components/05_Features/UIComponents/Utils/authIllustration';
 import useAuth from '@/hooks/useAuth';
 import usePageTitle from '@/hooks/usePageTitle';
 

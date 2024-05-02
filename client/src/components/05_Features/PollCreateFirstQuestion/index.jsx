@@ -1,12 +1,12 @@
-import React from 'react';
+import QuestionsImage from '@assets/QuestionsCreate.svg';
+import { Typography } from '@mui/material';
+
 import {
   StyledFirstButton,
   StyledFirstHeroWrapper,
   StyledFirstInfoWrapper,
   StyledFirstLeftColumn,
 } from '@/constants/styles';
-import { Typography } from '@mui/material';
-import QuestionsImage from '@assets/QuestionsCreate.svg';
 
 const PollCreateFirstQuestion = ({ settings = {}, handleCreateQuestion = () => {} }) => {
   return (

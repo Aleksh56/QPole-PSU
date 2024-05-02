@@ -1,4 +1,8 @@
-import React from 'react';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { Avatar, Typography } from '@mui/material';
+import { v4 } from 'uuid';
+
 import {
   BurgerList,
   LinkWrapper,
@@ -8,11 +12,8 @@ import {
   UserRole,
   UserWrapper,
 } from './styled';
-import { Avatar, Typography } from '@mui/material';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+
 import { appHeaderData } from '@/data/fields';
-import { v4 } from 'uuid';
 
 const AppBurgerMenu = ({ drawerOpen, toggleDrawer, userData, role }) => {
   return (

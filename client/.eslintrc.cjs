@@ -44,6 +44,7 @@ module.exports = {
     'react/prop-types': 'off',
     'react/display-name': 'off',
     'react/no-children-prop': 'off',
+    'react-hooks/exhaustive-deps': 'off',
     'import/order': [
       'error',
       {

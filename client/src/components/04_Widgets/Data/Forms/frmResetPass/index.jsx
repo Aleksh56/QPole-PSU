@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { FormContainer, FormGridWrapper, StyledForm } from './styled';
 
 import { checkResetPasswordCode, resetPasswordRequest, sendResetPasswordCode } from '@/api/api';
-import PasswordResetButtons from '@/components/05_Features/PasswordResetButtons';
-import PasswordResetHeading from '@/components/05_Features/PasswordResetHeading';
+import PassResetHead from '@/components/05_Features/UIComponents/Utils/passResetHead';
+import PassResetBtns from '@/components/07_Shared/UIComponents/Buttons/passResetBtns';
 import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
 import useAuth from '@/hooks/useAuth';
 import usePageTitle from '@/hooks/usePageTitle';
@@ -55,7 +55,7 @@ const FrmResetPass = () => {
   return (
     <FormGridWrapper item>
       <FormContainer>
-        <PasswordResetHeading />
+        <PassResetHead />
         <StyledForm
           onSubmit={
             isEmailSubmitted
@@ -100,7 +100,7 @@ const FrmResetPass = () => {
             />
           )}
 
-          <PasswordResetButtons
+          <PassResetBtns
             confirmCaption="Отправить"
             returnCaption="Вернуться назад"
             isConfirmDisabled={false}

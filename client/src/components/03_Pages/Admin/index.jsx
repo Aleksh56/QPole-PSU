@@ -1,12 +1,15 @@
-import React, { useEffect } from 'react';
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
-import { Routes, Route, useNavigate, NavLink } from 'react-router-dom';
-import { StyledDrawerWrapper } from './styled';
-import { adminPanelSidebarLinks } from '@/data/onboardings';
-import AdminUsersPage from './pages/AdminUsers';
-import AdmHeader from '@/components/04_Widgets/Navigation/Menus/admHeader';
-import { colorConfig } from '@/app/template/config/color.config';
+import React, { useEffect } from 'react';
+import { NavLink, Route, Routes, useNavigate } from 'react-router-dom';
+
+import AdminSettings from './pages/AdminSettings';
 import AdmSupportPage from './pages/AdminSupport';
+import AdminUsersPage from './pages/AdminUsers';
+import { StyledDrawerWrapper } from './styled';
+
+import { colorConfig } from '@/app/template/config/color.config';
+import AdmHeader from '@/components/04_Widgets/Navigation/Menus/admHeader';
+import { adminPanelSidebarLinks } from '@/data/onboardings';
 
 const AdminPanelPage = () => {
   const navigate = useNavigate();
@@ -67,10 +70,7 @@ const AdminPanelPage = () => {
               />
               <Route path="/users" element={<AdminUsersPage />} />
               <Route path="/support" element={<AdmSupportPage />} />
-              <Route
-                path="/settings"
-                element={<Typography paragraph>Настройки системы.</Typography>}
-              />
+              <Route path="/settings" element={<AdminSettings />} />
             </Routes>
           </Box>
         </Box>

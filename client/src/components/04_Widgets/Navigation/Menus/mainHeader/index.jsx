@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { StyledContainer, StyledHeader, StyledLogoLink } from './styled';
-import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
-import HeaderNavigationOutput from '@/components/05_Features/HeaderNavOutput';
 import { Box, useMediaQuery } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { StyledContainer, StyledHeader, StyledLogoLink } from './styled';
+
+import HeaderNavOut from '@/components/05_Features/DataDisplay/Out/headerNavOut';
+import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import useAuth from '@/hooks/useAuth';
 
 const Header = ({ isMainPage = true }) => {
@@ -30,7 +32,7 @@ const Header = ({ isMainPage = true }) => {
     <StyledHeader isSticky={isSticky} isMainPage={isMainPage}>
       <StyledContainer>
         <StyledLogoLink to="/">QPoll</StyledLogoLink>
-        <HeaderNavigationOutput
+        <HeaderNavOut
           children={
             <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}>
               <PrimaryButton caption={t('button.createQuiz')} to="/signup" />

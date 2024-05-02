@@ -1,12 +1,14 @@
+import { CircularProgress } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { ContentWrapper, PollsGrid, StyledAppContentWrapper } from './styled';
+
 import { getAllPoles } from '@/components/03_Pages/App/api/apiRequests';
-import { _settings } from '@/components/03_Pages/App/config/settings';
 import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
 import AppPoleCard from '@/components/04_Widgets/Data/Cards/appPoleCard';
 import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
-import { CircularProgress } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ContentWrapper, PollsGrid, StyledAppContentWrapper } from './styled';
+import { surveySettings } from '@/data/fields';
 
 const PolesArchivePage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState();
@@ -48,8 +50,8 @@ const PolesArchivePage = () => {
       <FrmCreatePoll
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title={_settings.survey.popUpTitle}
-        buttons={_settings.survey.surveyButtons}
+        title={surveySettings.survey.popUpTitle}
+        buttons={surveySettings.survey.surveyButtons}
       />
     </>
   );

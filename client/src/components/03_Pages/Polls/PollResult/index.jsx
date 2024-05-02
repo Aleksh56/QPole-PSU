@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 
-import ConductionResCrd from '@/components/05_Features/conductionResCrd';
+import ConductionResCrd from '@/components/05_Features/Data/Cards/conductionResCrd';
 import PollResultHeader from '@/components/05_Features/Poll/PollResultHeader';
 
 const PollResult = ({ data }) => {

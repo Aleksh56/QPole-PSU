@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { DialogContent } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { DialogContent } from '@mui/material';
+import { useState } from 'react';
+
 import { ShareDialog, ShareDialogTitle, StyledCheckIcon } from './styled';
-import FrmShareMain from '@/components/05_Features/frmShareMain';
-import FrmShareQR from '@/components/05_Features/frmShareQR';
+
+import FrmShareMain from '@/components/05_Features/Data/Forms/frmShareMain';
+import FrmShareQR from '@/components/05_Features/Data/Forms/frmShareQR';
 
 const FrmShare = ({ open, setOpen }) => {
   const [activeView, setActiveView] = useState('main');

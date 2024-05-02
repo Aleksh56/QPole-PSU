@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import AppHeaderNavigationOutput from '@/components/05_Features/AppHeaderNavOutput';
+import { Dropdown } from '@mui/base/Dropdown';
+import { Menu } from '@mui/base/Menu';
+import { MenuItem } from '@mui/base/MenuItem';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Button } from '@mui/material';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import {
   Listbox,
   StyledHeaderContainer,
@@ -8,17 +14,13 @@ import {
   StyledHeaderWrapper,
   StyledMenuIcon,
 } from './styled';
-import { Dropdown } from '@mui/base/Dropdown';
-import { Menu } from '@mui/base/Menu';
-import { MenuItem } from '@mui/base/MenuItem';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+
+import { useUserRole } from '@/app/context/UserRoleProvider';
+import AppHeaderNavOut from '@/components/05_Features/DataDisplay/Out/appHeaderNavOut';
+import AppBurgerMenu from '@/components/05_Features/UIComponents/Layouts/appBurger';
+import { appHeaderData } from '@/data/fields';
 import useAuth from '@/hooks/useAuth';
 import useUserData from '@/hooks/useUserData';
-import { appHeaderData } from '@/data/fields';
-import { useUserRole } from '@/app/context/UserRoleProvider';
-import AppBurgerMenu from '@/components/05_Features/UIComponents/Layouts/appBurger';
 
 const AppHeader = () => {
   const { role } = useUserRole();
@@ -43,7 +45,7 @@ const AppHeader = () => {
     <StyledHeaderWrapper>
       <StyledHeaderContainer>
         <StyledHeaderLogo to="/">QPoll</StyledHeaderLogo>
-        <AppHeaderNavigationOutput itemsData={appHeaderData} />
+        <AppHeaderNavOut itemsData={appHeaderData} />
         <StyledMenuIcon onClick={toggleDrawer(true)} />
         <AppBurgerMenu
           drawerOpen={drawerOpen}

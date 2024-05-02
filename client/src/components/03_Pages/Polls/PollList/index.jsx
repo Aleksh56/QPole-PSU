@@ -5,7 +5,7 @@ import { ContentWrapper, PollListPageContentWrapper } from './styled';
 
 import PollFilters from '@/components/04_Widgets/Content/Interactive/pollFilters';
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
-import PollListOutput from '@/components/04_Widgets/PollList/PollListOutput';
+import PollListOut from '@/components/05_Features/DataDisplay/Out/pollListOut';
 import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
 import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
 import usePagination from '@/hooks/usePagination';
@@ -35,7 +35,7 @@ const PollListPage = () => {
         <PollFilters setPolls={setPolls} />
         {!loading && (
           <ContentWrapper>
-            <PollListOutput polls={polls} />
+            <PollListOut polls={polls} />
             <CustomPagination
               pageSize={pageSize}
               totalPages={totalPages}

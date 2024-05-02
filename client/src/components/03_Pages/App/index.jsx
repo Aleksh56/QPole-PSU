@@ -1,10 +1,10 @@
 import InboxIcon from '@mui/icons-material/Inbox';
 import { CircularProgress } from '@mui/material';
+import { useUnit } from 'effector-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { getAllPoles } from './api/apiRequests';
-import { _settings } from './config/settings';
 import {
   ContentWrapper,
   PollsGrid,
@@ -13,25 +13,27 @@ import {
   StyledArchiveLink,
 } from './styled';
 
+import { $polls, setPollsData } from '@/api/store/polls';
 import AppPollFilters from '@/components/04_Widgets/Content/Interactive/appPollFilter';
 import AppPoleCard from '@/components/04_Widgets/Data/Cards/appPoleCard';
 import FrmCreatePoll from '@/components/04_Widgets/Utilities/Modals/frmCreatePoll';
-import AppCreateFirstPoll from '@/components/05_Features/AppCreateFirstPoll';
+import AppCreateFirstPoll from '@/components/05_Features/UIComponents/Utils/appCreateFirstPoll';
 import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
+import { surveySettings } from '@/data/fields';
 import usePageTitle from '@/hooks/usePageTitle';
 import usePagination from '@/hooks/usePagination';
 
 const AppPage = () => {
   usePageTitle('app');
+  const [$pollsData] = useUnit([$polls, setPollsData]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState();
   const [loading, setLoading] = useState(true);
-  const [pollData, setPollData] = useState([]);
   const { pageSize, currPage, totalPages, setTotalPages, handlePageSizeChange, handlePageChange } =
     usePagination();
 
   const fetchData = async () => {
     const pollResponse = await getAllPoles({ currPage, pageSize });
-    setPollData(pollResponse.results);
+    setPollsData(pollResponse.results);
     setTotalPages(pollResponse.total_pages);
     setLoading(false);
   };
@@ -42,13 +44,16 @@ const AppPage = () => {
 
   return (
     <>
-      <AppPollFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollData} />
+      <AppPollFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollsData} />
       {loading ? (
         <StyledAppContentWrapper>
           <CircularProgress />
         </StyledAppContentWrapper>
-      ) : pollData && pollData.length === 0 ? (
-        <AppCreateFirstPoll settings={_settings} handleOpenCreatePoleModal={setIsCreateModalOpen} />
+      ) : $pollsData && $pollsData.length === 0 ? (
+        <AppCreateFirstPoll
+          settings={surveySettings}
+          handleOpenCreatePoleModal={setIsCreateModalOpen}
+        />
       ) : (
         <StyledAppContentWrapper>
           <ContentWrapper>
@@ -58,8 +63,8 @@ const AppPage = () => {
             </StyledArchiveLink>
             <PollsGridWrapper>
               <PollsGrid>
-                {pollData &&
-                  pollData
+                {$pollsData &&
+                  $pollsData
                     .filter((item) => !item.is_closed)
                     .map((item) => (
                       <Link key={item.poll_id} to={`/app/tests/${item.poll_id}/main`}>
@@ -81,8 +86,8 @@ const AppPage = () => {
       <FrmCreatePoll
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title={_settings.survey.popUpTitle}
-        buttons={_settings.survey.surveyButtons}
+        title={surveySettings.survey.popUpTitle}
+        buttons={surveySettings.survey.surveyButtons}
       />
     </>
   );

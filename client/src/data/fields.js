@@ -1,7 +1,10 @@
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import GroupIcon from '@mui/icons-material/Group';
+import LinearScaleOutlinedIcon from '@mui/icons-material/LinearScaleOutlined';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import PortraitOutlinedIcon from '@mui/icons-material/PortraitOutlined';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
+import QuizIcon from '@mui/icons-material/Quiz';
 
 export const appHeaderData = [
   { caption: 'Ваши опросы', to: '/app', icon: DashboardIcon },
@@ -211,4 +214,68 @@ export const admSupportTableCols = [
       ) ?? '-',
   },
   { caption: 'Дата закрытия', key: 'is_closed_date' },
+];
+
+export const surveyTypesData = [
+  {
+    image: QuizIcon,
+    title: 'Тест викторина',
+    type: 'Викторина',
+    caption: 'Есть правильные и неправильные ответы. Считается кол-во баллов',
+  },
+  {
+    image: PortraitOutlinedIcon,
+    title: 'Анонимный опрос',
+    type: 'Анонимный',
+    caption: 'Нет правильных ответов. Результаты привязываются к вариантам ответов',
+  },
+  {
+    image: LinearScaleOutlinedIcon,
+    title: 'Квиз опросник',
+    type: 'Опрос',
+    caption: 'Возможность ветвления и начисление баллов за определенные ответы',
+  },
+];
+
+export const surveySettings = {
+  title: 'Вы не создали ни одного теста или опроса',
+  description: 'Вы можете сразу приступить к созданию своего первого теста',
+  buttonCaption: 'Создать новый опрос',
+  survey: {
+    popUpTitle: 'Выберите тип создаваемого опроса',
+    surveyButtons: [...surveyTypesData],
+  },
+};
+
+export const pollAdminSettings = [
+  {
+    caption: 'Максимальное количество вопросов',
+    label: 'Введите количество',
+    link: 'max_questions_quantity',
+  },
+  {
+    caption: 'Минимальное количество вопросов',
+    label: 'Введите количество',
+    link: 'min_questions_quantity',
+  },
+  {
+    caption: 'Максимальное количество ответов в вопросе',
+    label: 'Введите количество',
+    link: 'max_question_options_quantity',
+  },
+  {
+    caption: 'Минимальное количество ответов в вопросе',
+    label: 'Введите количество',
+    link: 'min_question_options_quantity',
+  },
+  {
+    caption: 'Максимальное количество повторных прохождений',
+    label: 'Введите количество',
+    link: 'max_users_polls_quantity',
+  },
+  {
+    caption: 'Максимальное количество опросов у пользователя',
+    label: 'Введите количество',
+    link: 'max_revotes_quantity',
+  },
 ];

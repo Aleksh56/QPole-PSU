@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { DeleteOutline, DragIndicator } from '@mui/icons-material';
 import {
-  Divider,
   Box,
-  Typography,
-  RadioGroup,
+  Checkbox,
+  Divider,
   FormControlLabel,
   Radio,
-  Checkbox,
+  RadioGroup,
+  Typography,
 } from '@mui/material';
-import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
-import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import {
   addOptionRequest,
   changeOptionOrderRequest,
@@ -19,14 +20,15 @@ import {
   handleChangeAnswerRequest,
   handleChangeQuestionInfoRequest,
 } from './api/apiRequests';
-import { useParams } from 'react-router-dom';
-import { DeleteOutline, DragIndicator } from '@mui/icons-material';
-import usePollData from '@/hooks/usePollData';
 import { deleteImageFx } from './model/delete-image';
 import { QueSettingsWrapper } from './styled';
+
+import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
-import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
+import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
+import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
+import usePollData from '@/hooks/usePollData';
 
 const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
   const { id } = useParams();
@@ -99,8 +101,8 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
     await changeOptionRequest(id, q_id, opt_id, fieldName, value);
     setOptions((prevOptions) =>
       prevOptions.map((option) =>
-        option.id === opt_id ? { ...option, [fieldName]: value } : option
-      )
+        option.id === opt_id ? { ...option, [fieldName]: value } : option,
+      ),
     );
     await fetchOptions();
   };

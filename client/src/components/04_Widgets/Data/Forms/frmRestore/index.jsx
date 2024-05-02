@@ -1,7 +1,7 @@
-import React from 'react';
-import AuthIllustration from '@/components/05_Features/AuthIllustration';
-import FrmResetPass from '@/components/04_Widgets/Data/Forms/frmResetPass';
 import { OverlayWrapper, StyledAuthWrapper } from '@/components/03_Pages/Auth/styled';
+import FrmResetPass from '@/components/04_Widgets/Data/Forms/frmResetPass';
+import AuthIllustration from '@/components/05_Features/UIComponents/Utils/authIllustration';
+import React from 'react';
 
 const FrmRestore = () => {
   return (

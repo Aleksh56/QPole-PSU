@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from './styled';
 
-import AuthFormHeading from '@/components/05_Features/AuthFormHeading';
+import AuthFrmHead from '@/components/05_Features/UIComponents/Utils/authFrmHead';
 import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
 import { pattern } from '@/config/validation.patterns';
 import { validateField } from '@/utils/js/validateField';
@@ -81,7 +81,7 @@ const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () 
   return (
     <FormGridWrapper item>
       <FormContainer>
-        <AuthFormHeading isSignIn={isSignIn} handleFormSwitch={handleFormSwitch} />
+        <AuthFrmHead isSignIn={isSignIn} handleFormSwitch={handleFormSwitch} />
         <StyledForm onSubmit={handleSubmit}>
           <LabeledInput
             label="Ваша почта"

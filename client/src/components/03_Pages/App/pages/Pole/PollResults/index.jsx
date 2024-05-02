@@ -9,7 +9,7 @@ import { v4 } from 'uuid';
 import { getPollResultsFx } from './model/get-results';
 import { ResultsGridWrapper, SettingsWrapper, Wrapper } from './styled';
 
-import PollResultCard from '@/components/05_Features/PollResultCard';
+import PollResultCard from '@/components/05_Features/Data/Cards/pollResCard';
 import PollResultsPDF from '@/components/06_Entities/pollResultsPDF';
 import NoDataHelper from '@/components/07_Shared/UIComponents/Utils/Helpers/noDataHelper';
 import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
