@@ -4,10 +4,9 @@ import { DescriptionTagsWrapper, DescriptionWrapper, GraphWrapper, HeaderWrapper
 
 import CustomGauge from '@/components/07_Shared/DataDisplay/Charts/gauge';
 import { pollResTableFlds } from '@/data/fields';
+import { formatISODateTime } from '@/utils/js/formatDate';
 
 const PollResultHeader = ({ res, data }) => {
-  console.log('res', res);
-  console.log(data);
   return (
     <HeaderWrapper>
       <GraphWrapper>
@@ -17,7 +16,9 @@ const PollResultHeader = ({ res, data }) => {
         <DescriptionTagsWrapper>
           <Typography sx={{ fontSize: '12px', color: '#aaa' }}>{data.poll_type}</Typography>
           <Box>
-            <Typography sx={{ fontSize: '12px' }}>{data.result.voting_date}</Typography>
+            <Typography sx={{ fontSize: '12px' }}>
+              {formatISODateTime(data.result.voting_date)}
+            </Typography>
           </Box>
         </DescriptionTagsWrapper>
 

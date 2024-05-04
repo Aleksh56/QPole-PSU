@@ -21,6 +21,7 @@
     "@react-pdf/renderer": "^3.4.2",
     "@types/react-input-mask": "^2.0.4",
     "axios": "^1.6.5",
+    "date-fns": "^3.6.0",
     "effector": "^23.2.0",
     "effector-react": "^23.2.0",
     "file-saver": "^2.0.5",

@@ -1,9 +1,10 @@
-import React from 'react';
 import { Box } from '@mui/material';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+
 import { DragWrapper } from './styled';
 
 const DraggableList = ({ renderItem, items, onDragEnd, pollType }) => {
+  console.log(items);
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="options">

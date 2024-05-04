@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const Wrapper = styled(Box)(() => ({
@@ -9,6 +10,7 @@ export const Wrapper = styled(Box)(() => ({
   maxWidth: Rem(1200),
   margin: `${Rem(24)} auto`,
   columnGap: Rem(30),
+  padding: '0 15px',
 }));
 
 export const SettingsWrapper = styled(Box)(() => ({

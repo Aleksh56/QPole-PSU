@@ -59,12 +59,12 @@ const PollDesignSettingsTab = () => {
       type="time"
       min="00:00:00"
       max="23:59:59"
-      handleChange={(e) => handleChange('duration', e)}
+      handleChange={(e) => handleChange('completion_time', e)}
       value={
-        pendingChanges['duration'] !== undefined
-          ? pendingChanges['duration']
-          : (poleData?.poll_setts?.duration !== null &&
-              poleData?.poll_setts?.duration?.split(':').splice(1).join(':')) ||
+        pendingChanges['completion_time'] !== undefined
+          ? pendingChanges['completion_time']
+          : (poleData?.poll_setts?.completion_time !== null &&
+              poleData?.poll_setts?.completion_time?.split(':').splice(1).join(':')) ||
             '00:00'
       }
     />

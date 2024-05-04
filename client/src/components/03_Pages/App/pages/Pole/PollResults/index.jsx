@@ -18,18 +18,20 @@ const PollResultsPage = () => {
   const { id } = useParams();
   const [questions, setQuestions] = useState([]);
   const [chartType, setChartType] = useState('pie');
+  const [isResults, setIsResults] = useState(false);
 
   useEffect(() => {
     const fetchResults = async () => {
       const data = await getPollResultsFx({ id });
       setQuestions(data.questions);
+      setIsResults(data.participants_quantity > 0);
     };
     fetchResults();
   }, []);
 
   const handleChartTypeChange = (event) => setChartType(event.target.value);
 
-  return questions.length > 0 ? (
+  return isResults ? (
     <Wrapper>
       <SettingsWrapper>
         <Select value={chartType} onChange={handleChartTypeChange} displayEmpty>

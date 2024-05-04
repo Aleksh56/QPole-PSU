@@ -1,3 +1,10 @@
+import { format, parseISO } from 'date-fns';
+
+export const formatISODateTime = (isoString) => {
+  const date = parseISO(isoString);
+  return format(date, 'dd.MM.yyyy HH:mm');
+};
+
 export const parseAndFormatDate = (dateString) => {
   const parts = dateString.split('-');
 

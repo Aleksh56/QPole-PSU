@@ -32,11 +32,17 @@ export const changePoleData = async (field, value, id, fetchPoleData, showAlert)
       'patch',
       `/api/my_poll${field === 'start_time' || field === 'end_time' || field === 'duration' ? '_settings' : ''}/?poll_id=${id}`,
       { [field]: value },
-    ).then(() =>
-      fetchPoleData().then(() => {
-        showAlert('Данные об опросе успешно сохранены !', 'success');
-      }),
-    );
+    ).then((res) => {
+      console.log(res);
+      if (res.response.status !== 200) {
+        showAlert(res.response.data[0].error, 'error');
+        fetchPoleData();
+      } else {
+        fetchPoleData().then(() => {
+          showAlert('Данные об опросе успешно сохранены !', 'success');
+        });
+      }
+    });
     delete timeouts[field];
   }, 0);
 };

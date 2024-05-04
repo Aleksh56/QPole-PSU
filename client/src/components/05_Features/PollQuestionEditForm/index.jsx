@@ -169,7 +169,12 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
         pollType={pollType}
         renderItem={(item) => (
           <>
-            <DragIndicator sx={{ cursor: 'grab' }} />
+            <DragIndicator
+              sx={{
+                cursor: item.is_free_response ? 'default' : 'grab',
+                opacity: item.is_free_response ? 0 : 1,
+              }}
+            />
             {pollType === 'Викторина' &&
               (question.has_multiple_choices ? (
                 <Box sx={{ width: '24px', height: '24px', marginRight: '15px' }}>

@@ -120,8 +120,8 @@ export const pollTuningSettings = [
     heading: 'Настройки результатов',
     switchSettings: [
       {
-        id: 'can_cancel_vote',
-        label: 'Запретить повторное прохождение теста',
+        id: 'is_revote_allowed',
+        label: 'Разрешить повторное прохождение теста',
         defaultChecked: false,
       },
     ],

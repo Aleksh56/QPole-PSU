@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { handleRequest } from '@/api/api';
 
 const usePollData = (pollId) => {
-  console.log(1);
   const [pollType, setPollType] = useState(null);
   const [pollStatus, setPollStatus] = useState(false);
   const [isMultiple, setIsMultiple] = useState(null);
