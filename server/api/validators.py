@@ -122,7 +122,7 @@ class BasePollSettingsValidator(BaseValidator):
     def end_time(value):
         current_time = datetime.now(value.tzinfo)
         if value < current_time:
-            raise ValidationError("Время начала не может быть раньше текущего времени.")
+            raise ValidationError("Время окончания не может быть раньше текущего времени.")
 
 
 

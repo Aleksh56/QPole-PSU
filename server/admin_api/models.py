@@ -3,6 +3,7 @@ from django.db import models
 
 class Settings(models.Model):
     max_users_polls_quantity = models.PositiveSmallIntegerField(default=10)
+    max_users_tickets_quantity = models.PositiveSmallIntegerField(default=1)
     max_questions_quantity = models.PositiveSmallIntegerField(default=50)
     min_questions_quantity = models.PositiveSmallIntegerField(default=1)
     max_question_options_quantity = models.PositiveSmallIntegerField(default=10)

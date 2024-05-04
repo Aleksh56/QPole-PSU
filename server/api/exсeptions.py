@@ -109,7 +109,7 @@ class BadImageException(APIException):
 
 
 class WrongPasswordException(APIException):
-    status_code = 400
+    status_code = 401
     default_code = 'wrong_password_or_login'
 
     def __init__(self, detail=None):

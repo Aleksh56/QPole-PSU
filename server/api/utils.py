@@ -21,9 +21,6 @@ from rest_framework.views import exception_handler as drf_exception_handler
 def custom_exception_handler(exc, context):
     response = drf_exception_handler(exc, context)
 
-    # if response is not None:
-    #     if isinstance(exc, APIException):
-    #         response.data['message'] = response.data.pop('detail', None)
     return response
 
 
@@ -290,4 +287,18 @@ def PollVoting(w3, contract, poll_data):
     
     except Exception as ex:
         return False
+
+
+
+def serializer_errors_wrapper(errors):
+    try:
+        data = []
+        for error in list(errors.items()):
+            data.append({
+                'field': error[0],
+                'error': error[1][0],
+            })
+        return data
+    except Exception:
+        return errors
 

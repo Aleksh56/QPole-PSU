@@ -41,9 +41,9 @@ class SupportRequestSerializer(serializers.ModelSerializer):
 
 class ProjectSettingsSerializer(serializers.ModelSerializer):
     max_questions_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=100)])
-    min_questions_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=1)])
-    max_question_options_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=15)])
-    min_question_options_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_questions_quantity, num=1)])
+    min_questions_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.min_questions_quantity, num=1)])
+    max_question_options_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.max_question_options_quantity, num=15)])
+    min_question_options_quantity = serializers.IntegerField(validators=[partial(BaseProjectSettingsValidator.min_question_options_quantity, num=1)])
     
     class Meta:
         model = Settings

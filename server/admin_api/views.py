@@ -324,10 +324,6 @@ def project_settings(request):
         elif request.method == 'PATCH':
             data = request.data
 
-            poll_id = request.GET.get('poll_id', None)
-            if not poll_id:
-                raise MissingParameterException(field_name='poll_id')
-            
             settings = Settings.objects.all().first()
             if not settings:
                 raise ObjectNotFoundException(model='Settings')

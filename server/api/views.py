@@ -52,7 +52,8 @@ def my_profile(request):
                     serializer.save(user=current_user)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
-                    raise MyCustomException(detail=serializer.errors)   
+                    data = serializer_errors_wrapper(serializer.errors)
+                    return Response(data, status=status.HTTP_400_BAD_REQUEST)      
 
         elif request.method == 'PATCH':
             current_user_profile = Profile.objects.filter(user=current_user).first()
@@ -66,7 +67,8 @@ def my_profile(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                raise MyCustomException(detail=serializer.errors)   
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)      
 
         elif request.method == 'DELETE':
             current_user_profile = Profile.objects.filter(user=current_user).first()
@@ -203,7 +205,8 @@ def my_poll(request):
                 
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                raise MyCustomException(detail=serializer.errors)   
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)      
 
         elif request.method == 'PATCH':
             data = request.data
@@ -222,7 +225,8 @@ def my_poll(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                raise MyCustomException(detail=serializer.errors)       
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)          
 
         elif request.method == 'PUT':   
             data = request.data
@@ -299,12 +303,12 @@ def my_poll(request):
 
             elif request_type == 'delete_image':
                 image_path = None
-                poll = Poll.objects.filter(poll_id=new_poll_id).first()
+                poll = Poll.objects.filter(poll_id=poll_id).first()
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
                 if poll.image:
-                    image_path = poll.image.path
+                    image_path = poll.image.paths
                 poll.image = None
                 poll.save()
                 if os.path.exists(image_path):
@@ -413,7 +417,8 @@ def my_poll_settings(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                raise MyCustomException(detail=serializer.errors)        
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)    
 
     
     except PollValidationException as exception:
@@ -714,7 +719,8 @@ def my_poll_question(request):
 
                 return Response(f"Вопрос {poll_question} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
-                raise MyCustomException(detail=serializer.errors)
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)   
             
         elif request.method == 'PATCH':
             data = request.data
@@ -742,7 +748,8 @@ def my_poll_question(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                raise MyCustomException(detail=serializer.errors)
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)   
 
         elif request.method == 'DELETE':
             data = request.data
@@ -953,7 +960,8 @@ def my_poll_question_option(request):
                     
                 return Response(f"Вариант ответа {answer_option} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:
-                raise MyCustomException(detail=serializer.errors)
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)   
             
         elif request.method == 'PATCH':
             data = request.data.copy()
@@ -992,7 +1000,8 @@ def my_poll_question_option(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                raise MyCustomException(detail=serializer.errors)
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)   
 
         elif request.method == 'DELETE':
             
@@ -1187,7 +1196,8 @@ def poll_answer_group(request):
                 return Response({'message':"Вы успешно начали голосование.", 'data':poll_answer_group.data},
                                                                                     status=status.HTTP_201_CREATED)
             else:
-                raise MyCustomException(detail=serializer.errors)
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)   
             
         if request.method == 'DELETE':
             poll_id = request.GET.get('poll_id', None)
@@ -1635,7 +1645,8 @@ def my_support_requests(request):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                raise MyCustomException(detail=serializer.errors)   
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)      
       
         elif request.method == 'DELETE':
             ticket_id = request.GET.get('ticket_id', None)
@@ -1659,7 +1670,7 @@ def my_support_requests(request):
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
     except Exception as ex:
-        logger.error(f"Внутренняя ошибка сервера в support_request: {ex}")
-        return Response({'message':f"Внутренняя ошибка сервера в support_request: {ex}"},
+        logger.error(f"Внутренняя ошибка сервера в my_support_requests: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в my_support_requests: {ex}"},
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
 
