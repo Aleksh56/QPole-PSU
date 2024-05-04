@@ -41,9 +41,7 @@ const PoleMainSettingsPage = () => {
       [fieldName]: value,
     }));
 
-    if (timeoutHandlers[fieldName]) {
-      clearTimeout(timeoutHandlers[fieldName]);
-    }
+    if (timeoutHandlers[fieldName]) clearTimeout(timeoutHandlers[fieldName]);
 
     const handler = setTimeout(async () => {
       await changePoleData(fieldName, value, id, fetchPoleData, showAlert);
@@ -59,9 +57,7 @@ const PoleMainSettingsPage = () => {
     }));
   };
 
-  const handleImageDelete = () => {
-    deleteImageFx({ id });
-  };
+  const handleImageDelete = () => deleteImageFx({ id });
 
   return (
     <Box sx={{ display: 'flex', backgroundColor: '#f9fafb' }}>

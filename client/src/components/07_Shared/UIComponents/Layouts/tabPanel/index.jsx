@@ -1,5 +1,6 @@
-import React from 'react';
 import { Box } from '@mui/material';
+import React from 'react';
+
 import { TabPanelWrapper } from './styled';
 
 const CustomTabPanel = ({ children, value, index, ...other }) => {

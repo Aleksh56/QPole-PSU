@@ -1,8 +1,9 @@
-import SettingsIcon from '@mui/icons-material/Settings';
 import ResultsIcon from '@mui/icons-material/BarChart';
 import QuestionsIcon from '@mui/icons-material/HelpOutline';
-import IntegrationIcon from '@mui/icons-material/SettingsEthernet';
 import PublishIcon from '@mui/icons-material/Public';
+import SettingsIcon from '@mui/icons-material/Settings';
+import IntegrationIcon from '@mui/icons-material/SettingsEthernet';
+
 import PoleMainSettingsPage from '../../Pole/PoleMainSettings';
 import PoleQuestionsPage from '../../Pole/PoleQuestions';
 import PollResultsPage from '../../Pole/PollResults';

@@ -1,7 +1,8 @@
-import CustomTabPanel from '@/components/07_Shared/UIComponents/Layouts/tabPanel';
 import { Grid, Tab } from '@mui/material';
-import React from 'react';
+
 import { StyledTabs, TabsButtonsContainer } from './styled';
+
+import CustomTabPanel from '@/components/07_Shared/UIComponents/Layouts/tabPanel';
 
 const PollMainSettingsTabs = ({ tabValue, handleTabChange, tabsData, pollData }) => {
   return (

@@ -1,5 +1,6 @@
-import config from '@/config';
 import axios from 'axios';
+
+import config from '@/config';
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -21,7 +22,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 const processQueue = (error, token = null) => {
@@ -84,8 +85,11 @@ export const handleRequest = async (method, url, data, successMessage) => {
     console.log(successMessage, response);
     return { data: response.data, ok: true };
   } catch (error) {
-    console.error(`${successMessage} failed:`, error?.response?.data || error.message);
-    throw error;
+    if (error.response && error.response.status === 500) {
+      console.error(`${successMessage} failed with 500 status:`, error.response.data);
+      throw error;
+    }
+    return error;
   }
 };
 
@@ -110,6 +114,6 @@ export const resetPasswordRequest = async (newUserPasswordData) => {
     'post',
     '/login/reset_password/',
     newUserPasswordData,
-    'Reset_password_request'
+    'Reset_password_request',
   );
 };

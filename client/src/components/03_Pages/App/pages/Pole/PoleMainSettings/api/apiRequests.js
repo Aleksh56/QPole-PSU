@@ -6,7 +6,7 @@ import config from '@/config';
 const timeouts = {};
 
 export const getInfoAboutPole = async (id) => {
-  return handleRequest('get', `/api/my_poll/?poll_id=${id}`);
+  return handleRequest('get', `/api/my_poll/?poll_id=${id}&detailed=0`);
 };
 
 export const changePoleData = async (field, value, id, fetchPoleData, showAlert) => {
