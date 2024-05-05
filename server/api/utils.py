@@ -15,15 +15,6 @@ def check_file(file):
 
     return True, "ОК"
 
-from rest_framework.views import exception_handler as drf_exception_handler
-
-
-def custom_exception_handler(exc, context):
-    response = drf_exception_handler(exc, context)
-
-    return response
-
-
 from copy import deepcopy
 
 
@@ -109,12 +100,6 @@ def clone_question(question):
     new_answer_options = AnswerOption.objects.bulk_create(new_answer_options)
     return cloned_question
 
-
-def validation_error_wrapper(errors):
-    error_messages = [str(error[0]) for error in errors.values()]
-    error_messages = dict(enumerate(error_messages, 1))
-
-    return error_messages
 
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -292,13 +277,22 @@ def PollVoting(w3, contract, poll_data):
 
 def serializer_errors_wrapper(errors):
     try:
-        data = []
-        for error in list(errors.items()):
-            data.append({
-                'field': error[0],
-                'error': error[1][0],
-            })
-        return data
+        all_errors = errors.items()
+        if isinstance(all_errors, list):
+            data = []
+            for error in list(all_errors):
+                data.append({
+                    'field': error[0],
+                    'error': error[1][0],
+                })
+            return data
+        else:
+            all_errors =  list(all_errors)
+            data = {
+                'field': all_errors[0][0],
+                'error': all_errors[0][1][0]
+            }
+            return data
+        
     except Exception:
         return errors
-

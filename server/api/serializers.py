@@ -368,7 +368,7 @@ class PollSerializer(BasePollSerializer):
         return instance
     
 class MiniPollSerializer(BasePollSerializer):
-    poll_type = serializers.CharField(source='poll_type.name')
+    poll_type = PollTypeSerializer(required=True)
     poll_setts = PollSettingsSerializer(required=False)
     author = MiniProfileSerializer()
 
@@ -542,7 +542,7 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
                 if item['question_id'] == question_id:
                     answer = {
                         'name': (item.get('profile_name') or '') + ' ' + (item.get('profile_surname', '') or ''),
-                        'text': item['text']
+                        'text': item.get('text') or ''
                     }
                     free_answers.append(answer)
             return free_answers

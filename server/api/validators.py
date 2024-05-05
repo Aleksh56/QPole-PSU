@@ -29,7 +29,7 @@ class BaseValidator:
     def description(value, chars=None):
         if value and not value == "":
             if value and len(value) > 1000:
-                raise ValidationError("Описание должно содержать более 1000 символов.")
+                raise ValidationError("Описание должно содержать менее 1000 символов.")
 
              
     def bolean(value):

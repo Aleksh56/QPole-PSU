@@ -17,7 +17,7 @@ from api.serializers import ProfileSerializer
 from .serializers import *
 from .utils import *
 from api.models import *
-from api.utils import validation_error_wrapper
+from api.utils import serializer_errors_wrapper
 
 
 @api_view(['POST'])
@@ -53,7 +53,7 @@ def register(request):
                     if serializer.is_valid():
                         serializer.save()
                     else:
-                        error_messages = validation_error_wrapper(serializer.errors)
+                        error_messages = serializer_errors_wrapper(serializer.errors)
                         user.delete()
                         return Response({'message': error_messages}, status=status.HTTP_400_BAD_REQUEST)
                     
@@ -158,7 +158,7 @@ def change_password(request):
 
             return Response({'access_token': access_token, 'refresh_token': refresh_token, 'user_data': {'email': user.email, 'username': user.username}})
         else:
-            error_messages = validation_error_wrapper(serializer.errors)
+            error_messages = serializer_errors_wrapper(serializer.errors)
             return Response({'message': error_messages}, status=status.HTTP_400_BAD_REQUEST)
         
     except APIException as api_exception:
@@ -264,7 +264,7 @@ def reset_password(request):
         if reset_token == get_reset_code_from_cache(email):
             password_serializer = PasswordCheckSerializer(data=request.data)
             if not password_serializer.is_valid():
-                error_messages = validation_error_wrapper(password_serializer.errors)
+                error_messages = serializer_errors_wrapper(password_serializer.errors)
                 return Response({'message': error_messages}, status=status.HTTP_400_BAD_REQUEST)
             
             reset_password_after_code_validation(email, new_password)
