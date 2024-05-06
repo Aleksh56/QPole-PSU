@@ -18,7 +18,8 @@ class Profile(models.Model):
     joining_date = models.DateField(auto_now_add=True)
     # has_2auf = models.BooleanField(default=False)
 
-    role = models.ForeignKey('UserRole', on_delete=models.CASCADE, related_name='profiles', verbose_name='Роль')
+    role = models.ForeignKey('UserRole', on_delete=models.RESTRICT, related_name='profiles')
+    group = models.ForeignKey('StudyGroup', on_delete=models.RESTRICT, related_name='students', null=True, default=None)
     
     
     is_banned = models.BooleanField('Заблокирован', default=False)
@@ -31,6 +32,12 @@ class Profile(models.Model):
         else: return f"Профиль {self.user.username}"
     
 
+class StudyGroup(models.Model):
+    name = models.CharField(max_length=50, null=True)
+
+    def __str__(self):
+        return f"Учебная группа '{self.name}'"
+        
 class UserRole(models.Model):
     role = models.CharField('Роль', max_length=50, unique=True)
 
@@ -70,6 +77,7 @@ class PollAnswer(models.Model):
 
 class PollAnswerGroup(models.Model):
     profile = models.ForeignKey(Profile, related_name='answer_groups', on_delete=models.CASCADE, null=True)
+    quick_voting_form = models.ForeignKey('QuickVotingForm', related_name='poll_answer_group', on_delete=models.CASCADE, null=True)
     tx_hash = models.CharField(max_length=255, default=None, null=True)
 
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
@@ -97,6 +105,7 @@ class PollAnswerGroup(models.Model):
 
 class PollParticipantsGroup(models.Model):
     profile = models.ForeignKey(Profile, related_name='participation_groups', on_delete=models.CASCADE, null=True)
+    quick_voting_form = models.ForeignKey('QuickVotingForm', related_name='participation_groups', on_delete=models.CASCADE, null=True)
     poll = models.ForeignKey('Poll', related_name='user_participations', on_delete=models.CASCADE)
 
 
@@ -170,8 +179,10 @@ class Poll(models.Model):
     description = models.TextField(blank=True, null=True) # текст начать опрос
     tags = models.TextField(blank=True, null=True) # тэги
 
-    poll_type = models.ForeignKey(PollType, related_name='poll', on_delete=models.CASCADE, null=True) # тип опроса
-    poll_setts = models.OneToOneField('PollSettings', on_delete=models.CASCADE, null=True, related_name='poll') # настройки опроса
+    poll_type = models.ForeignKey(PollType, related_name='poll', on_delete=models.RESTRICT, null=True) # тип опроса
+    poll_setts = models.OneToOneField('PollSettings', related_name='poll', on_delete=models.CASCADE, null=True) # настройки опроса
+    quick_voting_form = models.OneToOneField('QuickVotingForm', related_name='poll', on_delete=models.RESTRICT, null=True) # форма регистрации
+    # registration_form = models.OneToOneField('RegistrationForm', related_name='poll', on_delete=models.RESTRICT, null=True) # форма регистрации
 
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
 
@@ -293,7 +304,20 @@ class Poll(models.Model):
             
             else: return None    
         else: return None
-            
+
+
+class QuickVotingForm(models.Model):
+    first_name = models.CharField(max_length=50, null=True)
+    last_name = models.CharField(max_length=50, null=True)
+    patronymic = models.CharField(max_length=50, null=True)
+
+    group = models.ForeignKey(StudyGroup, on_delete=models.SET_NULL, null=True)
+
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.poll_answer_group.poll:
+            return f"Форма авторизции на {self.poll_answer_group.poll}"
 
 
 class PollSettings(models.Model):

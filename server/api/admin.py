@@ -11,6 +11,7 @@ admin.site.register(AnswerOption)
 admin.site.register(PollAnswer)
 admin.site.register(PollQuestion)
 admin.site.register(PollAnswerGroup)
+admin.site.register(PollParticipantsGroup)
 
 admin.site.register(SupportRequest)
 admin.site.register(SupportRequestType)

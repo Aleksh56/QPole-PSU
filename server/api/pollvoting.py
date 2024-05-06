@@ -134,13 +134,16 @@ def quizz_voting_handler(answers, poll):
     return parsed_answers
 
 
-def save_votes(answers, poll, my_profile, raw_answers):
+def save_votes(answers, poll, my_profile, quick_voting_form, raw_answers):
     poll_answer_group_data = {
                 'poll': poll.id,
     }
     
-    if not poll.poll_type.name in ("Анонимный", "Быстрый"):
+    if not poll.poll_type.name in ('Анонимный', 'Быстрый'):
         poll_answer_group_data['profile'] = my_profile.user_id
+    if poll.poll_type.name in ('Быстрый'):
+        poll_answer_group_data['quick_voting_form'] = quick_voting_form.id
+
 
 
     poll_answer_group = PollAnswerGroupSerializer(data=poll_answer_group_data)
@@ -152,8 +155,14 @@ def save_votes(answers, poll, my_profile, raw_answers):
     poll_participation_group_data = {
         'poll': poll.id,
     }
+
     if not poll.poll_type.name in ("Быстрый"):
         poll_participation_group_data['profile'] = my_profile.user_id
+        poll_participation_group_data['quick_voting_form'] = None
+    else:
+        poll_participation_group_data['quick_voting_form'] = quick_voting_form.id
+        poll_participation_group_data['profile'] = None
+
         
 
     poll_participation_group = PollParticipantsGroupSerializer(data=poll_participation_group_data)

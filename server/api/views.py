@@ -170,7 +170,7 @@ def my_poll(request):
             # вынести в настройки колво ограничений
             if not my_profile.user.is_staff:
                 max_users_polls_quantity = Settings.objects.all().first().max_users_polls_quantity
-                if len(my_profile.my_polls.all()) > max_users_polls_quantity:
+                if my_profile.my_polls.count() > max_users_polls_quantity:
                     raise TooManyInstancesException(detail=f"Вы не можете создавать более {max_users_polls_quantity} опросов.")
 
             data = request.data.copy()
@@ -694,7 +694,7 @@ def my_poll_question(request):
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
 
             max_questions_quantity = Settings.objects.all().first().max_questions_quantity
-            if len(poll.questions.all()) > max_questions_quantity:
+            if poll.questions.count() > max_questions_quantity:
                 raise TooManyInstancesException(model='PollQuestion', limit=max_questions_quantity)
 
             data['poll'] = poll.id
@@ -821,7 +821,7 @@ def my_poll_question(request):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
             elif request_type == 'copy_question':
-                if len(poll.questions.all()) > 50:
+                if poll.questions.count() > 50:
                     raise TooManyInstancesException(model='PollQuestion', limit=50)
                          
                 cloned_question = clone_question(poll_question)
@@ -929,7 +929,7 @@ def my_poll_question_option(request):
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             max_question_options_quantity = Settings.objects.all().first().max_question_options_quantity
-            if len(poll_question.answer_options.all()) > max_question_options_quantity:
+            if poll_question.answer_options.count() > max_question_options_quantity:
                 raise TooManyInstancesException(model='AnswerOption', limit=max_question_options_quantity)
 
             data['question'] = poll_question.id
@@ -1326,7 +1326,7 @@ def poll_voting(request):
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
 
-            poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, raw_answers)
+            poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, None, raw_answers)
 
         
             if tx_hash:
@@ -1394,9 +1394,7 @@ def quick_poll_voting(request):
     try:
         data = request.data.copy()
 
-        poll_id = request.GET.get('poll_id', None)
-        if not poll_id:
-            raise MissingParameterException(field_name='poll_id')
+        poll_id = get_parameter_or_400(request.GET, 'poll_id')
         
         poll = (
                 Poll.objects.filter(poll_id=poll_id, poll_type__name='Быстрый')
@@ -1416,15 +1414,26 @@ def quick_poll_voting(request):
         if not poll:
             raise ObjectNotFoundException(model='Poll')
 
-                    
-        answers = data.get('answers', None)
-        if not answers:
-            raise MissingFieldException(field_name='answers')
+        voting_form_data = get_data_or_400(data, 'voting_form_data')             
+        answers = get_data_or_400(data, 'answers')
+
+        study_group_name = get_data_or_400(voting_form_data, 'study_group')
+        study_group = StudyGroup.objects.filter(name=study_group_name).first()
+        if not study_group:
+            raise ObjectNotFoundException(model='StudyGroup')
+        voting_form_data['group'] = study_group.id
+
+        serializer = BaseQuickVotingFormSerializer(data=voting_form_data)
+        if serializer.is_valid():
+            quick_voting_form = serializer.save()
+        else:
+            data = serializer_errors_wrapper(serializer.errors)
+            return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)     
         
         # валидация и парсинг ответов
         answers, _ = poll_voting_handler(answers, poll)
 
-        save_votes(answers, poll, my_profile, _)
+        save_votes(answers, poll, my_profile, quick_voting_form, None)
 
                     
         return Response({'message':"Вы успешно проголосовали"}, status=status.HTTP_200_OK)  

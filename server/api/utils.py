@@ -296,3 +296,19 @@ def serializer_errors_wrapper(errors):
         
     except Exception:
         return errors
+    
+from .exсeptions import MissingFieldException, MissingParameterException
+
+def get_data_or_400(data, data_field_name):
+    data_field = data.get(data_field_name, None)
+    if not data_field:
+        raise MissingFieldException(data_field_name)
+    
+    return data_field
+
+def get_parameter_or_400(request_get, parameter_field_name):
+    parameter_field = request_get.get(parameter_field_name, None)
+    if not parameter_field:
+        raise MissingParameterException(parameter_field_name)
+    
+    return parameter_field

@@ -42,6 +42,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class StudyGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StudyGroup
+        fields = '__all__'
 
 
 class MiniProfileSerializer(serializers.ModelSerializer):
@@ -92,6 +97,17 @@ class MyProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+
+class BaseQuickVotingFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuickVotingForm
+        fields = '__all__'     
+
+
+class QuickVotingFormSerializer(BaseQuickVotingFormSerializer):
+    study_group = StudyGroupSerializer()
+
+
 
 
 # сериализаторы ответов
