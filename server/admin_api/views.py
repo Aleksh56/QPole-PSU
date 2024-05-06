@@ -59,9 +59,7 @@ def users(request):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         elif request.method == 'PATCH':
-            user_id = request.GET.get('user_id', None)
-            if not user_id:
-                raise MissingParameterException(field_name='user_id')
+            user_id = get_parameter_or_400(request.GET, 'user_id')
 
             user = Profile.objects.filter(user_id=user_id).first()
             if not user:
@@ -78,14 +76,9 @@ def users(request):
         elif request.method == 'PUT':   
             data = request.data
 
-            request_type = request.GET.get('request_type', None)
-            if not request_type:
-                raise MissingParameterException(field_name='request_type')
+            request_type = get_parameter_or_400(request.GET, 'request_type')
+            user_id = get_parameter_or_400(request.GET, 'user_id')
             
-            user_id = request.GET.get('user_id', None)
-            if not user_id:
-                raise MissingParameterException(field_name='user_id')
-                
             user = Profile.objects.filter(user_id=user_id).first()
             if not user:
                 raise ObjectNotFoundException(model='Profile')
@@ -108,9 +101,7 @@ def users(request):
                 return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
-            user_id = request.GET.get('user_id', None)
-            if not user_id:
-                raise MissingParameterException(field_name='user_id')
+            user_id = get_parameter_or_400(request.GET, 'user_id')
 
             user = User.objects.filter(user_id=user_id).first()
             if not user:
@@ -151,9 +142,7 @@ def polls(request):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         elif request.method == 'PATCH':
-            poll_id = request.GET.get('poll_id', None)
-            if not poll_id:
-                raise MissingParameterException(field_name='poll_id')
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
@@ -169,14 +158,8 @@ def polls(request):
 
         elif request.method == 'PUT':   
             data = request.data
-
-            request_type = request.GET.get('request_type', None)
-            if not request_type:
-                raise MissingParameterException(field_name='request_type')
-            
-            poll_id = request.GET.get('poll_id', None)
-            if not poll_id:
-                raise MissingParameterException(field_name='poll_id')
+            request_type = get_parameter_or_400(request.GET, 'request_type')
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
                 
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
@@ -186,9 +169,7 @@ def polls(request):
                 return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
-            poll_id = request.GET.get('poll_id', None)
-            if not poll_id:
-                raise MissingParameterException(field_name='poll_id')
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
@@ -280,11 +261,8 @@ def support_request(request):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
             
         elif request.method == 'DELETE':
-            ticket_id = request.GET.get('ticket_id', None)
+            ticket_id = get_parameter_or_400(request.GET, 'ticket_id')
 
-            if not ticket_id:
-                raise MissingParameterException(field_name='ticket_id')
-           
             ticket = (
                 SupportRequest.objects
                     .filter(id=ticket_id)
@@ -313,7 +291,7 @@ def project_settings(request):
     try:
         if request.method == 'GET':
 
-            settings = Settings.objects.all().first()
+            settings = Settings.objects.first()
             if not settings:
                 raise ObjectNotFoundException(model='Settings')
                         
@@ -324,7 +302,7 @@ def project_settings(request):
         elif request.method == 'PATCH':
             data = request.data
 
-            settings = Settings.objects.all().first()
+            settings = Settings.objects.first()
             if not settings:
                 raise ObjectNotFoundException(model='Settings')
     

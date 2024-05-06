@@ -181,7 +181,6 @@ class Poll(models.Model):
 
     poll_type = models.ForeignKey(PollType, related_name='poll', on_delete=models.RESTRICT, null=True) # тип опроса
     poll_setts = models.OneToOneField('PollSettings', related_name='poll', on_delete=models.CASCADE, null=True) # настройки опроса
-    quick_voting_form = models.OneToOneField('QuickVotingForm', related_name='poll', on_delete=models.RESTRICT, null=True) # форма регистрации
     # registration_form = models.OneToOneField('RegistrationForm', related_name='poll', on_delete=models.RESTRICT, null=True) # форма регистрации
 
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
@@ -214,12 +213,6 @@ class Poll(models.Model):
         super().__init__(*args, **kwargs)
         if not self.poll_setts:
             self.poll_setts = PollSettings.objects.create()
-        
-        if self.poll_type.name == 'Быстрый':
-            self.poll_setts.completion_time = timedelta(hours=1, minutes=30)
-            self.poll_setts.start_time = timezone.now()
-            self.poll_setts.end_time = self.poll_setts.start_time + timedelta(days=1)
-            self.is_anonymous = True
             
     # Проверка наличия участия пользователя в опросе
     def has_user_participated_in(self, user_profile):

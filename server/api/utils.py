@@ -312,3 +312,13 @@ def get_parameter_or_400(request_get, parameter_field_name):
         raise MissingParameterException(parameter_field_name)
     
     return parameter_field
+
+
+# def save_validated_object(serializer):
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#     else:
+#         data = serializer_errors_wrapper(serializer.errors)
+#         return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)  
+

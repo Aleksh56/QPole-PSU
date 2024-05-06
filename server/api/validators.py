@@ -213,7 +213,46 @@ class ReleaseOptionValidator():
                 if len(value) > max_len:
                     raise PollValidationException(f"Текст варианта ответа №{instance.order_id} вопроса №{instance.question.order_id} должен содержать менее {max_len} символов.")
             
- 
+
+class ReleasePollSettingsValidator():
+
+    def __init__(self, instance) -> None:
+        self.instance = instance
+    
+
+    def completion_time(self):
+        value = getattr(self.instance, 'completion_time', None)
+        if value:
+            if self.instance.completion_time < timedelta(minutes=1):
+                raise PollValidationException(f"Прохождение опроса не может длиться меньше 1 минуты")
+            
+            if self.instance.completion_time > timedelta(days=1):
+                raise PollValidationException(f"Прохождение опроса не может длиться дольше 1 дня")
+    
+    def start_time(self):
+        value = getattr(self.instance, 'start_time', None)
+        if value:
+            if self.instance.start_time + timedelta(minutes=5) < datetime.now():
+                raise PollValidationException(f"Начало опроса должно на 5 минут позже текущего времени")
+            
+            if self.instance.start_time > datetime.now() + timedelta(weeks=1):
+                raise PollValidationException(f"Прохождение опроса не может быть запланировано больше чем на неделю заранее")
+            
+            end_time =  getattr(self.instance, 'end_time', None)
+            if end_time:
+                if self.instance.start_time + timedelta(minutes=1) > self.instance.end_time:
+                    raise PollValidationException(f"Время начала опроса должно быть на минимум минуту меньше времени окончания")
+
+    def end_time(self):
+        value = getattr(self.instance, 'end_time', None)
+        if value:
+            if self.instance.end_time + timedelta(minutes=5) < datetime.now():
+                raise PollValidationException(f"Окончание опроса должно на 5 минут позже текущего времени")
+            
+            if self.instance.end_time > datetime.now() + timedelta(weeks=1):
+                raise PollValidationException(f"Окончание опроса не может быть запланировано больше чем на неделю заранее")
+            
+        
 def is_poll_valid(poll):
     poll_validator = ReleasePollValidator()
     poll_validator.name(instance=poll, max_len=50, min_len=5)
@@ -247,7 +286,12 @@ def is_poll_valid(poll):
             if not has_correct_option:
                 raise PollValidationException(f"Вопрос №{question.order_id} должен содержать хотя бы 1 верный вариант ответа.")
 
-            
+    poll_setts_validator = ReleasePollSettingsValidator(poll.poll_setts)
+    poll_setts_validator.completion_time()
+    poll_setts_validator.start_time()
+    poll_setts_validator.end_time()
+
+
     return True
 
 
