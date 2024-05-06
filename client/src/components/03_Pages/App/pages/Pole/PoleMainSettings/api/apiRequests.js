@@ -9,38 +9,40 @@ export const getInfoAboutPole = async (id) => {
   return handleRequest('get', `/api/my_poll/?poll_id=${id}&detailed=0`);
 };
 
-export const changePoleData = async (field, value, id, fetchPoleData, showAlert) => {
+export const changePoleData = async (field, value, id, setPoleData, showAlert, fetchPoleData) => {
   if (timeouts[field]) {
     clearTimeout(timeouts[field]);
   }
 
+  const requestData = { [field]: value };
+  console.log(requestData);
+
+  setPoleData((prevData) => ({
+    ...prevData,
+    [field]: value,
+  }));
+
   if (field === 'image') {
-    axios.patch(
-      `${config.serverUrl.main}/api/my_poll/?poll_id=${id}`,
-      { [field]: value },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
-          'content-type': 'multipart/form-data',
-        },
+    axios.patch(`${config.serverUrl.main}/api/my_poll/?poll_id=${id}`, requestData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
+        'content-type': 'multipart/form-data',
       },
-    );
+    });
   }
 
   timeouts[field] = setTimeout(() => {
     handleRequest(
       'patch',
       `/api/my_poll${field === 'start_time' || field === 'end_time' || field === 'duration' ? '_settings' : ''}/?poll_id=${id}`,
-      { [field]: value },
+      requestData,
     ).then((res) => {
-      console.log(res);
-      if (res.response.status !== 200) {
-        showAlert(res.response.data[0].error, 'error');
+      if (res.response && res.response.status !== 200) {
+        showAlert(res.response.data.message.error, 'error');
         fetchPoleData();
       } else {
-        fetchPoleData().then(() => {
-          showAlert('Данные об опросе успешно сохранены !', 'success');
-        });
+        fetchPoleData();
+        showAlert('Данные об опросе успешно сохранены !', 'success');
       }
     });
     delete timeouts[field];

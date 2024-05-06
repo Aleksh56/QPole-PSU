@@ -13,6 +13,7 @@ import {
   StldCardContent,
   StldCardMedia,
   StldChip,
+  StldDesc,
   StldPollName,
 } from './styled';
 
@@ -64,9 +65,11 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
             </Box>
           )}
         </ActionsWrapper>
-        <StldPollName gutterBottom>{pollData.poll_type ?? ''}</StldPollName>
+        <StldPollName gutterBottom>{pollData.poll_type.name ?? ''}</StldPollName>
         <Typography sx={{ fontSize: '14px', fontWeight: 600 }}>{pollData.name ?? ''}</Typography>
-        <Typography>{pollData.description ?? ''}</Typography>
+        <StldDesc>
+          <Typography noWrap>{pollData.description ?? ''}</Typography>
+        </StldDesc>
         {cardButton}
       </StldCardContent>
     </StldCard>

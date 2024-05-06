@@ -11,3 +11,7 @@ a {
 .base-Popup-root:not(.base--expanded) {
   display: none;
 }
+
+.MuiCardContent-root.que-card {
+  padding-bottom: 10px !important;
+}

@@ -1,4 +1,5 @@
 import { useUnit } from 'effector-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ import ConductionHeader from '@/components/04_Widgets/Content/Display/conduction
 import QueBlock from '@/components/04_Widgets/Content/Interactive/queBlock';
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
+import Timer from '@/components/07_Shared/UIComponents/Utils/Helpers/timer';
 import useAuth from '@/hooks/useAuth';
 import { shuffleArray } from '@/utils/js/shuffleArray';
 
@@ -27,6 +29,7 @@ const ConductionPollPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState({});
   const [isTextLong, setIsTextLong] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(true);
 
   useEffect(() => {
@@ -38,9 +41,8 @@ const ConductionPollPage = () => {
         navigate('/polls');
         return;
       }
-      if (data.mix_questions) {
-        data.questions = shuffleArray(data.questions);
-      }
+      if (data.mix_questions) data.questions = shuffleArray(data.questions);
+      setIsCollapsed(data.poll_setts?.completion_time !== null);
       setPollData(data);
     };
     pollDataRequest();
@@ -73,6 +75,8 @@ const ConductionPollPage = () => {
 
   const handleContextMenu = (e) => e.preventDefault();
 
+  const handleStart = () => setIsCollapsed(false);
+
   return (
     <ConductionBackgroundWrapper onContextMenu={handleContextMenu}>
       <Header isMainPage={false} />
@@ -82,22 +86,42 @@ const ConductionPollPage = () => {
         ) : (
           <>
             <ConductionHeader data={pollData} />
-            {pollData?.questions?.map((item) => (
-              <QueBlock
-                key={item.id}
-                question={item}
-                isMixed={pollData?.mix_options}
-                setIsLong={setIsTextLong}
-              />
-            ))}
-            <PrimaryButton
-              caption="Отправить"
-              handleClick={() => handleSubmit()}
-              disabled={!isSubmitEnabled || isTextLong}
-            />
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.4 }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    rowGap: '18px',
+                    width: '100%',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Timer initialTime="00:05:00" />
+                  {pollData?.questions?.map((item) => (
+                    <QueBlock
+                      key={item.id}
+                      question={item}
+                      isMixed={pollData?.mix_options}
+                      setIsLong={setIsTextLong}
+                    />
+                  ))}
+                  <PrimaryButton
+                    caption="Отправить"
+                    handleClick={() => handleSubmit()}
+                    disabled={!isSubmitEnabled || isTextLong}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </>
         )}
       </ConductionWrapper>
+      {isCollapsed && <PrimaryButton caption="Начать" handleClick={handleStart} />}
     </ConductionBackgroundWrapper>
   );
 };

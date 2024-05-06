@@ -41,10 +41,10 @@ const PoleMainSettingsPage = () => {
       [fieldName]: value,
     }));
 
-    if (timeoutHandlers[fieldName]) clearTimeout(timeoutHandlers[fieldName]);
+    clearTimeout(timeoutHandlers[fieldName]);
 
     const handler = setTimeout(async () => {
-      await changePoleData(fieldName, value, id, fetchPoleData, showAlert);
+      await changePoleData(fieldName, value, id, setPoleData, showAlert, fetchPoleData);
       setPendingChanges((prevState) => ({
         ...prevState,
         [fieldName]: undefined,
@@ -107,8 +107,8 @@ const PoleMainSettingsPage = () => {
               min="2024-01-01T00:00"
               max="9999-12-01T00:00"
               value={
-                pendingChanges['start_time'] !== undefined
-                  ? pendingChanges['start_time']
+                pendingChanges['end_time'] !== undefined
+                  ? pendingChanges['end_time']
                   : poleData?.poll_setts.end_time || ''
               }
               handleChange={(e) => handleFieldChange('end_time', e)}

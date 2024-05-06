@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { Box, Button, Card, CardContent, Typography } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const ListWrapper = styled(Box)(() => ({
   width: '100%',

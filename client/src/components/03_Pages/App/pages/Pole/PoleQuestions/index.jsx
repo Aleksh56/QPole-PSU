@@ -1,15 +1,17 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import PoleCreateFirstQuestion from '@/components/05_Features/PollCreateFirstQuestion';
 import { Box } from '@mui/material';
-import PollQuestionsList from '@/components/05_Features/PollQuestionsList';
-import PollQuestionEditForm from '@/components/05_Features/PollQuestionEditForm';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import {
   handleCreateQuestionRequest,
   handleGetAllQuestionRequest,
   handleGetQuestionInfoRequest,
 } from './api/apiRequests';
-import { useParams } from 'react-router-dom';
 import { ListWrapper } from './styled';
+
+import PoleCreateFirstQuestion from '@/components/05_Features/PollCreateFirstQuestion';
+import PollQuestionEditForm from '@/components/05_Features/PollQuestionEditForm';
+import PollQuestionsList from '@/components/05_Features/PollQuestionsList';
 import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
 
 const _settings = {
@@ -31,21 +33,27 @@ const PoleQuestionsPage = () => {
 
   const handleCreateQuestion = useCallback(async () => {
     await handleCreateQuestionRequest(id).then(() =>
-      handleGetAllQuestionRequest(id).then((res) => setQuestions(res.data))
+      handleGetAllQuestionRequest(id).then((res) => setQuestions(res.data)),
     );
   }, [id]);
 
   const handleSelectQuestion = useCallback(
     async (question_id) => {
       await handleGetQuestionInfoRequest(id, question_id).then((res) =>
-        setSelectedQuestion(res.data)
+        setSelectedQuestion(res.data),
       );
     },
-    [id]
+    [id],
   );
 
+  const handleQuestionUpdate = (questionId, fieldName, value) => {
+    setQuestions((prevQuestions) =>
+      prevQuestions.map((q) => (q.id === questionId ? { ...q, [fieldName]: value } : q)),
+    );
+  };
+
   return (
-    <div>
+    <Box sx={{ overflow: 'hidden' }}>
       {loading ? (
         <CLoader />
       ) : questions.length === 0 ? (
@@ -67,12 +75,13 @@ const PoleQuestionsPage = () => {
               <PollQuestionEditForm
                 question={selectedQuestion}
                 setSelectedQuestion={setSelectedQuestion}
+                onQuestionUpdate={handleQuestionUpdate}
               />
             )}
           </Box>
         </ListWrapper>
       )}
-    </div>
+    </Box>
   );
 };
 

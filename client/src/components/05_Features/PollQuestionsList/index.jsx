@@ -1,7 +1,11 @@
-import React, { useCallback } from 'react';
-import { Typography, Box } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { Box, Typography } from '@mui/material';
+import React, { useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+
+import { deleteQuestionRequest } from './api/apiRequests';
+import { copyQuestionFx } from './model/copy-question';
 import {
   IconsWrapper,
   ListWrapper,
@@ -11,9 +15,6 @@ import {
   StyledContentWrapper,
   StyledQueCount,
 } from './styled';
-import { deleteQuestionRequest } from './api/apiRequests';
-import { useParams } from 'react-router-dom';
-import { copyQuestionFx } from './model/copy-question';
 
 const PollQuestionsList = ({
   questions,
@@ -31,7 +32,7 @@ const PollQuestionsList = ({
       const newQue = await copyQuestionFx({ id, q_id });
       setQuestions((prev) => [...prev, newQue]);
     },
-    [id, setQuestions]
+    [id, setQuestions],
   );
 
   const handleDeleteQuestion = async (e, q_id) => {
@@ -58,7 +59,7 @@ const PollQuestionsList = ({
             selected={selectedQuestion?.id === question.id}
             onClick={() => onSelectQuestion(question.id)}
           >
-            <StyledCardContent>
+            <StyledCardContent className="que-card">
               <StyledContentWrapper>
                 <Typography variant="subtitle1" component="div">
                   №{index + 1}

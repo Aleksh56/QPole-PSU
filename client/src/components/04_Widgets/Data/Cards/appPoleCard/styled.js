@@ -44,6 +44,8 @@ export const StldCardMedia = styled(CardMedia)(() => ({
 export const StldCardContent = styled(CardContent)(() => ({
   display: 'flex',
   flexDirection: 'column',
+  maxHeight: Rem(200),
+  overflow: 'hidden',
   alignItems: 'start',
 }));
 
@@ -66,4 +68,14 @@ export const StldPollName = styled(Typography)(() => ({
   color: '#aaa',
   fontSize: Rem(12),
   marginBottom: Rem(10),
+}));
+
+export const StldDesc = styled(Box)(() => ({
+  maxWidth: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'no-wrap',
+  WebkitLineClamp: 3,
+  display: 'box',
+  WebkitBoxOrient: 'vertical',
 }));

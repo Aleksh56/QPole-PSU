@@ -85,6 +85,7 @@ export const handleRequest = async (method, url, data, successMessage) => {
     console.log(successMessage, response);
     return { data: response.data, ok: true };
   } catch (error) {
+    console.log(error);
     if (error.response && error.response.status === 500) {
       console.error(`${successMessage} failed with 500 status:`, error.response.data);
       throw error;

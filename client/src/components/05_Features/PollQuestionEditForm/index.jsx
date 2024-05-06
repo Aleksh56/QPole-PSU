@@ -30,7 +30,7 @@ import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/in
 import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
 import usePollData from '@/hooks/usePollData';
 
-const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
+const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
   const { id } = useParams();
   const [editedQuestion, setEditedQuestion] = useState(question);
   const [options, setOptions] = useState([]);
@@ -104,7 +104,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
         option.id === opt_id ? { ...option, [fieldName]: value } : option,
       ),
     );
-    await fetchOptions();
+    // await fetchOptions();
   };
 
   const handleDeleteOption = async (opt_id, q_id) => {
@@ -153,7 +153,10 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion }) => {
         <InvisibleLabeledField
           placeholder="Введите заголовок"
           value={editedQuestion.name || ''}
-          handleChange={(e) => handleFieldChange('name', e, question.id)}
+          handleChange={(e) => {
+            handleFieldChange('name', e, question.id);
+            if (onQuestionUpdate) onQuestionUpdate(question.id, 'name', e);
+          }}
         />
         <QueTypeSelect
           question={editedQuestion}
