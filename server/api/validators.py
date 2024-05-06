@@ -9,6 +9,8 @@ import re
 
 class BaseValidator:
 
+
+
     def name(value, chars=None):
         if not chars:
             if len(value) > 50:
@@ -30,10 +32,6 @@ class BaseValidator:
         if value and not value == "":
             if value and len(value) > 1000:
                 raise ValidationError("Описание должно содержать менее 1000 символов.")
-
-             
-    def bolean(value):
-        pass
 
     def image(image):    
         is_img_ok, details = check_file(image)
@@ -139,11 +137,21 @@ def is_email_valid(value):
     return False
 
 
-class ReleasePollValidator(PollValidator):
+class BaseReleaseValidator():
+    def __init__(self, instance) -> None:
+            self.instance = instance
 
-    @staticmethod
-    def name(instance, max_len=None, min_len=None):
-        value = getattr(instance, "name", None)
+    def validate(self):
+        methods = [method for method in dir(self) if callable(getattr(self, method)) and method.startswith('validate_')]
+        for method_name in methods:
+            getattr(self, method_name)()
+        
+        return True
+
+class ReleasePollValidator(BaseReleaseValidator):
+
+    def validate_name(self, max_len=None, min_len=None):
+        value = getattr(self.instance, "name", None)
         
         if not value:
             raise PollValidationException(f"Заголовок текущего опроса не должен быть пустым.")
@@ -164,63 +172,57 @@ class ReleasePollValidator(PollValidator):
                 raise PollValidationException(f"Заголовок текущего опроса должен содержать менее {max_len} символов.")
 
 
-class ReleaseQuestionValidator():
+class ReleaseQuestionValidator(BaseReleaseValidator):
 
-    @staticmethod
-    def name(instance, max_len=None, min_len=None):
-        value = getattr(instance, "name", None)
+    def validate_name(self, max_len=None, min_len=None):
+        value = getattr(self.instance, "name", None)
 
         if not value:
-            raise PollValidationException(f"Текст вопроса №{instance.order_id} не должен быть пустым.")
+            raise PollValidationException(f"Текст вопроса №{self.instance.order_id} не должен быть пустым.")
 
         if not min_len:
             if len(value) < 5:
-                raise PollValidationException(f"Текст вопроса №{instance.order_id} должен содержать не менее 5 символов.")
+                raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать не менее 5 символов.")
         else:
             if len(value) < min_len:
-                raise PollValidationException(f"Текст вопроса №{instance.order_id} должен содержать более {min_len - 1} символов.")
+                raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать более {min_len - 1} символов.")
             
         if not max_len:
             if len(value) > 50:
-                raise PollValidationException(f"Текст вопроса №{instance.order_id} должен содержать менее 50 символов.")
+                raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать менее 50 символов.")
         else:
             if len(value) > max_len:
-                raise PollValidationException(f"Текст вопроса №{instance.order_id} должен содержать менее {max_len} символов.")
+                raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать менее {max_len} символов.")
             
 
-class ReleaseOptionValidator():
+class ReleaseOptionValidator(BaseReleaseValidator):
 
-    @staticmethod
-    def name(instance, max_len=None, min_len=None):
-        value = getattr(instance, "name", None)
-        is_free_response = getattr(instance, "is_free_response", False)
+    def validate_name(self, max_len=None, min_len=None):
+        value = getattr(self.instance, "name", None)
+        is_free_response = getattr(self.instance, "is_free_response", False)
 
         if not value and not is_free_response:
-            raise PollValidationException(f"Текст варианта ответа №{instance.order_id} вопроса №{instance.question.order_id} не должен быть пустым.")
+            raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} не должен быть пустым.")
         
         if not is_free_response:
             if not min_len:
                 if len(value) < 1:
-                    raise PollValidationException(f"Текст варианта ответа №{instance.order_id} вопроса №{instance.question.order_id} должен содержать не менее 1 символа.")
+                    raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать не менее 1 символа.")
             else:
                 if len(value) < min_len:
-                    raise PollValidationException(f"Текст варианта ответа №{instance.order_id} вопроса №{instance.question.order_id} должен содержать более {min_len - 1} символов.")
+                    raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать более {min_len - 1} символов.")
                 
             if not max_len:
                 if len(value) > 50:
-                    raise PollValidationException(f"Текст варианта ответа №{instance.order_id} вопроса №{instance.question.order_id} должен содержать менее 50 символов.")
+                    raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать менее 50 символов.")
             else:
                 if len(value) > max_len:
-                    raise PollValidationException(f"Текст варианта ответа №{instance.order_id} вопроса №{instance.question.order_id} должен содержать менее {max_len} символов.")
+                    raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать менее {max_len} символов.")
             
 
-class ReleasePollSettingsValidator():
-
-    def __init__(self, instance) -> None:
-        self.instance = instance
-    
-
-    def completion_time(self):
+class ReleasePollSettingsValidator(BaseReleaseValidator):
+        
+    def validate_completion_time(self):
         value = getattr(self.instance, 'completion_time', None)
         if value:
             if self.instance.completion_time < timedelta(minutes=1):
@@ -229,7 +231,7 @@ class ReleasePollSettingsValidator():
             if self.instance.completion_time > timedelta(days=1):
                 raise PollValidationException(f"Прохождение опроса не может длиться дольше 1 дня")
     
-    def start_time(self):
+    def validate_start_time(self):
         value = getattr(self.instance, 'start_time', None)
         if value:
             if self.instance.start_time + timedelta(minutes=5) < datetime.now():
@@ -243,7 +245,7 @@ class ReleasePollSettingsValidator():
                 if self.instance.start_time + timedelta(minutes=1) > self.instance.end_time:
                     raise PollValidationException(f"Время начала опроса должно быть на минимум минуту меньше времени окончания")
 
-    def end_time(self):
+    def validate_end_time(self):
         value = getattr(self.instance, 'end_time', None)
         if value:
             if self.instance.end_time + timedelta(minutes=5) < datetime.now():
@@ -252,18 +254,23 @@ class ReleasePollSettingsValidator():
             if self.instance.end_time > datetime.now() + timedelta(weeks=1):
                 raise PollValidationException(f"Окончание опроса не может быть запланировано больше чем на неделю заранее")
             
+            start_time =  getattr(self.instance, 'start_time', None)
+            if start_time:
+                if self.instance.start_time + timedelta(minutes=1) > self.instance.end_time:
+                    raise PollValidationException(f"Время окончания опроса должно быть на минимум минуту позже времени начала")
+           
         
 def is_poll_valid(poll):
-    poll_validator = ReleasePollValidator()
-    poll_validator.name(instance=poll, max_len=50, min_len=5)
+    poll_validator = ReleasePollValidator(poll)
+    poll_validator.validate()
 
     all_questions = poll.questions.all()
     if len(all_questions) == 0:
         raise PollValidationException(f"Текущий опрос должен содержать хотя бы 1 вопрос.")
     
     for question in all_questions:
-        poll_question_validator = ReleaseQuestionValidator()
-        poll_question_validator.name(instance=question, max_len=50, min_len=1)
+        poll_question_validator = ReleaseQuestionValidator(question)
+        poll_question_validator.validate()
         
         all_options = question.answer_options.all()
         if len(all_options) == 0:
@@ -278,8 +285,8 @@ def is_poll_valid(poll):
             raise PollValidationException(f"Вопрос №{question.order_id} не может содержать более 1 свободного ответа.")
 
         for option in all_options:
-            poll_option_validator = ReleaseOptionValidator()
-            poll_option_validator.name(instance=option, max_len=50, min_len=1)
+            poll_option_validator = ReleaseOptionValidator(option)
+            poll_option_validator.validate()
 
         if poll.poll_type.name == 'Викторина':
             has_correct_option = [option for option in all_options if option.is_correct]
@@ -287,10 +294,7 @@ def is_poll_valid(poll):
                 raise PollValidationException(f"Вопрос №{question.order_id} должен содержать хотя бы 1 верный вариант ответа.")
 
     poll_setts_validator = ReleasePollSettingsValidator(poll.poll_setts)
-    poll_setts_validator.completion_time()
-    poll_setts_validator.start_time()
-    poll_setts_validator.end_time()
-
+    poll_setts_validator.validate()
 
     return True
 

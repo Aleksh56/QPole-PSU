@@ -90,7 +90,7 @@ def my_profile(request):
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
-@permission_classes([IsOwnerOrReadOnly])
+@permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll(request):
     try:
@@ -744,13 +744,13 @@ def my_poll_question(request):
         elif request.method == 'PUT':
             data = request.data
 
-            poll_id = get_parameter_or_400(request.GET, 'poll_id')
+            poll_id = get_data_or_400(data, 'poll_id')
             
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
+            poll_question_id = get_data_or_400(data, 'poll_question_id')
 
             
             poll_question = poll.questions.filter(id=poll_question_id).first()
@@ -856,8 +856,8 @@ def my_poll_question_option(request):
         elif request.method == 'POST':
             data = request.data.copy()
 
-            poll_id = get_parameter_or_400(request.GET, 'poll_id')
-            poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
+            poll_id = get_data_or_400(data, 'poll_id')
+            poll_question_id = get_data_or_400(data, 'poll_question_id')
 
             poll = (
                 Poll.objects.filter(Q(author__user=current_user) and Q(poll_id=poll_id))
@@ -972,8 +972,8 @@ def my_poll_question_option(request):
         elif request.method == 'PUT':
             data = request.data
 
-            poll_id = get_parameter_or_400(request.GET, 'poll_id')
-            poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
+            poll_id = get_data_or_400(data, 'poll_id')
+            poll_question_id = get_data_or_400(data, 'poll_question_id')
             
             poll = Poll.objects.filter(poll_id=poll_id).first()
             if not poll:

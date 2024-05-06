@@ -33,7 +33,7 @@ class Profile(models.Model):
     
 
 class StudyGroup(models.Model):
-    name = models.CharField(max_length=50, null=True)
+    name = models.CharField(max_length=50, unique=True, null=True)
 
     def __str__(self):
         return f"Учебная группа '{self.name}'"
