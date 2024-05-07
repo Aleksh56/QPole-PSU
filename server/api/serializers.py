@@ -347,10 +347,16 @@ class PollSerializer(BasePollSerializer):
     author = MyProfileSerializer(required=True)
     poll_setts = PollSettingsSerializer(required=False)
     questions = QuestionSerializer(many=True, required=False)
+    allowed_groups = StudyGroupSerializer(many=True, required=False)
 
     qrcode_img = serializers.SerializerMethodField()
+    
+    is_user_in_allowed_groups = serializers.SerializerMethodField()
+    
+    def get_is_user_in_allowed_groups(self, instance):
+        profile = self.context.get('profile')
+        return instance.is_user_in_allowed_groups(user_profile=profile)
 
-   
     def get_qrcode_img(self, instance):
         qrcode_path = instance.qrcode
         
@@ -389,8 +395,16 @@ class MiniPollSerializer(BasePollSerializer):
     poll_setts = PollSettingsSerializer(required=False)
     author = MiniProfileSerializer()
 
+    allowed_groups = StudyGroupSerializer(many=True, required=False)
+
     qrcode_img = serializers.SerializerMethodField()
 
+    is_user_in_allowed_groups = serializers.SerializerMethodField()
+    
+    def get_is_user_in_allowed_groups(self, instance):
+        profile = self.context.get('profile')
+        return instance.is_user_in_allowed_groups(user_profile=profile)
+    
     def get_qrcode_img(self, instance):
         qrcode_path = instance.qrcode
         

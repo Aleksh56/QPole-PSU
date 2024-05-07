@@ -6,6 +6,7 @@ from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField, Value
 from django.db.models import Count, Case, When, F, Sum, Subquery, OuterRef, Max
 from django.db.models.functions import Coalesce
 from django.db import transaction
+from django.contrib.auth.models import AnonymousUser
 
 from .permissions import *
 from .exсeptions import *
@@ -111,6 +112,7 @@ def my_poll(request):
                                 Prefetch('questions', queryset=PollQuestion.objects
                                                                     .prefetch_related('answer_options').all())
                             )
+                            .prefetch_related('allowed_groups')
                             .first()
                         )
                     if not poll:
@@ -122,6 +124,7 @@ def my_poll(request):
                         Poll.objects.filter(
                             Q(author=my_profile) & Q(poll_id=poll_id))
                             .select_related('author', 'author__user', 'poll_type', 'poll_setts')
+                            .prefetch_related('allowed_groups')
                             .first()
                         )
                     if not poll:
@@ -155,6 +158,7 @@ def my_poll(request):
                 polls = (
                     Poll.objects
                         .select_related('author', 'poll_type', 'author__user', 'poll_setts')
+                        .prefetch_related('allowed_groups')
                         .prefetch_related('questions')
                         .prefetch_related('user_participations')
                         .filter(filters)
@@ -228,8 +232,29 @@ def my_poll(request):
             request_type = get_parameter_or_400(request.GET, 'request_type')
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
                 
-            
-            if request_type == 'change_questions_order':
+            if request_type == 'edit_allowed_groups':
+                poll = get_object_or_404(Poll, poll_id=poll_id, author=my_profile)
+                action = get_data_or_400(data, 'action')
+
+                if action in ['add_group', 'remove_group']:
+                    study_group_name = get_data_or_400(data, 'study_group_name')
+                    study_group = get_object_or_404(StudyGroup, name=study_group_name)
+                    
+                    if action == 'add_group':
+                        poll.allowed_groups.add(study_group)
+
+                    elif action == 'remove_group':
+                        poll.allowed_groups.remove(study_group)
+                
+                elif action == 'remove_all_groups':
+                    poll.allowed_groups.clear()
+
+                allowed_groups = poll.allowed_groups.all()
+                serializer = StudyGroupSerializer(allowed_groups, many=True) 
+
+                return Response(serializer.data)
+
+            elif request_type == 'change_questions_order':
                 poll = (
                     Poll.objects.filter(poll_id=poll_id, author=my_profile)
                         # .prefetch_related('questions')
@@ -303,7 +328,7 @@ def my_poll(request):
                 serializer = PollSerializer(poll)
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
-            if request_type == 'deploy_to_production':
+            elif request_type == 'deploy_to_production':
                 poll = (
                     Poll.objects.filter(
                         Q(author=my_profile) and Q(poll_id=poll_id))
@@ -1363,6 +1388,12 @@ def quick_poll_voting(request):
 @permission_classes([AllowAny])
 def poll(request):
     try:
+        current_user = request.user
+        if not isinstance(current_user, AnonymousUser):
+            my_profile = Profile.objects.filter(user=current_user).first()
+        else:
+            my_profile = None
+
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
 
@@ -1371,6 +1402,7 @@ def poll(request):
                     Poll.objects
                         .filter(Q(poll_id=poll_id) & Q(is_in_production=True))
                         .select_related('author', 'author__user', 'poll_type', 'poll_setts')
+                        .prefetch_related('allowed_groups')
                         .prefetch_related(
                         Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
                                 'answer_options'
@@ -1380,7 +1412,7 @@ def poll(request):
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
-                serializer = PollSerializer(poll)
+                serializer = PollSerializer(poll, context={'profile': my_profile})
                 return Response(serializer.data)
             
             else:
@@ -1409,12 +1441,17 @@ def poll(request):
                 polls = (
                     Poll.objects
                     .select_related('author', 'poll_type', 'author__user', 'poll_setts')
+                    .prefetch_related('allowed_groups')
                     .prefetch_related('questions')
                     .prefetch_related('user_participations')
                     .filter(filters)  
                 )
 
-                pagination_data = get_paginated_response(request, polls, MiniPollSerializer)
+                if my_profile:
+                    context = {'profile': my_profile}
+                else:
+                    context = None
+                pagination_data = get_paginated_response(request, polls, MiniPollSerializer, context=context)
                 return Response(pagination_data)
 
             

@@ -181,6 +181,8 @@ class Poll(models.Model):
     poll_setts = models.OneToOneField('PollSettings', related_name='poll', on_delete=models.CASCADE, null=True) # настройки опроса
     # registration_form = models.OneToOneField('RegistrationForm', related_name='poll', on_delete=models.RESTRICT, null=True) # форма регистрации
 
+    allowed_groups = models.ManyToManyField(StudyGroup, related_name='allowed_polls', blank=True)
+
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
 
     is_anonymous = models.BooleanField(default=False) # анонимное
@@ -221,6 +223,17 @@ class Poll(models.Model):
             profile=user_profile
         ).exists()
     
+
+    def is_user_in_allowed_groups(self, user_profile):
+        allowed_groups = self.allowed_groups.all()
+        if allowed_groups:
+            if not user_profile:
+                return None
+            
+            return user_profile.group in allowed_groups
+        
+        return None
+
     def can_user_vote(self, user_profile):
         if not (self.is_closed or self.is_paused):
             if self.user_answers.filter(
@@ -323,9 +336,9 @@ class PollSettings(models.Model):
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 
-    def __str__(self):
-        if self.poll:
-            return f"Настройки {self.poll}"
+    # def __str__(self):
+    #     if self.poll:
+    #         return f"Настройки {self.poll}"
 
 
 class SupportRequestType(models.Model):

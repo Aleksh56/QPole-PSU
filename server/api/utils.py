@@ -153,7 +153,7 @@ def get_qrcode_img_bytes(qrcode_path):
 
 from rest_framework.pagination import PageNumberPagination
 
-def get_paginated_response(request, objects, serializer):
+def get_paginated_response(request, objects, serializer, context=None):
     paginator = PageNumberPagination()
     paginator.page_size = int(request.GET.get('page_size', 10))
     page = int(request.GET.get('page', 1))
@@ -161,7 +161,12 @@ def get_paginated_response(request, objects, serializer):
     paginator.page.number = page
     total_items = paginator.page.paginator.count
     total_pages = paginator.page.paginator.num_pages
-    serializer = serializer(objects, many=True)
+
+    if not context:
+        serializer = serializer(objects, many=True)
+    else:
+        serializer = serializer(objects, many=True, context=context)
+
     pagination_data = {
         'total_items': total_items,
         'total_pages': total_pages,
@@ -297,7 +302,7 @@ def serializer_errors_wrapper(errors):
     except Exception:
         return errors
     
-from .exсeptions import MissingFieldException, MissingParameterException
+from .exсeptions import MissingFieldException, MissingParameterException, ObjectNotFoundException
 
 def get_data_or_400(data, data_field_name):
     data_field = data.get(data_field_name, None)
@@ -312,6 +317,15 @@ def get_parameter_or_400(request_get, parameter_field_name):
         raise MissingParameterException(parameter_field_name)
     
     return parameter_field
+
+
+def get_object_or_404(model, **kwargs):
+    object = model.objects.filter(**kwargs).first()
+    if not object:
+        raise ObjectNotFoundException(model.__name__)
+    
+    return object
+    
 
 
 # def save_validated_object(serializer):
