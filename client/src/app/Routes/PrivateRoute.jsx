@@ -1,10 +1,10 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import useAuth from '@hooks/useAuth';
 import { useEffect, useState } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 export const PrivateRoute = () => {
   const { isAuthenticated } = useAuth();
-  const [isReady, setReady] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -15,11 +15,11 @@ export const PrivateRoute = () => {
 
         if (storedToken) {
           if (isMounted) {
-            setReady(true);
+            setIsReady(true);
           }
         } else {
           if (isMounted) {
-            setReady(true);
+            setIsReady(true);
           }
         }
       } catch (error) {
