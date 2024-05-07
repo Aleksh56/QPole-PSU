@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 
 const AlertContext = createContext();
 
@@ -21,9 +21,7 @@ export const AlertProvider = ({ children }) => {
     setAlert({ ...alert, open: false });
   };
 
-  return (
-    <AlertContext.Provider value={{ alert, showAlert, closeAlert }}>
-      {children}
-    </AlertContext.Provider>
-  );
+  const value = useMemo(() => ({ alert, showAlert, closeAlert }), [alert, showAlert, closeAlert]);
+
+  return <AlertContext.Provider value={value}>{children}</AlertContext.Provider>;
 };

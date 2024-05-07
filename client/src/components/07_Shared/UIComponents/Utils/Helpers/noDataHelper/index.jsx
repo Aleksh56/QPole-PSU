@@ -1,10 +1,9 @@
-import React from 'react';
 import {
+  StyledButton,
   StyledDescription,
   StyledHeroWrapper,
   StyledInfoWrapper,
   StyledLeftColumn,
-  StyledButton,
   StyledTypography,
 } from './styled';
 
@@ -24,7 +23,7 @@ const NoDataHelper = ({
           {btnCaption && <StyledButton onClick={() => handler(true)}>{btnCaption}</StyledButton>}
         </StyledInfoWrapper>
       </StyledLeftColumn>
-      <img src={image} alt={`${image} - image`} />
+      <img src={image} alt={`${image}`} />
     </StyledHeroWrapper>
   );
 };

@@ -5,7 +5,6 @@ import { colorConfig } from '@/app/template/config/color.config';
 import { Rem } from '@/utils/convertToRem';
 
 export const IllustrationGridWrapper = styled(Grid)(() => ({
-  // ToDo - rewrite flex -> grid
   display: 'flex',
   flexDirection: 'column',
   padding: Rem(60),

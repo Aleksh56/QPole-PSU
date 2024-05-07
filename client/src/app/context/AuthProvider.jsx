@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext({
   isAuthenticated: false,
@@ -6,37 +6,37 @@ const AuthContext = createContext({
 });
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setAuthState] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState('');
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('auth_token');
     if (storedToken) {
-      setAuthState(true);
+      setIsAuthenticated(true);
       setToken(storedToken);
     }
-    setLoading(false);
+    setIsLoading(false);
   }, []);
 
   const setAuth = useCallback(
     (newToken) => {
       if (newToken && typeof newToken === 'string') {
-        setAuthState(true);
+        setIsAuthenticated(true);
         setToken(newToken);
         localStorage.setItem('auth_token', newToken);
       } else {
-        setAuthState(false);
+        setIsAuthenticated(false);
         setToken('');
         localStorage.removeItem('auth_token');
       }
     },
-    [setAuthState, setToken]
+    [setIsAuthenticated, setToken],
   );
 
   const contextValue = useMemo(
     () => ({ isAuthenticated, setAuth, token, isLoading }),
-    [isAuthenticated, setAuth]
+    [isAuthenticated, setAuth],
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

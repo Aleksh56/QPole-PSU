@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
-import { Link } from 'react-router-dom';
 import { Box } from '@mui/material';
+import { Link } from 'react-router-dom';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledFooter = styled('footer')(() => ({
   backgroundColor: '#181824',

@@ -1,9 +1,10 @@
-import { StyledProfileContainer, StyledProfileFieldsBox } from '@/constants/styles';
-import React from 'react';
-import { BoxCaption, ProfileFieldsWrapper, ProfileTitle } from './styled';
 import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
+
+import { BoxCaption, ProfileFieldsWrapper, ProfileTitle } from './styled';
+
 import FrmFeedback from '@/components/04_Widgets/Data/Forms/frmFeedback';
+import { StyledProfileContainer, StyledProfileFieldsBox } from '@/constants/styles';
 
 const ProfileHelpPage = () => {
   return (

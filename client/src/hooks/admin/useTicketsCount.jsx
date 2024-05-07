@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import { getTicketsFx } from '@/api/common-requests/tickets/get-tickets';
 
 const useTicketsCount = () => {
   const [ticketsCount, setTicketsCount] = useState(0);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchTickets = async () => {

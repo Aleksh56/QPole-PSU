@@ -31,6 +31,8 @@ const AppPage = () => {
   const { pageSize, currPage, totalPages, setTotalPages, handlePageSizeChange, handlePageChange } =
     usePagination();
 
+  const shouldRenderCreateFirstPoll = $pollsData && $pollsData.length === 0;
+
   const fetchData = async () => {
     const pollResponse = await getAllPoles({ currPage, pageSize });
     setPollsData(pollResponse.results);
@@ -42,6 +44,42 @@ const AppPage = () => {
     fetchData();
   }, [currPage, pageSize]);
 
+  const renderAppContent = () => {
+    return shouldRenderCreateFirstPoll ? (
+      <AppCreateFirstPoll
+        settings={surveySettings}
+        handleOpenCreatePoleModal={setIsCreateModalOpen}
+      />
+    ) : (
+      <StyledAppContentWrapper>
+        <ContentWrapper>
+          <StyledArchiveLink to={'/app/polls-archive'}>
+            <InboxIcon />
+            Архив
+          </StyledArchiveLink>
+          <PollsGridWrapper>
+            <PollsGrid>
+              {$pollsData
+                ?.filter((item) => !item.is_closed)
+                .map((item) => (
+                  <Link key={item.poll_id} to={`/app/tests/${item.poll_id}/main`}>
+                    <AppPoleCard pollData={item} fetchData={fetchData} />
+                  </Link>
+                ))}
+            </PollsGrid>
+            <CustomPagination
+              pageSize={pageSize}
+              totalPages={totalPages}
+              currentPage={currPage}
+              handlePageChange={handlePageChange}
+              handlePageSizeChange={handlePageSizeChange}
+            />
+          </PollsGridWrapper>
+        </ContentWrapper>
+      </StyledAppContentWrapper>
+    );
+  };
+
   return (
     <>
       <AppPollFilters handleCreateModalOpen={setIsCreateModalOpen} setPollData={setPollsData} />
@@ -49,39 +87,8 @@ const AppPage = () => {
         <StyledAppContentWrapper>
           <CircularProgress />
         </StyledAppContentWrapper>
-      ) : $pollsData && $pollsData.length === 0 ? (
-        <AppCreateFirstPoll
-          settings={surveySettings}
-          handleOpenCreatePoleModal={setIsCreateModalOpen}
-        />
       ) : (
-        <StyledAppContentWrapper>
-          <ContentWrapper>
-            <StyledArchiveLink to={'/app/polls-archive'}>
-              <InboxIcon />
-              Архив
-            </StyledArchiveLink>
-            <PollsGridWrapper>
-              <PollsGrid>
-                {$pollsData &&
-                  $pollsData
-                    .filter((item) => !item.is_closed)
-                    .map((item) => (
-                      <Link key={item.poll_id} to={`/app/tests/${item.poll_id}/main`}>
-                        <AppPoleCard pollData={item} fetchData={fetchData} />
-                      </Link>
-                    ))}
-              </PollsGrid>
-              <CustomPagination
-                pageSize={pageSize}
-                totalPages={totalPages}
-                currentPage={currPage}
-                handlePageChange={handlePageChange}
-                handlePageSizeChange={handlePageSizeChange}
-              />
-            </PollsGridWrapper>
-          </ContentWrapper>
-        </StyledAppContentWrapper>
+        renderAppContent()
       )}
       <FrmCreatePoll
         isOpen={isCreateModalOpen}

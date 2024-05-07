@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { Box, DialogTitle, Typography } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledDialogTitle = styled(DialogTitle)(() => ({
   fontSize: Rem(14),

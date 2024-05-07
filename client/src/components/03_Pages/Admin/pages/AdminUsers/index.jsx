@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { getAllUsersFx } from './models/get-users';
-import CustomTable from '@/components/04_Widgets/Data/Vizualization/table';
 import BlockIcon from '@mui/icons-material/Block';
 import SettingsIcon from '@mui/icons-material/Settings';
-import FrmConfirm from '@/components/04_Widgets/Utilities/Modals/frmConfirm';
+import { useEffect, useState } from 'react';
+
 import { banUserFx } from './models/ban-user';
+import { getAllUsersFx } from './models/get-users';
+
 import { roleColorsConf } from '@/app/template/config/role.colors';
-import { parseAndFormatDate } from '@/utils/js/formatDate';
 import AdmUsrFilters from '@/components/04_Widgets/Content/Interactive/admUsrFilters';
+import CustomTable from '@/components/04_Widgets/Data/Vizualization/table';
+import FrmConfirm from '@/components/04_Widgets/Utilities/Modals/frmConfirm';
+import { parseAndFormatDate } from '@/utils/js/formatDate';
 
 const AdminUsersPage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -31,7 +33,7 @@ const AdminUsersPage = () => {
     try {
       const updatedUser = await banUserFx(userIdToBlock);
       setUsers((prevUsers) =>
-        prevUsers.map((user) => (user.user.id === userIdToBlock ? updatedUser : user))
+        prevUsers.map((user) => (user.user.id === userIdToBlock ? updatedUser : user)),
       );
       setIsConfirmOpen(false);
       setUserIdToBlock(null);
@@ -105,7 +107,7 @@ const AdminUsersPage = () => {
       <FrmConfirm
         open={isConfirmOpen}
         onCancel={() => setIsConfirmOpen(false)}
-        onConfirm={(e) => handleBlockUser(e)}
+        onConfirm={() => handleBlockUser()}
       />
     </>
   );

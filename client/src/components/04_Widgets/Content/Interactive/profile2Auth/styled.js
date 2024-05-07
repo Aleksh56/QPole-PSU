@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import { Box, Switch, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
 
 export const Styled2AuthContainerHeading = styled(Typography)(() => ({
   marginTop: '48px',

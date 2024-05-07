@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import { Box, ListItemText, Typography, List } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
+import { Box, List, ListItemText } from '@mui/material';
 import { NavLink } from 'react-router-dom';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledProfileWrapper = styled(Box)(() => ({
   height: '100vh',

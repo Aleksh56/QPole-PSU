@@ -8,7 +8,6 @@ import ru_buttons from './ru/ru.buttons.json';
 import ru_field from './ru/ru.field.json';
 import ru_head from './ru/ru.head.json';
 
-// const ru_notifications = merge(ru_alert);
 const ru_controls = merge(ru_buttons, ru_assits, ru_field);
 
 const ru_translation = merge(ru_alert, ru_controls, ru_head);

@@ -10,30 +10,29 @@ const DraggableList = ({ renderItem, items, onDragEnd, pollType, disabled = fals
       <Droppable droppableId="options">
         {(provided) => (
           <Box {...provided.droppableProps} ref={provided.innerRef}>
-            {items &&
-              items.map((item, index) => (
-                <Draggable
-                  key={item.id}
-                  draggableId={item.id.toString()}
-                  index={index}
-                  isDragDisabled={item.is_free_response || disabled}
-                >
-                  {(provided) => (
-                    <DragWrapper
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...(!item.is_free_response ? provided.dragHandleProps : {})}
-                      pollType={pollType}
-                      style={{
-                        ...provided.draggableProps.style,
-                        cursor: item.isDraggable ? 'grab' : 'default',
-                      }}
-                    >
-                      {renderItem(item, index)}
-                    </DragWrapper>
-                  )}
-                </Draggable>
-              ))}
+            {items?.map((item, index) => (
+              <Draggable
+                key={item.id}
+                draggableId={item.id.toString()}
+                index={index}
+                isDragDisabled={item.is_free_response || disabled}
+              >
+                {(provided) => (
+                  <DragWrapper
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...(!item.is_free_response ? provided.dragHandleProps : {})}
+                    pollType={pollType}
+                    style={{
+                      ...provided.draggableProps.style,
+                      cursor: item.isDraggable ? 'grab' : 'default',
+                    }}
+                  >
+                    {renderItem(item, index)}
+                  </DragWrapper>
+                )}
+              </Draggable>
+            ))}
             {provided.placeholder}
           </Box>
         )}

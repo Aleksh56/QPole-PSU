@@ -52,37 +52,35 @@ const PoleQuestionsPage = () => {
     );
   };
 
-  return (
-    <Box sx={{ overflow: 'hidden' }}>
-      {loading ? (
-        <CLoader />
-      ) : questions.length === 0 ? (
-        <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
-      ) : (
-        <ListWrapper>
-          <Box sx={{ width: '25%' }}>
-            <PollQuestionsList
-              questions={questions}
-              onSelectQuestion={handleSelectQuestion}
-              onAddQuestion={handleCreateQuestion}
-              selectedQuestion={selectedQuestion}
-              setQuestions={setQuestions}
-              setSelected={setSelectedQuestion}
+  const renderQuestionList = () => {
+    return questions.length === 0 ? (
+      <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
+    ) : (
+      <ListWrapper>
+        <Box sx={{ width: '25%' }}>
+          <PollQuestionsList
+            questions={questions}
+            onSelectQuestion={handleSelectQuestion}
+            onAddQuestion={handleCreateQuestion}
+            selectedQuestion={selectedQuestion}
+            setQuestions={setQuestions}
+            setSelected={setSelectedQuestion}
+          />
+        </Box>
+        <Box sx={{ width: '75%' }}>
+          {Object.keys(selectedQuestion).length > 0 && (
+            <PollQuestionEditForm
+              question={selectedQuestion}
+              setSelectedQuestion={setSelectedQuestion}
+              onQuestionUpdate={handleQuestionUpdate}
             />
-          </Box>
-          <Box sx={{ width: '75%' }}>
-            {Object.keys(selectedQuestion).length > 0 && (
-              <PollQuestionEditForm
-                question={selectedQuestion}
-                setSelectedQuestion={setSelectedQuestion}
-                onQuestionUpdate={handleQuestionUpdate}
-              />
-            )}
-          </Box>
-        </ListWrapper>
-      )}
-    </Box>
-  );
+          )}
+        </Box>
+      </ListWrapper>
+    );
+  };
+
+  return <Box sx={{ overflow: 'hidden' }}>{loading ? <CLoader /> : renderQuestionList()}</Box>;
 };
 
 export default PoleQuestionsPage;

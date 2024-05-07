@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { StyledProfileContainer, StyledProfileFieldsBox } from '@/constants/styles';
-import { Box, FormControlLabel } from '@mui/material';
 import SecurityIcon from '@assets/security.svg';
+import { Box, FormControlLabel } from '@mui/material';
+import { useState } from 'react';
+
+import { connect2AuthFx } from './model/connect-2auth';
 import {
   Styled2AuthContainerHeading,
   Styled2AuthHeading,
@@ -9,8 +10,9 @@ import {
   StyledAuthContentWrapper,
   StyledImage,
 } from './styled';
+
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
-import { connect2AuthFx } from './model/connect-2auth';
+import { StyledProfileContainer, StyledProfileFieldsBox } from '@/constants/styles';
 
 const Profile2AuthBlock = ({ caption = '' }) => {
   const [qrCode, setQrCode] = useState('');

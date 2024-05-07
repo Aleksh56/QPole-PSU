@@ -96,9 +96,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
     if (fieldChangeTimeout) {
       clearTimeout(fieldChangeTimeout);
     }
-    // const updatedQuestion = { ...editedQuestion, [fieldName]: value };
-    // setEditedQuestion(updatedQuestion);
-    // await handleChangeQuestionInfoRequest(fieldName, value, id, q_id);
+
     const updatedQuestion = { ...editedQuestion, [fieldName]: value };
     setEditedQuestion(updatedQuestion);
     const newTimeout = setTimeout(async () => {
@@ -122,7 +120,6 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
         option.id === opt_id ? { ...option, [fieldName]: value } : option,
       ),
     );
-    // await fetchOptions();
   };
 
   const handleDeleteOption = async (opt_id, q_id) => {

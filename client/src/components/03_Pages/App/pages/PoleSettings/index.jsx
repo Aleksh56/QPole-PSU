@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
+import { v4 } from 'uuid';
 
 import { poleNavigationButtonsData } from './data/PoleNavigationButtonsData';
 
@@ -10,7 +11,7 @@ const PolePage = () => {
       <PollSettingsMenuNavigation buttons={poleNavigationButtonsData} />
       <Routes>
         {poleNavigationButtonsData.map((button) => (
-          <Route path={`/${button.page}`} element={<button.component />} />
+          <Route key={v4()} path={`/${button.page}`} element={<button.component />} />
         ))}
       </Routes>
     </>

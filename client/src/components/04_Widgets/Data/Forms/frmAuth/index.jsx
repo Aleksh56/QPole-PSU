@@ -10,7 +10,6 @@ import { pattern } from '@/config/validation.patterns';
 import { validateField } from '@/utils/js/validateField';
 
 const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () => {} }) => {
-  // const { showAlert } = useAlert();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState({
@@ -100,14 +99,13 @@ const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () 
             placeholder="Пароль"
             handleChange={handleInputChange}
             errorMessage={formErrors.password}
-            children={
-              isSignIn ? (
-                <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
-              ) : (
-                ''
-              )
-            }
-          />
+          >
+            {isSignIn ? (
+              <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
+            ) : (
+              ''
+            )}
+          </LabeledInput>
           {!isSignIn && (
             <>
               <LabeledInput

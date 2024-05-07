@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Box, Divider, IconButton, Menu, MenuItem, Typography, Button } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { FiltersWrapper } from './styled';
-import { admUsrsFilterCategories } from '@/data/fields';
+import { Box, Button, Divider, IconButton, Menu, MenuItem } from '@mui/material';
+import React, { useState } from 'react';
 import { v4 } from 'uuid';
+
+import { FiltersWrapper } from './styled';
+
+import { admUsrsFilterCategories } from '@/data/fields';
 
 const AdmUsrFilters = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -37,8 +39,8 @@ const AdmUsrFilters = () => {
             open={Boolean(anchorEl) && selectedFilter.id === category.id}
             onClose={handleClose}
           >
-            {category.options.map((option, index) => (
-              <MenuItem key={index} onClick={handleClose}>
+            {category.options.map((option) => (
+              <MenuItem key={v4()} onClick={handleClose}>
                 {option}
               </MenuItem>
             ))}

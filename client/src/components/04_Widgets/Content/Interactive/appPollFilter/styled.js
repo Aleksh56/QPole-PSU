@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
-import { Rem } from '@/utils/convertToRem';
 import { Box, Button, Stack } from '@mui/material';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledStackWrapper = styled(Box)(() => ({
   width: '100%',
@@ -38,7 +39,7 @@ export const StyledButton = styled(Button)(() => ({
     display: 'block',
     width: '100%',
     fontSize: Rem(12),
-    marginLeft: Rem(20),
+    // marginLeft: Rem(20),
     padding: 0,
   },
 }));

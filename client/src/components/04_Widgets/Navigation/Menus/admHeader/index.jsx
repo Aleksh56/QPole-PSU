@@ -1,9 +1,10 @@
-import React from 'react';
-import { IconButton, Typography, InputBase, Badge, Avatar, Stack } from '@mui/material';
-import { Search as SearchIcon, Notifications as NotificationsIcon } from '@mui/icons-material';
+import { Notifications as NotificationsIcon, Search as SearchIcon } from '@mui/icons-material';
+import { Avatar, Badge, IconButton, InputBase, Stack, Typography } from '@mui/material';
+
 import { SearchWrapper, StyledAppBar, StyledStack, StyledToolbar } from './styled';
-import useUserData from '@/hooks/useUserData';
+
 import useTicketsCount from '@/hooks/admin/useTicketsCount';
+import useUserData from '@/hooks/useUserData';
 
 const AdmHeader = () => {
   const userData = useUserData();

@@ -42,7 +42,9 @@ const PollResultsPage = () => {
             <BarChartIcon /> Bar Chart
           </MenuItem>
         </Select>
-        <PdfExporter children={<PollResultsPDF data={questions} />} />
+        <PdfExporter>
+          <PollResultsPDF data={questions} />
+        </PdfExporter>
       </SettingsWrapper>
       <ResultsGridWrapper>
         {questions.map((item) => (

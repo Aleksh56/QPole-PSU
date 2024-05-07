@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { Box, TextField, Typography } from '@mui/material';
-import { designTokens } from '@/constants/designTokens';
-import { Rem } from '@/utils/convertToRem';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledTypography = styled(Typography)(() => ({
   marginBottom: Rem(5),

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Typography } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
 
 export const StyledLabel = styled(Typography)(() => ({
   backgroundColor: 'rgba(219, 236, 255, 0.8)',

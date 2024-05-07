@@ -1,4 +1,5 @@
 import { Document, Font, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { v4 } from 'uuid';
 
 Font.register({
   family: 'Roboto',
@@ -63,7 +64,6 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     margin: 'auto',
-    margin: 5,
     fontSize: 10,
   },
 });
@@ -74,8 +74,8 @@ const PollResultsPDF = ({ data }) => {
       <Page size="A4" style={styles.page}>
         <Text style={styles.title}>Результаты опроса</Text>
         <Text style={styles.subtitle}>Детали опроса</Text>
-        {data.map((question, index) => (
-          <View key={index} wrap={false}>
+        {data.map((question) => (
+          <View key={v4()} wrap={false}>
             <Text>
               {question.name}: Ответов - {question.votes_quantity}
             </Text>
@@ -91,8 +91,8 @@ const PollResultsPDF = ({ data }) => {
                   <Text style={styles.tableCellHeader}>Кол-во голосов</Text>
                 </View>
               </View>
-              {question.answer_options.map((option, optionIndex) => (
-                <View key={optionIndex} style={styles.tableRow}>
+              {question.answer_options.map((option) => (
+                <View key={v4()} style={styles.tableRow}>
                   <View style={styles.tableCol}>
                     <Text style={styles.tableCell}>{option.id}</Text>
                   </View>

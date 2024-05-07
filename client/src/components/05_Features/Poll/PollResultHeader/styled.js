@@ -1,6 +1,7 @@
-import { Rem } from '@/utils/convertToRem';
 import styled from '@emotion/styled';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const HeaderWrapper = styled(Box)(() => ({
   width: '100%',

@@ -32,18 +32,15 @@ const Header = ({ isMainPage = true }) => {
     <StyledHeader isSticky={isSticky} isMainPage={isMainPage}>
       <StyledContainer>
         <StyledLogoLink to="/">QPoll</StyledLogoLink>
-        <HeaderNavOut
-          children={
-            <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}>
-              <PrimaryButton caption={t('button.createQuiz')} to="/signup" />
-              <PrimaryButton
-                caption={isAuthenticated ? t('button.profile') : t('button.login')}
-                to={isAuthenticated ? '/app' : '/signin'}
-              />
-            </Box>
-          }
-          isMobile={isMobile}
-        />
+        <HeaderNavOut isMobile={isMobile}>
+          <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}>
+            <PrimaryButton caption={t('button.createQuiz')} to="/signup" />
+            <PrimaryButton
+              caption={isAuthenticated ? t('button.profile') : t('button.login')}
+              to={isAuthenticated ? '/app' : '/signin'}
+            />
+          </Box>
+        </HeaderNavOut>
       </StyledContainer>
     </StyledHeader>
   );

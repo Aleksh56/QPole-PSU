@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
-import { Box, Tabs } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
+import { Box } from '@mui/material';
 
 export const TabPanelWrapper = styled(Box)(() => ({
   backgroundColor: '#fff',

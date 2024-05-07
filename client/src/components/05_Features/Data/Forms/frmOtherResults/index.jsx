@@ -1,4 +1,5 @@
 import { Box, Dialog, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { v4 } from 'uuid';
 
 import { nameReducer } from '@/utils/js/nameReducer';
 
@@ -12,7 +13,7 @@ const FrmOtherResults = ({ open, onClose, data }) => {
         {filteredData?.length > 0 && filteredData[0].free_answers.length > 0 ? (
           filteredData[0].free_answers?.map((item, index) => (
             <Box
-              key={index}
+              key={v4()}
               sx={{
                 display: 'grid',
                 gridTemplateColumns: '0.35fr 1fr',

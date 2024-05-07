@@ -12,8 +12,8 @@ import usePageTitle from '@/hooks/usePageTitle';
 
 const FrmResetPass = () => {
   usePageTitle('restore');
-  const [isEmailSubmitted, setEmailSubmitted] = useState(false);
-  const [isCodeSubmitted, setCodeSubmitted] = useState(false);
+  const [isEmailSubmitted, setIsEmailSubmitted] = useState(false);
+  const [isCodeSubmitted, setIsCodeSubmitted] = useState(false);
   const [resetAccountEmail, setResetAccountEmail] = useState('');
   const [resetAccountPasswordToken, setResetAccountPasswordToken] = useState('');
   const [resetAccountCode, setResetAccountCode] = useState();
@@ -23,7 +23,7 @@ const FrmResetPass = () => {
 
   const handleEmailSubmit = (event) => {
     event.preventDefault();
-    setEmailSubmitted(true);
+    setIsEmailSubmitted(true);
     sendResetPasswordCode({ email: resetAccountEmail });
   };
 
@@ -34,7 +34,7 @@ const FrmResetPass = () => {
       reset_code: resetAccountCode,
     });
     if (checkCodeResponse.ok) {
-      setCodeSubmitted(true);
+      setIsCodeSubmitted(true);
       setResetAccountPasswordToken(checkCodeResponse.data.reset_token || '');
     }
   };
@@ -52,19 +52,23 @@ const FrmResetPass = () => {
     }
   };
 
+  const handleSubmit = () => {
+    if (isEmailSubmitted) {
+      if (isCodeSubmitted) {
+        return handlePasswordReset;
+      } else {
+        return handleCodeSubmit;
+      }
+    } else {
+      return handleEmailSubmit;
+    }
+  };
+
   return (
     <FormGridWrapper item>
       <FormContainer>
         <PassResetHead />
-        <StyledForm
-          onSubmit={
-            isEmailSubmitted
-              ? isCodeSubmitted
-                ? handlePasswordReset
-                : handleCodeSubmit
-              : handleEmailSubmit
-          }
-        >
+        <StyledForm onSubmit={handleSubmit()}>
           {!isEmailSubmitted && (
             <LabeledInput
               label="Введите вашу почту"

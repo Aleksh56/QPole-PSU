@@ -34,7 +34,6 @@ const FrmShare = ({ open, setOpen }) => {
       <DialogContent sx={{ p: '0' }}>
         {activeView === 'main' && <FrmShareMain setView={handleSwitchView} />}
         {activeView === 'qr' && <FrmShareQR setView={handleSwitchView} />}
-        {/* {activeView === 'email' && <FrmShareEmail setView={handleSwitchView}/>} */}
       </DialogContent>
     </ShareDialog>
   );

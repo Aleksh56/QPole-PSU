@@ -1,6 +1,8 @@
-import React from 'react';
-import ServicesLabel from '@/components/07_Shared/DataDisplay/Labels/servicesLabel';
+import { v4 } from 'uuid';
+
 import { StyledCard, StyledCardHeading, StyledLabelWrapper } from './styled';
+
+import ServicesLabel from '@/components/07_Shared/DataDisplay/Labels/servicesLabel';
 
 const ServicesCard = ({ caption = '', buttons = [] }) => {
   return (
@@ -9,7 +11,7 @@ const ServicesCard = ({ caption = '', buttons = [] }) => {
       <StyledCardHeading variant="h6">{caption}</StyledCardHeading>
       <StyledLabelWrapper>
         {buttons.map((btn) => {
-          return <ServicesLabel caption={btn} />;
+          return <ServicesLabel key={v4()} caption={btn} />;
         })}
       </StyledLabelWrapper>
     </StyledCard>

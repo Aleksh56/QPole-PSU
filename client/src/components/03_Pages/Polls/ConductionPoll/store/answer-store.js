@@ -24,12 +24,10 @@ export const $answersStore = createStore([])
         if (existingAnswerIndex === -1) {
           return [...filteredState, { answer_option, question }];
         }
-      } else {
-        if (existingAnswerIndex !== -1) {
-          return filteredState.filter(
-            (answer) => !(answer.question === question && answer.answer_option === answer_option),
-          );
-        }
+      } else if (existingAnswerIndex !== -1) {
+        return filteredState.filter(
+          (answer) => !(answer.question === question && answer.answer_option === answer_option),
+        );
       }
       return filteredState;
     }

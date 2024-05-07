@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
-import { Box, Drawer, List, Typography } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
-import { Link } from 'react-router-dom';
 import { MenuButton } from '@mui/base/MenuButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Box } from '@mui/material';
+import { Link } from 'react-router-dom';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledHeaderWrapper = styled('header')(() => ({
   backgroundColor: '#EAEDFE',

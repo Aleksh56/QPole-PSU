@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { changeUserDataFx } from './models/change-user-data';
 import {
@@ -45,19 +45,18 @@ const ProfileUserData = ({ caption = '', boxCaption = '', ProfileInfoFields = []
       </BoxCaption>
       <StyledProfileFieldsBox>
         <ProfileFieldsWrapper>
-          {ProfileInfoFields &&
-            ProfileInfoFields.map(({ label, id, disabled, key }) => (
-              <ProfileAccFld
-                key={id}
-                label={label}
-                required={false}
-                id={id}
-                value={fieldValues[key]}
-                fieldKey={key}
-                handleChange={handleFieldChange}
-                isDisabled={disabled}
-              />
-            ))}
+          {ProfileInfoFields?.map(({ label, id, disabled, key }) => (
+            <ProfileAccFld
+              key={id}
+              label={label}
+              required={false}
+              id={id}
+              value={fieldValues[key]}
+              fieldKey={key}
+              handleChange={handleFieldChange}
+              isDisabled={disabled}
+            />
+          ))}
         </ProfileFieldsWrapper>
       </StyledProfileFieldsBox>
     </StyledProfileContainer>

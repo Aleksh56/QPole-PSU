@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Box, TextField, Typography } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const StyledColorTypography = styled(Typography)(() => ({
@@ -12,7 +13,6 @@ export const ColorPickerWrapper = styled(Box)(() => ({
   alignItems: 'center',
   border: '1px solid #c6ced9',
   marginTop: Rem(10),
-  display: 'grid',
   gridTemplateColumns: 'auto 1fr',
   columnGap: Rem(10),
 }));

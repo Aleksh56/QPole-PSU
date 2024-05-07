@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { Box, Tabs } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
 
 export const TabsButtonsContainer = styled(Box)(() => ({
   backgroundColor: '#fff',

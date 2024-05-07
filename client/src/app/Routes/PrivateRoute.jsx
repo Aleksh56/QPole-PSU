@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 export const PrivateRoute = () => {
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [isReady, setIsReady] = useState(false);
 
@@ -12,16 +13,7 @@ export const PrivateRoute = () => {
     const checkToken = async () => {
       try {
         const storedToken = localStorage.getItem('auth_token');
-
-        if (storedToken) {
-          if (isMounted) {
-            setIsReady(true);
-          }
-        } else {
-          if (isMounted) {
-            setIsReady(true);
-          }
-        }
+        if (isMounted && storedToken) setIsReady(true);
       } catch (error) {
         console.error('Error while checking token:', error);
       }
@@ -34,13 +26,14 @@ export const PrivateRoute = () => {
     };
   }, []);
 
-  const location = useLocation();
+  const renderContent = () => {
+    if (!isReady) return null;
 
-  return isReady ? (
-    isAuthenticated === true ? (
-      <Outlet />
-    ) : (
-      <Navigate to="/signin" state={{ from: location }} replace />
-    )
-  ) : null;
+    if (!isAuthenticated) {
+      return <Navigate to="/signin" state={{ from: location }} replace />;
+    }
+    return <Outlet />;
+  };
+
+  return renderContent();
 };

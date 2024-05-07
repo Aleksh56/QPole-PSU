@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import {
-  TextField,
   Button,
-  FormGroup,
   FormControlLabel,
+  FormGroup,
+  TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import { useState } from 'react';
+
+import { applyFiltersFx } from './models/apply-filters';
 import { FiltersButton, FiltersWrapper } from './styled';
+
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appTypesFilter } from '@/data/fields';
-import { applyFiltersFx } from './models/apply-filters';
 
 const PollFilters = ({ setPolls }) => {
   const [filters, setFilters] = useState({

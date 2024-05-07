@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Box, Typography } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
-import { designTokens } from '@/constants/designTokens';
 
 export const StyledSection = styled('section')(() => ({
   maxWidth: Rem(1200),

@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
-import { StyledProfileContainer, StyledProfileFieldsBox } from '@/constants/styles';
 import { FormControl, MenuItem, Select, Typography } from '@mui/material';
+import { useEffect } from 'react';
+import { v4 } from 'uuid';
+
+import { StyledProfileContainer, StyledProfileFieldsBox } from '@/constants/styles';
 import useFormInput from '@/hooks/useFormInput';
 
 const ProfileTimezone = ({ caption = '', selectCaption = '', options = [] }) => {
@@ -10,7 +12,6 @@ const ProfileTimezone = ({ caption = '', selectCaption = '', options = [] }) => 
     const getAllTimeZones = async () => {
       await fetch('http://worldtimeapi.org/api/timezone').then((res) => {
         const data = res;
-        console.log(data);
       });
     };
     getAllTimeZones();
@@ -44,8 +45,8 @@ const ProfileTimezone = ({ caption = '', selectCaption = '', options = [] }) => 
             onChange={selectedOption.onChange}
             sx={{ padding: '6px', '& .MuiSelect-select': { padding: 0 } }}
           >
-            {options.map((option, index) => (
-              <MenuItem key={index} value={option.value}>
+            {options.map((option) => (
+              <MenuItem key={v4()} value={option.value}>
                 {option.label}
               </MenuItem>
             ))}
