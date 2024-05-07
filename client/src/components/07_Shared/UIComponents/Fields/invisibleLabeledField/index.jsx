@@ -10,11 +10,13 @@ const InvisibleLabeledField = ({
   min,
   step,
   defaultValue,
+  disabled,
 }) => {
   return (
     <LabeledFieldWrapper>
       <StyledLabelTypography>{label}</StyledLabelTypography>
       <StyledInput
+        disabled={disabled}
         id={type}
         fullWidth
         placeholder={placeholder}

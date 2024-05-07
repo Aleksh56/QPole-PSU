@@ -3,7 +3,7 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 import { DragWrapper } from './styled';
 
-const DraggableList = ({ renderItem, items, onDragEnd, pollType }) => {
+const DraggableList = ({ renderItem, items, onDragEnd, pollType, disabled = false }) => {
   console.log(items);
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -16,7 +16,7 @@ const DraggableList = ({ renderItem, items, onDragEnd, pollType }) => {
                   key={item.id}
                   draggableId={item.id.toString()}
                   index={index}
-                  isDragDisabled={item.is_free_response}
+                  isDragDisabled={item.is_free_response || disabled}
                 >
                   {(provided) => (
                     <DragWrapper

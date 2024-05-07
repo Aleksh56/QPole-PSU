@@ -7,9 +7,11 @@ import {
   getInfoAboutPole,
 } from '@/components/03_Pages/App/pages/Pole/PoleMainSettings/api/apiRequests';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
+import usePollData from '@/hooks/usePollData';
 
 const PollDesignSettingsTab = () => {
   const { id } = useParams();
+  const { pollStatus } = usePollData(id);
   const { showAlert } = useAlert();
   const [poleData, setPoleData] = useState();
   const [pendingChanges, setPendingChanges] = useState({});
@@ -55,6 +57,7 @@ const PollDesignSettingsTab = () => {
 
   return (
     <InvisibleLabeledField
+      disabled={pollStatus}
       label="Время прохождения опроса"
       type="time"
       min="00:00:00"

@@ -1,4 +1,3 @@
-import React from 'react';
 import { IOSSwitch } from './styled';
 
 const CustomSwitch = ({
@@ -6,9 +5,11 @@ const CustomSwitch = ({
   onChange = () => {},
   checked = false,
   name = '',
+  disabled,
 }) => {
   return (
     <IOSSwitch
+      disabled={disabled}
       focusVisibleClassName={focusVisibleClassName}
       disableRipple
       onChange={onChange}

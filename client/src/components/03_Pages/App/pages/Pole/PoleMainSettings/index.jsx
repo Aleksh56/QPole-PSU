@@ -11,15 +11,18 @@ import { useAlert } from '@/app/context/AlertProvider';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import PollMainSettingsTabs from '@/components/06_Entities/PollMainSettingsTabs';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
+import usePollData from '@/hooks/usePollData';
 import useTabs from '@/hooks/useTabs';
 
 const PoleMainSettingsPage = () => {
   const { id } = useParams();
   const { showAlert } = useAlert();
+  const { pollStatus } = usePollData(id);
   const [tabValue, handleTabChange] = useTabs();
   const [poleData, setPoleData] = useState();
   const [pendingChanges, setPendingChanges] = useState({});
   const [timeoutHandlers, setTimeoutHandlers] = useState({});
+  const [currentDate, setCurrentDate] = useState('');
 
   const location = useLocation();
   const isNewPole = location.state?.isNewPole;
@@ -33,6 +36,8 @@ const PoleMainSettingsPage = () => {
     if (!isNewPole) {
       fetchPoleData();
     }
+    const currentISODate = new Date().toISOString().slice(0, 16);
+    setCurrentDate(currentISODate);
   }, [isNewPole]);
 
   const handleFieldChange = (fieldName, value) => {
@@ -58,7 +63,6 @@ const PoleMainSettingsPage = () => {
   };
 
   const handleImageDelete = () => deleteImageFx({ id });
-
   return (
     <Box sx={{ display: 'flex', backgroundColor: '#f9fafb' }}>
       <MainSettingsContentWrapper>
@@ -67,6 +71,7 @@ const PoleMainSettingsPage = () => {
             image={poleData?.image}
             onFileSelect={(e) => handleFieldChange('image', e)}
             handleDelete={handleImageDelete}
+            disabled={pollStatus}
           />
           <InvisibleLabeledField
             label="Название теста"
@@ -75,6 +80,7 @@ const PoleMainSettingsPage = () => {
               pendingChanges['name'] !== undefined ? pendingChanges['name'] : poleData?.name || ''
             }
             handleChange={(e) => handleFieldChange('name', e)}
+            disabled={pollStatus}
           />
           <InvisibleLabeledField
             label="Описание"
@@ -85,26 +91,27 @@ const PoleMainSettingsPage = () => {
                 : poleData?.description || ''
             }
             handleChange={(e) => handleFieldChange('description', e)}
+            disabled={pollStatus}
           />
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px' }}>
             <InvisibleLabeledField
               label="Время начала"
               placeholder="Введите время начала опроса"
               type="datetime-local"
-              min="0001-01-01T00:00"
-              max="9999-12-01T00:00"
+              min={currentDate}
               value={
                 pendingChanges['start_time'] !== undefined
                   ? pendingChanges['start_time']
                   : poleData?.poll_setts.start_time || ''
               }
               handleChange={(e) => handleFieldChange('start_time', e)}
+              disabled={pollStatus}
             />
             <InvisibleLabeledField
               label="Время конца"
               placeholder="Введите время конца опроса"
               type="datetime-local"
-              min="2024-01-01T00:00"
+              min={currentDate}
               max="9999-12-01T00:00"
               value={
                 pendingChanges['end_time'] !== undefined
@@ -112,6 +119,7 @@ const PoleMainSettingsPage = () => {
                   : poleData?.poll_setts.end_time || ''
               }
               handleChange={(e) => handleFieldChange('end_time', e)}
+              disabled={pollStatus}
             />
           </Box>
         </PoleInfoContainer>

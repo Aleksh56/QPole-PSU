@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import React from 'react';
+
 import {
   DescriptionTagsWrapper,
   DescriptionWrapper,
@@ -9,6 +9,7 @@ import {
   StyledImage,
   StyledTitle,
 } from './styled';
+
 import config from '@/config';
 
 const ConductionHeader = ({ data }) => {

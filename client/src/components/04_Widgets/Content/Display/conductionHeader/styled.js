@@ -1,6 +1,7 @@
-import { Rem } from '@/utils/convertToRem';
 import styled from '@emotion/styled';
 import { Box, Typography } from '@mui/material';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const HeaderWrapper = styled(Box)(() => ({
   width: '100%',
@@ -53,4 +54,10 @@ export const StyledDescText = styled(Typography)(() => ({
   width: '100%',
   marginTop: Rem(10),
   fontSize: Rem(14),
+  wordBreak: 'break-word',
+  overflowWrap: 'break-word',
+  whiteSpace: 'normal',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  maxWidth: '100%',
 }));

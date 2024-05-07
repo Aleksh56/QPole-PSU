@@ -1,7 +1,8 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import PollSettingsMenuNavigation from '@/components/05_Features/PollSettingsMenuNavigation';
+import { Route, Routes } from 'react-router-dom';
+
 import { poleNavigationButtonsData } from './data/PoleNavigationButtonsData';
+
+import PollSettingsMenuNavigation from '@/components/05_Features/PollSettingsMenuNavigation';
 
 const PolePage = () => {
   return (

@@ -16,6 +16,8 @@ import {
   StyledQueCount,
 } from './styled';
 
+import usePollData from '@/hooks/usePollData';
+
 const PollQuestionsList = ({
   questions,
   onSelectQuestion,
@@ -25,10 +27,12 @@ const PollQuestionsList = ({
   setSelected,
 }) => {
   const { id } = useParams();
+  const { pollStatus } = usePollData(id);
 
   const handleCopyQuestion = useCallback(
     async (e, q_id) => {
       e.stopPropagation();
+      if (pollStatus) return;
       const newQue = await copyQuestionFx({ id, q_id });
       setQuestions((prev) => [...prev, newQue]);
     },
@@ -37,6 +41,7 @@ const PollQuestionsList = ({
 
   const handleDeleteQuestion = async (e, q_id) => {
     e.stopPropagation();
+    if (pollStatus) return;
     await deleteQuestionRequest(id, q_id).then(() => {
       if (q_id === selectedQuestion?.id) {
         setSelected({});
@@ -48,7 +53,7 @@ const PollQuestionsList = ({
 
   return (
     <ListWrapper>
-      <StyledAddButton onClick={onAddQuestion} variant="outlined">
+      <StyledAddButton onClick={onAddQuestion} variant="outlined" disabled={pollStatus}>
         Добавить вопрос
       </StyledAddButton>
       <StyledQueCount>Количество вопросов - {questions.length}</StyledQueCount>

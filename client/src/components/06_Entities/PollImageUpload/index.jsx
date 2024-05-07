@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { InvisibleInput, StyledImageButton } from './styled';
-import { Box, IconButton } from '@mui/material';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import { Box, IconButton } from '@mui/material';
+import { useEffect, useState } from 'react';
+
+import { InvisibleInput, StyledImageButton } from './styled';
+
 import config from '@/config';
 
-const PollImageUpload = ({ image = '', onFileSelect, handleDelete }) => {
+const PollImageUpload = ({ image = '', onFileSelect, handleDelete, disabled }) => {
   const [preview, setPreview] = useState('');
 
   useEffect(() => {
@@ -47,7 +49,7 @@ const PollImageUpload = ({ image = '', onFileSelect, handleDelete }) => {
           </IconButton>
         </>
       ) : (
-        <StyledImageButton sx={{ width: '100%' }} component="label">
+        <StyledImageButton sx={{ width: '100%' }} component="label" disabled={disabled}>
           <PhotoCamera />
           Выбор изображения
           <InvisibleInput accept="image/*" type="file" hidden onChange={handleFileChange} />

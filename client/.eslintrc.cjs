@@ -37,7 +37,7 @@ module.exports = {
       },
     },
   },
-  plugins: ['react', 'react-refresh', 'import'],
+  plugins: ['react', 'react-refresh', 'import', 'sonarjs'],
   rules: {
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     'no-unused-vars': ['warn'],
@@ -45,6 +45,8 @@ module.exports = {
     'react/display-name': 'off',
     'react/no-children-prop': 'off',
     'react-hooks/exhaustive-deps': 'off',
+    'sonarjs/no-duplicate-string': 'warn',
+    'sonarjs/no-identical-functions': 'warn',
     'import/order': [
       'error',
       {

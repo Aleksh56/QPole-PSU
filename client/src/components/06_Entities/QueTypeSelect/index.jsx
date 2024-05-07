@@ -1,12 +1,16 @@
-import React, { useEffect } from 'react';
-import { MenuItem, ListItemIcon, ListItemText } from '@mui/material';
-import { TypeSelect } from './styled';
+import { CheckBox, RadioButtonChecked, ShortText } from '@mui/icons-material';
+import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+
 import { changePollTypeFx } from './models/change-poll-type';
-import { RadioButtonChecked, CheckBox, ShortText } from '@mui/icons-material';
+import { TypeSelect } from './styled';
+
+import usePollData from '@/hooks/usePollData';
 
 const QueTypeSelect = ({ question, questionType, setQuestionType, setQuestion }) => {
   const { id } = useParams();
+  const { pollStatus } = usePollData(id);
 
   const queTypes = [
     {
@@ -55,13 +59,13 @@ const QueTypeSelect = ({ question, questionType, setQuestionType, setQuestion })
     if (selectedTypeObject) {
       console.log(selectedTypeObject.type);
       await changePollTypeFx(id, question.id, selectedTypeObject.type).then((res) =>
-        setQuestion(res.data)
+        setQuestion(res.data),
       );
     }
   };
 
   return (
-    <TypeSelect value={questionType} onChange={(e) => handleTypeChange(e)}>
+    <TypeSelect value={questionType} onChange={(e) => handleTypeChange(e)} disabled={pollStatus}>
       {queTypes.map((item) => (
         <MenuItem key={item.name} value={item.caption}>
           <ListItemIcon>{item.icon}</ListItemIcon>

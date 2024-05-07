@@ -1,6 +1,6 @@
-import React from 'react';
-import { LoaderWrapper } from './styled';
 import { CircularProgress } from '@mui/material';
+
+import { LoaderWrapper } from './styled';
 
 const CLoader = () => {
   return (

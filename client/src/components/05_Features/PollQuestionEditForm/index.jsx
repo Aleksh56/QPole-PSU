@@ -38,7 +38,8 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
   const [questionType, setQuestionType] = useState('Один ответ');
   const [isFreeResponse, setIsFreeResponse] = useState(false);
   const [isRequired, setIsRequired] = useState(false);
-  const { pollType } = usePollData(id);
+  const [fieldChangeTimeout, setFieldChangeTimeout] = useState(null);
+  const { pollType, pollStatus } = usePollData(id);
 
   useEffect(() => {
     const correctOptions = question.answer_options.filter((option) => option.is_correct);
@@ -92,13 +93,30 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
   }, [id, question]);
 
   const handleFieldChange = async (fieldName, value, q_id) => {
+    if (fieldChangeTimeout) {
+      clearTimeout(fieldChangeTimeout);
+    }
+    // const updatedQuestion = { ...editedQuestion, [fieldName]: value };
+    // setEditedQuestion(updatedQuestion);
+    // await handleChangeQuestionInfoRequest(fieldName, value, id, q_id);
     const updatedQuestion = { ...editedQuestion, [fieldName]: value };
     setEditedQuestion(updatedQuestion);
-    await handleChangeQuestionInfoRequest(fieldName, value, id, q_id);
+    const newTimeout = setTimeout(async () => {
+      await handleChangeQuestionInfoRequest(fieldName, value, id, q_id);
+      if (onQuestionUpdate) onQuestionUpdate(q_id, fieldName, value);
+    }, 1000);
+
+    setFieldChangeTimeout(newTimeout);
   };
 
   const handleOptionChange = async (fieldName, value, opt_id, q_id) => {
-    await changeOptionRequest(id, q_id, opt_id, fieldName, value);
+    if (fieldChangeTimeout) {
+      clearTimeout(fieldChangeTimeout);
+    }
+    const newTimeout = setTimeout(async () => {
+      await changeOptionRequest(id, q_id, opt_id, fieldName, value);
+    }, 1000);
+    setFieldChangeTimeout(newTimeout);
     setOptions((prevOptions) =>
       prevOptions.map((option) =>
         option.id === opt_id ? { ...option, [fieldName]: value } : option,
@@ -108,6 +126,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
   };
 
   const handleDeleteOption = async (opt_id, q_id) => {
+    if (pollStatus) return;
     await deleteOptionRequest(id, q_id, opt_id);
     fetchOptions();
   };
@@ -148,6 +167,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
         image={question?.image}
         onFileSelect={(e) => handleFieldChange('image', e, question.id)}
         handleDelete={() => handleImageDelete(question.id)}
+        disabled={pollStatus}
       />
       <QueSettingsWrapper>
         <InvisibleLabeledField
@@ -157,6 +177,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
             handleFieldChange('name', e, question.id);
             if (onQuestionUpdate) onQuestionUpdate(question.id, 'name', e);
           }}
+          disabled={pollStatus}
         />
         <QueTypeSelect
           question={editedQuestion}
@@ -167,6 +188,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
       </QueSettingsWrapper>
       <Divider style={{ margin: '30px 0' }} />
       <DraggableList
+        disabled={pollStatus}
         items={options}
         onDragEnd={onDragEnd}
         pollType={pollType}
@@ -174,7 +196,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
           <>
             <DragIndicator
               sx={{
-                cursor: item.is_free_response ? 'default' : 'grab',
+                cursor: item.is_free_response || pollStatus ? 'default' : 'grab',
                 opacity: item.is_free_response ? 0 : 1,
               }}
             />
@@ -189,6 +211,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
                         onChange={(e) => handleOptionSelect(e, question.id)}
                         value={item.id}
                         sx={{ width: '24px', height: '24px' }}
+                        disabled={pollStatus}
                       />
                     }
                   />
@@ -202,6 +225,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
                   <FormControlLabel
                     control={<Radio sx={{ width: '24px', height: '24px' }} />}
                     value={item.id.toString()}
+                    disabled={pollStatus}
                   />
                 </RadioGroup>
               ))}
@@ -214,6 +238,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
                   placeholder="Введите правильный ответ"
                   value={item.name || ''}
                   handleChange={(e) => handleOptionChange('name', e, item.id, question.id)}
+                  disabled={pollStatus}
                 />
               )
             ) : (
@@ -221,6 +246,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
                 placeholder="Начните вводить"
                 value={item.name || ''}
                 handleChange={(e) => handleOptionChange('name', e, item.id, question.id)}
+                disabled={pollStatus}
               />
             )}
             <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '5px' }}>
@@ -239,13 +265,21 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
           )}
           {!question.is_free && (
             <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '10px' }}>
-              <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption()}>
+              <button
+                style={{ maxWidth: '100%' }}
+                onClick={() => handleAddOption()}
+                disabled={pollStatus}
+              >
                 Добавить ответ
               </button>
               {!isFreeResponse && (
                 <>
                   <span>или</span>
-                  <button style={{ maxWidth: '100%' }} onClick={() => handleAddOption('is_free')}>
+                  <button
+                    style={{ maxWidth: '100%' }}
+                    onClick={() => handleAddOption('is_free')}
+                    disabled={pollStatus}
+                  >
                     Добавить "Другое"
                   </button>
                 </>
@@ -258,6 +292,7 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
             label="Обязательный вопрос"
             control={
               <CustomSwitch
+                disabled={pollStatus}
                 onChange={() => {
                   setIsRequired((prev) => !prev);
                   handleFieldChange('is_required', !isRequired, question.id);

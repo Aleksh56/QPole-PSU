@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
 
 import usePollSettings from './hooks/usePollSettings';
@@ -6,8 +7,11 @@ import usePollSettings from './hooks/usePollSettings';
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import { StyledFormControlLabel } from '@/constants/styles';
 import { pollTuningSettings } from '@/data/fields';
+import usePollData from '@/hooks/usePollData';
 
 const PollTuningTab = ({ pollData }) => {
+  const { id } = useParams();
+  const { pollStatus } = usePollData(id);
   const [localSettings, handleSwitchChange] = usePollSettings(pollData);
 
   return (
@@ -23,6 +27,7 @@ const PollTuningTab = ({ pollData }) => {
               key={v4()}
               control={
                 <CustomSwitch
+                  disabled={pollStatus}
                   focusVisibleClassName={item.label}
                   onChange={handleSwitchChange(item.id)}
                   checked={localSettings ? localSettings[item.id] ?? false : false}

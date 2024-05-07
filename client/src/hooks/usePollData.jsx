@@ -10,6 +10,7 @@ const usePollData = (pollId) => {
   useEffect(() => {
     const fetchPollType = async () => {
       const data = await handleRequest('get', `/api/my_poll/?poll_id=${pollId}&detailed=0`);
+      console.log(data);
       setPollStatus(data.data.is_in_production);
       setPollType(data.data.poll_type.name);
       setIsMultiple(data.data.has_multiple_choices);
