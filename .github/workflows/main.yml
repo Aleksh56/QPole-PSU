@@ -8,20 +8,15 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
       - uses: actions/checkout@v4
-
-      # - name: Cd client directory
-      #   run: cd client
-
-      # - name: List files in the repository
-      #   run: ls -la
-
-      # - name: Run tests before deploy
-      #   run: npm install && npm test
-      #   working-directory: ./client
-
       - name: Check test status
         id: check_test_status
         run: |
