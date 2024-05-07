@@ -6,10 +6,10 @@ from django.db.models import Q
 from django.db import transaction
 
 
-from api.exсeptions import *
-from api.serializers import PollSerializer, SupportRequestSerializer
-from api.models import *
-from api.utils import *
+from api.exсeptions import ObjectNotFoundException, APIException, ObjectAlreadyExistsException
+from api.serializers import PollSerializer, SupportRequestSerializer, StudyGroupSerializer
+from api.models import Poll, UserRole, StudyGroup
+from api.utils import get_data_or_400, get_parameter_or_400, get_paginated_response
 
 from .serializers import *
 from .models import *
@@ -84,9 +84,7 @@ def users(request):
                 raise ObjectNotFoundException(model='Profile')
             
             if request_type == 'change_role':
-                role_name = data.get('role_name', None)
-                if not role_name:
-                    raise MissingFieldException(field_name='role_name')
+                role_name = get_data_or_400(data, 'role_name')
                 
                 role = UserRole.objects.filter(role=role_name).first()
                 if not role:
@@ -244,10 +242,8 @@ def support_request(request):
         elif request.method == 'PATCH':
             data = request.data
 
-            ticket_id = request.GET.get('ticket_id', None)
-            if not ticket_id:
-                raise MissingParameterException(field_name='ticket_id')
-            
+            ticket_id = get_parameter_or_400(request.GET, 'ticket_id')
+
             ticket = SupportRequest.objects.filter(id=ticket_id).first()
             if not ticket:
                 raise ObjectNotFoundException(model='SupportRequest')
@@ -314,10 +310,7 @@ def project_settings(request):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
 
-    
-    except PollValidationException as exception:
-        return Response(exception.detail, exception.status_code)
-    
+   
     except APIException as api_exception:
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     
@@ -325,3 +318,79 @@ def project_settings(request):
         return Response({'message':f"Внутренняя ошибка сервера в admin project_settings: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@permission_classes([IsAdminUser])
+@transaction.atomic
+def study_group(request):
+    try:
+        if request.method == 'GET':
+            study_group_name = request.GET.get('study_group_name', None)
+
+            if study_group_name:
+                study_group = StudyGroup.objects.filter(name=study_group_name).first()
+                if not study_group:
+                    raise ObjectNotFoundException('StudyGroup')
+                serializer = StudyGroupSerializer(study_group)
+            else:
+                study_groups = StudyGroup.objects.all().order_by('-id')
+                study_groups = get_paginated_response(request, study_groups, StudyGroupSerializer)
+
+                return Response(study_groups)
+    
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        elif request.method == 'PATCH':
+            data = request.data
+            study_group_name = get_parameter_or_400(request.GET, 'study_group_name')
+
+            study_group = StudyGroup.objects.filter(name=study_group_name).first()
+            if not study_group:
+                raise ObjectNotFoundException('StudyGroup')
+            
+            new_study_group_name = data.get('name', None)
+            if new_study_group_name:
+                if not new_study_group_name == study_group_name:
+                    study_group = StudyGroup.objects.filter(name=study_group_name).exists()
+                    if study_group:
+                        raise ObjectAlreadyExistsException(detail='Группа с таким названием уже есть.')
+
+
+            serializer = StudyGroupSerializer(study_group, data=data, partial=True)
+    
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'PUT':   
+            data = request.data
+            study_group_name = get_parameter_or_400(request.GET, 'study_group_name')
+                
+            study_group = StudyGroup.objects.filter(name=study_group_name).first()
+            if not study_group:
+                raise ObjectNotFoundException(model='StudyGroup')
+
+            else:
+                return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            study_group_name = get_parameter_or_400(request.GET, 'study_group_name')
+
+            study_group = StudyGroup.objects.filter(name=study_group_name).first()
+            if not study_group:
+                raise ObjectNotFoundException('StudyGroup')
+            
+            study_group_data = study_group
+            study_group.delete()
+            return Response(f"{study_group_data} успешно удалена.", status=status.HTTP_204_NO_CONTENT)
+      
+
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    
+    except Exception as ex:
+        return Response(f"Внутренняя ошибка сервера в admin study_group: {ex}",
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 

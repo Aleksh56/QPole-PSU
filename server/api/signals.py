@@ -13,6 +13,10 @@ def poll_delete_handler(sender, instance, **kwargs):
         file_path = str(instance.image.path)
         if os.path.exists(file_path):
             os.remove(file_path)
+    if instance.qrcode:
+        file_path = str(instance.qrcode.path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
 
 @receiver(post_delete, sender=PollQuestion)

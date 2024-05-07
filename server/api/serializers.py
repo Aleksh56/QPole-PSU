@@ -43,6 +43,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class StudyGroupSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(validators=[BaseValidator.name], required=False)
 
     class Meta:
         model = StudyGroup

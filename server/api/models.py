@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from datetime import timedelta
-
 from .exсeptions import *
 
 class Profile(models.Model):
@@ -278,7 +276,9 @@ class Poll(models.Model):
             
             if start_time:
                 time_left = max((self.poll_setts.start_time - timezone.now()).total_seconds(), 0)
-                return time_left
+                return format_time(time_left)
+
+        return None
 
     @property
     def end_time_left(self):
@@ -289,11 +289,11 @@ class Poll(models.Model):
 
             if end_time:
                 time_left = max((end_time - timezone.now()).total_seconds(), 0)
-                return time_left
+                return format_time(time_left)
             
             elif start_time and duration:
                 time_left = max((start_time + duration - timezone.now()).total_seconds(), 0)
-                return time_left
+                return format_time(time_left)
             
             else: return None    
         else: return None
@@ -349,3 +349,12 @@ class SupportRequest(models.Model):
     def __str__(self):
         return f"Обращение типа {self.type.type} от {self.author} от {self.created_date}"
 
+
+def format_time(seconds):
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    # Форматируем строку
+    time_string = f"{int(days)} {int(hours)}:{int(minutes):02}:{int(seconds):02}"
+    return time_string
