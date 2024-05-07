@@ -18,9 +18,6 @@ jobs:
         run: pwd
       - name: List all files in the directory
         run: ls -la
-
-      - name: Set permissions for all files
-        run: sudo chmod -R 777 client/.scannerwork
         
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
