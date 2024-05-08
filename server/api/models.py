@@ -214,7 +214,10 @@ class Poll(models.Model):
         if not self.poll_setts:
             self.poll_setts = PollSettings.objects.create()
             
-    # Проверка наличия участия пользователя в опросе
+
+    def is_user_authenticated(self, user_profile):
+        return user_profile is not None
+
     def has_user_participated_in(self, user_profile):
         if not user_profile:
             return None
@@ -223,7 +226,6 @@ class Poll(models.Model):
             profile=user_profile
         ).exists()
     
-
     def is_user_in_allowed_groups(self, user_profile):
         allowed_groups = self.allowed_groups.all()
         if allowed_groups:

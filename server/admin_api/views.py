@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import generics
 from django.db.models import Q
 from django.db import transaction
 
@@ -9,6 +10,7 @@ from django.db import transaction
 from api.exсeptions import ObjectNotFoundException, APIException, ObjectAlreadyExistsException
 from api.serializers import PollSerializer, SupportRequestSerializer, StudyGroupSerializer
 from api.models import Poll, UserRole, StudyGroup
+from api.permissions import IsOwnerOrReadOnly
 from api.utils import get_data_or_400, get_parameter_or_400, get_paginated_response
 
 from .serializers import *

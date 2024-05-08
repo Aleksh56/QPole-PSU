@@ -304,6 +304,7 @@ class BasePollSerializer(serializers.ModelSerializer):
     questions_quantity = serializers.SerializerMethodField()
     opened_for_voting = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
+    is_user_authenticated = serializers.SerializerMethodField()
 
     start_time_left = serializers.SerializerMethodField()
     end_time_left = serializers.SerializerMethodField()
@@ -318,19 +319,19 @@ class BasePollSerializer(serializers.ModelSerializer):
     def get_participants_quantity(self, instance):
         return instance.participants_quantity
 
-
     def get_questions_quantity(self, instance):
         return instance.questions_quantity
 
-    
     def get_opened_for_voting(self, instance):   
         return instance.opened_for_voting
-
 
     def get_has_user_participated_in(self, instance):
         profile = self.context.get('profile')
         return instance.has_user_participated_in(user_profile=profile)
 
+    def get_is_user_authenticated(self, instance):
+        profile = self.context.get('profile')
+        return instance.is_user_authenticated(user_profile=profile)
 
     class Meta:
         model = Poll

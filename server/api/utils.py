@@ -327,6 +327,12 @@ def get_object_or_404(model, **kwargs):
     return object
     
 
+def get_object_from_object_or_404(main_object, **kwargs):
+    object = main_object.filter(**kwargs).first()
+    if not object:
+        raise ObjectNotFoundException(detail=f"Связанный объект из объекта '{main_object}' не найден.")
+    
+    return object
 
 # def save_validated_object(serializer):
 #     if serializer.is_valid():

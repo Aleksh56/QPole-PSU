@@ -436,3 +436,42 @@ def poll_answer_group_test(request):
                                                                             status=status.HTTP_201_CREATED)
     else:
         return Response(poll_answer_group.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# from abc import ABC, abstractmethod
+# from rest_framework import generics
+
+# class MyCustomApiView(generics.ListCreateAPIView, ABC):
+#     @property
+#     @abstractmethod
+#     def basic_model(self):
+#         pass
+
+#     def get_basic_model(self):
+#         return self.basic_model
+
+#     @classmethod
+#     def __get_base_queryset(cls, Model, **kwargs):
+#         return Model.objects.filter(**kwargs)
+
+#     def queryset(self, **kwargs):
+#         model = self.get_basic_model()
+#         return self.__get_base_queryset(model, **kwargs)
+    
+#     def get(self, request, *args, **kwargs):
+#         return super().get(request, *args, **kwargs)
+
+# class MyCustomApi(MyCustomApiView):
+#     basic_model = Poll
+#     serializer_class = PollSerializer
+#     request = request
+
+
+# @api_view(['GET'])
+# @transaction.atomic
+# def test(request):
+#     test = MyCustomApi()
+#     print(test.queryset(poll_type__name='Опрос'))
+#     print(test.get(request, poll_type__name='Опрос'))
+
+#     return Response('ok')

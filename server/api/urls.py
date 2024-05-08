@@ -24,5 +24,6 @@ urlpatterns = [
     path('poll_voting_test/', poll_voting_test, name='poll_voting_test'),
     path('my_poll_stats_test/', my_poll_stats_test, name='my_poll_stats_test'),
     path('poll_answer_group_test/', poll_answer_group_test, name='poll_answer_group_test'),
+    # path('test/', test, name='test'),
 
 ]

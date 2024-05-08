@@ -95,8 +95,7 @@ def my_profile(request):
 def my_poll(request):
     try:
         current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
-        # my_profile = Profile.objects.filter(user__id=1).first()
+        my_profile = get_object_or_404(Profile, user=current_user)
         
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
@@ -182,9 +181,7 @@ def my_poll(request):
             data['poll_id'] = poll_id 
             
             poll_type = get_data_or_400(data, 'poll_type')
-            poll_type = PollType.objects.filter(name=poll_type).first()
-            if not poll_type:
-                raise ObjectNotFoundException(model='PollType')
+            poll_type = get_object_or_404(PollType, name=poll_type)
                        
             data['poll_type'] = poll_type.id
             data['author'] = my_profile
@@ -315,9 +312,7 @@ def my_poll(request):
 
             elif request_type == 'delete_image':
                 image_path = None
-                poll = Poll.objects.filter(poll_id=poll_id).first()
-                if not poll:
-                    raise ObjectNotFoundException(model='Poll')
+                poll = get_object_or_404(Poll, poll_id=poll_id)
                 
                 if poll.image:
                     image_path = poll.image.path
@@ -390,7 +385,7 @@ def my_poll(request):
 def my_poll_settings(request):
     try:
         current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
+        my_profile = get_object_or_404(Profile, user=current_user)
 
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
@@ -445,8 +440,7 @@ def my_poll_settings(request):
 def my_poll_stats(request):
     try:
         current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
-        # my_profile = Profile.objects.filter(user__id=1).first()
+        my_profile = get_object_or_404(Profile, user=current_user)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -598,7 +592,7 @@ def my_poll_stats(request):
 def my_poll_user_answers(request):
     try:
         current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
+        my_profile = get_object_or_404(Profile, user=current_user)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -727,12 +721,8 @@ def my_poll_question(request):
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
             poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
 
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='PollQuestion')
+            poll = get_object_or_404(Poll, poll_id=poll_id)
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)
             
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
@@ -751,12 +741,8 @@ def my_poll_question(request):
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
             poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='PollQuestion')
+            poll = get_object_or_404(Poll, poll_id=poll_id)
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)
 
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
@@ -768,27 +754,18 @@ def my_poll_question(request):
         elif request.method == 'PUT':
             data = request.data
 
-            poll_id = get_data_or_400(data, 'poll_id')
-            
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
-            
-            poll_question_id = get_data_or_400(data, 'poll_question_id')
-
-            
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='Question')
-            
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
+            poll = get_object_or_404(Poll, poll_id=poll_id)
+        
+            poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)           
             request_type = get_parameter_or_400(request.GET, 'request_type')
 
-            if poll.is_in_production:
-                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
             
             if request_type == 'change_options_order':
                 new_options = []
-                options_data = data['options_data']
+
+                options_data = get_data_or_400(data, 'options_data')
                 options_ids = list(options_data.keys())
                 options = AnswerOption.objects.filter(id__in=map(int, options_ids))
                 for option_number, option in enumerate(options.all(), start=1):
@@ -861,9 +838,7 @@ def my_poll_question_option(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='PollQuestion')
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)
             
 
             question_option_id = request.GET.get('question_option_id', None)
@@ -894,9 +869,7 @@ def my_poll_question_option(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
             
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='PollQuestion')
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)
 
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
@@ -943,17 +916,9 @@ def my_poll_question_option(request):
             poll_question_id = get_data_or_400(data, 'poll_question_id')
             question_option_id = get_data_or_400(data, 'question_option_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
-            
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='PollQuestion')
-            
-            question_option = poll_question.answer_options.filter(id=question_option_id).first()
-            if not question_option:
-                raise ObjectNotFoundException(model='AnswerOption')
+            poll = get_object_or_404(Poll, poll_id=poll_id)
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)
+            question_option = get_object_from_object_or_404(poll_question.answer_options, id=question_option_id)
             
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
@@ -974,13 +939,9 @@ def my_poll_question_option(request):
             poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
             question_option_id = get_parameter_or_400(request.GET, 'question_option_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
+            poll = get_object_or_404(Poll, poll_id=poll_id)
             
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='PollQuestion')
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)
             
             question_option = poll_question.answer_options.filter(id=question_option_id).first()
             if not question_option:
@@ -999,13 +960,8 @@ def my_poll_question_option(request):
             poll_id = get_data_or_400(data, 'poll_id')
             poll_question_id = get_data_or_400(data, 'poll_question_id')
             
-            poll = Poll.objects.filter(poll_id=poll_id).first()
-            if not poll:
-                raise ObjectNotFoundException(model='Poll')
-            
-            poll_question = poll.questions.filter(id=poll_question_id).first()
-            if not poll_question:
-                raise ObjectNotFoundException(model='PollQuestion')
+            poll = get_object_or_404(Poll, poll_id=poll_id)
+            poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)
 
             if poll.is_in_production:
                 raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
@@ -1046,7 +1002,7 @@ def my_poll_question_option(request):
 def poll_answer_group(request):
     try:
         current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
+        my_profile = get_object_or_404(Profile, user=current_user)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -1181,7 +1137,7 @@ def poll_answer_group(request):
 def poll_voting(request):
     try:
         current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
+        my_profile = get_object_or_404(Profile, user=current_user)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -1390,7 +1346,7 @@ def poll(request):
     try:
         current_user = request.user
         if not isinstance(current_user, AnonymousUser):
-            my_profile = Profile.objects.filter(user=current_user).first()
+            my_profile = get_object_or_404(Profile, user=current_user)
         else:
             my_profile = None
 
@@ -1471,7 +1427,7 @@ def poll(request):
 def my_poll_users_votes(request):
     try:
         current_user = request.user
-        my_profile = Profile.objects.filter(user=current_user).first()
+        my_profile = get_object_or_404(Profile, user=current_user)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -1521,7 +1477,7 @@ def my_poll_users_votes(request):
 @transaction.atomic
 def my_support_requests(request):
     current_user = request.user
-    my_profile = Profile.objects.filter(user=current_user).first()
+    my_profile = get_object_or_404(Profile, user=current_user)
 
     if not my_profile:
         raise ObjectNotFoundException(model='Profile')
