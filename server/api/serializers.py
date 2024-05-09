@@ -59,7 +59,7 @@ class MiniProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ('name','surname', 'user')
+        fields = ('name','surname', 'user', 'group')
 
 
 class MiniPollAnswerSerializer(serializers.ModelSerializer):
@@ -343,11 +343,11 @@ class BasePollSerializer(serializers.ModelSerializer):
     
     def get_has_user_participated_in(self, instance):
         profile = self.context.get('profile')
-        return instance.has_user_participated_in(user_profile=profile)
+        return instance.has_user_participated_in(profile)
 
     def get_is_user_registrated(self, instance):
         profile = self.context.get('profile')
-        return instance.is_user_registrated(user_profile=profile)
+        return instance.is_user_registrated(profile)
 
     class Meta:
         model = Poll
@@ -355,7 +355,9 @@ class BasePollSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         poll = super().create(validated_data)
+        poll_setts = PollSettings.objects.create()
         poll = generate_poll_qr(poll)
+        poll.poll_setts = poll_setts
 
         return poll
 
@@ -388,7 +390,7 @@ class MiniPollSerializer(BasePollSerializer):
 
 
 class PollRegistrationSerializer(serializers.ModelSerializer):
-    poll = MiniPollSerializer()
+    # poll = MiniPollSerializer()
 
 
     class Meta:
@@ -401,7 +403,7 @@ class PollSerializer(BasePollSerializer):
     poll_setts = PollSettingsSerializer(required=False)
     questions = QuestionSerializer(many=True, required=False)
     allowed_groups = StudyGroupSerializer(many=True, required=False)
-    registrated_users = PollRegistrationSerializer(many=True, required=False)
+    registrated_users = MiniProfileSerializer(many=True, required=False)
    
 
     qrcode_img = serializers.SerializerMethodField()

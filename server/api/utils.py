@@ -334,6 +334,14 @@ def get_object_from_object_or_404(main_object, **kwargs):
     
     return object
 
+def get_profile_to_context(my_profile=None):
+    if my_profile:
+        context = {'profile': my_profile}
+    else:
+        context = None
+
+    return context
+
 # def save_validated_object(serializer):
 #     if serializer.is_valid():
 #         serializer.save()

@@ -127,6 +127,7 @@ def my_poll(request):
     try:
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
         
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
@@ -134,30 +135,15 @@ def my_poll(request):
             if poll_id:
                 detailed = int(request.GET.get('detailed', True))
                 if detailed:
-                    poll = (
-                        Poll.objects.filter(
-                            Q(author=my_profile) & Q(poll_id=poll_id))
-                            .select_related('author', 'author__user', 'poll_type', 'poll_setts')
-                            .prefetch_related(
-                                Prefetch('questions', queryset=PollQuestion.objects
-                                                                    .prefetch_related('answer_options').all())
-                            )
-                            .prefetch_related('allowed_groups')
-                            .prefetch_related('registrated_users')
-                            .first()
-                        )
+                    filters = Q(author=my_profile, poll_id=poll_id)
+                    poll = Poll.my_manager.get_one(filters)
                     if not poll:
                         raise ObjectNotFoundException(model='Poll')
                 
                     serializer = PollSerializer(poll, context={'profile': my_profile})
                 else:
-                    poll = (
-                        Poll.objects.filter(
-                            Q(author=my_profile) & Q(poll_id=poll_id))
-                            .select_related('author', 'author__user', 'poll_type', 'poll_setts')
-                            .prefetch_related('allowed_groups')
-                            .first()
-                        )
+                    filters = Q(author=my_profile, poll_id=poll_id)
+                    poll = Poll.my_manager.get_mini_by_poll_id(filters)
                     if not poll:
                         raise ObjectNotFoundException(model='Poll')
                 
@@ -186,17 +172,7 @@ def my_poll(request):
                 filters &= Q(is_paused=is_paused)
                 filters &= Q(is_closed=is_closed)
 
-                polls = (
-                    Poll.objects
-                        .select_related('author', 'poll_type', 'author__user', 'poll_setts')
-                        .prefetch_related('allowed_groups')
-                        .prefetch_related('questions')
-                        .prefetch_related('user_participations')
-                        .filter(filters)
-                        .order_by('-created_date')
-                )
-                
-                # print(polls.explain(analyze=True))
+                polls = Poll.my_manager.get_all(filters)
 
                 pagination_data = get_paginated_response(request, polls, MiniPollSerializer)
                 return Response(pagination_data)
@@ -480,18 +456,7 @@ def my_poll_stats(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = (
-                Poll.objects.filter(poll_id=poll_id)
-                    .prefetch_related(
-                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                        'answer_options'
-                    ).all()))
-                    .prefetch_related('all_answers')
-                    .prefetch_related('user_participations')
-                    .first()
-            )
-            # print(poll.explain(analyze=True))
-
+            poll = Poll.my_manager.get_one(Q(poll_id=poll_id))
             if not poll:
                 raise ObjectNotFoundException('Poll')
             poll_members_quantity = poll.user_participations.count()
@@ -1182,11 +1147,7 @@ def poll_voting(request):
                     Q(profile=my_profile) & Q(poll__poll_id=poll_id)
                 ).select_related('poll').prefetch_related('answers').first()
 
-                poll = Poll.objects.filter(
-                    Q(author__user=current_user) & Q(poll_id=poll_id)
-                ).select_related('author', 'poll_type').prefetch_related(
-                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related('answer_options').all())
-                ).first()
+                poll = Poll.my_manager.get_one(Q(author=my_profile) & Q(poll_id=poll_id))
 
                 if not my_answer:
                     raise ObjectNotFoundException(model='PollAnswerGroup')
@@ -1206,21 +1167,8 @@ def poll_voting(request):
 
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
            
-            poll = (
-                    Poll.objects.filter(poll_id=poll_id)
-                    .select_related('author', 'poll_type', 'author__user')
-                    .prefetch_related(
-                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                            'answer_options'
-                        ).all()))
-                    .prefetch_related(
-                        Prefetch('user_answers', queryset=PollAnswerGroup.objects.prefetch_related(
-                            'answers'
-                        ).all()))
-                    .prefetch_related('user_participations')
-                    .first()
-                )
-            
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id))
+
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
@@ -1327,20 +1275,8 @@ def quick_poll_voting(request):
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
         
-        poll = (
-                Poll.objects.filter(poll_id=poll_id, poll_type__name='Быстрый')
-                .select_related('author', 'poll_type', 'author__user')
-                .prefetch_related(
-                    Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                        'answer_options'
-                    ).all()))
-                .prefetch_related(
-                    Prefetch('user_answers', queryset=PollAnswerGroup.objects.prefetch_related(
-                        'answers'
-                    ).all()))
-                .prefetch_related('user_participations')
-                .first()
-            )
+        
+        poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id))
         
         if not poll:
             raise ObjectNotFoundException(model='Poll')
@@ -1392,17 +1328,8 @@ def poll(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = (
-                    Poll.objects
-                        .filter(Q(poll_id=poll_id) & Q(is_in_production=True))
-                        .select_related('author', 'author__user', 'poll_type', 'poll_setts')
-                        .prefetch_related('allowed_groups')
-                        .prefetch_related(
-                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                                'answer_options'
-                        ).all()))
-                        .first()
-                )
+                filters = Q(poll_id=poll_id) & Q(is_in_production=True)
+                poll = Poll.my_manager.get_one(filters)
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
@@ -1432,19 +1359,9 @@ def poll(request):
                     filters &= Q(is_closed=is_closed)
 
 
-                polls = (
-                    Poll.objects
-                    .select_related('author', 'poll_type', 'author__user', 'poll_setts')
-                    .prefetch_related('allowed_groups')
-                    .prefetch_related('questions')
-                    .prefetch_related('user_participations')
-                    .filter(filters)  
-                )
-
-                if my_profile:
-                    context = {'profile': my_profile}
-                else:
-                    context = None
+                polls = Poll.my_manager.get_all(filters)
+                   
+                context = get_profile_to_context(my_profile)
                 pagination_data = get_paginated_response(request, polls, MiniPollSerializer, context=context)
                 return Response(pagination_data)
 
@@ -1462,7 +1379,7 @@ def poll(request):
 @api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def poll_registration(request):
-    # try:
+    try:
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
         # my_profile = get_object_or_404(Profile, user__id=1)
@@ -1498,10 +1415,8 @@ def poll_registration(request):
                         .prefetch_related('poll__user_participations')
                         .order_by('-registration_time')
                 )
-                if my_profile:
-                    context = {'profile': my_profile}
-                else:
-                    context = None
+
+                context = get_profile_to_context(my_profile)
                 pagination_data = get_paginated_response(request, poll_registrations, PollRegistrationSerializer, context=context)
                 return Response(pagination_data)
 
@@ -1538,13 +1453,13 @@ def poll_registration(request):
         
             return Response('Регастрация на опрос успешно отменена.')
 
-    # except APIException as api_exception:
-    #     return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
         
-    # except Exception as ex:
-    #     logger.error(f"Внутренняя ошибка сервера в poll_registration: {ex}")
-    #     return Response({'message':f"Внутренняя ошибка сервера в poll_registration: {ex}"},
-    #                      status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_registration: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в poll_registration: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 
@@ -1562,18 +1477,7 @@ def my_poll_users_votes(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = (
-               Poll.objects.filter(poll_id=poll_id)
-                        .select_related('author', 'poll_type')
-                        .prefetch_related(
-                        Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                                'answer_options').all()))
-                        .prefetch_related(
-                            Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
-                                                            .select_related('profile', 'profile__user')
-                                                            .prefetch_related('answers')))
-                        .first()
-            )
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id))
             if not poll:
                 raise ObjectNotFoundException('Poll')
 

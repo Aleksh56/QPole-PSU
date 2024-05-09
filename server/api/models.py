@@ -169,6 +169,76 @@ class PollQuestion(models.Model):
             return f"Вопрос №{self.id}"
 
 
+class MyPollManager(models.Manager):
+    def get_all(self, filters):
+        """Получение всех опросов"""
+        objects = (
+            super().get_queryset()
+            .select_related('author', 'author__user', 'author__group')
+            .select_related('poll_type', 'poll_setts')
+            .prefetch_related('allowed_groups')
+            .prefetch_related('questions')
+            .prefetch_related('user_participations')
+            .filter(filters)
+            .order_by('-created_date')   
+        )
+        
+        return objects
+
+    def get_one(self, filters):
+        """Получение опроса по `filters`"""
+        object = (
+            super().get_queryset()
+            .select_related('author', 'author__user', 'author__group')
+            .select_related('poll_type', 'poll_setts')
+            .prefetch_related('allowed_groups')
+            .prefetch_related('registrated_users')
+            .prefetch_related(
+                models.Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                        'answer_options'
+                ).all()))
+            .filter(filters)    
+        ).first()
+        
+        return object
+
+    def get_one_with_answers(self, filters):
+        """Получение опроса по `filters` с ответами пользователей"""
+        object = (
+            super().get_queryset()
+            .select_related('author', 'author__user')
+            .select_related('poll_type', 'poll_setts')
+            .prefetch_related(
+                models.Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
+                    'answer_options'
+                ).all()))
+            .prefetch_related(
+                models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
+                                                .select_related('profile', 'profile__user')
+                                                .prefetch_related('answers')))
+            .prefetch_related('user_participations')
+            .prefetch_related('allowed_groups')
+            .prefetch_related('registrated_users')
+            .filter(filters)    
+        ).first()
+        
+        return object
+    
+    def get_mini_by_poll_id(self, filters):
+        """Получение опроса по `poll_id` без вопросов и вариантов ответа"""
+        objects = (
+            super().get_queryset()
+            .select_related('author', 'author__user', 'author__group')
+            .select_related('poll_type', 'poll_setts')
+            .prefetch_related('user_participations')
+            .prefetch_related('allowed_groups')
+            .prefetch_related('questions')
+            .filter(filters)    
+            ).first()
+        
+        return objects        
+
+
 class Poll(models.Model):
     poll_id = models.CharField(max_length=100, unique=True) # уникальный id
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='my_polls') # автор опроса
@@ -205,6 +275,9 @@ class Poll(models.Model):
     # qr код ссылки на опрос
     qrcode = models.ImageField(verbose_name='Qrcode опроса', upload_to=f'images/poll_qrcodes/', blank=True, null=True) 
 
+    objects = models.Manager()
+    my_manager = MyPollManager()
+
     def __str__(self):
         if self.name:
             return f"Опрос '{self.name}'"
@@ -213,8 +286,6 @@ class Poll(models.Model):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.poll_setts:
-            self.poll_setts = PollSettings.objects.create()
             
 
     def is_user_registrated(self, user_profile):
@@ -227,9 +298,7 @@ class Poll(models.Model):
         if not user_profile:
             return None
         
-        return self.user_participations.filter(
-            profile=user_profile
-        ).exists()
+        return user_profile in self.user_participations.all()
     
     def is_user_in_allowed_groups(self, user_profile):
         allowed_groups = self.allowed_groups.all()
@@ -241,16 +310,6 @@ class Poll(models.Model):
         
         return None
 
-    def can_user_vote(self, user_profile):
-        if not (self.is_closed or self.is_paused):
-            if self.user_answers.filter(
-                profile=user_profile
-            ).exists():
-                if self.is_revote_allowed:
-                    return True
-                return False
-            return True
-        return False
     
     @property
     def participants_quantity(self):   # число участников опроса
@@ -316,14 +375,17 @@ class Poll(models.Model):
             start_time = self.poll_setts.start_time
             end_time = self.poll_setts.end_time
 
-            if reg_start_time and reg_end_time:    
-                return reg_start_time < timezone.now() < reg_end_time
-            elif reg_start_time and not reg_end_time:
-                return reg_start_time < timezone.now() < start_time
-            elif reg_end_time and not reg_start_time:
-                return timezone.now() < reg_end_time
+            if start_time or end_time:
+                if reg_start_time and reg_end_time:    
+                    return reg_start_time < timezone.now() < reg_end_time
+                elif reg_start_time and not reg_end_time:
+                    return reg_start_time < timezone.now() < start_time
+                elif reg_end_time and not reg_start_time:
+                    return timezone.now() < reg_end_time
+                else:
+                    return timezone.now() < start_time
             else:
-                return timezone.now() < start_time
+                return None
         else:
             return None
 
