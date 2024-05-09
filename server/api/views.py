@@ -89,6 +89,37 @@ def my_profile(request):
         
 
 
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def study_group(request):
+    try:
+        if request.method == 'GET':
+            study_group_name = request.GET.get('study_group_name', None)
+
+            if study_group_name:
+                study_group = StudyGroup.objects.filter(name=study_group_name).first()
+                if not study_group:
+                    raise ObjectNotFoundException('StudyGroup')
+                serializer = StudyGroupSerializer(study_group)
+            else:
+                study_groups = StudyGroup.objects.all().order_by('-id')
+                study_groups = get_paginated_response(request, study_groups, StudyGroupSerializer)
+
+                return Response(study_groups)
+    
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception}"}, api_exception.status_code)
+    
+    except Exception as ex:
+        return Response(f"Внутренняя ошибка сервера в study_group: {ex}",
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
@@ -112,6 +143,7 @@ def my_poll(request):
                                                                     .prefetch_related('answer_options').all())
                             )
                             .prefetch_related('allowed_groups')
+                            .prefetch_related('registrated_users')
                             .first()
                         )
                     if not poll:
@@ -1192,6 +1224,12 @@ def poll_voting(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
+            if not poll.opened_for_voting:
+                raise AccessDeniedException(detail='Голосование еще не началось или уже завершилось')
+
+            if poll.is_registration_demanded:
+                if not poll.registrated_users.contains(my_profile):
+                    raise AccessDeniedException(detail='Вы не были зарегистрированы на опрос')
 
             if poll.has_user_participated_in(my_profile):
                 if not poll.is_revote_allowed:
@@ -1419,6 +1457,95 @@ def poll(request):
         return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def poll_registration(request):
+    # try:
+        current_user = request.user
+        my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
+ 
+        if request.method == 'GET':
+            poll_registration_id = request.GET.get('poll_registration_id', None)
+
+            if poll_registration_id:
+                poll_registration = (
+                    PollRegistration.objects
+                        .filter(Q(user=my_profile) & Q(id=poll_registration_id))
+                        .select_related('user__user', 'user')
+                        .select_related('poll__poll_setts', 'poll__poll_type', 'poll__author', 'poll__author__user')
+                        .prefetch_related('poll__allowed_groups')
+                        .prefetch_related('poll__questions')
+                        .first()
+                )
+                if not poll_registration:
+                    raise ObjectNotFoundException(model='PollRegistration')
+                
+                serializer = PollRegistrationSerializer(poll_registration, context={'profile': my_profile})
+                return Response(serializer.data)
+            
+            else:
+                poll_registrations = (
+                    PollRegistration.objects
+                        .filter(Q(user=my_profile))
+                        .select_related('user__user', 'user')
+                        .select_related('poll__poll_setts')
+                        .select_related('poll__poll_type', 'poll__author', 'poll__author__user')
+                        .prefetch_related('poll__allowed_groups')
+                        .prefetch_related('poll__questions')
+                        .prefetch_related('poll__user_participations')
+                        .order_by('-registration_time')
+                )
+                if my_profile:
+                    context = {'profile': my_profile}
+                else:
+                    context = None
+                pagination_data = get_paginated_response(request, poll_registrations, PollRegistrationSerializer, context=context)
+                return Response(pagination_data)
+
+        if request.method == 'POST':
+            poll_id = get_parameter_or_400(request.GET, 'poll_id') 
+
+            poll = get_object_or_404(Poll, poll_id=poll_id)
+
+
+            opened_for_registration = poll.opened_for_registration()
+            if opened_for_registration:
+                if not poll.registrated_users.contains(my_profile):
+                    poll.registrated_users.add(my_profile)
+                else:
+                    raise AccessDeniedException(detail='Вы уже зарегестрированы на данный опрос.')
+            elif opened_for_registration is False:
+                raise AccessDeniedException(detail='Регистрация на опрос уже завершена.')
+            else:
+                raise AccessDeniedException(detail='Регистрация на опрос не требуется.')
+
+                    
+        
+            return Response('Вы были успешно зарегестрированы на опрос.')
+        
+        if request.method == 'DELETE':
+            poll_id = get_parameter_or_400(request.GET, 'poll_id') 
+
+            poll = get_object_or_404(Poll, poll_id=poll_id)
+
+            if poll.registrated_users.contains(my_profile):
+                poll.registrated_users.remove(my_profile)
+            else:
+                raise AccessDeniedException(detail='Вы еще не зарегестрированы на данный опрос.')
+        
+            return Response('Регастрация на опрос успешно отменена.')
+
+    # except APIException as api_exception:
+    #     return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+        
+    # except Exception as ex:
+    #     logger.error(f"Внутренняя ошибка сервера в poll_registration: {ex}")
+    #     return Response({'message':f"Внутренняя ошибка сервера в poll_registration: {ex}"},
+    #                      status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 
 @api_view(['GET'])

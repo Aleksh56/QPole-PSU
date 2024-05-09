@@ -182,10 +182,12 @@ class Poll(models.Model):
     # registration_form = models.OneToOneField('RegistrationForm', related_name='poll', on_delete=models.RESTRICT, null=True) # форма регистрации
 
     allowed_groups = models.ManyToManyField(StudyGroup, related_name='allowed_polls', blank=True)
+    registrated_users = models.ManyToManyField(Profile, related_name='registered_polls', through='PollRegistration', blank=True)
 
     created_date = models.DateTimeField(auto_now_add=True) # дата создания
 
     is_anonymous = models.BooleanField(default=False) # анонимное
+    is_registration_demanded = models.BooleanField(default=False) # нужна ли регистрация
 
     is_revote_allowed = models.BooleanField(default=False) # разрешить повторное
     mix_questions = models.BooleanField(default=False) # перемешивать вопросы
@@ -215,8 +217,11 @@ class Poll(models.Model):
             self.poll_setts = PollSettings.objects.create()
             
 
-    def is_user_authenticated(self, user_profile):
-        return user_profile is not None
+    def is_user_registrated(self, user_profile):
+        if self.is_registration_demanded:
+            return user_profile in self.registrated_users.all()
+        else:
+            return None
 
     def has_user_participated_in(self, user_profile):
         if not user_profile:
@@ -263,22 +268,11 @@ class Poll(models.Model):
             end_time = self.poll_setts.end_time
 
             if start_time and duration:
-                if timezone.now() > start_time and timezone.now() < start_time + duration:
-                    return True
-                else: 
-                    return False
-                 
+                return timezone.now() > start_time and timezone.now() < start_time + duration
             elif start_time and end_time:    
-                if end_time > timezone.now() > start_time:
-                    return True
-                else: 
-                    return False
-                
+                return end_time > timezone.now() > start_time
             elif start_time and not duration:
-                if timezone.now() > start_time:
-                    return True
-                else:
-                    return False
+                return timezone.now() > start_time
             else:
                 return True
         else:
@@ -313,6 +307,56 @@ class Poll(models.Model):
             else: return None    
         else: return None
 
+    @property
+    def opened_for_registration(self):
+        if self.is_registration_demanded:
+            reg_start_time = self.poll_setts.registration_start_time
+            reg_end_time = self.poll_setts.registration_end_time
+                
+            start_time = self.poll_setts.start_time
+            end_time = self.poll_setts.end_time
+
+            if reg_start_time and reg_end_time:    
+                return reg_start_time < timezone.now() < reg_end_time
+            elif reg_start_time and not reg_end_time:
+                return reg_start_time < timezone.now() < start_time
+            elif reg_end_time and not reg_start_time:
+                return timezone.now() < reg_end_time
+            else:
+                return timezone.now() < start_time
+        else:
+            return None
+
+    @property
+    def registration_start_time_left(self):
+        start_time = self.poll_setts.start_time
+        reg_start_time = self.poll_setts.registration_start_time
+        
+        if self.is_registration_demanded:
+            if reg_start_time:
+                time_left = max((reg_start_time - timezone.now()).total_seconds(), 0)
+                return format_time(time_left)
+            else:
+                return None
+        else:
+            return None
+
+    @property
+    def registration_end_time_left(self):
+        start_time = self.poll_setts.start_time
+        reg_end_time = self.poll_setts.registration_end_time
+        
+        if self.is_registration_demanded:
+            if reg_end_time:
+                time_left = max((reg_end_time - timezone.now()).total_seconds(), 0)
+                return format_time(time_left)
+            else:
+                time_left = max((start_time - timezone.now()).total_seconds(), 0)
+                return format_time(time_left)
+        else:
+            return None  
+
+
 
 class QuickVotingForm(models.Model):
     first_name = models.CharField(max_length=50, null=True)
@@ -328,6 +372,18 @@ class QuickVotingForm(models.Model):
             return f"Форма авторизции на {self.poll_answer_group.poll}"
 
 
+class PollRegistration(models.Model):
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
+    registration_time = models.DateTimeField(auto_now_add=True)
+    poll_passed = models.BooleanField(default=False)
+    passing_date = models.DateTimeField(null=True, blank=True)
+
+
+    def __str__(self):
+        return f"Регистрация {self.user} на {self.poll} от {self.registration_time}"
+
+
 class PollSettings(models.Model):
 
     max_revotes_quantity = models.PositiveSmallIntegerField(default=2)
@@ -338,9 +394,13 @@ class PollSettings(models.Model):
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 
-    # def __str__(self):
-    #     if self.poll:
-    #         return f"Настройки {self.poll}"
+    registration_start_time = models.DateTimeField(null=True)
+    registration_end_time = models.DateTimeField(null=True)
+
+
+    def __str__(self):
+        if self.poll:
+            return f"Настройки {self.poll}"
 
 
 class SupportRequestType(models.Model):

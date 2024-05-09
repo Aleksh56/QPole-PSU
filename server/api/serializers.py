@@ -15,8 +15,17 @@ class MiniUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'email', 'username']
     
 
+class StudyGroupSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(validators=[BaseValidator.name], required=False)
+
+    class Meta:
+        model = StudyGroup
+        fields = '__all__'
+
+
 class GetProfileSerializer(serializers.ModelSerializer):
     user = MiniUserSerializer()
+    group = StudyGroupSerializer()
     role = serializers.SerializerMethodField()
 
     class Meta:
@@ -42,16 +51,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class StudyGroupSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(validators=[BaseValidator.name], required=False)
-
-    class Meta:
-        model = StudyGroup
-        fields = '__all__'
 
 
 class MiniProfileSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source='user.username', read_only=True)
+    group = StudyGroupSerializer()
 
     class Meta:
         model = Profile
@@ -303,11 +307,14 @@ class BasePollSerializer(serializers.ModelSerializer):
     participants_quantity = serializers.SerializerMethodField()
     questions_quantity = serializers.SerializerMethodField()
     opened_for_voting = serializers.SerializerMethodField()
+    opened_for_registration = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
-    is_user_authenticated = serializers.SerializerMethodField()
+    is_user_registrated = serializers.SerializerMethodField()
 
     start_time_left = serializers.SerializerMethodField()
     end_time_left = serializers.SerializerMethodField()
+    registration_start_time_left = serializers.SerializerMethodField()
+    registration_end_time_left = serializers.SerializerMethodField()
     
 
     def get_start_time_left(self, instance):
@@ -315,6 +322,12 @@ class BasePollSerializer(serializers.ModelSerializer):
     
     def get_end_time_left(self, instance):
         return instance.end_time_left
+    
+    def get_registration_start_time_left(self, instance):
+        return instance.registration_start_time_left
+    
+    def get_registration_end_time_left(self, instance):
+        return instance.registration_end_time_left
     
     def get_participants_quantity(self, instance):
         return instance.participants_quantity
@@ -325,13 +338,16 @@ class BasePollSerializer(serializers.ModelSerializer):
     def get_opened_for_voting(self, instance):   
         return instance.opened_for_voting
 
+    def get_opened_for_registration(self, instance):   
+        return instance.opened_for_registration
+    
     def get_has_user_participated_in(self, instance):
         profile = self.context.get('profile')
         return instance.has_user_participated_in(user_profile=profile)
 
-    def get_is_user_authenticated(self, instance):
+    def get_is_user_registrated(self, instance):
         profile = self.context.get('profile')
-        return instance.is_user_authenticated(user_profile=profile)
+        return instance.is_user_registrated(user_profile=profile)
 
     class Meta:
         model = Poll
@@ -343,12 +359,50 @@ class BasePollSerializer(serializers.ModelSerializer):
 
         return poll
 
+class MiniPollSerializer(BasePollSerializer):
+    poll_type = PollTypeSerializer(required=True)
+    poll_setts = PollSettingsSerializer(required=False)
+    author = MiniProfileSerializer()
+
+    allowed_groups = StudyGroupSerializer(many=True, required=False)
+
+    qrcode_img = serializers.SerializerMethodField()
+
+    is_user_in_allowed_groups = serializers.SerializerMethodField()
+    
+    def get_is_user_in_allowed_groups(self, instance):
+        profile = self.context.get('profile')
+        return instance.is_user_in_allowed_groups(user_profile=profile)
+    
+    def get_qrcode_img(self, instance):
+        qrcode_path = instance.qrcode
+        
+        if qrcode_path:
+            return get_qrcode_img_bytes(qrcode_path.path)
+
+        return None
+
+    class Meta:
+        model = Poll
+        exclude = ['qrcode', 'registrated_users']
+
+
+class PollRegistrationSerializer(serializers.ModelSerializer):
+    poll = MiniPollSerializer()
+
+
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
 class PollSerializer(BasePollSerializer):
     poll_type = PollTypeSerializer(required=True)
     author = MyProfileSerializer(required=True)
     poll_setts = PollSettingsSerializer(required=False)
     questions = QuestionSerializer(many=True, required=False)
     allowed_groups = StudyGroupSerializer(many=True, required=False)
+    registrated_users = PollRegistrationSerializer(many=True, required=False)
+   
 
     qrcode_img = serializers.SerializerMethodField()
     
@@ -391,33 +445,6 @@ class PollSerializer(BasePollSerializer):
                 getattr(self, setter_name)(value)
         return instance
     
-class MiniPollSerializer(BasePollSerializer):
-    poll_type = PollTypeSerializer(required=True)
-    poll_setts = PollSettingsSerializer(required=False)
-    author = MiniProfileSerializer()
-
-    allowed_groups = StudyGroupSerializer(many=True, required=False)
-
-    qrcode_img = serializers.SerializerMethodField()
-
-    is_user_in_allowed_groups = serializers.SerializerMethodField()
-    
-    def get_is_user_in_allowed_groups(self, instance):
-        profile = self.context.get('profile')
-        return instance.is_user_in_allowed_groups(user_profile=profile)
-    
-    def get_qrcode_img(self, instance):
-        qrcode_path = instance.qrcode
-        
-        if qrcode_path:
-            return get_qrcode_img_bytes(qrcode_path.path)
-
-        return None
-
-    class Meta:
-        model = Poll
-        exclude = ['qrcode']
-
 
 
 # сериализаторы воросов
@@ -481,7 +508,6 @@ class PollQuestionSerializer(serializers.ModelSerializer):
             if hasattr(self, setter_name):
                 getattr(self, setter_name)(value)
         return instance
-    
 
 
 
