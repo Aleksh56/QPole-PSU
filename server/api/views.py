@@ -143,7 +143,7 @@ def my_poll(request):
                     serializer = PollSerializer(poll, context={'profile': my_profile})
                 else:
                     filters = Q(author=my_profile, poll_id=poll_id)
-                    poll = Poll.my_manager.get_mini_by_poll_id(filters)
+                    poll = Poll.my_manager.get_one_mini(filters)
                     if not poll:
                         raise ObjectNotFoundException(model='Poll')
                 
@@ -753,7 +753,10 @@ def my_poll_question(request):
 
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
             poll = get_object_or_404(Poll, poll_id=poll_id)
-        
+
+            if poll.is_in_production:
+                raise AccessDeniedException(detail="Данный опрос находится в продакшене, его нельзя изменять!")
+            
             poll_question_id = get_parameter_or_400(request.GET, 'poll_question_id')
             poll_question = get_object_from_object_or_404(poll.questions, id=poll_question_id)           
             request_type = get_parameter_or_400(request.GET, 'request_type')
@@ -1167,7 +1170,7 @@ def poll_voting(request):
 
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
            
-            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id))
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, in_production=True))
 
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
@@ -1193,9 +1196,7 @@ def poll_voting(request):
                     ).first()
                     if to_delete:
                         to_delete.delete()
-
-            
-                        
+                  
             answers = get_data_or_400(data, 'answers')
             
             # валидация и парсинг ответов
@@ -1274,7 +1275,6 @@ def quick_poll_voting(request):
         data = request.data.copy()
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
-        
         
         poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id))
         
@@ -1391,33 +1391,27 @@ def poll_registration(request):
                 poll_registration = (
                     PollRegistration.objects
                         .filter(Q(user=my_profile) & Q(id=poll_registration_id))
-                        .select_related('user__user', 'user')
-                        .select_related('poll__poll_setts', 'poll__poll_type', 'poll__author', 'poll__author__user')
-                        .prefetch_related('poll__allowed_groups')
-                        .prefetch_related('poll__questions')
+                        .select_related('user__user', 'user', 'user__group')
                         .first()
                 )
                 if not poll_registration:
                     raise ObjectNotFoundException(model='PollRegistration')
+                poll = Poll.my_manager.get_one(Q(poll_id=poll_registration.poll.poll_id))
+                poll_registration.poll = poll
                 
-                serializer = PollRegistrationSerializer(poll_registration, context={'profile': my_profile})
+                serializer = BasePollRegistrationSerializer(poll_registration, context={'profile': my_profile})
                 return Response(serializer.data)
             
             else:
                 poll_registrations = (
                     PollRegistration.objects
-                        .filter(Q(user=my_profile))
-                        .select_related('user__user', 'user')
-                        .select_related('poll__poll_setts')
-                        .select_related('poll__poll_type', 'poll__author', 'poll__author__user')
-                        .prefetch_related('poll__allowed_groups')
-                        .prefetch_related('poll__questions')
-                        .prefetch_related('poll__user_participations')
+                        .filter(user=my_profile)
+                        .select_related('user__user', 'user__group', 'poll')
                         .order_by('-registration_time')
                 )
 
                 context = get_profile_to_context(my_profile)
-                pagination_data = get_paginated_response(request, poll_registrations, PollRegistrationSerializer, context=context)
+                pagination_data = get_paginated_response(request, poll_registrations, MiniPollRegistrationSerializer, context=context)
                 return Response(pagination_data)
 
         if request.method == 'POST':

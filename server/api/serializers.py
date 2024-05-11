@@ -211,7 +211,6 @@ class PollVotingResultSerializer(PollAnswerGroupSerializer):
                                 question_gained_quantity += answer_option['points']
             
 
-            print(question_correct_quantity)
             if question_correct_quantity:
                 question['points'] += round(question_gained_quantity / question_correct_quantity, 2) # начисляем очки, которые получили после проверки правильности
                 if question['points'] < 0:
@@ -358,6 +357,7 @@ class BasePollSerializer(serializers.ModelSerializer):
         poll_setts = PollSettings.objects.create()
         poll = generate_poll_qr(poll)
         poll.poll_setts = poll_setts
+        poll.save()
 
         return poll
 
@@ -389,13 +389,33 @@ class MiniPollSerializer(BasePollSerializer):
         exclude = ['qrcode', 'registrated_users']
 
 
-class PollRegistrationSerializer(serializers.ModelSerializer):
-    # poll = MiniPollSerializer()
-
-
+class BasePollRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+
+
+class PollRegistrationSerializer(serializers.ModelSerializer):
+    poll = MiniPollSerializer()
+    user = MiniProfileSerializer()
+    
+    class Meta:
+        model = PollRegistration
+        fields = '__all__'
+
+
+class MiniPollRegistrationSerializer(serializers.ModelSerializer):
+    poll = serializers.SerializerMethodField()
+    user = MiniProfileSerializer()
+    
+    def get_poll(self, instance):
+        return str(instance)
+
+
+    class Meta:
+        model = PollRegistration
+        fields = '__all__'
+
 
 class PollSerializer(BasePollSerializer):
     poll_type = PollTypeSerializer(required=True)

@@ -192,7 +192,10 @@ class MyPollManager(models.Manager):
             .select_related('author', 'author__user', 'author__group')
             .select_related('poll_type', 'poll_setts')
             .prefetch_related('allowed_groups')
-            .prefetch_related('registrated_users')
+            .prefetch_related(
+                models.Prefetch('registrated_users', queryset=Profile.objects.select_related(
+                        'group'
+                ).all()))
             .prefetch_related(
                 models.Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
                         'answer_options'
@@ -224,8 +227,8 @@ class MyPollManager(models.Manager):
         
         return object
     
-    def get_mini_by_poll_id(self, filters):
-        """Получение опроса по `poll_id` без вопросов и вариантов ответа"""
+    def get_one_mini(self, filters):
+        """Получение опроса по `filters` без вопросов и вариантов ответа"""
         objects = (
             super().get_queryset()
             .select_related('author', 'author__user', 'author__group')
@@ -249,7 +252,6 @@ class Poll(models.Model):
 
     poll_type = models.ForeignKey(PollType, related_name='poll', on_delete=models.RESTRICT, null=True) # тип опроса
     poll_setts = models.OneToOneField('PollSettings', related_name='poll', on_delete=models.CASCADE, null=True) # настройки опроса
-    # registration_form = models.OneToOneField('RegistrationForm', related_name='poll', on_delete=models.RESTRICT, null=True) # форма регистрации
 
     allowed_groups = models.ManyToManyField(StudyGroup, related_name='allowed_polls', blank=True)
     registrated_users = models.ManyToManyField(Profile, related_name='registered_polls', through='PollRegistration', blank=True)
@@ -269,6 +271,7 @@ class Poll(models.Model):
 
     is_paused = models.BooleanField(default=False) # приостановлено
     is_closed = models.BooleanField(default=False) # завершено
+    accessible_via_link = models.BooleanField(default=False) # доступна только по ссылке
 
     is_in_production = models.BooleanField(default=False) # готов к прохождению
 

@@ -98,7 +98,7 @@ class InvalidFieldException(APIException):
 
 
 class BadImageException(APIException):
-    status_code = 400
+    status_code = 403
     default_code = 'bad_image'
 
     def __init__(self, field_name, expected_type, detail=None):
@@ -135,7 +135,7 @@ class PollAnsweringException(APIException):
     
 
 class TooManyInstancesException(APIException):
-    status_code = 400
+    status_code = 403
     default_code = 'too_many_instances'
 
     def __init__(self, model=None, limit=None, detail=None):
