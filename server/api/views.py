@@ -1370,14 +1370,28 @@ def poll_voting_ended(request):
         data = request.data.copy()
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
-        poll_voting_id = get_parameter_or_400(request.GET, 'poll_voting_id')
         
         poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
 
         if not poll:
             raise ObjectNotFoundException(model='Poll')
 
-        poll_answer_group = get_object_or_404(PollAnswerGroup, id=poll_voting_id)
+        if poll.has_user_participated_in(my_profile):
+            if not poll.is_revote_allowed:
+                raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+            else:
+                to_delete = PollAnswerGroup.objects.filter(
+                    Q(poll=poll) & Q(profile=my_profile)      
+                ).first()
+                if to_delete:
+                    to_delete.delete()
+                to_delete = PollParticipantsGroup.objects.filter(
+                    Q(poll=poll) & Q(profile=my_profile)      
+                ).first()
+                if to_delete:
+                    to_delete.delete()
+
+        poll_answer_group = PollAnswerGroup.objects.filter(poll=poll, profile=my_profile).first()
         if not poll_answer_group:
             raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
 
