@@ -1267,6 +1267,160 @@ def poll_voting(request):
 
 
 
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def poll_voting_started(request):
+    try:
+        current_user = request.user
+        my_profile = get_object_or_404(Profile, user=current_user)
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        if request.method == 'GET':
+            poll_id = request.GET.get('poll_id', None)
+
+            if poll_id:
+                my_answer = PollAnswerGroup.objects.filter(
+                    Q(profile=my_profile) & Q(poll__poll_id=poll_id)
+                ).select_related('poll').prefetch_related('answers').first()
+
+                poll = Poll.my_manager.get_one(Q(author=my_profile) & Q(poll_id=poll_id))
+
+                if not my_answer:
+                    raise ObjectNotFoundException(model='PollAnswerGroup')
+                
+                my_answer.poll = poll
+
+                serializer = PollVotingResultSerializer(my_answer)
+                return Response(serializer.data)
+            
+            else:
+                my_answers = PollAnswerGroup.objects.filter(profile=my_profile)
+                serializer = PollVotingResultSerializer(my_answers, many=True)
+                return Response(serializer.data)
+
+        elif request.method == 'POST':
+            data = request.data.copy()
+
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
+           
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
+
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+
+            if not poll.opened_for_voting:
+                raise AccessDeniedException(detail='Голосование еще не началось или уже завершилось')
+
+            if poll.is_registration_demanded:
+                if not poll.is_user_registrated(my_profile):
+                    raise AccessDeniedException(detail='Вы еще не зарегистрировались на опрос')
+
+            if poll.has_user_participated_in(my_profile):
+                if not poll.is_revote_allowed:
+                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+                else:
+                    to_delete = PollAnswerGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile)      
+                    ).first()
+                    if to_delete:
+                        to_delete.delete()
+                    to_delete = PollParticipantsGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile)      
+                    ).first()
+                    if to_delete:
+                        to_delete.delete()
+
+            poll_answer_group_data = {
+                'profile': my_profile,
+                'poll': poll.id,
+            }
+            serializer = PollAnswerGroupSerializer(data=poll_answer_group_data)
+            if serializer.is_valid():
+                poll_answer_group = serializer.save()                
+                return Response({'message':"Вы успешно начали голосование", 'data':serializer.data}, status=status.HTTP_200_OK)
+            else:
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST) 
+
+    
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_voting_started: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в poll_voting_started: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def poll_voting_ended(request):
+    try:
+        current_user = request.user
+        my_profile = get_object_or_404(Profile, user=current_user)
+
+        if not my_profile:
+            raise ObjectNotFoundException(model='Profile')
+
+        
+        data = request.data.copy()
+
+        poll_id = get_parameter_or_400(request.GET, 'poll_id')
+        poll_voting_id = get_parameter_or_400(request.GET, 'poll_voting_id')
+        
+        poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
+
+        if not poll:
+            raise ObjectNotFoundException(model='Poll')
+
+        poll_answer_group = get_object_or_404(PollAnswerGroup, id=poll_voting_id)
+        if not poll_answer_group:
+            raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
+
+
+        answers = get_data_or_400(data, 'answers')
+        
+        # валидация и парсинг ответов
+        raw_answers = None
+        if poll.poll_type.name == 'Опрос':
+            answers, raw_answers = poll_voting_handler(answers, poll, is_full=False)
+        elif poll.poll_type.name == 'Викторина':
+            answers = quizz_voting_handler(answers, poll, is_full=False)
+        else:
+            raise MyCustomException(detail="Данного типа опроса не существует")
+
+
+        _, answers, _ = save_votes(answers, poll, my_profile, None, raw_answers,
+                                                poll_answer_group=poll_answer_group)
+
+        my_answer = PollAnswerGroup.objects.filter(
+                Q(profile=my_profile) & Q(poll__poll_id=poll_id)
+            ).select_related('profile').prefetch_related('answers').first()
+
+        if not my_answer:
+            raise ObjectNotFoundException(model='PollAnswerGroup')
+        
+        my_answer.poll = poll
+
+        serializer = PollVotingResultSerializer(my_answer)
+                    
+        return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK) 
+
+    
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_voting_ended: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в poll_voting_ended: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @transaction.atomic

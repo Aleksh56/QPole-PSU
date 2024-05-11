@@ -86,7 +86,8 @@ class PollAnswerGroup(models.Model):
     def voting_time_left(self):
         completion_time = self.poll.poll_setts.completion_time
 
-        poll_time_left = self.poll.end_time_left
+        poll_time_left = self.poll.end_time_seconds_left
+
         if poll_time_left:
             if completion_time:
                 time_left = max(((self.voting_date + completion_time) - timezone.now()).total_seconds(), 0)
@@ -379,7 +380,28 @@ class Poll(models.Model):
             else: return None
         except Exception:
             return None
-        
+
+    @property
+    def end_time_seconds_left(self):
+        try:
+            if self.poll_setts:
+                start_time = self.poll_setts.start_time
+                duration = self.poll_setts.duration
+                end_time = self.poll_setts.end_time
+
+                if end_time:
+                    time_left = max((end_time - timezone.now()).total_seconds(), 0)
+                    return time_left
+                
+                elif start_time and duration:
+                    time_left = max((start_time + duration - timezone.now()).total_seconds(), 0)
+                    return time_left
+                
+                else: return 0    
+            else: return 0
+        except Exception:
+            return 0
+            
     @property
     def opened_for_registration(self):
         try:
