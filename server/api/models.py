@@ -293,21 +293,20 @@ class Poll(models.Model):
 
     def is_user_registrated(self, user_profile):
         if self.is_registration_demanded:
-            return user_profile in self.registrated_users.all()
+            return self.registrated_users.contains(user_profile)
         else:
             return None
 
     def has_user_participated_in(self, user_profile):
         if not user_profile:
             return None
-        
-        return user_profile in self.user_participations.all()
+        return self.user_participations.filter(profile=user_profile).exists()
     
     def is_user_in_allowed_groups(self, user_profile):
         allowed_groups = self.allowed_groups.all()
         if allowed_groups:
             if not user_profile:
-                return None
+                return False
             
             return user_profile.group in allowed_groups
         
@@ -324,103 +323,120 @@ class Poll(models.Model):
 
     @property
     def opened_for_voting(self):
-        if self.poll_setts:
-            start_time = self.poll_setts.start_time
-            duration = self.poll_setts.duration
-            end_time = self.poll_setts.end_time
+        try:
+            if self.poll_setts:
+                start_time = self.poll_setts.start_time
+                duration = self.poll_setts.duration
+                end_time = self.poll_setts.end_time
 
-            if start_time and duration:
-                return timezone.now() > start_time and timezone.now() < start_time + duration
-            elif start_time and end_time:    
-                return end_time > timezone.now() > start_time
-            elif start_time and not duration:
-                return timezone.now() > start_time
+                if start_time and duration:
+                    return timezone.now() > start_time and timezone.now() < start_time + duration
+                elif start_time and end_time:    
+                    return end_time > timezone.now() > start_time
+                elif start_time and not duration:
+                    return timezone.now() > start_time
+                else:
+                    return True
             else:
                 return True
-        else:
+        except Exception:
             return True
 
     @property
     def start_time_left(self):
-        if self.poll_setts:
-            start_time = self.poll_setts.start_time
-            
-            if start_time:
-                time_left = max((self.poll_setts.start_time - timezone.now()).total_seconds(), 0)
-                return format_time(time_left)
+        try:
+            if self.poll_setts:
+                start_time = self.poll_setts.start_time
+                
+                if start_time:
+                    time_left = max((self.poll_setts.start_time - timezone.now()).total_seconds(), 0)
+                    return format_time(time_left)
 
-        return None
+            return None
+        except Exception:
+            return None
 
     @property
     def end_time_left(self):
-        if self.poll_setts:
-            start_time = self.poll_setts.start_time
-            duration = self.poll_setts.duration
-            end_time = self.poll_setts.end_time
+        try:
+            if self.poll_setts:
+                start_time = self.poll_setts.start_time
+                duration = self.poll_setts.duration
+                end_time = self.poll_setts.end_time
 
-            if end_time:
-                time_left = max((end_time - timezone.now()).total_seconds(), 0)
-                return format_time(time_left)
-            
-            elif start_time and duration:
-                time_left = max((start_time + duration - timezone.now()).total_seconds(), 0)
-                return format_time(time_left)
-            
-            else: return None    
-        else: return None
-
+                if end_time:
+                    time_left = max((end_time - timezone.now()).total_seconds(), 0)
+                    return format_time(time_left)
+                
+                elif start_time and duration:
+                    time_left = max((start_time + duration - timezone.now()).total_seconds(), 0)
+                    return format_time(time_left)
+                
+                else: return None    
+            else: return None
+        except Exception:
+            return None
+        
     @property
     def opened_for_registration(self):
-        if self.is_registration_demanded:
-            reg_start_time = self.poll_setts.registration_start_time
-            reg_end_time = self.poll_setts.registration_end_time
-                
-            start_time = self.poll_setts.start_time
-            end_time = self.poll_setts.end_time
+        try:
+            if self.is_registration_demanded:
+                reg_start_time = self.poll_setts.registration_start_time
+                reg_end_time = self.poll_setts.registration_end_time
+                    
+                start_time = self.poll_setts.start_time
+                end_time = self.poll_setts.end_time
 
-            if start_time or end_time:
-                if reg_start_time and reg_end_time:    
-                    return reg_start_time < timezone.now() < reg_end_time
-                elif reg_start_time and not reg_end_time:
-                    return reg_start_time < timezone.now() < start_time
-                elif reg_end_time and not reg_start_time:
-                    return timezone.now() < reg_end_time
+                if start_time or end_time:
+                    if reg_start_time and reg_end_time:    
+                        return reg_start_time < timezone.now() < reg_end_time
+                    elif reg_start_time and not reg_end_time:
+                        return reg_start_time < timezone.now() < start_time
+                    elif reg_end_time and not reg_start_time:
+                        return timezone.now() < reg_end_time
+                    else:
+                        return timezone.now() < start_time
                 else:
-                    return timezone.now() < start_time
+                    return None
             else:
                 return None
-        else:
+        except Exception:
             return None
 
     @property
     def registration_start_time_left(self):
-        start_time = self.poll_setts.start_time
-        reg_start_time = self.poll_setts.registration_start_time
-        
-        if self.is_registration_demanded:
-            if reg_start_time:
-                time_left = max((reg_start_time - timezone.now()).total_seconds(), 0)
-                return format_time(time_left)
+        try:
+            start_time = self.poll_setts.start_time
+            reg_start_time = self.poll_setts.registration_start_time
+            
+            if self.is_registration_demanded:
+                if reg_start_time:
+                    time_left = max((reg_start_time - timezone.now()).total_seconds(), 0)
+                    return format_time(time_left)
+                else:
+                    return None
             else:
                 return None
-        else:
+        except Exception:
             return None
 
     @property
     def registration_end_time_left(self):
-        start_time = self.poll_setts.start_time
-        reg_end_time = self.poll_setts.registration_end_time
-        
-        if self.is_registration_demanded:
-            if reg_end_time:
-                time_left = max((reg_end_time - timezone.now()).total_seconds(), 0)
-                return format_time(time_left)
+        try:
+            start_time = self.poll_setts.start_time
+            reg_end_time = self.poll_setts.registration_end_time
+            
+            if self.is_registration_demanded:
+                if reg_end_time:
+                    time_left = max((reg_end_time - timezone.now()).total_seconds(), 0)
+                    return format_time(time_left)
+                else:
+                    time_left = max((start_time - timezone.now()).total_seconds(), 0)
+                    return format_time(time_left)
             else:
-                time_left = max((start_time - timezone.now()).total_seconds(), 0)
-                return format_time(time_left)
-        else:
-            return None  
-
+                return None  
+        except Exception:
+            return None
 
 
 class QuickVotingForm(models.Model):
@@ -463,9 +479,9 @@ class PollSettings(models.Model):
     registration_end_time = models.DateTimeField(null=True)
 
 
-    def __str__(self):
-        if self.poll:
-            return f"Настройки {self.poll}"
+    # def __str__(self):
+    #     if self.poll:
+    #         return f"Настройки {self.poll}"
 
 
 class SupportRequestType(models.Model):

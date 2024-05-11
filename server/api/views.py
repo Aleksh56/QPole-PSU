@@ -1170,7 +1170,7 @@ def poll_voting(request):
 
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
            
-            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, in_production=True))
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
 
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
@@ -1179,8 +1179,8 @@ def poll_voting(request):
                 raise AccessDeniedException(detail='Голосование еще не началось или уже завершилось')
 
             if poll.is_registration_demanded:
-                if not poll.registrated_users.contains(my_profile):
-                    raise AccessDeniedException(detail='Вы не были зарегистрированы на опрос')
+                if not poll.is_user_registrated(my_profile):
+                    raise AccessDeniedException(detail='Вы еще не зарегистрировались на опрос')
 
             if poll.has_user_participated_in(my_profile):
                 if not poll.is_revote_allowed:

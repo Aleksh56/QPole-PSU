@@ -142,7 +142,7 @@ class TooManyInstancesException(APIException):
         if not detail:
             detail = f"Слишком много объектов модели '{model}'."
             if limit:
-                detail += f" Максимально допустимое количество = {limit}"
+                detail += f"Максимально допустимое количество = {limit}"
         self.detail = detail
 
     def __str__(self):
