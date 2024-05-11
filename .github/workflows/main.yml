@@ -34,7 +34,7 @@ jobs:
             docker stop nginx-server-container || true
             docker rm nginx-server-container || true
             apt-get clean
-            docker system prune
+            docker system prune -f
             # docker image prune -f
             # docker container prune
             cd /home/db
