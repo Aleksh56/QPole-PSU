@@ -293,7 +293,10 @@ class Poll(models.Model):
 
     def is_user_registrated(self, user_profile):
         if self.is_registration_demanded:
-            return self.registrated_users.contains(user_profile)
+            if user_profile:
+                return self.registrated_users.contains(user_profile)
+            else:
+                return None
         else:
             return None
 
@@ -400,6 +403,7 @@ class Poll(models.Model):
                     return None
             else:
                 return None
+            
         except Exception:
             return None
 

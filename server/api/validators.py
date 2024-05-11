@@ -258,7 +258,43 @@ class ReleasePollSettingsValidator(BaseReleaseValidator):
             if start_time:
                 if self.instance.start_time + timedelta(minutes=1) > self.instance.end_time:
                     raise PollValidationException(f"Время окончания опроса должно быть на минимум минуту позже времени начала")
-           
+
+    def validate_registration_start_time(self):
+        registration_start_time = getattr(self.instance, 'registration_start_time', None)
+        start_time = getattr(self.instance, 'start_time', None)
+        if registration_start_time:
+            if not start_time:
+                raise PollValidationException(f"При указании времени начала регистрации на опрос, необходимо указать время начала опроса")
+
+            if registration_start_time + timedelta(minutes=15) >= start_time:
+                raise PollValidationException(f"Регистрация на опрос должна быть минимум на 15 минут раньше начала опроса")
+            
+            if registration_start_time + timedelta(weeks=1) < datetime.now():
+                raise PollValidationException(f"Регистрация на опрос не может быть запланирована больше чем на неделю заранее")
+            
+            registration_end_time = getattr(self.instance, 'registration_end_time', None)
+            if registration_end_time:
+                if registration_start_time + timedelta(minutes=15) >= registration_end_time:
+                    raise PollValidationException(f"Время начала регистрации на опрос должно быть минимум на 15 минут меньше времени окончания регистрации")
+
+    def validate_registration_time(self):
+        registration_end_time = getattr(self.instance, 'registration_end_time', None)
+        start_time = getattr(self.instance, 'start_time', None)
+        if registration_end_time:
+            if not start_time:
+                raise PollValidationException(f"При указании времени окончания регистрации на опрос, необходимо указать время начала опроса")
+            
+            if registration_end_time + timedelta(minutes=5) >= start_time:
+                raise PollValidationException(f"Окончание регистрации на опрос должна быть минимум на 5 минут раньше начала опроса")
+              
+            if registration_end_time > datetime.now() + timedelta(weeks=1):
+                raise PollValidationException(f"Окончание регистрации на опрос не может быть запланировано больше чем на неделю заранее")
+            
+            registration_start_time =  getattr(self.instance, 'registration_start_time', None)
+            if registration_start_time:
+                if registration_start_time + timedelta(minutes=10) > registration_end_time:
+                    raise PollValidationException(f"Окончание регистрации на опрос должна быть минимум на 10 минут раньше начала регистрации")
+                
         
 def is_poll_valid(poll):
     poll_validator = ReleasePollValidator(poll)

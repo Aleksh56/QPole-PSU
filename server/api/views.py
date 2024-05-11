@@ -1416,23 +1416,23 @@ def poll_registration(request):
 
         if request.method == 'POST':
             poll_id = get_parameter_or_400(request.GET, 'poll_id') 
-
             poll = get_object_or_404(Poll, poll_id=poll_id)
-
 
             opened_for_registration = poll.opened_for_registration()
             if opened_for_registration:
-                if not poll.registrated_users.contains(my_profile):
-                    poll.registrated_users.add(my_profile)
+                if not poll.is_user_in_allowed_groups() == False:
+                    if not poll.is_user_registrated(my_profile):
+                        poll.registrated_users.add(my_profile)
+                    else:
+                        raise AccessDeniedException(detail='Вы уже зарегестрированы на данный опрос.')
                 else:
-                    raise AccessDeniedException(detail='Вы уже зарегестрированы на данный опрос.')
+                    raise AccessDeniedException(detail="Вы не принадлежите группе, которым разрешено учавствовать в опросе.")
             elif opened_for_registration is False:
                 raise AccessDeniedException(detail='Регистрация на опрос уже завершена.')
             else:
                 raise AccessDeniedException(detail='Регистрация на опрос не требуется.')
 
                     
-        
             return Response('Вы были успешно зарегестрированы на опрос.')
         
         if request.method == 'DELETE':
@@ -1440,12 +1440,12 @@ def poll_registration(request):
 
             poll = get_object_or_404(Poll, poll_id=poll_id)
 
-            if poll.registrated_users.contains(my_profile):
+            if poll.is_user_registrated(my_profile):
                 poll.registrated_users.remove(my_profile)
             else:
-                raise AccessDeniedException(detail='Вы еще не зарегестрированы на данный опрос.')
+                raise AccessDeniedException(detail='Вы еще не зарегестрировались на данный опрос.')
         
-            return Response('Регастрация на опрос успешно отменена.')
+            return Response('Регистрация на опрос успешно отменена.')
 
     except APIException as api_exception:
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)

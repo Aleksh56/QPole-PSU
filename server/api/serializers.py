@@ -443,13 +443,21 @@ class PollSerializer(BasePollSerializer):
         return None
 
     def set_is_in_production(self, value):
-        # если убрали из продакшена, удаляем все ответы
+        """Если убрали из продакшена, удаляем все ответы"""
         value = bool(int(value))
         if value == False:
             poll = self.instance
             answers = PollAnswerGroup.objects.filter(poll=poll).delete()
             participants = PollParticipantsGroup.objects.filter(poll=poll).delete()
 
+    def set_is_registration_demanded(self, value):
+        """Если убрали регистрацию, удаляем время регистрации"""
+        value = bool(int(value))
+        if value == False:
+            poll_setts = self.instance.poll_setts
+            poll_setts.registration_start_time = None
+            poll_setts.registration_end_time = None
+            poll_setts.save()
 
     def create(self, validated_data):
         instance = super().create(validated_data)
