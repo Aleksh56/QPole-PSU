@@ -138,8 +138,9 @@ def is_email_valid(value):
 
 
 class BaseReleaseValidator():
-    def __init__(self, instance) -> None:
+    def __init__(self, instance, poll=None) -> None:
             self.instance = instance
+            self.poll = poll
 
     def validate(self):
         methods = [method for method in dir(self) if callable(getattr(self, method)) and method.startswith('validate_')]
@@ -245,6 +246,9 @@ class ReleasePollSettingsValidator(BaseReleaseValidator):
                 if self.instance.start_time + timedelta(minutes=1) > self.instance.end_time:
                     raise PollValidationException(f"Время начала опроса должно быть на минимум минуту меньше времени окончания")
 
+            self.poll.is_registration_demanded = True
+            self.poll.save()
+
     def validate_end_time(self):
         value = getattr(self.instance, 'end_time', None)
         if value:
@@ -329,7 +333,7 @@ def is_poll_valid(poll):
             if not has_correct_option:
                 raise PollValidationException(f"Вопрос №{question.order_id} должен содержать хотя бы 1 верный вариант ответа.")
 
-    poll_setts_validator = ReleasePollSettingsValidator(poll.poll_setts)
+    poll_setts_validator = ReleasePollSettingsValidator(poll.poll_setts, poll)
     poll_setts_validator.validate()
 
     return True

@@ -1418,7 +1418,7 @@ def poll_registration(request):
             poll_id = get_parameter_or_400(request.GET, 'poll_id') 
             poll = get_object_or_404(Poll, poll_id=poll_id)
 
-            opened_for_registration = poll.opened_for_registration()
+            opened_for_registration = poll.opened_for_registration
             if opened_for_registration:
                 if not poll.is_user_in_allowed_groups() == False:
                     if not poll.is_user_registrated(my_profile):
