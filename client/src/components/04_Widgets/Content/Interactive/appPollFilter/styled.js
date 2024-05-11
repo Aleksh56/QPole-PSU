@@ -6,9 +6,9 @@ import { Rem } from '@/utils/convertToRem';
 export const StyledStackWrapper = styled(Box)(() => ({
   width: '100%',
   boxShadow: '1px 20px 20px 0 #00000030',
-  '@media (max-width: 900px)': {
-    display: 'none',
-  },
+  // '@media (max-width: 900px)': {
+  //   display: 'none',
+  // },
 }));
 
 export const StyledStack = styled(Stack)(() => ({
@@ -28,6 +28,9 @@ export const StyledStack = styled(Stack)(() => ({
   '@media (max-width: 1100px)': {
     maxWidth: Rem(760),
   },
+  '@media (max-width: 900px)': {
+    display: 'none',
+  },
 }));
 
 export const StyledButton = styled(Button)(() => ({
@@ -39,7 +42,20 @@ export const StyledButton = styled(Button)(() => ({
     display: 'block',
     width: '100%',
     fontSize: Rem(12),
-    // marginLeft: Rem(20),
     padding: 0,
+  },
+}));
+
+export const MobileFiltersWrapper = styled('div')(({ show }) => ({
+  display: show ? 'block' : 'none',
+  '@media (min-width: 901px)': {
+    display: 'none',
+  },
+}));
+
+export const StyledMobileButton = styled(Button)(() => ({
+  display: 'none',
+  '@media (max-width: 900px)': {
+    display: 'block',
   },
 }));

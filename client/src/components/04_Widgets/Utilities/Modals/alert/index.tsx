@@ -1,6 +1,6 @@
-import React from 'react';
-import { Snackbar, Alert } from '@mui/material';
-import { useAlert } from '@/app/context/AlertProvider';
+import { Alert, Snackbar } from '@mui/material';
+
+import { useAlert } from '@/hooks/useAlert';
 
 const AlertPopup = () => {
   const { alert, closeAlert } = useAlert();

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { TextField, MenuItem, Button, Box } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import { Box, Button, MenuItem, TextField } from '@mui/material';
+import { useState } from 'react';
+
 import { sendTicketFx } from './model/send-ticket';
-import { useAlert } from '@/app/context/AlertProvider';
+
+import { useAlert } from '@/hooks/useAlert';
 
 const FrmFeedback = () => {
   const { showAlert } = useAlert();
@@ -14,7 +16,7 @@ const FrmFeedback = () => {
     if (!type || message.length < 10) {
       showAlert(
         'Пожалуйста, заполните все обязательные поля и убедитесь, что сообщение содержит минимум 10 символов.',
-        'info'
+        'info',
       );
       return;
     }

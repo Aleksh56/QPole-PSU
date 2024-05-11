@@ -6,6 +6,7 @@ import { FormContainer, FormGridWrapper, StyledConfirmButton, StyledForm } from 
 
 import AuthFrmHead from '@/components/05_Features/UIComponents/Utils/authFrmHead';
 import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
+import { maskTemplates } from '@/config/mask.templates';
 import { pattern } from '@/config/validation.patterns';
 import { validateField } from '@/utils/js/validateField';
 
@@ -139,7 +140,7 @@ const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () 
                 id="number"
                 handleChange={handleInputChange}
                 placeholder="Телефон"
-                mask="+7\ (999) 999-99-99"
+                mask={maskTemplates.phone}
               />
             </>
           )}

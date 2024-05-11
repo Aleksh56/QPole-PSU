@@ -9,9 +9,9 @@ import {
 } from './api/apiRequests';
 import { ListWrapper } from './styled';
 
-import PoleCreateFirstQuestion from '@/components/05_Features/PollCreateFirstQuestion';
-import PollQuestionEditForm from '@/components/05_Features/PollQuestionEditForm';
-import PollQuestionsList from '@/components/05_Features/PollQuestionsList';
+import FrmQueEdit from '@/components/04_Widgets/Data/Forms/frmQueEdit';
+import PollQuestionsList from '@/components/05_Features/DataDisplay/Out/PollQuestionsList';
+import PoleCreateFirstQuestion from '@/components/05_Features/UIComponents/Utils/PollCreateFirstQuestion';
 import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
 
 const _settings = {
@@ -69,7 +69,7 @@ const PoleQuestionsPage = () => {
         </Box>
         <Box sx={{ width: '75%' }}>
           {Object.keys(selectedQuestion).length > 0 && (
-            <PollQuestionEditForm
+            <FrmQueEdit
               question={selectedQuestion}
               setSelectedQuestion={setSelectedQuestion}
               onQuestionUpdate={handleQuestionUpdate}

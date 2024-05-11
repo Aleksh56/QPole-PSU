@@ -7,6 +7,7 @@ import { checkResetPasswordCode, resetPasswordRequest, sendResetPasswordCode } f
 import PassResetHead from '@/components/05_Features/UIComponents/Utils/passResetHead';
 import PassResetBtns from '@/components/07_Shared/UIComponents/Buttons/passResetBtns';
 import LabeledInput from '@/components/07_Shared/UIComponents/Fields/authLabeledInput';
+import { maskTemplates } from '@/config/mask.templates';
 import useAuth from '@/hooks/useAuth';
 import usePageTitle from '@/hooks/usePageTitle';
 
@@ -87,7 +88,7 @@ const FrmResetPass = () => {
               id="code"
               autoComplete="one-time-code"
               placeholder="000-000"
-              mask="999-999"
+              mask={maskTemplates.restore_code}
               value={resetAccountCode}
               handleChange={(e) => setResetAccountCode(e.target.value)}
             />

@@ -1,6 +1,6 @@
+import { pageSizesSettings } from '@config/pagination.config';
 import { MenuItem, Select } from '@mui/material';
 import { memo } from 'react';
-import { pageSizesSettings } from '@config/pagination.config';
 
 import { StyledPageSizeWrapper, StyledPagination, StyledStack } from './styled';
 
@@ -27,7 +27,7 @@ const CustomPagination = memo(
         />
       </StyledStack>
     );
-  }
+  },
 );
 
 export default CustomPagination;

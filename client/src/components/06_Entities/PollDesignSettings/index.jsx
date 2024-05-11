@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
-import { useAlert } from '@/app/context/AlertProvider';
 import {
   changePoleData,
   getInfoAboutPole,
 } from '@/components/03_Pages/App/pages/Pole/PoleMainSettings/api/apiRequests';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
+import { useAlert } from '@/hooks/useAlert';
 import usePollData from '@/hooks/usePollData';
 
 const PollDesignSettingsTab = () => {

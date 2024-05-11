@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import TuneIcon from '@mui/icons-material/Tune';
+import { Box, Button } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import { StyledButton, StyledStack, StyledStackWrapper } from './styled';
+import { useState } from 'react';
+
 import { filterPollsRequest } from './api/apiRequests';
+import { MobileFiltersWrapper, StyledButton, StyledStack, StyledStackWrapper } from './styled';
+
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appFilterOptions } from '@/data/fields';
 
@@ -12,6 +16,7 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
     is_closed: 'Все статусы',
     group: 'Для всех',
   });
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
@@ -29,6 +34,51 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
 
   return (
     <StyledStackWrapper>
+      <Box
+        sx={{
+          '@media (min-width: 900px)': {
+            display: 'none',
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 15px',
+          }}
+        >
+          <TuneIcon onClick={() => setShowMobileFilters((prev) => !prev)} />
+          <Button onClick={() => handleCreateModalOpen(true)}>Создать опрос</Button>
+        </Box>
+        <MobileFiltersWrapper show={showMobileFilters}>
+          {showMobileFilters && (
+            <Box
+              sx={{ display: 'grid', gridTemplateColumns: '1fr', rowGap: '20px', padding: '15px' }}
+            >
+              <TextField
+                label="Поиск"
+                name="name"
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                placeholder="Введите название"
+                onChange={handleFilterChange}
+              />
+              {appFilterOptions.map((filter) => (
+                <FilterSelect
+                  key={filter.name}
+                  label={filter.label}
+                  name={filter.name}
+                  value={filters[filter.name]}
+                  options={filter.options}
+                  onChange={handleFilterChange}
+                />
+              ))}
+            </Box>
+          )}
+        </MobileFiltersWrapper>
+      </Box>
       <StyledStack>
         <TextField
           label="Поиск"

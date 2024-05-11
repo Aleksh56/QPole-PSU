@@ -10,12 +10,12 @@ import { sendAnswersRequestFx } from './model/send-answers';
 import { $answersStore, resetAnswers } from './store/answer-store';
 import { ConductionBackgroundWrapper, ConductionWrapper } from './styled';
 
-import { useAlert } from '@/app/context/AlertProvider';
 import ConductionHeader from '@/components/04_Widgets/Content/Display/conductionHeader';
 import QueBlock from '@/components/04_Widgets/Content/Interactive/queBlock';
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import Timer from '@/components/07_Shared/UIComponents/Utils/Helpers/timer';
+import { useAlert } from '@/hooks/useAlert';
 import useAuth from '@/hooks/useAuth';
 import { shuffleArray } from '@/utils/js/shuffleArray';
 

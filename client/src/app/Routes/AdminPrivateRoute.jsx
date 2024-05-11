@@ -1,6 +1,7 @@
-import useAuth from '@/hooks/useAuth';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useUserRole } from '../context/UserRoleProvider';
+
+import useAuth from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const AdminPrivateRoute = () => {
   const { isAuthenticated } = useAuth();

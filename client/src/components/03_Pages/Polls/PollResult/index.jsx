@@ -1,14 +1,14 @@
 import { v4 } from 'uuid';
 
+import PollResHead from '@/components/05_Features/Content/Display/PollResHead';
 import ConductionResCrd from '@/components/05_Features/Data/Cards/conductionResCrd';
-import PollResultHeader from '@/components/05_Features/Poll/PollResultHeader';
 
 const PollResult = ({ data }) => {
   const { questions, result, results } = data;
 
   return (
     <>
-      <PollResultHeader res={results} data={data} />
+      <PollResHead res={results} data={data} />
       {questions.map((item) => (
         <ConductionResCrd key={v4()} question={item} answers={result.answers} />
       ))}

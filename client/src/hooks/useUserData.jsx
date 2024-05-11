@@ -1,7 +1,7 @@
-import { useUserRole } from '@app/context/UserRoleProvider';
 import { useEffect, useState } from 'react';
 
 import useAuth from './useAuth';
+import { useUserRole } from './useUserRole';
 
 import { handleRequest } from '@/api/api';
 
@@ -22,6 +22,7 @@ const useUserData = () => {
           Authorization: `Token ${token}`,
         };
         const { data } = await handleRequest('get', '/api/my_profile/', null, headers);
+        console.log(data);
         setUserRole(data.role);
         setUserData(data);
       } catch (error) {

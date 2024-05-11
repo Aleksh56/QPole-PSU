@@ -5,12 +5,18 @@ import { useLocation, useParams } from 'react-router-dom';
 import { changePoleData, getInfoAboutPole } from './api/apiRequests';
 import { poleTabsButtonsData } from './data/PoleTabsButtonsData';
 import { deleteImageFx } from './model/image-delete';
-import { MainSettingsContentWrapper, PoleInfoContainer } from './styled';
+import {
+  MainSettingsContentWrapper,
+  MobileSettingsContentWrapper,
+  PoleInfoContainer,
+} from './styled';
 
-import { useAlert } from '@/app/context/AlertProvider';
+import PollDesignSettingsTab from '@/components/06_Entities/PollDesignSettings';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import PollMainSettingsTabs from '@/components/06_Entities/PollMainSettingsTabs';
+import PollTuningTab from '@/components/06_Entities/PollTuningTab';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
+import { useAlert } from '@/hooks/useAlert';
 import usePollData from '@/hooks/usePollData';
 import useTabs from '@/hooks/useTabs';
 
@@ -63,8 +69,9 @@ const PoleMainSettingsPage = () => {
   };
 
   const handleImageDelete = () => deleteImageFx({ id });
+
   return (
-    <Box sx={{ display: 'flex', backgroundColor: '#f9fafb' }}>
+    <Box sx={{ display: 'flex', backgroundColor: '#f9fafb', padding: '0 15px' }}>
       <MainSettingsContentWrapper>
         <PoleInfoContainer>
           <PoleImageUpload
@@ -132,6 +139,74 @@ const PoleMainSettingsPage = () => {
           />
         </Box>
       </MainSettingsContentWrapper>
+      <MobileSettingsContentWrapper>
+        <PoleImageUpload
+          image={poleData?.image}
+          onFileSelect={(e) => handleFieldChange('image', e)}
+          handleDelete={handleImageDelete}
+          disabled={pollStatus}
+        />
+        <InvisibleLabeledField
+          label="Название теста"
+          placeholder="Введите название"
+          value={
+            pendingChanges['name'] !== undefined ? pendingChanges['name'] : poleData?.name || ''
+          }
+          handleChange={(e) => handleFieldChange('name', e)}
+          disabled={pollStatus}
+        />
+        <InvisibleLabeledField
+          label="Описание"
+          placeholder="Введите описание"
+          value={
+            pendingChanges['description'] !== undefined
+              ? pendingChanges['description']
+              : poleData?.description || ''
+          }
+          handleChange={(e) => handleFieldChange('description', e)}
+          disabled={pollStatus}
+        />
+        <PollDesignSettingsTab />
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            columnGap: '20px',
+            '@media (max-width: 550px)': {
+              gridTemplateColumns: '1fr',
+            },
+          }}
+        >
+          <InvisibleLabeledField
+            label="Время начала"
+            placeholder="Введите время начала опроса"
+            type="datetime-local"
+            min={currentDate}
+            value={
+              pendingChanges['start_time'] !== undefined
+                ? pendingChanges['start_time']
+                : poleData?.poll_setts.start_time || ''
+            }
+            handleChange={(e) => handleFieldChange('start_time', e)}
+            disabled={pollStatus}
+          />
+          <InvisibleLabeledField
+            label="Время конца"
+            placeholder="Введите время конца опроса"
+            type="datetime-local"
+            min={currentDate}
+            max="9999-12-01T00:00"
+            value={
+              pendingChanges['end_time'] !== undefined
+                ? pendingChanges['end_time']
+                : poleData?.poll_setts.end_time || ''
+            }
+            handleChange={(e) => handleFieldChange('end_time', e)}
+            disabled={pollStatus}
+          />
+        </Box>
+        <PollTuningTab pollData={poleData} />
+      </MobileSettingsContentWrapper>
     </Box>
   );
 };

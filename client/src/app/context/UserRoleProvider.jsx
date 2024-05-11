@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useMemo, useState } from 'react';
 
 const UserRoleContext = createContext();
 
@@ -12,4 +12,4 @@ export const UserRoleProvider = ({ children }) => {
   return <UserRoleContext.Provider value={{ contextValue }}>{children}</UserRoleContext.Provider>;
 };
 
-export const useUserRole = () => useContext(UserRoleContext);
+export default UserRoleContext;

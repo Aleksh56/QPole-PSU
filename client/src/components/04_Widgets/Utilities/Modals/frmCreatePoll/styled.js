@@ -13,6 +13,10 @@ export const DialogContentWrapper = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: 'repeat(3,1fr)',
   columnGap: Rem(20),
+  '@media (max-width: 600px)': {
+    gridTemplateColumns: '1fr',
+    gap: Rem(10),
+  },
 }));
 
 export const ButtonContainer = styled(Box)(() => ({

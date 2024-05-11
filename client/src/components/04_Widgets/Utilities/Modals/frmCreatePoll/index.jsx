@@ -1,5 +1,8 @@
-import React from 'react';
 import { Dialog, DialogContent } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { v4 } from 'uuid';
+
+import { createPole } from './api/apiRequests';
 import {
   ButtonContainer,
   ButtonContainerDescription,
@@ -7,9 +10,6 @@ import {
   DialogContentWrapper,
   StyledDialogTitle,
 } from './styled';
-import { v4 } from 'uuid';
-import { createPole } from './api/apiRequests';
-import { useNavigate } from 'react-router-dom';
 
 const FrmCreatePoll = ({ isOpen, onClose, title, buttons }) => {
   const navigate = useNavigate();

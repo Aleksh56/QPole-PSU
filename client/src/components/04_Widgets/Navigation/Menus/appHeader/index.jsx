@@ -15,12 +15,12 @@ import {
   StyledMenuIcon,
 } from './styled';
 
-import { useUserRole } from '@/app/context/UserRoleProvider';
 import AppHeaderNavOut from '@/components/05_Features/DataDisplay/Out/appHeaderNavOut';
 import AppBurgerMenu from '@/components/05_Features/UIComponents/Layouts/appBurger';
 import { appHeaderData } from '@/data/fields';
 import useAuth from '@/hooks/useAuth';
 import useUserData from '@/hooks/useUserData';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const AppHeader = () => {
   const { role } = useUserRole();
@@ -40,6 +40,8 @@ const AppHeader = () => {
     setAuth(false);
     navigate('/');
   };
+
+  console.log(userData);
 
   return (
     <StyledHeaderWrapper>

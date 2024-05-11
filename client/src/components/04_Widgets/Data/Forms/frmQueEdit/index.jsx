@@ -30,7 +30,7 @@ import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/in
 import DraggableList from '@/components/07_Shared/UIComponents/Layouts/draggableList';
 import usePollData from '@/hooks/usePollData';
 
-const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
+const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
   const { id } = useParams();
   const [editedQuestion, setEditedQuestion] = useState(question);
   const [options, setOptions] = useState([]);
@@ -305,4 +305,4 @@ const PollQuestionEditForm = ({ question, setSelectedQuestion, onQuestionUpdate 
   );
 };
 
-export default React.memo(PollQuestionEditForm);
+export default React.memo(FrmQueEdit);

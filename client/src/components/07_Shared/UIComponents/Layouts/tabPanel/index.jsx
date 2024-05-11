@@ -1,17 +1,10 @@
 import { Box } from '@mui/material';
-import React from 'react';
 
 import { TabPanelWrapper } from './styled';
 
 const CustomTabPanel = ({ children, value, index, ...other }) => {
   return (
-    <TabPanelWrapper
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+    <TabPanelWrapper role="tabpanel" hidden={value !== index} {...other}>
       <Box sx={{ p: 3 }}>{children}</Box>
     </TabPanelWrapper>
   );

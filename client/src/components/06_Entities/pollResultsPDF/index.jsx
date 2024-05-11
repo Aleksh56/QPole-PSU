@@ -1,5 +1,5 @@
-import { Document, Font, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
-import { v4 } from 'uuid';
+import { Document, Font, Page, StyleSheet, Text } from '@react-pdf/renderer';
+import { useEffect, useState } from 'react';
 
 Font.register({
   family: 'Roboto',
@@ -11,102 +11,47 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#fff',
     padding: 30,
-    fontSize: 10,
     fontFamily: 'Roboto',
+    fontSize: 14,
   },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-  },
-  title: {
-    fontSize: 18,
+  header: {
+    fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10,
-    fontFamily: 'Roboto',
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
     marginBottom: 20,
-    fontFamily: 'Roboto',
-  },
-  table: {
-    display: 'table',
-    width: 'auto',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-  },
-  tableRow: {
-    margin: 'auto',
-    flexDirection: 'row',
-  },
-  tableColHeader: {
-    width: '33%',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
-  },
-  tableCol: {
-    width: '33%',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
-  },
-  tableCellHeader: {
-    margin: 'auto',
-    fontSize: 12,
-    fontWeight: 500,
-  },
-  tableCell: {
-    margin: 'auto',
-    fontSize: 10,
+    textAlign: 'center',
   },
 });
 
-const PollResultsPDF = ({ data }) => {
+const PollResultsPDF = ({ data, pollData }) => {
+  const [currentDate, setCurrentDate] = useState('');
+
+  useEffect(() => {
+    const currentISODate = new Date().toISOString().slice(0, 16);
+    setCurrentDate(currentISODate);
+  }, []);
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>Результаты опроса</Text>
-        <Text style={styles.subtitle}>Детали опроса</Text>
-        {data.map((question) => (
-          <View key={v4()} wrap={false}>
-            <Text>
-              {question.name}: Ответов - {question.votes_quantity}
-            </Text>
-            <View style={styles.table}>
-              <View style={styles.tableRow}>
-                <View style={styles.tableColHeader}>
-                  <Text style={styles.tableCellHeader}>ID</Text>
-                </View>
-                <View style={styles.tableColHeader}>
-                  <Text style={styles.tableCellHeader}>Ответ</Text>
-                </View>
-                <View style={styles.tableColHeader}>
-                  <Text style={styles.tableCellHeader}>Кол-во голосов</Text>
-                </View>
-              </View>
-              {question.answer_options.map((option) => (
-                <View key={v4()} style={styles.tableRow}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>{option.id}</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>{option.name}</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>{option.votes_quantity}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </View>
-        ))}
+        <Text style={styles.header}>Результаты опроса: {pollData.name}</Text>
+        <Text style={styles.subtitle}>
+          Результаты экспортированы: {currentDate}
+          {'\n'}Тип опроса: {pollData.poll_type.name}
+        </Text>
+        <Text style={styles.infoText}>
+          Автор опроса: {pollData.author.surname} {pollData.author.name}
+        </Text>
+        <Text style={styles.infoText}>{pollData.description}</Text>
+        <Text style={styles.infoText}>Дата начала: -</Text>
+        <Text style={styles.infoText}>Дата окончания: -</Text>
+        <Text style={styles.infoText}>Количество вопросов: {pollData.questions_quantity}</Text>
+        <Text style={styles.infoText}>Количество голосов: {pollData.participants_quantity}</Text>
+        <Text style={styles.infoText}>
+          Защита от списывания: {pollData.mix_options || pollData.mix_questions ? 'Да' : 'Нет'}
+        </Text>
       </Page>
     </Document>
   );

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 
 import { Rem } from '@/utils/convertToRem';
 
@@ -42,4 +42,10 @@ export const DescriptionTagsWrapper = styled(Box)(() => ({
   justifyContent: 'space-between',
   alignItems: 'center',
   width: '100%',
+}));
+
+export const ResultContainer = styled(Grid)(() => ({
+  marginTop: Rem(30),
+  border: '1px solid black',
+  rowGap: Rem(10),
 }));

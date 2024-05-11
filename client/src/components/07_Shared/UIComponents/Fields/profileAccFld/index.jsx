@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyledPasswordWrapper, StyledTextField, StyledTypography } from './styled';
 import { Box } from '@mui/material';
+
+import { StyledPasswordWrapper, StyledTextField, StyledTypography } from './styled';
 
 const ProfileAccFld = ({
   label = '',

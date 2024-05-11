@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 
 import { poleNavigationButtonsData } from './data/PoleNavigationButtonsData';
 
-import PollSettingsMenuNavigation from '@/components/05_Features/PollSettingsMenuNavigation';
+import PollSettingsMenuNavigation from '@/components/04_Widgets/Navigation/Menus/PollSettingsMenuNavigation';
 
 const PolePage = () => {
   return (

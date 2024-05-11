@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const MainSettingsContentWrapper = styled(Box)(() => ({
@@ -8,6 +9,22 @@ export const MainSettingsContentWrapper = styled(Box)(() => ({
   maxWidth: Rem(1200),
   margin: `${Rem(24)} auto`,
   columnGap: Rem(30),
+  '@media (max-width: 999px)': {
+    display: 'none',
+  },
+}));
+
+export const MobileSettingsContentWrapper = styled(Box)(() => ({
+  width: '100%',
+  display: 'grid',
+  backgroundColor: '#fff',
+  gridTemplateColumns: '1fr',
+  rowGap: '15px',
+  padding: '25px',
+  borderRadius: '15px',
+  '@media (min-width: 1000px)': {
+    display: 'none',
+  },
 }));
 
 export const PoleInfoContainer = styled(Box)(() => ({
