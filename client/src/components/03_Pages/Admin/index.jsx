@@ -9,7 +9,7 @@ import { StyledDrawerWrapper } from './styled';
 
 import { colorConfig } from '@/app/template/config/color.config';
 import AdmHeader from '@/components/04_Widgets/Navigation/Menus/admHeader';
-import { adminPanelSidebarLinks } from '@/data/onboardings';
+import { adminPanelSidebarLinks } from '@/data/navigation';
 
 const AdminPanelPage = () => {
   const navigate = useNavigate();

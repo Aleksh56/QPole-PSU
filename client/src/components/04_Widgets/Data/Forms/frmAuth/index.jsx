@@ -102,7 +102,7 @@ const FrmAuth = ({ isSignIn, handleFormSwitch = () => {}, handleFormSubmit = () 
             errorMessage={formErrors.password}
           >
             {isSignIn ? (
-              <button onClick={() => navigate('/password-reset')}>Забыли пароль?</button>
+              <button onClick={() => navigate('/password-reset')}>{t('button.forgotPass')}</button>
             ) : (
               ''
             )}

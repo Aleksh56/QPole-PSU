@@ -16,11 +16,11 @@ const pollDataCache = createStore(initialCache).on(updateCache, (state, { pollId
 pollDataCache.watch((state) => console.log(state));
 
 export const fetchPollDataFx = createEffect(async (pollId) => {
-  const currentCache = pollDataCache.getState();
+  // const currentCache = pollDataCache.getState();
 
-  if (currentCache[pollId]) return currentCache[pollId];
+  // if (currentCache[pollId]) return currentCache[pollId];
 
-  if (requestQueue.has(pollId)) return requestQueue.get(pollId);
+  // if (requestQueue.has(pollId)) return requestQueue.get(pollId);
 
   const fetchPromise = handleRequest('get', `/api/my_poll/?poll_id=${pollId}&detailed=0`)
     .then(({ data }) => {

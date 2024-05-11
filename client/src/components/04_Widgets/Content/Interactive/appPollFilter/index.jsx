@@ -2,14 +2,16 @@ import TuneIcon from '@mui/icons-material/Tune';
 import { Box, Button } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { filterPollsRequest } from './api/apiRequests';
 import { MobileFiltersWrapper, StyledButton, StyledStack, StyledStackWrapper } from './styled';
 
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
-import { appFilterOptions } from '@/data/fields';
+import { appFilterOptions } from '@/data/filters';
 
 const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => {} }) => {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState({
     search: '',
     poll_type: 'Все типы',
@@ -50,7 +52,7 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
           }}
         >
           <TuneIcon onClick={() => setShowMobileFilters((prev) => !prev)} />
-          <Button onClick={() => handleCreateModalOpen(true)}>Создать опрос</Button>
+          <Button onClick={() => handleCreateModalOpen(true)}>{t('button.createPoll')}</Button>
         </Box>
         <MobileFiltersWrapper show={showMobileFilters}>
           {showMobileFilters && (

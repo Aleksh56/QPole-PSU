@@ -3,6 +3,7 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import PieChartIcon from '@mui/icons-material/PieChart';
 import { Button, MenuItem, Select } from '@mui/material';
 import { Suspense, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
 
@@ -17,6 +18,7 @@ import usePollData from '@/hooks/usePollData';
 
 const PollResultsPage = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const { pollData } = usePollData(id);
   const [questions, setQuestions] = useState([]);
   const [chartType, setChartType] = useState('pie');
@@ -48,7 +50,7 @@ const PollResultsPage = () => {
             <BarChartIcon /> Bar Chart
           </MenuItem>
         </Select>
-        <Button onClick={handleDownloadClick}>Выгрузить в PDF</Button>
+        <Button onClick={handleDownloadClick}>{t('button.downloadPDF')}</Button>
         {showPDFExporter && (
           <Suspense fallback={<div>Загрузка PDF...</div>}>
             <PdfExporter

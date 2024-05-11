@@ -6,29 +6,25 @@ import { useUserRole } from './useUserRole';
 import { handleRequest } from '@/api/api';
 
 const useUserData = () => {
-  const [userData, setUserData] = useState(null);
   const { setUserRole } = useUserRole();
   const { isAuthenticated, token } = useAuth();
+  const [userData, setUserData] = useState({});
 
   useEffect(() => {
-    async function fetchUserData() {
+    const fetchUserData = async () => {
       if (!isAuthenticated) {
         console.log('Пользователь не аутентифицирован');
         return;
       }
 
-      try {
-        const headers = {
-          Authorization: `Token ${token}`,
-        };
-        const { data } = await handleRequest('get', '/api/my_profile/', null, headers);
-        console.log(data);
-        setUserRole(data.role);
-        setUserData(data);
-      } catch (error) {
-        setUserData({});
-      }
-    }
+      const headers = {
+        Authorization: `Token ${token}`,
+      };
+      const { data } = await handleRequest('get', '/api/my_profile/', null, headers);
+      setUserRole(data.role);
+      setUserData(data);
+      console.log(userData);
+    };
 
     fetchUserData();
   }, []);

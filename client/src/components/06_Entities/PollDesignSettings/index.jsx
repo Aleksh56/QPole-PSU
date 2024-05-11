@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import {
@@ -11,6 +12,7 @@ import usePollData from '@/hooks/usePollData';
 
 const PollDesignSettingsTab = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const { pollStatus } = usePollData(id);
   const { showAlert } = useAlert();
   const [poleData, setPoleData] = useState();
@@ -58,7 +60,7 @@ const PollDesignSettingsTab = () => {
   return (
     <InvisibleLabeledField
       disabled={pollStatus}
-      label="Время прохождения опроса"
+      label={t('label.completionTime')}
       type="time"
       min="00:00:00"
       max="23:59:59"

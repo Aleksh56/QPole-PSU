@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import { useUnit } from 'effector-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -7,6 +8,7 @@ import PollResult from '../PollResult';
 
 import { fetchPollQuestions } from './model/fetch-questions';
 import { sendAnswersRequestFx } from './model/send-answers';
+import { startConductionFx } from './model/start-conduction';
 import { $answersStore, resetAnswers } from './store/answer-store';
 import { ConductionBackgroundWrapper, ConductionWrapper } from './styled';
 
@@ -21,6 +23,7 @@ import { shuffleArray } from '@/utils/js/shuffleArray';
 
 const ConductionPollPage = () => {
   const { id } = useParams();
+  const cachedTime = localStorage.getItem('remainingTime');
   const { isAuthenticated, isLoading } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
@@ -42,7 +45,7 @@ const ConductionPollPage = () => {
         return;
       }
       if (data.mix_questions) data.questions = shuffleArray(data.questions);
-      setIsCollapsed(data.poll_setts?.completion_time !== null);
+      setIsCollapsed(data.poll_setts?.completion_time !== null && !cachedTime);
       setPollData(data);
     };
     pollDataRequest();
@@ -73,9 +76,16 @@ const ConductionPollPage = () => {
     }
   };
 
+  const handleTimeEnd = () => {
+    console.log('first');
+  };
+
   const handleContextMenu = (e) => e.preventDefault();
 
-  const handleStart = () => setIsCollapsed(false);
+  const handleStart = async () => {
+    localStorage.setItem('remainingTime', JSON.stringify(pollData.poll_setts.completion_time));
+    await startConductionFx({ id }).then(() => setIsCollapsed(false));
+  };
 
   return (
     <ConductionBackgroundWrapper onContextMenu={handleContextMenu}>
@@ -87,7 +97,7 @@ const ConductionPollPage = () => {
           <>
             <ConductionHeader data={pollData} />
             <AnimatePresence>
-              {!isCollapsed && (
+              {!isCollapsed && cachedTime && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -101,7 +111,10 @@ const ConductionPollPage = () => {
                     alignItems: 'center',
                   }}
                 >
-                  <Timer initialTime="00:05:00" />
+                  <Timer
+                    initialTime={pollData?.poll_setts?.completion_time}
+                    onTimeEnd={() => handleTimeEnd()}
+                  />
                   {pollData?.questions?.map((item) => (
                     <QueBlock
                       key={item.id}
@@ -121,7 +134,11 @@ const ConductionPollPage = () => {
           </>
         )}
       </ConductionWrapper>
-      {isCollapsed && <PrimaryButton caption="Начать" handleClick={handleStart} />}
+      {isCollapsed && !cachedTime && (
+        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <PrimaryButton caption="Начать" handleClick={handleStart} />
+        </Box>
+      )}
     </ConductionBackgroundWrapper>
   );
 };

@@ -54,7 +54,7 @@ const ProfileUserData = ({ caption = '', boxCaption = '', ProfileInfoFields = []
               value={fieldValues[key]}
               fieldKey={key}
               handleChange={handleFieldChange}
-              isDisabled={disabled}
+              disabled={disabled}
             />
           ))}
         </ProfileFieldsWrapper>

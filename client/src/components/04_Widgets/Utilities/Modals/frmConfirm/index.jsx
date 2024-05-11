@@ -1,18 +1,19 @@
-import React from 'react';
+import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import Button from '@mui/material/Button';
+import { useTranslation } from 'react-i18next';
 
 const FrmConfirm = ({
   open,
-  title = "Подтверждение",
-  message = "Вы уверены?",
+  title = 'Подтверждение',
+  message = 'Вы уверены?',
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   return (
     <Dialog
       open={open}
@@ -22,16 +23,14 @@ const FrmConfirm = ({
     >
       <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          {message}
-        </DialogContentText>
+        <DialogContentText id="alert-dialog-description">{message}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel} color="primary">
-          Отмена
+          {t('button.cancel')}
         </Button>
         <Button onClick={onConfirm} color="primary" autoFocus>
-          Подтвердить
+          {t('button.apply')}
         </Button>
       </DialogActions>
     </Dialog>

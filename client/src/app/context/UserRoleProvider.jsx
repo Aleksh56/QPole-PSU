@@ -9,7 +9,7 @@ export const UserRoleProvider = ({ children }) => {
 
   const contextValue = useMemo(() => ({ role, setUserRole }), [role, setUserRole]);
 
-  return <UserRoleContext.Provider value={{ contextValue }}>{children}</UserRoleContext.Provider>;
+  return <UserRoleContext.Provider value={contextValue}>{children}</UserRoleContext.Provider>;
 };
 
 export default UserRoleContext;

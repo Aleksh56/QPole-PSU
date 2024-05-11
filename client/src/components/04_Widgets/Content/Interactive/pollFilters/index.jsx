@@ -8,15 +8,17 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { applyFiltersFx } from './models/apply-filters';
 import { FiltersButton, FiltersWrapper } from './styled';
 
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
-import { appTypesFilter } from '@/data/fields';
+import { appTypesFilter } from '@/data/filters';
 
 const PollFilters = ({ setPolls }) => {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState({
     name: '',
     poll_type: '',
@@ -77,7 +79,7 @@ const PollFilters = ({ setPolls }) => {
             label="Анонимный"
           />
           <Button variant="contained" onClick={handleApplyFilters} sx={{ mt: 2 }}>
-            Применить фильтры
+            {t('button.applyFilters')}
           </Button>
         </FormGroup>
       )}

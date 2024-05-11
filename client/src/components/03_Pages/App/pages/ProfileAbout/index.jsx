@@ -11,8 +11,8 @@ import ProfileUserData from '@/components/04_Widgets/Content/Interactive/profile
 import useUserData from '@/hooks/useUserData';
 
 const ProfileAboutPage = () => {
-  const navigate = useNavigate();
   const userData = useUserData();
+  const navigate = useNavigate();
 
   const profileInfoFields = userData
     ? ProfileInfoFieldsConfig.map((field) => ({
@@ -22,6 +22,8 @@ const ProfileAboutPage = () => {
           : userData[field.key],
       }))
     : [];
+
+  console.log(userData);
 
   return (
     <StyledProfileAboutWrapper>

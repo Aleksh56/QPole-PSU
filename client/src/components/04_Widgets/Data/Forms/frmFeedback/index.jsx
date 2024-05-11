@@ -1,12 +1,14 @@
 import SendIcon from '@mui/icons-material/Send';
 import { Box, Button, MenuItem, TextField } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { sendTicketFx } from './model/send-ticket';
 
 import { useAlert } from '@/hooks/useAlert';
 
 const FrmFeedback = () => {
+  const { t } = useTranslation();
   const { showAlert } = useAlert();
   const [message, setMessage] = useState('');
   const [type, setType] = useState('');
@@ -43,22 +45,6 @@ const FrmFeedback = () => {
         <MenuItem value="Обращение">Предложение</MenuItem>
         <MenuItem value="Вопрос">Вопрос</MenuItem>
       </TextField>
-      {/* <TextField
-        label="Электронная почта"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        fullWidth
-        margin="normal"
-      />
-      <TextField
-        label="ФИО"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-        fullWidth
-        margin="normal"
-      /> */}
       <TextField
         label="Сообщение"
         value={message}
@@ -71,7 +57,7 @@ const FrmFeedback = () => {
         inputProps={{ minLength: 10 }}
       />
       <Button type="submit" variant="contained" startIcon={<SendIcon />} sx={{ mt: 2 }}>
-        Отправить
+        {t('button.send')}
       </Button>
     </Box>
   );

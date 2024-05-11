@@ -4,6 +4,7 @@ import { MenuItem } from '@mui/base/MenuItem';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Button } from '@mui/material';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -17,12 +18,13 @@ import {
 
 import AppHeaderNavOut from '@/components/05_Features/DataDisplay/Out/appHeaderNavOut';
 import AppBurgerMenu from '@/components/05_Features/UIComponents/Layouts/appBurger';
-import { appHeaderData } from '@/data/fields';
+import { appHeaderData } from '@/data/navigation';
 import useAuth from '@/hooks/useAuth';
 import useUserData from '@/hooks/useUserData';
 import { useUserRole } from '@/hooks/useUserRole';
 
 const AppHeader = () => {
+  const { t } = useTranslation();
   const { role } = useUserRole();
   const { setAuth } = useAuth();
   const navigate = useNavigate();
@@ -63,14 +65,16 @@ const AppHeader = () => {
           <Menu slots={{ listbox: Listbox }}>
             {role === 'Админ' && (
               <MenuItem>
-                <Button onClick={() => navigate('/admin-panel')}> Админ-панель</Button>
+                <Button onClick={() => navigate('/admin-panel')}>
+                  {t('navigation.adminPanel')}
+                </Button>
               </MenuItem>
             )}
             <MenuItem>
-              <Button onClick={() => navigate('/app/profile')}>Профиль</Button>
+              <Button onClick={() => navigate('/app/profile')}>{t('navigation.profile')}</Button>
             </MenuItem>
             <MenuItem>
-              <Button onClick={() => handleLogOut()}>Выйти из аккаунта</Button>
+              <Button onClick={() => handleLogOut()}>{t('navigation.logOut')}</Button>
             </MenuItem>
           </Menu>
         </Dropdown>

@@ -9,6 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -32,6 +33,7 @@ import usePollData from '@/hooks/usePollData';
 
 const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const [editedQuestion, setEditedQuestion] = useState(question);
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState([]);
@@ -267,7 +269,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
                 onClick={() => handleAddOption()}
                 disabled={pollStatus}
               >
-                Добавить ответ
+                {t('button.addAnswer')}
               </button>
               {!isFreeResponse && (
                 <>
@@ -277,7 +279,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
                     onClick={() => handleAddOption('is_free')}
                     disabled={pollStatus}
                   >
-                    Добавить "Другое"
+                    {t('button.addFreeAnswer')}
                   </button>
                 </>
               )}

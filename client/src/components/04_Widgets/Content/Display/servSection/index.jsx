@@ -1,8 +1,10 @@
-import React from 'react';
-import { StyledCardsWrapper, StyledSection, StyledSectionHeading } from './styled';
-import ServicesCard from '../../../../06_Entities/ServicesCard';
 import { v4 } from 'uuid';
-import { servicesCardsData } from '@/data/fields';
+
+import ServicesCard from '../../../../06_Entities/ServicesCard';
+
+import { StyledCardsWrapper, StyledSection, StyledSectionHeading } from './styled';
+
+import { servicesCardsData } from '@/data/services';
 
 const ServSection = () => {
   return (

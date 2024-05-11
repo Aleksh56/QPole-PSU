@@ -13,7 +13,7 @@ import {
   UserWrapper,
 } from './styled';
 
-import { appHeaderData } from '@/data/fields';
+import { appHeaderData } from '@/data/navigation';
 
 const AppBurgerMenu = ({ drawerOpen, toggleDrawer, userData, role }) => {
   return (

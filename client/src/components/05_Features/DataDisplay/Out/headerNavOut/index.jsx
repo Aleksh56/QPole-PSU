@@ -1,14 +1,14 @@
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Box, Drawer, IconButton, List, ListItem } from '@mui/material';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 } from 'uuid';
 
 import { StyledNavigation, StyledNavigationLink } from './styled';
 
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
-import { commonHeaderLinksData } from '@/data/fields';
+import { commonHeaderLinksData } from '@/data/navigation';
 import useAuth from '@/hooks/useAuth';
 
 const HeaderNavOut = ({ children, isMobile }) => {

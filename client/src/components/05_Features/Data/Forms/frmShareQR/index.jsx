@@ -3,10 +3,12 @@ import { Box } from '@mui/system';
 import FileSaver from 'file-saver';
 import QRCode from 'qrcode.react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 const FrmShareQR = () => {
   const { id } = useParams();
+  const { t } = useTranslation();
   const [surveyLink, setSurveyLink] = useState('');
 
   useEffect(() => {
@@ -26,7 +28,7 @@ const FrmShareQR = () => {
   return (
     <Box>
       <QRCode id="qrCodeEl" value={surveyLink} size={256} level={'H'} includeMargin={true} />
-      <Button onClick={downloadQR}>Скачать QR-код</Button>
+      <Button onClick={downloadQR}>{t('button.downloadQR')}</Button>
     </Box>
   );
 };

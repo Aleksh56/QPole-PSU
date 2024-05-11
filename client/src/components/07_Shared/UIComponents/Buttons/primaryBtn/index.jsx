@@ -7,14 +7,17 @@ const PrimaryButton = ({
   handleClick = () => {},
   to,
   disabled = false,
+  style = {},
   ...linkProps
 }) => {
   const buttonElement = to ? (
     <Link to={to} {...linkProps}>
-      <StyledButton onClick={handleClick}>{caption}</StyledButton>
+      <StyledButton onClick={handleClick} style={style}>
+        {caption}
+      </StyledButton>
     </Link>
   ) : (
-    <StyledButton onClick={handleClick} disabled={disabled}>
+    <StyledButton onClick={handleClick} disabled={disabled} style={style}>
       {caption}
     </StyledButton>
   );

@@ -6,7 +6,7 @@ import { v4 } from 'uuid';
 
 import { FiltersWrapper } from './styled';
 
-import { admUsrsFilterCategories } from '@/data/fields';
+import { admUsrsFilterCategories } from '@/data/filters';
 
 const AdmUsrFilters = () => {
   const [anchorEl, setAnchorEl] = useState(null);

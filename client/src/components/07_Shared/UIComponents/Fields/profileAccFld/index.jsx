@@ -12,7 +12,6 @@ const ProfileAccFld = ({
   disabled = false,
   children,
   fieldKey,
-  isDisabled = false,
 }) => {
   return (
     <>
@@ -34,7 +33,6 @@ const ProfileAccFld = ({
           name={id}
           autoFocus
           value={value}
-          disabled={isDisabled}
           onChange={(e) => handleChange && handleChange(fieldKey, e.target.value)}
         />
       </Box>
