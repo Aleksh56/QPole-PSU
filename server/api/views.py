@@ -1293,7 +1293,7 @@ def poll_voting_started(request):
                 
                 my_answer.poll = poll
 
-                serializer = PollVotingResultSerializer(my_answer)
+                serializer = PollAnswerGroupSerializer(my_answer)
                 return Response(serializer.data)
             
             else:

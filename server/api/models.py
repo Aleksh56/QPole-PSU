@@ -474,9 +474,9 @@ class QuickVotingForm(models.Model):
 
     date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        if self.poll_answer_group.poll:
-            return f"Форма авторизции на {self.poll_answer_group.poll}"
+    # def __str__(self):
+    #     if self.poll_answer_group.poll:
+    #         return f"Форма авторизции на {self.poll_answer_group.poll}"
 
 
 class PollRegistration(models.Model):
@@ -538,5 +538,7 @@ def format_time(seconds):
     minutes, seconds = divmod(remainder, 60)
     
     # Форматируем строку
-    time_string = f"{int(days)} {int(hours)}:{int(minutes):02}:{int(seconds):02}"
+    time_string = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
     return time_string
+
+

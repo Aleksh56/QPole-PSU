@@ -133,10 +133,14 @@ class PollAnswerGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     voting_time_left = serializers.SerializerMethodField()
+    voting_time_left_str = serializers.SerializerMethodField()
 
     def get_voting_time_left(self, instance):
         return instance.voting_time_left
         
+    def get_voting_time_left_str(self, instance):
+        return format_time(instance.voting_time_left)
+    
 
     def get_author(self, instance):
         return MiniProfileSerializer(instance=instance.profile).data
