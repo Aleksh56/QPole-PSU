@@ -341,9 +341,9 @@ class Poll(models.Model):
         return None
 
     def has_user_started_voting(self, user_profile):
-        active_voting = [answer for answer in self.user_answers.all() if answer.profile == user_profile][-1] or None
-        if active_voting:
-            return not active_voting.is_finished
+        active_voting = [answer for answer in self.user_answers.all() if answer.profile == user_profile] or None
+        if active_voting and not active_voting == []:
+            return not active_voting[-1].is_finished
         else:
             return False    
  
