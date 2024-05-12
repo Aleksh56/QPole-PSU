@@ -1326,12 +1326,28 @@ def poll_voting_started(request):
                         Q(poll=poll) & Q(profile=my_profile)      
                     ).first()
                     if to_delete:
+                        if not to_delete.voting_time_left == 0:
+                            active_voting = PollAnswerGroupSerializer(to_delete).data
+                            return Response({'message':'У вас уже есть незавершенное голосование.', 'data': active_voting})
+
                         to_delete.delete()
-                    to_delete = PollParticipantsGroup.objects.filter(
-                        Q(poll=poll) & Q(profile=my_profile)      
-                    ).first()
-                    if to_delete:
-                        to_delete.delete()
+
+                        to_delete = PollParticipantsGroup.objects.filter(
+                            Q(poll=poll) & Q(profile=my_profile)      
+                        ).first()
+                        if to_delete:
+                            to_delete.delete()
+
+            poll_participant_group_data = {
+                'profile': my_profile,
+                'poll': poll.id,
+            }
+            serializer = PollParticipantsGroupSerializer(data=poll_participant_group_data)
+            if serializer.is_valid():
+                poll_participant_group = serializer.save()
+            else:
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)      
 
             poll_answer_group_data = {
                 'profile': my_profile,

@@ -98,8 +98,8 @@ class PollAnswerGroup(models.Model):
         return 0            
 
 
-    def __str__(self):
-        return f"Группа ответов на {self.poll} от {self.profile}"
+    # def __str__(self):
+    #     return f"Группа ответов на {self.poll} от {self.profile}"
 
 
 class PollParticipantsGroup(models.Model):
