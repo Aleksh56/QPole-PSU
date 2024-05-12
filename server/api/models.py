@@ -4,6 +4,10 @@ from django.utils import timezone
 
 from .exсeptions import *
 
+import logging
+logger = logging.getLogger('debug') 
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, verbose_name='Пользователь')
     email = models.EmailField('Почта', blank=True, null=True)

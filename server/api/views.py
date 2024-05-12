@@ -1271,7 +1271,7 @@ def poll_voting(request):
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting_started(request):
-    # try:
+    try:
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
 
@@ -1280,7 +1280,6 @@ def poll_voting_started(request):
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
-
             if poll_id:
                 my_answer = PollAnswerGroup.objects.filter(
                     Q(profile=my_profile) & Q(poll__poll_id=poll_id)
@@ -1288,13 +1287,13 @@ def poll_voting_started(request):
 
                 poll = Poll.my_manager.get_one(Q(author=my_profile) & Q(poll_id=poll_id))
 
-                if not my_answer:
-                    raise ObjectNotFoundException(model='PollAnswerGroup')
-                
-                my_answer.poll = poll
+                if my_answer:
+                    my_answer.poll = poll
 
-                serializer = PollAnswerGroupSerializer(my_answer)
-                return Response(serializer.data)
+                    serializer = PollAnswerGroupSerializer(my_answer)
+                    return Response(serializer.data)
+                else:
+                    return Response([])
             
             else:
                 my_answers = PollAnswerGroup.objects.filter(profile=my_profile)
@@ -1362,20 +1361,20 @@ def poll_voting_started(request):
                 return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST) 
 
     
-    # except APIException as api_exception:
-    #     return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
-    # except Exception as ex:
-    #     logger.error(f"Внутренняя ошибка сервера в poll_voting_started: {ex}")
-    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting_started: {ex}"},
-    #                      status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_voting_started: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в poll_voting_started: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
     
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
 def poll_voting_ended(request):
-    # try:
+    try:
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
 
@@ -1397,7 +1396,7 @@ def poll_voting_ended(request):
             raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
 
 
-        answers = get_data_or_400(data, 'answers')
+        answers = data.get('answers', [])
         
         # валидация и парсинг ответов
         raw_answers = None
@@ -1426,13 +1425,13 @@ def poll_voting_ended(request):
         return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK) 
 
     
-    # except APIException as api_exception:
-    #     return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
 
-    # except Exception as ex:
-    #     logger.error(f"Внутренняя ошибка сервера в poll_voting_ended: {ex}")
-    #     return Response({'message':f"Внутренняя ошибка сервера в poll_voting_ended: {ex}"},
-    #                      status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_voting_ended: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в poll_voting_ended: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
