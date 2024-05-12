@@ -302,7 +302,7 @@ def serializer_errors_wrapper(errors):
     except Exception:
         return errors
     
-from .exсeptions import MissingFieldException, MissingParameterException, ObjectNotFoundException
+from .exсeptions import MissingFieldException, MissingParameterException, ObjectNotFoundException, AccessDeniedException
 
 def get_data_or_400(data, data_field_name):
     data_field = data.get(data_field_name, None)
@@ -350,3 +350,53 @@ def get_profile_to_context(my_profile=None):
 #         data = serializer_errors_wrapper(serializer.errors)
 #         return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)  
 
+from django.db.models import Q
+from .models import PollAnswerGroup, PollParticipantsGroup
+
+def unmake_last_answer_latest(poll, my_profile):
+    to_ummake_latest = PollAnswerGroup.objects.filter(
+                        Q(poll=poll) & Q(profile=my_profile) & Q(is_latest=True)
+                    ).first()
+    if to_ummake_latest:
+        to_ummake_latest.is_latest = False
+        to_ummake_latest.save()
+    to_ummake_latest = PollParticipantsGroup.objects.filter(
+        Q(poll=poll) & Q(profile=my_profile) & Q(is_latest=True) 
+    ).first()
+    if to_ummake_latest:
+        to_ummake_latest.is_latest = False
+        to_ummake_latest.save()
+
+def has_user_participated_in_poll_too_many_times(poll, my_profile):
+    poll_max_revotes_quantity = poll.poll_setts.max_revotes_quantity
+    if not poll_max_revotes_quantity == 0:
+        return poll.user_participations.filter(profile=my_profile).count() >= poll_max_revotes_quantity
+    elif poll_max_revotes_quantity == None:
+        return False
+    else:
+        return True
+
+
+        
+        
+def check_if_user_is_allowed_to_vote(poll, user_profile):
+    if not poll.opened_for_voting:
+        raise AccessDeniedException(detail='Голосование еще не началось или уже завершилось')
+
+    if poll.is_registration_demanded and not poll.is_user_registrated(user_profile):
+        raise AccessDeniedException(detail='Вы еще не зарегистрировались на опрос')
+
+    allowed_groups = poll.allowed_groups.all()
+    if not allowed_groups == [] and not user_profile.group in allowed_groups:
+        raise AccessDeniedException(detail='Вы не принадлежите группе, которая может проходить данный опрос.')
+
+    if poll.has_user_participated_in(user_profile):
+        if not poll.is_revote_allowed:
+            raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
+        if has_user_participated_in_poll_too_many_times(poll, user_profile):
+            raise AccessDeniedException(detail="Вы достигли предела максимального количества прохождений опроса.")
+        
+    
+
+    
+    return True

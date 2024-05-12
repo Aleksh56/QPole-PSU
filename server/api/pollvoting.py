@@ -137,10 +137,11 @@ def quizz_voting_handler(answers, poll, is_full=True):
 
 
 def save_votes(answers, poll, my_profile, quick_voting_form, raw_answers,
-                                                poll_answer_group=None):
+               poll_answer_group=None, poll_participation_group=None):
     if not poll_answer_group:
         poll_answer_group_data = {
                     'poll': poll.id,
+                    'is_finished':True
         }
         
         if not poll.poll_type.name in ('Анонимный', 'Быстрый'):
@@ -153,27 +154,28 @@ def save_votes(answers, poll, my_profile, quick_voting_form, raw_answers,
             poll_answer_group = poll_answer_group.save()
         else:
             raise MyCustomException(detail=poll_answer_group.errors)
-    
     else:
         poll_answer_group = poll_answer_group
 
-    poll_participation_group_data = {
-            'poll': poll.id,
-        }
+    if not poll_participation_group:
+        poll_participation_group_data = {
+                'poll': poll.id,
+                'is_latest': True,
+            }
 
-    if not poll.poll_type.name in ("Быстрый"):
-        poll_participation_group_data['profile'] = my_profile.user_id
-        poll_participation_group_data['quick_voting_form'] = None
-    else:
-        poll_participation_group_data['quick_voting_form'] = quick_voting_form.id
-        poll_participation_group_data['profile'] = None
+        if not poll.poll_type.name in ("Быстрый"):
+            poll_participation_group_data['profile'] = my_profile.user_id
+            poll_participation_group_data['quick_voting_form'] = None
+        else:
+            poll_participation_group_data['quick_voting_form'] = quick_voting_form.id
+            poll_participation_group_data['profile'] = None
 
-    poll_participation_group = PollParticipantsGroupSerializer(data=poll_participation_group_data)
-    if poll_participation_group.is_valid():
-        poll_participation_group = poll_participation_group.save()
-    else:
-        raise MyCustomException(detail=poll_participation_group.errors)
-    
+        poll_participation_group = PollParticipantsGroupSerializer(data=poll_participation_group_data)
+        if poll_participation_group.is_valid():
+            poll_participation_group = poll_participation_group.save()
+        else:
+            raise MyCustomException(detail=poll_participation_group.errors)
+
     data = answers
     # Получите все вопросы в один запрос
     poll_questions = poll.questions.all()

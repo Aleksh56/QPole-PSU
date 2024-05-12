@@ -85,6 +85,8 @@ class PollAnswerGroup(models.Model):
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
 
     voting_date = models.DateTimeField(auto_now_add=True)
+    is_finished = models.BooleanField(default=True)
+    is_latest = models.BooleanField(default=True)
 
     @property
     def voting_time_left(self):
@@ -110,7 +112,7 @@ class PollParticipantsGroup(models.Model):
     profile = models.ForeignKey(Profile, related_name='participation_groups', on_delete=models.CASCADE, null=True)
     quick_voting_form = models.ForeignKey('QuickVotingForm', related_name='participation_groups', on_delete=models.CASCADE, null=True)
     poll = models.ForeignKey('Poll', related_name='user_participations', on_delete=models.CASCADE)
-
+    is_latest = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Группа ответов на {self.poll} от {self.profile}"
@@ -190,6 +192,24 @@ class MyPollManager(models.Manager):
         
         return objects
 
+    def get_all_with_answers(self, filters):
+        """Получение всех опросов с ответами"""
+        objects = (
+            super().get_queryset()
+            .select_related('author', 'author__user', 'author__group')
+            .select_related('poll_type', 'poll_setts')
+            .prefetch_related('allowed_groups')
+            .prefetch_related(
+                models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
+                                                .select_related('profile')))
+            .prefetch_related('user_participations')
+            .prefetch_related('questions')
+            .filter(filters)
+            .order_by('-created_date')   
+        )
+        
+        return objects
+    
     def get_one(self, filters):
         """Получение опроса по `filters`"""
         object = (
@@ -321,20 +341,16 @@ class Poll(models.Model):
         return None
 
     def has_user_started_voting(self, user_profile):
-        active_voting = self.user_answers.filter(profile=user_profile).first()
+        active_voting = [answer for answer in self.user_answers.all() if answer.profile == user_profile][-1] or None
         if active_voting:
-            voting_time_left = active_voting.voting_time_left
-            if not voting_time_left == 0:
-                return True
-            else:
-                return False
+            return not active_voting.is_finished
         else:
-            return False     
+            return False    
  
     
     @property
     def participants_quantity(self):   # число участников опроса
-        return self.user_participations.count()
+        return self.user_participations.values('profile_id').distinct().count()
 
     @property
     def questions_quantity(self):   # число вопросов опроса

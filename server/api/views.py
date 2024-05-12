@@ -463,7 +463,7 @@ def my_poll_stats(request):
 
             poll_user_answers = (
                 poll.all_answers
-                .filter(poll_answer_group__poll=poll)
+                .filter(poll_answer_group__poll=poll, poll_answer_group__is_latest=True, poll_answer_group__is_finished=True)
                 .select_related('question', 'answer_option', 'poll_answer_group__profile')
             )
 
@@ -1169,34 +1169,12 @@ def poll_voting(request):
             data = request.data.copy()
 
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
-           
             poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
-
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
-            if not poll.opened_for_voting:
-                raise AccessDeniedException(detail='Голосование еще не началось или уже завершилось')
-
-            if poll.is_registration_demanded:
-                if not poll.is_user_registrated(my_profile):
-                    raise AccessDeniedException(detail='Вы еще не зарегистрировались на опрос')
-
-            if poll.has_user_participated_in(my_profile):
-                if not poll.is_revote_allowed:
-                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
-                else:
-                    to_delete = PollAnswerGroup.objects.filter(
-                        Q(poll=poll) & Q(profile=my_profile)      
-                    ).first()
-                    if to_delete:
-                        to_delete.delete()
-                    to_delete = PollParticipantsGroup.objects.filter(
-                        Q(poll=poll) & Q(profile=my_profile)      
-                    ).first()
-                    if to_delete:
-                        to_delete.delete()
-                  
+            check_if_user_is_allowed_to_vote(poll, my_profile)
+            
             answers = get_data_or_400(data, 'answers')
             
             # валидация и парсинг ответов
@@ -1208,7 +1186,7 @@ def poll_voting(request):
             else:
                 raise MyCustomException(detail="Данного типа опроса не существует")
 
-
+            unmake_last_answer_latest(poll, my_profile)
             poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, None, raw_answers)
 
         
@@ -1280,21 +1258,24 @@ def poll_voting_started(request):
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
+
             if poll_id:
-                my_answer = PollAnswerGroup.objects.filter(
-                    Q(profile=my_profile) & Q(poll__poll_id=poll_id)
-                ).select_related('poll').prefetch_related('answers').first()
+                latest_answer = PollAnswerGroup.objects.filter(
+                    Q(poll__poll_id=poll_id) & Q(profile=my_profile) & Q(is_latest=True)     
+                ).prefetch_related('answers').first()
 
-                poll = Poll.my_manager.get_one(Q(author=my_profile) & Q(poll_id=poll_id))
-
-                if my_answer:
-                    my_answer.poll = poll
-
-                    serializer = PollAnswerGroupSerializer(my_answer)
-                    return Response(serializer.data)
-                else:
-                    return Response([])
-            
+                if latest_answer:
+                    if not latest_answer.is_finished:
+                        if latest_answer.voting_time_left == 0:
+                            serializer = PollAnswerGroupSerializer(latest_answer)
+                            return Response({'message':'Время на ответ вышло.', 'data': serializer.data})
+                        else:
+                            serializer = PollAnswerGroupSerializer(latest_answer)
+                            return Response({'message':'У вас уже есть незавершенное голосование.', 'data': serializer.data})
+                    
+                return Response({'message':'У вас нет активного голосования.', 'data': None})
+                
+                        
             else:
                 my_answers = PollAnswerGroup.objects.filter(profile=my_profile)
                 serializer = PollVotingResultSerializer(my_answers, many=True)
@@ -1310,36 +1291,25 @@ def poll_voting_started(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
-            if not poll.opened_for_voting:
-                raise AccessDeniedException(detail='Голосование еще не началось или уже завершилось')
+            check_if_user_is_allowed_to_vote(poll, my_profile)
+             
+            latest_answer = PollAnswerGroup.objects.filter(
+                Q(poll=poll) & Q(profile=my_profile) & Q(is_latest=True)     
+            ).first()
+            if latest_answer:
+                if not latest_answer.is_finished:
+                    if not latest_answer.voting_time_left == 0:
+                        active_voting = PollAnswerGroupSerializer(latest_answer).data
+                        return Response({'message':'У вас уже есть незавершенное голосование.', 'data': active_voting})
+                    else:
+                        active_voting = PollAnswerGroupSerializer(latest_answer).data
+                        return Response({'message':'Время на ответ вышло.', 'data': active_voting})
 
-            if poll.is_registration_demanded:
-                if not poll.is_user_registrated(my_profile):
-                    raise AccessDeniedException(detail='Вы еще не зарегистрировались на опрос')
-
-            if poll.has_user_participated_in(my_profile):
-                if not poll.is_revote_allowed:
-                    raise AccessDeniedException(detail="Вы уже принимали участие в этом опросе.")
-                else:
-                    to_delete = PollAnswerGroup.objects.filter(
-                        Q(poll=poll) & Q(profile=my_profile)      
-                    ).first()
-                    if to_delete:
-                        if not to_delete.voting_time_left == 0:
-                            active_voting = PollAnswerGroupSerializer(to_delete).data
-                            return Response({'message':'У вас уже есть незавершенное голосование.', 'data': active_voting})
-
-                        to_delete.delete()
-
-                        to_delete = PollParticipantsGroup.objects.filter(
-                            Q(poll=poll) & Q(profile=my_profile)      
-                        ).first()
-                        if to_delete:
-                            to_delete.delete()
-
+            unmake_last_answer_latest(poll, my_profile)
             poll_participant_group_data = {
                 'profile': my_profile,
                 'poll': poll.id,
+                'is_latest': True,
             }
             serializer = PollParticipantsGroupSerializer(data=poll_participant_group_data)
             if serializer.is_valid():
@@ -1351,6 +1321,8 @@ def poll_voting_started(request):
             poll_answer_group_data = {
                 'profile': my_profile,
                 'poll': poll.id,
+                'is_finished': False,
+                'is_latest': True,
             }
             serializer = PollAnswerGroupSerializer(data=poll_answer_group_data)
             if serializer.is_valid():
@@ -1375,27 +1347,32 @@ def poll_voting_started(request):
 @transaction.atomic
 def poll_voting_ended(request):
     try:
+        data = request.data.copy()
+
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
-
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
 
-        
-        data = request.data.copy()
-
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
-        
         poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
-
         if not poll:
             raise ObjectNotFoundException(model='Poll')
 
-        poll_answer_group = PollAnswerGroup.objects.filter(poll=poll, profile=my_profile).first()
+        poll_answer_group = PollAnswerGroup.objects.filter(poll=poll, profile=my_profile,
+                                                           is_finished=False).first()
         if not poll_answer_group:
             raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
-
-
+        else:
+            poll_answer_group.is_finished = True
+            poll_answer_group.save()
+            
+        poll_participation_group = PollParticipantsGroup.objects.filter(poll=poll, profile=my_profile,
+                                                                        is_latest=True).first()
+        if not poll_participation_group:
+            raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
+        
+            
         answers = data.get('answers', [])
         
         # валидация и парсинг ответов
@@ -1409,17 +1386,16 @@ def poll_voting_ended(request):
 
 
         _, answers, _ = save_votes(answers, poll, my_profile, None, raw_answers,
-                                                poll_answer_group=poll_answer_group)
+                                                poll_answer_group=poll_answer_group,
+                                                poll_participation_group=poll_participation_group)
 
         my_answer = PollAnswerGroup.objects.filter(
                 Q(profile=my_profile) & Q(poll__poll_id=poll_id)
             ).select_related('profile').prefetch_related('answers').first()
-
         if not my_answer:
             raise ObjectNotFoundException(model='PollAnswerGroup')
-        
-        my_answer.poll = poll
 
+        my_answer.poll = poll
         serializer = PollVotingResultSerializer(my_answer)
                     
         return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK) 
@@ -1527,8 +1503,9 @@ def poll(request):
                     filters &= Q(is_closed=is_closed)
 
 
-                polls = Poll.my_manager.get_all(filters)
-                   
+                polls = Poll.my_manager.get_all_with_answers(filters)
+                polls = [poll for poll in polls if poll.opened_for_voting and not poll.allowed_groups.all()]
+
                 context = get_profile_to_context(my_profile)
                 pagination_data = get_paginated_response(request, polls, MiniPollSerializer, context=context)
                 return Response(pagination_data)
