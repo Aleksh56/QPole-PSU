@@ -13,10 +13,7 @@ const Timer = ({ initialTime, onTimeEnd }) => {
     return [hours, minutes, seconds].map((val) => val.toString().padStart(2, '0')).join(':');
   };
 
-  const [timeInSeconds, setTimeInSeconds] = useState(() => {
-    const savedTime = localStorage.getItem('remainingTime');
-    return savedTime ? parseTime(JSON.parse(savedTime)) : parseTime(initialTime);
-  });
+  const [timeInSeconds, setTimeInSeconds] = useState(() => parseTime(initialTime));
 
   useEffect(() => {
     if (timeInSeconds === 0) {

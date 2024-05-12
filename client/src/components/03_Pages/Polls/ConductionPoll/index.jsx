@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import PollResult from '../PollResult';
 
 import { fetchPollQuestions } from './model/fetch-questions';
+import { getRemainingTimeFx } from './model/get-remaining-time';
 import { sendAnswersRequestFx } from './model/send-answers';
 import { startConductionFx } from './model/start-conduction';
 import { $answersStore, resetAnswers } from './store/answer-store';
@@ -34,12 +35,14 @@ const ConductionPollPage = () => {
   const [isTextLong, setIsTextLong] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(true);
+  const [remainingTime, setRemainingTime] = useState(pollData?.poll_setts?.completion_time || '');
 
   useEffect(() => {
     if (isLoading) return;
     const pollDataRequest = async () => {
       resetAnswers();
       const data = await fetchPollQuestions(id);
+      setRemainingTime(data?.poll_setts?.completion_time);
       if ((!data.is_revote_allowed && data.has_user_participated_in) || isAuthenticated === false) {
         navigate('/polls');
         return;
@@ -50,6 +53,13 @@ const ConductionPollPage = () => {
     };
     pollDataRequest();
   }, [isLoading, isAuthenticated, id]);
+
+  useEffect(() => {
+    const getRemainingTime = async () => {
+      await getRemainingTimeFx({ id }).then((res) => setRemainingTime(res.voting_time_left_str));
+    };
+    getRemainingTime();
+  }, [pollData]);
 
   useEffect(() => {
     const requiredQuestions = pollData.questions
@@ -63,22 +73,33 @@ const ConductionPollPage = () => {
     setIsSubmitEnabled(areAllRequiredAnswered);
   }, [pollData.questions, answers]);
 
-  const handleSubmit = async () => {
-    const response = await sendAnswersRequestFx({ answers, id });
+  const handleSubmit = async (isTimeEnd = false) => {
+    const response = await sendAnswersRequestFx({ answers, id, isTimeEnd });
     setResults(response.data);
     if (response.data.poll_type !== 'Викторина') {
-      showAlert('Ваш голос успешно записан!', 'success');
+      if (isTimeEnd) {
+        showAlert(
+          'Время прохождения опроса вышло. Отмеченные варианты ответов были записаны !',
+          'info',
+        );
+      } else {
+        showAlert('Ваш голос успешно записан!', 'success');
+      }
       setTimeout(() => {
         navigate('/polls');
       }, 1500);
     } else {
+      if (isTimeEnd) {
+        showAlert(
+          'Время прохождения опроса вышло. Отмеченные варианты ответов были записаны !',
+          'info',
+        );
+      }
       setShowResults(true);
     }
   };
 
-  const handleTimeEnd = () => {
-    console.log('first');
-  };
+  const handleTimeEnd = async () => await handleSubmit(true);
 
   const handleContextMenu = (e) => e.preventDefault();
 
@@ -111,10 +132,7 @@ const ConductionPollPage = () => {
                     alignItems: 'center',
                   }}
                 >
-                  <Timer
-                    initialTime={pollData?.poll_setts?.completion_time}
-                    onTimeEnd={() => handleTimeEnd()}
-                  />
+                  <Timer initialTime={remainingTime} onTimeEnd={() => handleTimeEnd()} />
                   {pollData?.questions?.map((item) => (
                     <QueBlock
                       key={item.id}
