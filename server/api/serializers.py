@@ -313,6 +313,7 @@ class BasePollSerializer(serializers.ModelSerializer):
     opened_for_registration = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()
     is_user_registrated = serializers.SerializerMethodField()
+    has_user_started_voting = serializers.SerializerMethodField()
 
     start_time_left = serializers.SerializerMethodField()
     end_time_left = serializers.SerializerMethodField()
@@ -348,6 +349,10 @@ class BasePollSerializer(serializers.ModelSerializer):
         profile = self.context.get('profile')
         return instance.has_user_participated_in(profile)
 
+    def get_has_user_started_voting(self, instance):
+        profile = self.context.get('profile')
+        return instance.has_user_started_voting(profile)
+    
     def get_is_user_registrated(self, instance):
         profile = self.context.get('profile')
         return instance.is_user_registrated(profile)

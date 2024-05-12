@@ -98,8 +98,8 @@ class PollAnswerGroup(models.Model):
         return 0            
 
 
-    # def __str__(self):
-    #     return f"Группа ответов на {self.poll} от {self.profile}"
+    def __str__(self):
+        return f"Группа ответов на {self.poll} от {self.profile}"
 
 
 class PollParticipantsGroup(models.Model):
@@ -316,6 +316,17 @@ class Poll(models.Model):
         
         return None
 
+    def has_user_started_voting(self, user_profile):
+        active_voting = self.user_answers.filter(profile=user_profile).first()
+        if active_voting:
+            voting_time_left = active_voting.voting_time_left
+            if not voting_time_left == 0:
+                return True
+            else:
+                return False
+        else:
+            return False     
+ 
     
     @property
     def participants_quantity(self):   # число участников опроса
