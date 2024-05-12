@@ -387,8 +387,9 @@ def check_if_user_is_allowed_to_vote(poll, user_profile):
         raise AccessDeniedException(detail='Вы еще не зарегистрировались на опрос')
 
     allowed_groups = poll.allowed_groups.all()
-    if not allowed_groups == [] and not user_profile.group in allowed_groups:
-        raise AccessDeniedException(detail='Вы не принадлежите группе, которая может проходить данный опрос.')
+    if allowed_groups:
+        if not user_profile.group in allowed_groups:
+            raise AccessDeniedException(detail='Вы не принадлежите группе, которая может проходить данный опрос.')
 
     if poll.has_user_participated_in(user_profile):
         if not poll.is_revote_allowed:
