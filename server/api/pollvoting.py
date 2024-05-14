@@ -2,6 +2,7 @@ from .exсeptions import *
 from .serializers import PollAnswerGroupSerializer, PollParticipantsGroupSerializer
 from .models import PollAnswer
 
+from datetime import datetime
 from .utils import PollVoting
 from qpoll.settings import w3, contract
 
@@ -141,7 +142,8 @@ def save_votes(answers, poll, my_profile, quick_voting_form, raw_answers,
     if not poll_answer_group:
         poll_answer_group_data = {
                     'poll': poll.id,
-                    'is_finished':True
+                    'is_finished':True,
+                    'voting_end_date': datetime.now()
         }
         
         if not poll.poll_type.name in ('Анонимный', 'Быстрый'):

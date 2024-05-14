@@ -114,8 +114,8 @@ class BasePollSettingsValidator(BaseValidator):
     
     def start_time(value):
         current_time = datetime.now(value.tzinfo)
-        if value < current_time:
-            raise ValidationError("Время начала не может быть раньше текущего времени.")
+        if value + timedelta(minutes=10) < current_time:
+            raise ValidationError("Время начала не может быть раньше текущего времени более чем на 10 минут.")
         
     def end_time(value):
         current_time = datetime.now(value.tzinfo)
@@ -235,8 +235,8 @@ class ReleasePollSettingsValidator(BaseReleaseValidator):
     def validate_start_time(self):
         value = getattr(self.instance, 'start_time', None)
         if value:
-            if self.instance.start_time + timedelta(minutes=5) < datetime.now():
-                raise PollValidationException(f"Начало опроса должно на 5 минут позже текущего времени")
+            if self.instance.start_time + timedelta(minutes=10) < datetime.now():
+                raise PollValidationException(f"Начало опроса должно быть не более чем на 10 минут раньше текущего времени")
             
             if self.instance.start_time > datetime.now() + timedelta(weeks=1):
                 raise PollValidationException(f"Прохождение опроса не может быть запланировано больше чем на неделю заранее")
@@ -255,8 +255,8 @@ class ReleasePollSettingsValidator(BaseReleaseValidator):
             if self.instance.end_time + timedelta(minutes=5) < datetime.now():
                 raise PollValidationException(f"Окончание опроса должно на 5 минут позже текущего времени")
             
-            if self.instance.end_time > datetime.now() + timedelta(weeks=1):
-                raise PollValidationException(f"Окончание опроса не может быть запланировано больше чем на неделю заранее")
+            if self.instance.end_time > datetime.now() + timedelta(weeks=2):
+                raise PollValidationException(f"Окончание опроса не может быть запланировано больше чем на 2 недели заранее")
             
             start_time =  getattr(self.instance, 'start_time', None)
             if start_time:

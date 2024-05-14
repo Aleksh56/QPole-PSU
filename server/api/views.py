@@ -957,7 +957,7 @@ def my_poll_question_option(request):
         elif request.method == 'PUT':
             data = request.data
 
-            poll_id = get_data_or_400(data, 'poll_id')
+            poll_id = get_parameter_or_400(data, 'poll_id')
             poll_question_id = get_data_or_400(data, 'poll_question_id')
             
             poll = get_object_or_404(Poll, poll_id=poll_id)
@@ -1365,6 +1365,7 @@ def poll_voting_ended(request):
             raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
         else:
             poll_answer_group.is_finished = True
+            poll_answer_group.voting_end_date = datetime.now()
             poll_answer_group.save()
             
         poll_participation_group = PollParticipantsGroup.objects.filter(poll=poll, profile=my_profile,
@@ -1519,6 +1520,50 @@ def poll(request):
         return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
+def polls_for_me(request):
+    try:
+        current_user = request.user
+        my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
+
+        if request.method == 'GET':
+            poll_type = request.GET.get('poll_type', None)
+            name = request.GET.get('name', None)
+            is_anonymous = request.GET.get('is_anonymous', None)
+
+            filters = Q(is_in_production=True)
+            if poll_type:
+                poll_type = PollType.objects.filter(name=poll_type).first()
+                if not poll_type:
+                    raise ObjectNotFoundException(model='PollType')
+                filters &= Q(poll_type=poll_type)
+            if name:
+                filters &= Q(name__icontains=name)
+            if is_anonymous:
+                filters &= Q(is_anonymous=is_anonymous)
+
+
+            polls = Poll.my_manager.get_all_avaliable_to_me(filters, my_profile)
+            
+
+            context = get_profile_to_context(my_profile)
+            pagination_data = get_paginated_response(request, polls, MiniPollSerializer, context=context)
+            return Response(pagination_data)
+
+            
+    except APIException as api_exception:
+            return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+        
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в poll_for_me: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в poll_for_me: {ex}"},
+                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 
 
 @api_view(['GET', 'POST', 'DELETE'])

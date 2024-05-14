@@ -38,7 +38,7 @@ def validate_sex(value):
 
 def validate_number(value):
     if not re.match(r'^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$', value):
-        raise ValidationError("Номер телефона должен быть в формате +7 (999) 221-21-22.")
+        raise ValidationError("Номер телефона должен быть в формате +7 (012) 345-67-89.")
 
     
 

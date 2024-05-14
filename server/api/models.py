@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+import uuid
 
 from .exсeptions import *
 
@@ -85,6 +86,7 @@ class PollAnswerGroup(models.Model):
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
 
     voting_date = models.DateTimeField(auto_now_add=True)
+    voting_end_date = models.DateTimeField(default=None, null=True)
     is_finished = models.BooleanField(default=True)
     is_latest = models.BooleanField(default=True)
 
@@ -186,6 +188,10 @@ class MyPollManager(models.Manager):
             .prefetch_related('allowed_groups')
             .prefetch_related('questions')
             .prefetch_related('user_participations')
+            .prefetch_related(
+                models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
+                                                .select_related('profile')))
+            .prefetch_related('registrated_users')
             .filter(filters)
             .order_by('-created_date')   
         )
@@ -199,17 +205,68 @@ class MyPollManager(models.Manager):
             .select_related('author', 'author__user', 'author__group')
             .select_related('poll_type', 'poll_setts')
             .prefetch_related('allowed_groups')
+            .prefetch_related('questions')
+            .prefetch_related('registrated_users')
             .prefetch_related(
                 models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
                                                 .select_related('profile')))
             .prefetch_related('user_participations')
-            .prefetch_related('questions')
             .filter(filters)
             .order_by('-created_date')   
         )
         
         return objects
     
+    def get_all_avaliable_to_me(self, filters, user_profile):
+        """Получение всех опросов доступных мне"""
+        objects = (
+            super().get_queryset()
+            .select_related('author', 'author__user', 'author__group')
+            .select_related('poll_type', 'poll_setts')
+            .prefetch_related('allowed_groups')
+            .prefetch_related(
+                models.Prefetch('registrated_users', queryset=Profile.objects.select_related(
+                        'group'
+                ).all()))
+            .prefetch_related(
+                models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
+                                                .select_related('profile')))
+            .prefetch_related('user_participations')
+            .prefetch_related('questions')
+            .annotate(
+                check_if_user_registered=models.Case(
+                    models.When(
+                        is_registration_demanded=False,
+                        then=True,
+                    ),
+                    models.When(
+                        is_registration_demanded=True,
+                        registrated_users=user_profile,
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=models.BooleanField()
+                ),
+                check_if_user_in_allowed_groups=models.Case(
+                    models.When(
+                        allowed_groups__isnull=True,
+                        then=True,
+                    ),
+                    models.When(
+                        allowed_groups__isnull=False,
+                        allowed_groups=user_profile.group,
+                        then=True,
+                    ),
+                    default=False,
+                    output_field=models.BooleanField()
+                )
+            )
+            .filter(filters, check_if_user_registered=True, check_if_user_in_allowed_groups=True)
+            .order_by('-created_date')   
+        )
+        
+        return objects
+
     def get_one(self, filters):
         """Получение опроса по `filters`"""
         object = (
@@ -268,6 +325,7 @@ class MyPollManager(models.Manager):
 
 
 class Poll(models.Model):
+    # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     poll_id = models.CharField(max_length=100, unique=True) # уникальный id
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='my_polls') # автор опроса
     image = models.ImageField(verbose_name='Фото опроса', upload_to=f'images/poll_images/', blank=True, null=True) # фото 
@@ -328,7 +386,7 @@ class Poll(models.Model):
     def has_user_participated_in(self, user_profile):
         if not user_profile:
             return None
-        return self.user_participations.filter(profile=user_profile).exists()
+        return self.user_participations.contains(user_profile)
     
     def is_user_in_allowed_groups(self, user_profile):
         allowed_groups = self.allowed_groups.all()
@@ -350,7 +408,7 @@ class Poll(models.Model):
     
     @property
     def participants_quantity(self):   # число участников опроса
-        return self.user_participations.values('profile_id').distinct().count()
+        return self.user_participations.count()
 
     @property
     def questions_quantity(self):   # число вопросов опроса
