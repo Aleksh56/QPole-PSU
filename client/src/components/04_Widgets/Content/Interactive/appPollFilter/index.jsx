@@ -5,8 +5,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { filterPollsRequest } from './api/apiRequests';
-import { MobileFiltersWrapper, StyledButton, StyledStack, StyledStackWrapper } from './styled';
+import { MobileFiltersWrapper, StyledStack, StyledStackWrapper } from './styled';
 
+import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appFilterOptions } from '@/data/filters';
 
@@ -102,9 +103,7 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
             onChange={handleFilterChange}
           />
         ))}
-        <StyledButton variant="contained" onClick={() => handleCreateModalOpen(true)}>
-          Создать опрос
-        </StyledButton>
+        <PrimaryButton handleClick={() => handleCreateModalOpen(true)} caption="Создать опрос" />
       </StyledStack>
     </StyledStackWrapper>
   );

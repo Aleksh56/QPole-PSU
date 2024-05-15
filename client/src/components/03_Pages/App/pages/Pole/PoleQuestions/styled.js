@@ -8,6 +8,14 @@ export const ListWrapper = styled(Box)(() => ({
   width: '100%',
   maxWidth: Rem(1200),
   margin: '0 auto',
-  padding: `${Rem(20)} 0`,
+  padding: `${Rem(20)} 15px`,
   columnGap: Rem(30),
+  '@media (max-width: 1000px)': {
+    alignItems: 'center',
+    flexDirection: 'column',
+    margin: 0,
+    maxWidth: 'unset',
+    columnGap: 0,
+    padding: 0,
+  },
 }));

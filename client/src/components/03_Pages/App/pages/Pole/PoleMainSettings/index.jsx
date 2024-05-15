@@ -17,10 +17,12 @@ import PollMainSettingsTabs from '@/components/06_Entities/PollMainSettingsTabs'
 import PollTuningTab from '@/components/06_Entities/PollTuningTab';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
 import { useAlert } from '@/hooks/useAlert';
+import usePageTitle from '@/hooks/usePageTitle';
 import usePollData from '@/hooks/usePollData';
 import useTabs from '@/hooks/useTabs';
 
 const PoleMainSettingsPage = () => {
+  usePageTitle('settings');
   const { id } = useParams();
   const { showAlert } = useAlert();
   const { pollStatus } = usePollData(id);
@@ -29,6 +31,8 @@ const PoleMainSettingsPage = () => {
   const [pendingChanges, setPendingChanges] = useState({});
   const [timeoutHandlers, setTimeoutHandlers] = useState({});
   const [currentDate, setCurrentDate] = useState('');
+
+  console.log(pollStatus);
 
   const location = useLocation();
   const isNewPole = location.state?.isNewPole;

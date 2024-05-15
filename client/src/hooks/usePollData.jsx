@@ -1,29 +1,3 @@
-// import { useEffect, useState } from 'react';
-
-// import { handleRequest } from '@/api/api';
-
-// const usePollData = (pollId) => {
-//   const [pollType, setPollType] = useState(null);
-//   const [pollStatus, setPollStatus] = useState(false);
-//   const [pollData, setPollData] = useState({});
-//   const [isMultiple, setIsMultiple] = useState(null);
-
-//   useEffect(() => {
-//     const fetchPollType = async () => {
-//       const { data } = await handleRequest('get', `/api/my_poll/?poll_id=${pollId}&detailed=0`);
-//       setPollData(data);
-//       setPollStatus(data.is_in_production);
-//       setPollType(data.poll_type.name);
-//       setIsMultiple(data.has_multiple_choices);
-//     };
-
-//     fetchPollType();
-//   }, [pollId]);
-//   return { pollType, pollStatus, isMultiple, pollData };
-// };
-
-// export default usePollData;
-
 import { useUnit } from 'effector-react';
 import { useCallback, useEffect } from 'react';
 

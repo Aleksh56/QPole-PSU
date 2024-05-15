@@ -44,8 +44,8 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
   const { pollType, pollStatus } = usePollData(id);
 
   useEffect(() => {
-    const correctOptions = question.answer_options.filter((option) => option.is_correct);
-    setSelectedOption(correctOptions.length ? correctOptions.map((option) => option.id) : []);
+    const correctOptions = question?.answer_options?.filter((option) => option.is_correct);
+    setSelectedOption(correctOptions?.length ? correctOptions?.map((option) => option.id) : []);
     setEditedQuestion(question);
     console.log(selectedOption);
   }, [question]);
@@ -59,7 +59,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
     const value = e.target.value;
     if (question.has_multiple_choices) {
       if (selectedOption.includes(Number(value))) {
-        setSelectedOption(selectedOption.filter((item) => item !== Number(value)));
+        setSelectedOption(selectedOption?.filter((item) => item !== Number(value)));
         await handleChangeAnswerRequest(id, q_id, value, 0);
       } else {
         setSelectedOption([...selectedOption, Number(value)]);
@@ -161,7 +161,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
   };
 
   return (
-    <Box>
+    <Box sx={{ padding: '0 15px' }}>
       <PoleImageUpload
         image={question?.image}
         onFileSelect={(e) => handleFieldChange('image', e, question.id)}

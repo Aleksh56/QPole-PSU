@@ -14,9 +14,11 @@ import PollResultCard from '@/components/05_Features/Data/Cards/pollResCard';
 import PollResultsPDF from '@/components/06_Entities/pollResultsPDF';
 import NoDataHelper from '@/components/07_Shared/UIComponents/Utils/Helpers/noDataHelper';
 import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
+import usePageTitle from '@/hooks/usePageTitle';
 import usePollData from '@/hooks/usePollData';
 
 const PollResultsPage = () => {
+  usePageTitle('pollres');
   const { id } = useParams();
   const { t } = useTranslation();
   const { pollData } = usePollData(id);

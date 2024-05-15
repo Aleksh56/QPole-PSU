@@ -35,7 +35,7 @@ const ProfileAboutPage = () => {
           caption="Профиль"
           boxCaption="Данные аккаунта"
           ProfileInfoFields={profileInfoFields}
-          user_id={userData?.user.id}
+          user_id={userData?.user?.id}
         />
         <ProfileTimezone caption="Язык и страна" selectCaption="Часовой пояс" />
         <Profile2AuthBlock caption="Безопасность" />

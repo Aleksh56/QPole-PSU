@@ -4,8 +4,10 @@ import { v4 } from 'uuid';
 import { poleNavigationButtonsData } from './data/PoleNavigationButtonsData';
 
 import PollSettingsMenuNavigation from '@/components/04_Widgets/Navigation/Menus/PollSettingsMenuNavigation';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const PolePage = () => {
+  usePageTitle('settings');
   return (
     <>
       <PollSettingsMenuNavigation buttons={poleNavigationButtonsData} />

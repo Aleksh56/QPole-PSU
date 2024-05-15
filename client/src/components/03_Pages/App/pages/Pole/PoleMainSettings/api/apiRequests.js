@@ -14,8 +14,11 @@ export const changePoleData = async (field, value, id, setPoleData, showAlert, f
     clearTimeout(timeouts[field]);
   }
 
+  if ((field === 'start_time' || field === 'end_time') && value === '') {
+    value = null;
+  }
+
   const requestData = { [field]: value };
-  console.log(requestData);
 
   setPoleData((prevData) => ({
     ...prevData,

@@ -11,7 +11,19 @@ export default defineConfig({
       babelHelpers: 'runtime',
       exclude: 'node_modules/**',
       extensions: ['.js', '.jsx', '.es6', '.es', '.mjs'],
-      presets: [['@babel/preset-env', { modules: false }], '@babel/preset-react'],
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['> 0.25%', 'not dead', 'IE 11'],
+            },
+            useBuiltIns: 'entry', // Добавляем полифиллы
+            corejs: 3, // Указываем версию core-js
+          },
+        ],
+        '@babel/preset-react',
+      ],
       plugins: [
         [
           '@babel/plugin-transform-runtime',

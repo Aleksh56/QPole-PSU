@@ -19,7 +19,7 @@ const PollListOut = ({ polls = [] }) => {
           <AppPoleCard
             pollData={item}
             cardButton={
-              item.has_user_participated_in ? (
+              item.has_user_participated_in && !item.is_revote_allowed ? (
                 !item.opened_for_voting ? (
                   <PrimaryButton
                     caption="Зарегистрироваться"

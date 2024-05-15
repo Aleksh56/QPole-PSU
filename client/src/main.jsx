@@ -2,6 +2,8 @@ import { AlertProvider } from '@app/context/AlertProvider';
 import { AuthProvider } from '@app/context/AuthProvider';
 import ReactDOM from 'react-dom/client';
 
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import './app/template/__init__.css';
 
 import '@locale/i18n';

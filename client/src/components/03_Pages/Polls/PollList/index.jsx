@@ -8,9 +8,11 @@ import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 import PollListOut from '@/components/05_Features/DataDisplay/Out/pollListOut';
 import CustomPagination from '@/components/07_Shared/UIComponents/Navigation/pagination';
 import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
+import usePageTitle from '@/hooks/usePageTitle';
 import usePagination from '@/hooks/usePagination';
 
 const PollListPage = () => {
+  usePageTitle('polls');
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(false);
   const { pageSize, currPage, totalPages, setTotalPages, handlePageSizeChange, handlePageChange } =

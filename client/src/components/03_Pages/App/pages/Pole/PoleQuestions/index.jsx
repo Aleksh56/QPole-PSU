@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import FrmQueEdit from '@/components/04_Widgets/Data/Forms/frmQueEdit';
 import PollQuestionsList from '@/components/05_Features/DataDisplay/Out/PollQuestionsList';
 import PoleCreateFirstQuestion from '@/components/05_Features/UIComponents/Utils/PollCreateFirstQuestion';
 import CLoader from '@/components/07_Shared/UIComponents/Utils/Helpers/loader';
+import usePageTitle from '@/hooks/usePageTitle';
 
 const _settings = {
   title: 'Вы не создали ни одного вопроса',
@@ -20,10 +21,12 @@ const _settings = {
 };
 
 const PoleQuestionsPage = () => {
+  usePageTitle('qsettings');
   const { id } = useParams();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedQuestion, setSelectedQuestion] = useState({});
+  const matches = useMediaQuery('(max-width:1000px)');
 
   useEffect(() => {
     handleGetAllQuestionRequest(id)
@@ -57,7 +60,7 @@ const PoleQuestionsPage = () => {
       <PoleCreateFirstQuestion settings={_settings} handleCreateQuestion={handleCreateQuestion} />
     ) : (
       <ListWrapper>
-        <Box sx={{ width: '25%' }}>
+        <Box sx={{ width: matches ? '100%' : '25%' }}>
           <PollQuestionsList
             questions={questions}
             onSelectQuestion={handleSelectQuestion}
@@ -65,6 +68,7 @@ const PoleQuestionsPage = () => {
             selectedQuestion={selectedQuestion}
             setQuestions={setQuestions}
             setSelected={setSelectedQuestion}
+            onQuestionUpdate={handleQuestionUpdate}
           />
         </Box>
         <Box sx={{ width: '75%' }}>
@@ -80,7 +84,17 @@ const PoleQuestionsPage = () => {
     );
   };
 
-  return <Box sx={{ overflow: 'hidden' }}>{loading ? <CLoader /> : renderQuestionList()}</Box>;
+  return (
+    <Box
+      sx={{
+        overflow: 'hidden',
+        padding: matches ? '0 15px' : 0,
+        height: matches ? '100vh' : 'auto',
+      }}
+    >
+      {loading ? <CLoader /> : renderQuestionList()}
+    </Box>
+  );
 };
 
 export default PoleQuestionsPage;

@@ -7,7 +7,7 @@ import { ShareDialog, ShareDialogTitle, StyledCheckIcon } from './styled';
 import FrmShareMain from '@/components/05_Features/Data/Forms/frmShareMain';
 import FrmShareQR from '@/components/05_Features/Data/Forms/frmShareQR';
 
-const FrmShare = ({ open, setOpen }) => {
+const FrmShare = ({ open, setOpen, caption = '' }) => {
   const [activeView, setActiveView] = useState('main');
 
   const handleSwitchView = (view) => setActiveView(view);
@@ -22,7 +22,7 @@ const FrmShare = ({ open, setOpen }) => {
     >
       <ShareDialogTitle>
         <StyledCheckIcon color="success" />
-        Опрос успешно опубликован
+        {caption}
         <CloseIcon
           onClick={() => {
             setOpen(false);

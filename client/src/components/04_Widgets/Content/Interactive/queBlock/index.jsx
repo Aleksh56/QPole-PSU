@@ -6,17 +6,20 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useUnit } from 'effector-react';
 import { useEffect, useState } from 'react';
 
 import { StyledFormControl } from './styled';
 
 import {
+  $answersStore,
   updateAnswer,
   updateMultipleAnswer,
 } from '@/components/03_Pages/Polls/ConductionPoll/store/answer-store';
 import { shuffleArray } from '@/utils/js/shuffleArray';
 
 const QueBlock = ({ question, isMixed, setIsLong }) => {
+  const answers = useUnit($answersStore);
   const [selectedValue, setSelectedValue] = useState('');
   const [selectedValues, setSelectedValues] = useState([]);
   const [fieldValue, setFieldValue] = useState('');
@@ -24,8 +27,26 @@ const QueBlock = ({ question, isMixed, setIsLong }) => {
   const [isTextLong, setIsTextLong] = useState(false);
 
   useEffect(() => {
+    if (question.has_multiple_choices) {
+      const selectedOpts = answers
+        .filter((ans) => ans.question === question.id)
+        .map((ans) => ans.answer_option);
+      setSelectedValues(selectedOpts);
+    } else {
+      const selectedOpt = answers.find((ans) => ans.question === question.id);
+      if (selectedOpt) {
+        setSelectedValue(selectedOpt.answer_option.toString());
+      }
+    }
+
+    const textAnswer = answers.find((ans) => ans.question === question.id && ans.text);
+    if (textAnswer) {
+      setFieldValue(textAnswer.text);
+    }
+  }, [answers, question.id, question.has_multiple_choices]);
+
+  useEffect(() => {
     if (isMixed) {
-      console.log(111);
       const shuffled = shuffleArray([...question.answer_options]);
       const index = shuffled.findIndex((option) => option.order_id === 16);
       if (index !== -1) {

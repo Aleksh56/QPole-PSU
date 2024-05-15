@@ -1,7 +1,15 @@
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { Box, Typography } from '@mui/material';
-import React, { useCallback } from 'react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
+import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { deleteQuestionRequest } from './api/apiRequests';
@@ -16,6 +24,7 @@ import {
   StyledQueCount,
 } from './styled';
 
+import FrmQueEdit from '@/components/04_Widgets/Data/Forms/frmQueEdit';
 import usePollData from '@/hooks/usePollData';
 
 const PollQuestionsList = ({
@@ -25,9 +34,19 @@ const PollQuestionsList = ({
   selectedQuestion,
   setQuestions,
   setSelected,
+  onQuestionUpdate,
 }) => {
   const { id } = useParams();
   const { pollStatus } = usePollData(id);
+  const [expanded, setExpanded] = useState({});
+  const matches = useMediaQuery('(max-width:1000px)');
+
+  const handleToggleQuestion = useCallback((question_id) => {
+    setExpanded((prev) => ({
+      ...prev,
+      [question_id]: !prev[question_id],
+    }));
+  }, []);
 
   const handleCopyQuestion = useCallback(
     async (e, q_id) => {
@@ -58,28 +77,45 @@ const PollQuestionsList = ({
       </StyledAddButton>
       <StyledQueCount>Количество вопросов - {questions.length}</StyledQueCount>
       <Box>
-        {questions.map((question, index) => (
-          <StyledCard
-            key={question.id}
-            selected={selectedQuestion?.id === question.id}
-            onClick={() => onSelectQuestion(question.id)}
-          >
-            <StyledCardContent className="que-card">
-              <StyledContentWrapper>
-                <Typography variant="subtitle1" component="div">
-                  №{index + 1}
-                </Typography>
-                <Typography variant="body2" component="div">
-                  {question.name || 'Без заголовка'}
-                </Typography>
-              </StyledContentWrapper>
-              <IconsWrapper>
-                <ContentCopyIcon onClick={(e) => handleCopyQuestion(e, question.id)} />
-                <DeleteOutlineIcon onClick={(e) => handleDeleteQuestion(e, question.id)} />
-              </IconsWrapper>
-            </StyledCardContent>
-          </StyledCard>
-        ))}
+        {questions.map((question, index) =>
+          matches ? (
+            <Accordion
+              key={question.id}
+              expanded={expanded[question.id] || false}
+              onChange={() => handleToggleQuestion(question.id)}
+            >
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>{question.name}</AccordionSummary>
+              <AccordionDetails>
+                <FrmQueEdit
+                  question={selectedQuestion}
+                  onQuestionUpdate={onQuestionUpdate}
+                  setSelectedQuestion={setSelected}
+                />
+              </AccordionDetails>
+            </Accordion>
+          ) : (
+            <StyledCard
+              key={question.id}
+              selected={selectedQuestion?.id === question.id}
+              onClick={() => onSelectQuestion(question.id)}
+            >
+              <StyledCardContent className="que-card">
+                <StyledContentWrapper>
+                  <Typography variant="subtitle1" component="div">
+                    №{index + 1}
+                  </Typography>
+                  <Typography variant="body2" component="div">
+                    {question.name || 'Без заголовка'}
+                  </Typography>
+                </StyledContentWrapper>
+                <IconsWrapper>
+                  <ContentCopyIcon onClick={(e) => handleCopyQuestion(e, question.id)} />
+                  <DeleteOutlineIcon onClick={(e) => handleDeleteQuestion(e, question.id)} />
+                </IconsWrapper>
+              </StyledCardContent>
+            </StyledCard>
+          ),
+        )}
       </Box>
     </ListWrapper>
   );

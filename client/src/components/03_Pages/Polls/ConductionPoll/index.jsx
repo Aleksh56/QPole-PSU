@@ -20,11 +20,12 @@ import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBt
 import Timer from '@/components/07_Shared/UIComponents/Utils/Helpers/timer';
 import { useAlert } from '@/hooks/useAlert';
 import useAuth from '@/hooks/useAuth';
+import usePageTitle from '@/hooks/usePageTitle';
 import { shuffleArray } from '@/utils/js/shuffleArray';
 
 const ConductionPollPage = () => {
+  usePageTitle('conduction');
   const { id } = useParams();
-  const cachedTime = localStorage.getItem('remainingTime');
   const { isAuthenticated, isLoading } = useAuth();
   const { showAlert } = useAlert();
   const navigate = useNavigate();
@@ -35,31 +36,30 @@ const ConductionPollPage = () => {
   const [isTextLong, setIsTextLong] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(true);
-  const [remainingTime, setRemainingTime] = useState(pollData?.poll_setts?.completion_time || '');
+  const [remainingTime, setRemainingTime] = useState('');
+
+  const getRemainingTime = async () => {
+    const data = await getRemainingTimeFx({ id });
+    setRemainingTime(data.voting_time_left_str);
+  };
 
   useEffect(() => {
     if (isLoading) return;
     const pollDataRequest = async () => {
-      resetAnswers();
       const data = await fetchPollQuestions(id);
-      setRemainingTime(data?.poll_setts?.completion_time);
+      getRemainingTime();
+      console.log(remainingTime);
       if ((!data.is_revote_allowed && data.has_user_participated_in) || isAuthenticated === false) {
         navigate('/polls');
         return;
       }
       if (data.mix_questions) data.questions = shuffleArray(data.questions);
-      setIsCollapsed(data.poll_setts?.completion_time !== null && !cachedTime);
+      setIsCollapsed(data.poll_setts?.completion_time !== null);
+      if (data.has_user_started_voting) handleStart();
       setPollData(data);
     };
     pollDataRequest();
   }, [isLoading, isAuthenticated, id]);
-
-  useEffect(() => {
-    const getRemainingTime = async () => {
-      await getRemainingTimeFx({ id }).then((res) => setRemainingTime(res.voting_time_left_str));
-    };
-    getRemainingTime();
-  }, [pollData]);
 
   useEffect(() => {
     const requiredQuestions = pollData.questions
@@ -76,6 +76,8 @@ const ConductionPollPage = () => {
   const handleSubmit = async (isTimeEnd = false) => {
     const response = await sendAnswersRequestFx({ answers, id, isTimeEnd });
     setResults(response.data);
+    resetAnswers();
+    localStorage.removeItem('answersStore');
     if (response.data.poll_type !== 'Викторина') {
       if (isTimeEnd) {
         showAlert(
@@ -104,8 +106,10 @@ const ConductionPollPage = () => {
   const handleContextMenu = (e) => e.preventDefault();
 
   const handleStart = async () => {
-    localStorage.setItem('remainingTime', JSON.stringify(pollData.poll_setts.completion_time));
-    await startConductionFx({ id }).then(() => setIsCollapsed(false));
+    await startConductionFx({ id }).then((res) => {
+      setRemainingTime(res.data.voting_time_left_str);
+      setIsCollapsed(false);
+    });
   };
 
   return (
@@ -118,7 +122,7 @@ const ConductionPollPage = () => {
           <>
             <ConductionHeader data={pollData} />
             <AnimatePresence>
-              {!isCollapsed && cachedTime && (
+              {!isCollapsed && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -152,7 +156,7 @@ const ConductionPollPage = () => {
           </>
         )}
       </ConductionWrapper>
-      {isCollapsed && !cachedTime && (
+      {isCollapsed && (
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
           <PrimaryButton caption="Начать" handleClick={handleStart} />
         </Box>

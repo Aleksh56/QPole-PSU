@@ -18,6 +18,7 @@ export const StyledAppContentWrapper = styled(Box)(() => ({
   },
   '@media (max-width: 768px)': {
     padding: 0,
+    marginTop: Rem(40),
   },
 }));
 

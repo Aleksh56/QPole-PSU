@@ -3,8 +3,13 @@ import { createEvent, createStore } from 'effector';
 export const updateAnswer = createEvent();
 export const updateMultipleAnswer = createEvent();
 export const resetAnswers = createEvent();
+const initialState = JSON.parse(localStorage.getItem('answersStore')) || [];
 
-export const $answersStore = createStore([])
+const saveStateToLocalStorage = (state) => {
+  localStorage.setItem('answersStore', JSON.stringify(state));
+};
+
+export const $answersStore = createStore(initialState)
   .on(updateMultipleAnswer, (state, { question, answer_option, text = null, selected }) => {
     if (text !== null) {
       if (text === '') {
@@ -41,5 +46,7 @@ export const $answersStore = createStore([])
     }
   })
   .reset(resetAnswers);
+
+$answersStore.watch(saveStateToLocalStorage);
 
 $answersStore.watch((state) => console.log(state));

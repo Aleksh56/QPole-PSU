@@ -7,11 +7,14 @@ const requestQueue = new Map();
 
 const initialCache = JSON.parse(localStorage.getItem('pollDataCache') || '{}');
 
-const pollDataCache = createStore(initialCache).on(updateCache, (state, { pollId, data }) => {
-  const newState = { ...state, [pollId]: data };
-  localStorage.setItem('pollDataCache', JSON.stringify(newState));
-  return newState;
-});
+export const pollDataCache = createStore(initialCache).on(
+  updateCache,
+  (state, { pollId, data }) => {
+    const newState = { ...state, [pollId]: data };
+    localStorage.setItem('pollDataCache', JSON.stringify(newState));
+    return newState;
+  },
+);
 
 pollDataCache.watch((state) => console.log(state));
 

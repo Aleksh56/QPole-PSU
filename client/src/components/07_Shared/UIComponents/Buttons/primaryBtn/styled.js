@@ -12,4 +12,8 @@ export const StyledButton = styled('button')(({ disabled }) => ({
   padding: `${Rem(10)} ${Rem(24)}`,
   borderRadius: designTokens.borderRadius.buttonBorder,
   cursor: !disabled ? 'pointer' : 'not-allowed',
+  '@media (max-width: 1100px)': {
+    fontSize: Rem(13),
+    padding: `${Rem(6)} ${Rem(16)}`,
+  },
 }));
