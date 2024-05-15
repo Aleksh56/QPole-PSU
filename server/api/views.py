@@ -136,14 +136,14 @@ def my_poll(request):
                 detailed = int(request.GET.get('detailed', True))
                 if detailed:
                     filters = Q(author=my_profile, poll_id=poll_id)
-                    poll = Poll.my_manager.get_one(filters)
+                    poll = Poll.my_manager.get_one(filters).first()
                     if not poll:
                         raise ObjectNotFoundException(model='Poll')
                 
                     serializer = PollSerializer(poll, context={'profile': my_profile})
                 else:
                     filters = Q(author=my_profile, poll_id=poll_id)
-                    poll = Poll.my_manager.get_one_mini(filters)
+                    poll = Poll.my_manager.get_one_mini(filters).first()
                     if not poll:
                         raise ObjectNotFoundException(model='Poll')
                 
@@ -456,7 +456,7 @@ def my_poll_stats(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = Poll.my_manager.get_one(Q(poll_id=poll_id))
+            poll = Poll.my_manager.get_one(Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
             poll_members_quantity = poll.user_participations.count()
@@ -957,7 +957,7 @@ def my_poll_question_option(request):
         elif request.method == 'PUT':
             data = request.data
 
-            poll_id = get_parameter_or_400(data, 'poll_id')
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
             poll_question_id = get_data_or_400(data, 'poll_question_id')
             
             poll = get_object_or_404(Poll, poll_id=poll_id)
@@ -1150,7 +1150,7 @@ def poll_voting(request):
                     Q(profile=my_profile) & Q(poll__poll_id=poll_id)
                 ).select_related('poll').prefetch_related('answers').first()
 
-                poll = Poll.my_manager.get_one(Q(author=my_profile) & Q(poll_id=poll_id))
+                poll = Poll.my_manager.get_one(Q(author=my_profile) & Q(poll_id=poll_id)).first()
 
                 if not my_answer:
                     raise ObjectNotFoundException(model='PollAnswerGroup')
@@ -1169,7 +1169,7 @@ def poll_voting(request):
             data = request.data.copy()
 
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
-            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True)).first()
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
@@ -1286,7 +1286,7 @@ def poll_voting_started(request):
 
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
            
-            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True)).first()
 
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
@@ -1355,7 +1355,7 @@ def poll_voting_ended(request):
             raise ObjectNotFoundException(model='Profile')
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
-        poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True))
+        poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True)).first()
         if not poll:
             raise ObjectNotFoundException(model='Poll')
 
@@ -1421,7 +1421,7 @@ def quick_poll_voting(request):
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
         
-        poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id))
+        poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id)).first()
         
         if not poll:
             raise ObjectNotFoundException(model='Poll')
@@ -1474,7 +1474,7 @@ def poll(request):
 
             if poll_id:
                 filters = Q(poll_id=poll_id) & Q(is_in_production=True)
-                poll = Poll.my_manager.get_one(filters)
+                poll = Poll.my_manager.get_one(filters).first()
                 if not poll:
                     raise ObjectNotFoundException(model='Poll')
                 
@@ -1586,7 +1586,7 @@ def poll_registration(request):
                 )
                 if not poll_registration:
                     raise ObjectNotFoundException(model='PollRegistration')
-                poll = Poll.my_manager.get_one(Q(poll_id=poll_registration.poll.poll_id))
+                poll = Poll.my_manager.get_one(Q(poll_id=poll_registration.poll.poll_id)).first()
                 poll_registration.poll = poll
                 
                 serializer = BasePollRegistrationSerializer(poll_registration, context={'profile': my_profile})
@@ -1661,7 +1661,7 @@ def my_poll_users_votes(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id))
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
 

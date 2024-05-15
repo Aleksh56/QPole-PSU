@@ -306,7 +306,7 @@ class MyPollManager(models.Manager):
                         'answer_options'
                 ).all()))
             .filter(filters)    
-        ).first()
+        )
         
         return object
 
@@ -318,8 +318,7 @@ class MyPollManager(models.Manager):
                 models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
                                                 .select_related('profile', 'profile__user')
                                                 .prefetch_related('answers'))) 
-        ).first()
-        
+        )
         return object
     
     def get_one_mini(self, filters):
@@ -332,7 +331,7 @@ class MyPollManager(models.Manager):
             .prefetch_related('allowed_groups')
             .prefetch_related('questions')
             .filter(filters)    
-            ).first()
+        )
         
         return objects        
 
