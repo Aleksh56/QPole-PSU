@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models import Q, BooleanField
+from django.db.models import Case, When
+from django.utils import timezone
 from django.contrib.auth.models import User
 from django.utils import timezone
 import uuid
@@ -179,6 +182,42 @@ class PollQuestion(models.Model):
 
 
 class MyPollManager(models.Manager):
+    
+    def __annotate_time(self, queryset):
+        """Проверка на доступность опроса по времени"""
+        now = timezone.now()
+        
+        return queryset.annotate(
+            is_avaliable_for_voting=Case(
+                When(
+                    Q(poll_setts__start_time__isnull=False) & 
+                    Q(poll_setts__end_time__isnull=False) & 
+                    Q(poll_setts__start_time__lte=now) & 
+                    Q(poll_setts__end_time__gte=now),
+                    then=True,
+                ),
+                When(
+                    Q(poll_setts__start_time__isnull=False) & 
+                    Q(poll_setts__end_time__isnull=True) & 
+                    Q(poll_setts__start_time__lte=now),
+                    then=True,
+                ),
+                When(
+                    Q(poll_setts__start_time__isnull=True) & 
+                    Q(poll_setts__end_time__isnull=False) & 
+                    Q(poll_setts__end_time__gte=now),
+                    then=True,
+                ),
+                When(
+                    Q(poll_setts__start_time__isnull=True) & 
+                    Q(poll_setts__end_time__isnull=True),
+                    then=True,
+                ),
+                default=False,
+                output_field=BooleanField()
+            )
+        )
+    
     def get_all(self, filters):
         """Получение всех опросов"""
         objects = (
@@ -201,38 +240,22 @@ class MyPollManager(models.Manager):
     def get_all_with_answers(self, filters):
         """Получение всех опросов с ответами"""
         objects = (
-            super().get_queryset()
-            .select_related('author', 'author__user', 'author__group')
-            .select_related('poll_type', 'poll_setts')
-            .prefetch_related('allowed_groups')
-            .prefetch_related('questions')
-            .prefetch_related('registrated_users')
-            .prefetch_related(
-                models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
-                                                .select_related('profile')))
-            .prefetch_related('user_participations')
-            .filter(filters)
-            .order_by('-created_date')   
+            self.get_all(filters)
         )
         
         return objects
     
+    def get_all_avaliable_for_voting(self, filters):
+        """Получение всех опросов, доступных для прохождения"""
+
+        objects = self.get_all_with_answers(filters)
+        objects = self.__annotate_time(objects)
+        return objects.filter(is_avaliable_for_voting=True)
+    
     def get_all_avaliable_to_me(self, filters, user_profile):
         """Получение всех опросов доступных мне"""
         objects = (
-            super().get_queryset()
-            .select_related('author', 'author__user', 'author__group')
-            .select_related('poll_type', 'poll_setts')
-            .prefetch_related('allowed_groups')
-            .prefetch_related(
-                models.Prefetch('registrated_users', queryset=Profile.objects.select_related(
-                        'group'
-                ).all()))
-            .prefetch_related(
-                models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
-                                                .select_related('profile')))
-            .prefetch_related('user_participations')
-            .prefetch_related('questions')
+            self.get_all_avaliable_for_voting(filters)
             .annotate(
                 check_if_user_registered=models.Case(
                     models.When(
@@ -261,7 +284,7 @@ class MyPollManager(models.Manager):
                     output_field=models.BooleanField()
                 )
             )
-            .filter(filters, check_if_user_registered=True, check_if_user_in_allowed_groups=True)
+            .filter(check_if_user_registered=True, check_if_user_in_allowed_groups=True)
             .order_by('-created_date')   
         )
         
@@ -290,21 +313,11 @@ class MyPollManager(models.Manager):
     def get_one_with_answers(self, filters):
         """Получение опроса по `filters` с ответами пользователей"""
         object = (
-            super().get_queryset()
-            .select_related('author', 'author__user')
-            .select_related('poll_type', 'poll_setts')
-            .prefetch_related(
-                models.Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
-                    'answer_options'
-                ).all()))
+            self.get_one(filters)
             .prefetch_related(
                 models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
                                                 .select_related('profile', 'profile__user')
-                                                .prefetch_related('answers')))
-            .prefetch_related('user_participations')
-            .prefetch_related('allowed_groups')
-            .prefetch_related('registrated_users')
-            .filter(filters)    
+                                                .prefetch_related('answers'))) 
         ).first()
         
         return object
@@ -326,7 +339,7 @@ class MyPollManager(models.Manager):
 
 class Poll(models.Model):
     # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    poll_id = models.CharField(max_length=100, unique=True) # уникальный id
+    poll_id = models.CharField(max_length=100, unique=True, db_index=True) # уникальный id
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='my_polls') # автор опроса
     image = models.ImageField(verbose_name='Фото опроса', upload_to=f'images/poll_images/', blank=True, null=True) # фото 
     name = models.CharField(max_length=50, blank=True, null=True) # имя опроса
@@ -419,15 +432,14 @@ class Poll(models.Model):
         try:
             if self.poll_setts:
                 start_time = self.poll_setts.start_time
-                duration = self.poll_setts.duration
                 end_time = self.poll_setts.end_time
 
-                if start_time and duration:
-                    return timezone.now() > start_time and timezone.now() < start_time + duration
-                elif start_time and end_time:    
-                    return end_time > timezone.now() > start_time
-                elif start_time and not duration:
+                if start_time and end_time:
+                    return timezone.now() > start_time and timezone.now() < end_time 
+                elif start_time and not end_time:    
                     return timezone.now() > start_time
+                elif not start_time and end_time:
+                    return timezone.now() < end_time
                 else:
                     return True
             else:

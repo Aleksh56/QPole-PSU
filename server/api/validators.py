@@ -246,9 +246,6 @@ class ReleasePollSettingsValidator(BaseReleaseValidator):
                 if self.instance.start_time + timedelta(minutes=1) > self.instance.end_time:
                     raise PollValidationException(f"Время начала опроса должно быть на минимум минуту меньше времени окончания")
 
-            self.poll.is_registration_demanded = True
-            self.poll.save()
-
     def validate_end_time(self):
         value = getattr(self.instance, 'end_time', None)
         if value:

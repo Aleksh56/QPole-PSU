@@ -252,10 +252,10 @@ class MyPollUsersAnswersSerializer(PollVotingResultSerializer):
 # сериализаторы опросов
 
 class PollSettingsSerializer(serializers.ModelSerializer):
-    completion_time = serializers.DurationField(validators=[BasePollSettingsValidator.completion_time], required=False)
-    start_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.start_time], required=False)
-    end_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.end_time], required=False)
-    duration = serializers.DurationField(validators=[BasePollSettingsValidator.duration], required=False)
+    completion_time = serializers.DurationField(validators=[BasePollSettingsValidator.completion_time], required=False, allow_null=True)
+    start_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.start_time], required=False, allow_null=True)
+    end_time = serializers.DateTimeField(validators=[BasePollSettingsValidator.end_time], required=False, allow_null=True)
+    duration = serializers.DurationField(validators=[BasePollSettingsValidator.duration], required=False, allow_null=True)
 
     max_revotes_quantity = serializers.IntegerField(validators=[partial(BasePollSettingsValidator.max_revotes_quantity, num=10)])
 

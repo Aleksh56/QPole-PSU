@@ -1504,8 +1504,8 @@ def poll(request):
                     filters &= Q(is_closed=is_closed)
 
 
-                polls = Poll.my_manager.get_all_with_answers(filters)
-                polls = [poll for poll in polls if poll.opened_for_voting and not poll.allowed_groups.all()]
+                polls = Poll.my_manager.get_all_avaliable_for_voting(filters)
+                # print(polls)
 
                 context = get_profile_to_context(my_profile)
                 pagination_data = get_paginated_response(request, polls, MiniPollSerializer, context=context)
