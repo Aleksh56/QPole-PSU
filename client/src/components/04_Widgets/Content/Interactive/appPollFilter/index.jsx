@@ -10,9 +10,12 @@ import { MobileFiltersWrapper, StyledStack, StyledStackWrapper } from './styled'
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appFilterOptions } from '@/data/filters';
+import useUserData from '@/hooks/useUserData';
 
 const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => {} }) => {
   const { t } = useTranslation();
+  const userData = useUserData();
+  console.log(userData);
   const [filters, setFilters] = useState({
     search: '',
     poll_type: 'Все типы',
@@ -103,7 +106,11 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
             onChange={handleFilterChange}
           />
         ))}
-        <PrimaryButton handleClick={() => handleCreateModalOpen(true)} caption="Создать опрос" />
+        <PrimaryButton
+          handleClick={() => handleCreateModalOpen(true)}
+          caption="Создать опрос"
+          disabled={userData.role === 'Пользователь'}
+        />
       </StyledStack>
     </StyledStackWrapper>
   );

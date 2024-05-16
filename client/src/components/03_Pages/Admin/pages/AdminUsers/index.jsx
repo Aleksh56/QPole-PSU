@@ -7,13 +7,16 @@ import { getAllUsersFx } from './models/get-users';
 
 import { roleColorsConf } from '@/app/template/config/role.colors';
 import AdmUsrFilters from '@/components/04_Widgets/Content/Interactive/admUsrFilters';
+import FrmAdmUserSettings from '@/components/04_Widgets/Data/Forms/frmAdmUserSettings';
 import CustomTable from '@/components/04_Widgets/Data/Vizualization/table';
 import FrmConfirm from '@/components/04_Widgets/Utilities/Modals/frmConfirm';
 import { parseAndFormatDate } from '@/utils/js/formatDate';
 
 const AdminUsersPage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [userIdToBlock, setUserIdToBlock] = useState(null);
+  const [userIdToChange, setUserIdToChange] = useState(null);
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
@@ -43,7 +46,8 @@ const AdminUsersPage = () => {
   };
 
   const handleChangeStatus = (userId) => {
-    console.log(`Сменить статус пользователя с ID: ${userId}`);
+    setUserIdToChange(userId);
+    setIsSettingsOpen(true);
   };
 
   const getAdminUsersTableColumns = (handleChangeStatus) => [
@@ -92,7 +96,7 @@ const AdminUsersPage = () => {
             sx={{ cursor: 'pointer' }}
           />
           <SettingsIcon
-            onClick={() => handleChangeStatus(user.id)}
+            onClick={() => handleChangeStatus(user.user.id)}
             sx={{ ml: 1, cursor: 'pointer' }}
           />
         </>
@@ -104,6 +108,11 @@ const AdminUsersPage = () => {
     <>
       <AdmUsrFilters />
       <CustomTable columns={getAdminUsersTableColumns(handleChangeStatus)} data={users} />
+      <FrmAdmUserSettings
+        open={isSettingsOpen}
+        handleClose={setIsSettingsOpen}
+        userId={userIdToChange}
+      />
       <FrmConfirm
         open={isConfirmOpen}
         onCancel={() => setIsConfirmOpen(false)}

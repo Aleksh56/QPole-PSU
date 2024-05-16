@@ -6,6 +6,7 @@ import { Rem } from '@/utils/convertToRem';
 export const ConductionBackgroundWrapper = styled(Box)(() => ({
   backgroundColor: '#FAFAFF',
   height: '100vh',
+  width: '100%',
 }));
 
 export const ConductionWrapper = styled(Box)(() => ({

@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
 import { Link } from 'react-router-dom';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledHeader = styled('header')(({ isSticky, isMainPage }) => ({
   padding: `${Rem(20)}`,

@@ -63,5 +63,6 @@ export const StyledArchiveLink = styled(Link)({
   color: colorConfig.primaryBlue,
   '@media (max-width: 768px)': {
     fontSize: Rem(14),
+    padding: `0 ${Rem(20)}`,
   },
 });
