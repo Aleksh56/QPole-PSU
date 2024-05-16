@@ -16,3 +16,7 @@ admin.site.register(PollRegistration)
 
 admin.site.register(SupportRequest)
 admin.site.register(SupportRequestType)
+
+admin.site.register(QuickVotingForm)
+admin.site.register(PollAuthField)
+admin.site.register(PollAuthFieldAnswer)

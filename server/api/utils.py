@@ -342,13 +342,13 @@ def get_profile_to_context(my_profile=None):
 
     return context
 
-# def save_validated_object(serializer):
-#     if serializer.is_valid():
-#         serializer.save()
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-#     else:
-#         data = serializer_errors_wrapper(serializer.errors)
-#         return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)  
+def is_serializer_valid(serializer):
+    if serializer.is_valid():
+        serializer.save()
+        return True, serializer.data
+    else:
+        data = serializer_errors_wrapper(serializer.errors)
+        return False, data
 
 from django.db.models import Q
 from .models import PollAnswerGroup, PollParticipantsGroup
@@ -397,7 +397,32 @@ def check_if_user_is_allowed_to_vote(poll, user_profile):
         if has_user_participated_in_poll_too_many_times(poll, user_profile):
             raise AccessDeniedException(detail="Вы достигли предела максимального количества прохождений опроса.")
         
-    
+    return True
+
+
+from .models import PollAuthFieldAnswer
+from .exсeptions import MyCustomException
+
+def validate_auth_data(auth_data, poll, quick_voting_form):
+    new_auth_fields = []
+    required_auth_fields = set(auth_field.id for auth_field in poll.auth_fields.all() if auth_field.is_required)
+
+    for auth_field_data in auth_data:
+        auth_field_data['poll'] = poll
+        auth_field_data['quick_voting_form'] = quick_voting_form
+        auth_field_id = auth_field_data.get('auth_field')
+        auth_field_instance = next((auth_field for auth_field in poll.auth_fields.all() if auth_field.id == auth_field_id), None)
+        
+        auth_field_data['auth_field'] = auth_field_instance
+        new_auth_field = PollAuthFieldAnswer(**auth_field_data)
+        new_auth_fields.append(new_auth_field)
+
+    new_auth_field_ids = set(auth_field.auth_field.id for auth_field in new_auth_fields if not auth_field.answer == None)
+    if not required_auth_fields.issubset(new_auth_field_ids):
+        difference = list(required_auth_fields.difference(new_auth_field_ids))
+        raise MyCustomException(detail=f'Были переданы не все обяательные поля индентификации: {difference}')
 
     
-    return True
+    return new_auth_fields
+
+

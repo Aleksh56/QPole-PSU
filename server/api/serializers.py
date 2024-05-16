@@ -103,14 +103,6 @@ class MyProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = '__all__'
 
-class BaseQuickVotingFormSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QuickVotingForm
-        fields = '__all__'     
-
-
-class QuickVotingFormSerializer(BaseQuickVotingFormSerializer):
-    study_group = StudyGroupSerializer()
 
 
 
@@ -297,6 +289,7 @@ class PollSettingsSerializer(serializers.ModelSerializer):
         model = PollSettings
         fields = '__all__'
 
+
 class BasePollSerializer(serializers.ModelSerializer):
     name = serializers.CharField(validators=[BaseValidator.name], required=False, allow_blank=True)
     description = serializers.CharField(validators=[BaseValidator.description], required=False, allow_blank=True)
@@ -398,11 +391,11 @@ class MiniPollSerializer(BasePollSerializer):
         exclude = ['qrcode', 'registrated_users']
 
 
+
 class BasePollRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
-
 
 class PollRegistrationSerializer(serializers.ModelSerializer):
     poll = MiniPollSerializer()
@@ -411,7 +404,6 @@ class PollRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = PollRegistration
         fields = '__all__'
-
 
 class MiniPollRegistrationSerializer(serializers.ModelSerializer):
     poll = serializers.SerializerMethodField()
@@ -426,12 +418,45 @@ class MiniPollRegistrationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
+class BasePollAuthFieldSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=50, required=False, allow_null=True)
+    description = serializers.CharField(max_length=150, required=False, allow_null=True)
+    is_required = serializers.BooleanField(required=True)
+
+    class Meta:
+        model = PollAuthField
+        fields = '__all__'
+
+
+class PollAuthFieldSerializer(BasePollAuthFieldSerializer):
+    name = serializers.CharField(read_only=True)
+    description = serializers.CharField(read_only=True)
+    is_required = serializers.BooleanField(read_only=True)
+
+
+class PollAuthFieldAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PollAuthFieldAnswer
+        fields = '__all__'
+
+
+class MiniPollAuthFieldAnswerSerializer(serializers.ModelSerializer):
+    # name = serializers.CharField(source='auth_field.name')
+    auth_field = PollAuthFieldSerializer()
+
+    class Meta:
+        model = PollAuthFieldAnswer
+        fields = ['answer', 'auth_field']
+
+
 class PollSerializer(BasePollSerializer):
     poll_type = PollTypeSerializer(required=True)
     author = MyProfileSerializer(required=True)
     poll_setts = PollSettingsSerializer(required=False)
     questions = QuestionSerializer(many=True, required=False)
     allowed_groups = StudyGroupSerializer(many=True, required=False)
+    auth_fields = PollAuthFieldSerializer(many=True, required=False)
     registrated_users = MiniProfileSerializer(many=True, required=False)
    
 
@@ -738,3 +763,20 @@ class SupportRequestSerializer(SupportRequestBaseSerializer):
     author = GetProfileSerializer()
     type = SupportRequestTypeSerializer()
 
+
+class QuickVotingFormSerializer(serializers.ModelSerializer):
+    auth_field_answers = MiniPollAuthFieldAnswerSerializer(many=True)
+
+    class Meta:
+        model = QuickVotingForm
+        fields = '__all__'     
+
+
+
+class QuickPollAnswerGroupSerializer(serializers.ModelSerializer):
+    quick_voting_form = QuickVotingFormSerializer()
+    answers = PollAnswerSerializer(many=True)
+
+    class Meta:
+        model = PollAnswerGroup
+        fields = '__all__'

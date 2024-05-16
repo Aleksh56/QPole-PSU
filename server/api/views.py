@@ -136,7 +136,7 @@ def my_poll(request):
                 detailed = int(request.GET.get('detailed', True))
                 if detailed:
                     filters = Q(author=my_profile, poll_id=poll_id)
-                    poll = Poll.my_manager.get_one(filters).first()
+                    poll = Poll.my_manager.get_one_with_answers(filters).first()
                     if not poll:
                         raise ObjectNotFoundException(model='Poll')
                 
@@ -387,6 +387,110 @@ def my_poll(request):
 
 
 
+@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@transaction.atomic
+def my_quick_poll_voting_auth_forms(request):
+    try:
+        current_user = request.user
+        my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
+
+        if request.method == 'GET':
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
+
+            # poll = Poll.my_manager.get_one(Q(poll_id=poll_id) & Q(author=my_profile)).first()
+            poll = (
+                Poll.objects.filter(Q(poll_id=poll_id) & Q(author=my_profile))
+                .prefetch_related('auth_fields')
+                .first()
+            )
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            voting_form_id = request.GET.get('voting_form_id', None)
+            if voting_form_id:
+                voting_form = get_object_from_object_or_404(poll.auth_fields, id=voting_form_id)
+                serializer = PollAuthFieldSerializer(voting_form)
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                voting_forms = poll.auth_fields.all()
+                serializer = PollAuthFieldSerializer(voting_forms, many=True)
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+        elif request.method == 'POST':
+            data = request.data.copy()
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
+            poll = (
+                Poll.objects.filter(Q(poll_id=poll_id) & Q(author=my_profile))
+                .prefetch_related('auth_fields')
+                .first()
+            )
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            if poll.auth_fields.count() > 5:
+                raise TooManyInstancesException(model='PollAuthField', limit=5)
+
+            data['poll'] = poll.id
+            serializer = PollAuthFieldSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)   
+
+        elif request.method == 'PATCH':
+            data = request.data.copy()
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
+            poll = (
+                Poll.objects.filter(Q(poll_id=poll_id) & Q(author=my_profile))
+                .prefetch_related('auth_fields')
+                .first()
+            )
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+
+            voting_form_id = get_parameter_or_400(request.GET, 'voting_form_id')
+            voting_form = get_object_from_object_or_404(poll.auth_fields, id=voting_form_id)
+
+            serializer = PollAuthFieldSerializer(instance=voting_form, data=data, partial=True)
+            is_valid, data = is_serializer_valid(serializer)
+            if is_valid:
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            poll_id = get_parameter_or_400(request.GET, 'poll_id')
+            poll = (
+                Poll.objects.filter(Q(poll_id=poll_id) & Q(author=my_profile))
+                .prefetch_related('auth_fields')
+                .first()
+            )
+            if not poll:
+                raise ObjectNotFoundException(model='Poll')
+            
+            voting_form_id = get_parameter_or_400(request.GET, 'voting_form_id')
+            voting_form = get_object_from_object_or_404(poll.auth_fields, id=voting_form_id)
+            
+            voting_form.delete()
+
+            return Response({'message': 'Поле успешно удалено.'}, status=status.HTTP_204_NO_CONTENT)
+
+
+    except APIException as api_exception:
+        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
+    
+    except Exception as ex:
+        logger.error(f"Внутренняя ошибка сервера в my_quick_poll_voting_auth_forms: {ex}")
+        return Response({'message':f"Внутренняя ошибка сервера в my_quick_poll_voting_auth_forms: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 @transaction.atomic
@@ -512,7 +616,7 @@ def my_poll_stats(request):
                 question_statistics
                 .values('question_id')
                 .annotate(
-                    answers_quantity=Count('poll_answer_group__profile', distinct=True),
+                    answers_quantity=Count('poll_answer_group__id', distinct=True),
                     answer_percentage=F('answers_quantity') / Value(poll_members_quantity) * 100,
                     correct_percentage=ExpressionWrapper((F('correct_percentage') / F('answers_quantity')),
                         output_field=FloatField()
@@ -520,7 +624,6 @@ def my_poll_stats(request):
                 )
             )  
             # print(questions_percentage)
-
 
             poll_statistics = (
                 questions_percentage
@@ -541,8 +644,7 @@ def my_poll_stats(request):
                 .filter(poll_answer_group__poll=poll)
                 .values('answer_option')
                 .annotate(
-                    quantity=Count('id'),
-                    # choosing_percentage=F('quantity') / OuterRef(),
+                    quantity=Count('poll_answer_group__id', distinct=True),
                 )
             )
 
@@ -586,54 +688,46 @@ def my_poll_stats(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def my_poll_user_answers(request):
+def my_quick_poll_poll_user_answers(request):
     try:
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
+        poll = Poll.my_manager.get_one_with_answers(Q(author=my_profile, poll_id=poll_id)).first()
         
         if request.method == 'GET':
-
             user_id = request.GET.get('user_id', None)
-
             if user_id:
                 answer = (
-                    PollAnswerGroup.objects.filter(Q(poll__poll_id=poll_id) & Q(profile__user_id=user_id))
-                    .prefetch_related(
-                            'answers'
-                        ).all()
+                    poll.user_answers.filter(Q(poll__poll_id=poll_id) & Q(profile__user_id=user_id))
                     .first()
                 )
                 if not answer:
-                    raise MyCustomException(detail="Данный юзер еще не принял участие в опросе")
+                    raise ObjectNotFoundException(detail="Данный пользователь еще не принимал участие в опросе")
         
-                # answer = PollAnswerGroupSerializer(answer)
                 answer = MyPollUsersAnswersSerializer(answer)
                 return Response(answer.data)
 
             else:
                 answers = (
-                    PollAnswerGroup.objects
-                    .filter(poll__poll_id=poll_id)
-                    .prefetch_related('answers')
+                    poll.user_answers.all()
                     .order_by('-voting_date')
                 )
-
-                pagination_data = get_paginated_response(request, answers, MyPollUsersAnswersSerializer)
+                pagination_data = get_paginated_response(request, answers, QuickPollAnswerGroupSerializer)
                 return Response(pagination_data)
 
 
 
     except APIException as api_exception:
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
-
     except Exception as ex:
-        logger.error(f"Внутренняя ошибка сервера в my_poll_answers: {ex}")
-        return Response({'message': f"Внутренняя ошибка сервера в my_poll_answers: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Внутренняя ошибка сервера в my_poll_user_answers: {ex}")
+        return Response({'message': f"Внутренняя ошибка сервера в my_poll_user_answers: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -1426,22 +1520,23 @@ def quick_poll_voting(request):
         if not poll:
             raise ObjectNotFoundException(model='Poll')
 
-        voting_form_data = get_data_or_400(data, 'voting_form_data')             
+        auth_data = get_data_or_400(data, 'auth_data')             
         answers = get_data_or_400(data, 'answers')
 
-        study_group_name = get_data_or_400(voting_form_data, 'study_group')
-        study_group = StudyGroup.objects.filter(name=study_group_name).first()
-        if not study_group:
-            raise ObjectNotFoundException(model='StudyGroup')
-        voting_form_data['group'] = study_group.id
-
-        serializer = BaseQuickVotingFormSerializer(data=voting_form_data)
+        quick_voting_form_data = {
+            'poll': poll.id
+        }
+        serializer = QuickVotingFormSerializer(data=quick_voting_form_data)
         if serializer.is_valid():
             quick_voting_form = serializer.save()
         else:
             data = serializer_errors_wrapper(serializer.errors)
-            return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)     
-        
+            return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)     
+
+        new_auth_fields = validate_auth_data(auth_data, poll, quick_voting_form)
+
+        created_auth_fields = PollAuthFieldAnswer.objects.bulk_create(new_auth_fields)
+
         # валидация и парсинг ответов
         answers, _ = poll_voting_handler(answers, poll)
 
@@ -1457,6 +1552,7 @@ def quick_poll_voting(request):
         logger.error(f"Внутренняя ошибка сервера в quick_poll_voting: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в quick_poll_voting: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['GET'])

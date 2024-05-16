@@ -83,7 +83,7 @@ class PollAnswer(models.Model):
 
 class PollAnswerGroup(models.Model):
     profile = models.ForeignKey(Profile, related_name='answer_groups', on_delete=models.CASCADE, null=True)
-    quick_voting_form = models.ForeignKey('QuickVotingForm', related_name='poll_answer_group', on_delete=models.CASCADE, null=True)
+    quick_voting_form = models.OneToOneField('QuickVotingForm', related_name='poll_answer_group', on_delete=models.CASCADE, null=True)
     tx_hash = models.CharField(max_length=255, default=None, null=True)
 
     poll = models.ForeignKey('Poll', related_name='user_answers', on_delete=models.CASCADE)
@@ -297,6 +297,7 @@ class MyPollManager(models.Manager):
             .select_related('author', 'author__user', 'author__group')
             .select_related('poll_type', 'poll_setts')
             .prefetch_related('allowed_groups')
+            .prefetch_related('auth_fields')
             .prefetch_related(
                 models.Prefetch('registrated_users', queryset=Profile.objects.select_related(
                         'group'
@@ -566,17 +567,13 @@ class Poll(models.Model):
 
 
 class QuickVotingForm(models.Model):
-    first_name = models.CharField(max_length=50, null=True)
-    last_name = models.CharField(max_length=50, null=True)
-    patronymic = models.CharField(max_length=50, null=True)
-
-    group = models.ForeignKey(StudyGroup, on_delete=models.SET_NULL, null=True)
-
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
 
-    # def __str__(self):
-    #     if self.poll_answer_group.poll:
-    #         return f"Форма авторизции на {self.poll_answer_group.poll}"
+    def __str__(self):
+        if hasattr(self, 'poll_answer_group'):
+            return f"Форма авторизции на {self.poll_answer_group}"
+        else: return super().__str__()
 
 
 class PollRegistration(models.Model):
@@ -608,6 +605,27 @@ class PollSettings(models.Model):
     # def __str__(self):
     #     if self.poll:
     #         return f"Настройки {self.poll}"
+
+
+class PollAuthField(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='auth_fields')
+    name = models.CharField(max_length=50, null=True, blank=True)
+    description = models.CharField(max_length=150, null=True, blank=True)
+
+    is_required = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Поле '{self.name}' для авторизции на {self.poll}"
+
+
+class PollAuthFieldAnswer(models.Model):
+    auth_field = models.ForeignKey(PollAuthField, on_delete=models.CASCADE, related_name='answers')
+    quick_voting_form = models.ForeignKey(QuickVotingForm, on_delete=models.CASCADE, related_name='auth_field_answers')
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='auth_field_answers')
+    answer = models.CharField(max_length=150, null=True, blank=True)
+
+    def __str__(self):
+        return f"Ответ '{self.quick_voting_form}' на поле авторизации '{self.auth_field.name}' на {self.poll}"
 
 
 class SupportRequestType(models.Model):
