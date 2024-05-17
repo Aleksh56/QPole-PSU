@@ -798,27 +798,27 @@ class QuickVotingFormSerializer(serializers.ModelSerializer):
 class QuickPollAnswerSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         my_answers = serializers.ModelSerializer.to_representation(self, instance)
-        poll = self.context.get('poll', None)        
+        # poll = self.context.get('poll', None)        
         data = {
-                    'questions': PollQuestionSerializer(poll.questions.all(), many=True).data,
+                    # 'questions': PollQuestionSerializer(poll.questions.all(), many=True).data,
                     'answers': my_answers,
                 }
 
-        all_answers = [my_answers]
-        for question in data['questions']: # проходим по всем вопросам 
-            if question.get('is_answered') is None: # проверка чтобы не занулять вопрос на который дан ответ
-                question['is_answered'] = False # если ответ уже дан, то не делаем его False
-            for answer_option in question['answer_options']: # проходим по всем вариантам ответа 
+        # all_answers = [my_answers]
+        # for question in data['questions']: # проходим по всем вопросам 
+        #     if question.get('is_answered') is None: # проверка чтобы не занулять вопрос на который дан ответ
+        #         question['is_answered'] = False # если ответ уже дан, то не делаем его False
+        #     for answer_option in question['answer_options']: # проходим по всем вариантам ответа 
 
-                if answer_option.get('is_answered') is None: # проверка на то что на вариант ответа еще не ответили
-                    answer_option['is_chosen'] = False # отмечаем, что вариант ответа изначально не выбран
-                    answer_option['text'] = None # отмечаем, что текст для варианта ответа изначально не указан
+        #         if answer_option.get('is_answered') is None: # проверка на то что на вариант ответа еще не ответили
+        #             answer_option['is_chosen'] = False # отмечаем, что вариант ответа изначально не выбран
+        #             answer_option['text'] = None # отмечаем, что текст для варианта ответа изначально не указан
 
-                for answer in all_answers: # проходим по всем моим ответам
-                    if answer['answer_option'] == answer_option['id']: # выбираем ответ по совпавшим id
-                        question['is_answered'] = True # отмечаем, что вопрос отвечен
-                        answer_option['is_chosen'] = True # отмечаем, что вариант ответа был выбран
-                        answer_option['text'] = answer.get('text', None) # добавляем текст ответа, если он был дан
+        #         for answer in all_answers: # проходим по всем моим ответам
+        #             if answer['answer_option'] == answer_option['id']: # выбираем ответ по совпавшим id
+        #                 question['is_answered'] = True # отмечаем, что вопрос отвечен
+        #                 answer_option['is_chosen'] = True # отмечаем, что вариант ответа был выбран
+        #                 answer_option['text'] = answer.get('text', None) # добавляем текст ответа, если он был дан
 
         return data
     
@@ -837,10 +837,18 @@ class QuickPollAnswerGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PollAnswersSerializer(serializers.ModelSerializer):
-    answers = PollAnswerSerializer(many=True, read_only=True)
-    # profile = ProfileSerializer()
+# class MyPollAnswerSerializer(serializers.ModelSerializer):
+    # answer_option = serializers.CharField(source='answer_option.name')
 
+
+    # class Meta:
+    #     model = PollAnswer
+    #     fields = '__all__'
+
+
+class PollAnswersSerializer(serializers.ModelSerializer):
+    # answers = MyPollAnswerSerializer(many=True, read_only=True)
+    answer_option = serializers.CharField(source='answer_option.name')
 
     def to_representation(self, instance):
         my_answers = serializers.ModelSerializer.to_representation(self, instance)

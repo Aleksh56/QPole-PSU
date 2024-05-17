@@ -742,6 +742,10 @@ def my_quick_poll_poll_user_answers(request):
         
                 context = {'poll': poll}
                 answer = QuickPollAnswerGroupSerializer(answer, context=context)
+                pagination_data['results'] = {
+                    'poll_data': PollSerializer(poll).data,
+                    'answers': pagination_data['results']
+                }
                 return Response(answer.data)
             
             else:
@@ -751,6 +755,10 @@ def my_quick_poll_poll_user_answers(request):
                 )
                 context = {'poll': poll}
                 pagination_data = get_paginated_response(request, answers, QuickPollAnswerGroupSerializer, context=context)
+                pagination_data['results'] = {
+                    'poll_data': PollSerializer(poll).data,
+                    'answers': pagination_data['results']
+                }
                 return Response(pagination_data)
         
     except APIException as api_exception:
