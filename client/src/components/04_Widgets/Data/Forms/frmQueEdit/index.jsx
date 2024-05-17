@@ -197,6 +197,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
               sx={{
                 cursor: item.is_free_response || pollStatus ? 'default' : 'grab',
                 opacity: item.is_free_response ? 0 : 1,
+                marginRight: '10px',
               }}
             />
             {pollType === 'Викторина' &&

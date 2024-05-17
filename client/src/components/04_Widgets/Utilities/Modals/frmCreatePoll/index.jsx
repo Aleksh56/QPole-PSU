@@ -21,7 +21,11 @@ const FrmCreatePoll = ({ isOpen, onClose, title, buttons }) => {
   };
 
   return (
-    <Dialog open={isOpen} onClose={() => onClose(false)}>
+    <Dialog
+      open={isOpen}
+      onClose={() => onClose(false)}
+      sx={{ '& .MuiPaper-root': { maxWidth: '800px' } }}
+    >
       <StyledDialogTitle>{title}</StyledDialogTitle>
       <DialogContent>
         <DialogContentWrapper>

@@ -1,26 +1,9 @@
 import LinearScaleOutlinedIcon from '@mui/icons-material/LinearScaleOutlined';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import PortraitOutlinedIcon from '@mui/icons-material/PortraitOutlined';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import QuizIcon from '@mui/icons-material/Quiz';
 
 export const pollTuningSettings = [
-  {
-    heading: 'Настройки опроса',
-    switchSettings: [
-      {
-        id: 'hide_participants_quantity',
-        label: 'Скрыть количество проголосовавших',
-        defaultChecked: false,
-      },
-      {
-        id: 'hide_options_percentage',
-        label: 'Скрыть проценты у вариантов ответа',
-        defaultChecked: false,
-      },
-      { id: 'is_anonymous', label: 'Анонимное голосование', defaultChecked: false },
-    ],
-  },
   {
     heading: 'Настройки результатов',
     switchSettings: [
@@ -54,12 +37,6 @@ export const shareButtons = [
     view: 'qr',
     description: 'Скачайте рисунок с QR-кодом вашего опроса',
     icon: QrCode2Icon,
-  },
-  {
-    caption: 'Email приглашения',
-    view: 'email',
-    description: 'Пригласите участников опроса',
-    icon: MailOutlineIcon,
   },
 ];
 
@@ -126,6 +103,12 @@ export const surveyTypesData = [
     title: 'Анонимный опрос',
     type: 'Анонимный',
     caption: 'Нет правильных ответов. Результаты привязываются к вариантам ответов',
+  },
+  {
+    image: PortraitOutlinedIcon,
+    title: 'Быстрый опрос',
+    type: 'Быстрый',
+    caption: 'Не требуется регистрация. Функционал стандартного опроса.',
   },
   {
     image: LinearScaleOutlinedIcon,

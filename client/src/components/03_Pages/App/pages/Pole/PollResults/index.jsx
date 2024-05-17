@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
 
-import { getPollResultsFx } from './model/get-results';
+import { getPollAnswersFx, getPollResultsFx } from './model/get-results';
 import { ResultsGridWrapper, SettingsWrapper, Wrapper } from './styled';
 
 import PollResultCard from '@/components/05_Features/Data/Cards/pollResCard';
@@ -25,11 +25,14 @@ const PollResultsPage = () => {
   const [questions, setQuestions] = useState([]);
   const [chartType, setChartType] = useState('pie');
   const [isResults, setIsResults] = useState(false);
+  const [answers, setAnswers] = useState([]);
   const [showPDFExporter, setShowPDFExporter] = useState(false);
 
   useEffect(() => {
     const fetchResults = async () => {
       const data = await getPollResultsFx({ id });
+      const answers = await getPollAnswersFx({ id });
+      setAnswers(answers);
       setQuestions(data.questions);
       setIsResults(data.participants_quantity > 0);
     };
@@ -37,6 +40,7 @@ const PollResultsPage = () => {
   }, [id]);
 
   const handleChartTypeChange = (event) => setChartType(event.target.value);
+  console.log(questions);
   const handleDownloadClick = () => {
     setShowPDFExporter(true);
   };
@@ -56,7 +60,7 @@ const PollResultsPage = () => {
         {showPDFExporter && (
           <Suspense fallback={<div>Загрузка PDF...</div>}>
             <PdfExporter
-              document={<PollResultsPDF results={questions} pollData={pollData} />}
+              document={<PollResultsPDF data={answers} pollData={pollData} />}
               fileName="poll-results.pdf"
             />
           </Suspense>

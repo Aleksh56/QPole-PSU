@@ -11,7 +11,7 @@ export const StyledDialogTitle = styled(DialogTitle)(() => ({
 
 export const DialogContentWrapper = styled(Box)(() => ({
   display: 'grid',
-  gridTemplateColumns: 'repeat(3,1fr)',
+  gridTemplateColumns: 'repeat(4,1fr)',
   columnGap: Rem(20),
   '@media (max-width: 600px)': {
     gridTemplateColumns: '1fr',
