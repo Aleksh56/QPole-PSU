@@ -330,6 +330,14 @@ def is_poll_valid(poll):
             if not has_correct_option:
                 raise PollValidationException(f"Вопрос №{question.order_id} должен содержать хотя бы 1 верный вариант ответа.")
 
+    if poll.poll_type.name == 'Быстрый':
+        if [auth_field for auth_field in poll.auth_fields.all() if (auth_field.name == None or auth_field.name == '')]:
+            raise PollValidationException(f"Содержание полей авторизации не может быть пустым.")
+        
+        if not len([auth_field for auth_field in poll.auth_fields.all() if auth_field.is_main == True]) == 1:
+            raise PollValidationException(f"Должно быть ровно 1 обязательное поле авторизации.")
+
+
     poll_setts_validator = ReleasePollSettingsValidator(poll.poll_setts, poll)
     poll_setts_validator.validate()
 

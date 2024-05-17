@@ -322,6 +322,23 @@ class MyPollManager(models.Manager):
         )
         return object
     
+    def get_one_quick_with_answers(self, filters):
+        """Получение быстрого опроса по `filters` с формами ответа пользователей"""
+        object = (
+            self.get_one(filters)
+            .prefetch_related(
+                models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
+                                                    .select_related('profile', 'profile__user', 'quick_voting_form')
+                                                    .prefetch_related('answers')
+                                                    .prefetch_related(
+                                                        models.Prefetch('quick_voting_form__auth_field_answers',
+                                                                        queryset=PollAuthFieldAnswer.objects.all()
+                                                                        .select_related('auth_field')) 
+                                                        )
+                                                    )) 
+            )
+        return object
+    
     def get_one_mini(self, filters):
         """Получение опроса по `filters` без вопросов и вариантов ответа"""
         objects = (
@@ -613,6 +630,7 @@ class PollAuthField(models.Model):
     description = models.CharField(max_length=150, null=True, blank=True)
 
     is_required = models.BooleanField(default=True)
+    is_main = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Поле '{self.name}' для авторизции на {self.poll}"

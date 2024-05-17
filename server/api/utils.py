@@ -400,7 +400,7 @@ def check_if_user_is_allowed_to_vote(poll, user_profile):
     return True
 
 
-from .models import PollAuthFieldAnswer
+from .models import PollAuthFieldAnswer, PollAuthField
 from .exсeptions import MyCustomException
 
 def validate_auth_data(auth_data, poll, quick_voting_form):

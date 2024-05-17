@@ -22,7 +22,7 @@ from django.contrib.auth.models import User
 
 from login.serializers import *
 
-@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
+@api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])
 @permission_classes([IsAdminUser])
 @transaction.atomic
 def users(request):
@@ -93,9 +93,16 @@ def users(request):
                     raise ObjectNotFoundException(model='UserRole')
                 
                 user.role = role
+                if role.role == 'Админ':
+                    user.user.is_staff = 1
+                else:
+                    user.user.is_staff = 0
+
                 user.save()
 
-                return Response(f"Роль для {user} успешно изменена на {role}",status=status.HTTP_200_OK)
+                serializer = ProfileSerializer(user)
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
             else:
                 return Response("Неверный тип запроса к PUT", status=status.HTTP_400_BAD_REQUEST)

@@ -207,7 +207,15 @@ def my_poll(request):
                         createPoll(w3, contract, poll_data)
                     else:
                         raise MyCustomException(detail="is_web3_connected не подключился")
-                
+                elif poll.poll_type.name == 'Быстрый':
+                    auth_fields = [
+                        {'poll': poll.id, 'name': 'Фамилия', 'is_main': True},
+                        {'poll': poll.id, 'name': 'Имя', 'is_main': False},
+                        {'poll': poll.id, 'name': 'Группа', 'is_main': False},
+                    ]
+                    auth_fields_serializer = PollAuthFieldSerializer(data=auth_fields, many=True)
+                    if auth_fields_serializer.is_valid():
+                        auth_fields_serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 data = serializer_errors_wrapper(serializer.errors)
@@ -648,21 +656,42 @@ def my_poll_stats(request):
                 )
             )
 
-            free_answers = (
-                poll_user_answers
-                .filter(
-                    poll_answer_group__poll__poll_id=poll_id,
-                    text__isnull=False
+            if poll.poll_type.name in ['Опрос', 'Викторина', 'Анонимный']:
+                free_answers = (
+                    poll_user_answers
+                    .filter(
+                        poll_answer_group__poll__poll_id=poll_id,
+                        text__isnull=False
+                    )
+                    .values(
+                        'text',
+                        'question_id',
+                        user_id=F('poll_answer_group__profile__user_id'),
+                        profile_name=F('poll_answer_group__profile__name'),
+                        profile_surname=F('poll_answer_group__profile__surname')
+                    )
                 )
-                .values(
-                    'text',
-                    'question_id',
-                    user_id=F('poll_answer_group__profile__user_id'),
-                    profile_name=F('poll_answer_group__profile__name'),
-                    profile_surname=F('poll_answer_group__profile__surname')
+            elif poll.poll_type.name in ['Быстрый']:
+                free_answers = (
+                    poll_user_answers
+                    .filter(
+                        poll_answer_group__poll__poll_id=poll_id,
+                        text__isnull=False
+                    )
+                    .values(
+                        'text',
+                        'question_id',
+                        user_id=F('poll_answer_group__profile__user_id'),
+                        profile_name=F('poll_answer_group__profile__name'),
+                        profile_surname=F('poll_answer_group__profile__surname'),
+                        is_auth_field_main=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__is_main'),
+                        auth_field_name=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__name'),
+                        auth_field_answer=F('poll_answer_group__quick_voting_form__auth_field_answers__answer'),
+                    )
+                    .filter(
+                        is_auth_field_main=True
+                    )
                 )
-            )
-
 
             context = {
                 'poll_statistics': poll_statistics,
@@ -698,36 +727,39 @@ def my_quick_poll_poll_user_answers(request):
             raise ObjectNotFoundException(model='Profile')
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
-        poll = Poll.my_manager.get_one_with_answers(Q(author=my_profile, poll_id=poll_id)).first()
+        poll = Poll.my_manager.get_one_quick_with_answers(Q(author=my_profile, poll_id=poll_id)).first()
         
         if request.method == 'GET':
-            user_id = request.GET.get('user_id', None)
-            if user_id:
+            poll_answer_group_id = request.GET.get('poll_answer_group_id', None)
+            
+            if poll_answer_group_id:
                 answer = (
-                    poll.user_answers.filter(Q(poll__poll_id=poll_id) & Q(profile__user_id=user_id))
+                    poll.user_answers.filter(Q(poll__poll_id=poll_id) & Q(id=poll_answer_group_id))
                     .first()
                 )
                 if not answer:
                     raise ObjectNotFoundException(detail="Данный пользователь еще не принимал участие в опросе")
         
-                answer = MyPollUsersAnswersSerializer(answer)
+                context = {'poll': poll}
+                answer = QuickPollAnswerGroupSerializer(answer, context=context)
                 return Response(answer.data)
-
+            
             else:
                 answers = (
                     poll.user_answers.all()
                     .order_by('-voting_date')
                 )
-                pagination_data = get_paginated_response(request, answers, QuickPollAnswerGroupSerializer)
+                context = {'poll': poll}
+                pagination_data = get_paginated_response(request, answers, QuickPollAnswerGroupSerializer, context=context)
                 return Response(pagination_data)
-
-
-
+        
     except APIException as api_exception:
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
+    
     except Exception as ex:
-        logger.error(f"Внутренняя ошибка сервера в my_poll_user_answers: {ex}")
-        return Response({'message': f"Внутренняя ошибка сервера в my_poll_user_answers: {ex}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Внутренняя ошибка сервера в my_quick_poll_poll_user_answers: {ex}")
+        return Response({'message': f"Внутренняя ошибка сервера в my_quick_poll_poll_user_answers: {ex}"},
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -1770,7 +1802,13 @@ def my_poll_users_votes(request):
             else:
                 answers = poll.user_answers.all().order_by('-voting_date')
 
-            paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer)
+            context = {'poll': poll}
+            paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer, context=context)
+            paginated_result['results'] = {
+                'poll_data': PollSerializer(poll).data,
+                'answers': paginated_result['results']
+            }
+
             return Response(paginated_result)
 
     except APIException as api_exception:

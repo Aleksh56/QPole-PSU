@@ -232,15 +232,6 @@ class PollVotingResultSerializer(PollAnswerGroupSerializer):
         fields = '__all__'
 
 
-class MyPollUsersAnswersSerializer(PollVotingResultSerializer):
-    answers = PollAnswerSerializer(many=True, read_only=True)
-    author = serializers.SerializerMethodField()
-
-
-    def get_author(self, instance):
-        return MiniProfileSerializer(instance=instance.profile).data
-    
-
 # сериализаторы опросов
 
 class PollSettingsSerializer(serializers.ModelSerializer):
@@ -419,7 +410,25 @@ class MiniPollRegistrationSerializer(serializers.ModelSerializer):
 
 
 
-class BasePollAuthFieldSerializer(serializers.ModelSerializer):
+class BaseModelSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for attr, value in self.initial_data.items():
+            setter_name = f"set_{attr}"
+            if hasattr(self, setter_name):
+                getattr(self, setter_name)(value)
+        return instance
+    
+
+class BasePollAuthFieldSerializer(BaseModelSerializer):
     name = serializers.CharField(max_length=50, required=False, allow_null=True)
     description = serializers.CharField(max_length=150, required=False, allow_null=True)
     is_required = serializers.BooleanField(required=True)
@@ -428,11 +437,19 @@ class BasePollAuthFieldSerializer(serializers.ModelSerializer):
         model = PollAuthField
         fields = '__all__'
 
+    def set_is_main(self, value):
+        if value:
+            auth_fields = self.instance.poll.auth_fields.all()
+            for auth_field in auth_fields:
+                if not auth_field.id == self.instance.id:
+                    auth_field.is_main = False
+                    auth_field.save()
+
 
 class PollAuthFieldSerializer(BasePollAuthFieldSerializer):
-    name = serializers.CharField(read_only=True)
-    description = serializers.CharField(read_only=True)
-    is_required = serializers.BooleanField(read_only=True)
+    name = serializers.CharField()
+    description = serializers.CharField(required=False)
+    is_required = serializers.BooleanField(required=False)
 
 
 class PollAuthFieldAnswerSerializer(serializers.ModelSerializer):
@@ -662,10 +679,16 @@ class AnswerOptionStatsSerializer(serializers.ModelSerializer):
             user_answers = self.context.get('free_answers', [])
             for item in user_answers:
                 if item['question_id'] == question_id:
-                    answer = {
-                        'name': (item.get('profile_name') or '') + ' ' + (item.get('profile_surname', '') or ''),
-                        'text': item.get('text') or ''
-                    }
+                    if item.get('user_id'):
+                        answer = {
+                            'name': (item.get('profile_name') or '') + ' ' + (item.get('profile_surname', '') or ''),
+                            'text': item.get('text') or ''
+                        }
+                    else:
+                        answer = {
+                            'name': (item.get('auth_field_name') or '') + ':' + (item.get('auth_field_answer', '') or ''),
+                            'text': item.get('text') or ''
+                        }
                     free_answers.append(answer)
             return free_answers
              
@@ -765,17 +788,125 @@ class SupportRequestSerializer(SupportRequestBaseSerializer):
 
 
 class QuickVotingFormSerializer(serializers.ModelSerializer):
-    auth_field_answers = MiniPollAuthFieldAnswerSerializer(many=True)
+    auth_field_answers = MiniPollAuthFieldAnswerSerializer(many=True, required=False)
 
     class Meta:
         model = QuickVotingForm
         fields = '__all__'     
 
 
+class QuickPollAnswerSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        my_answers = serializers.ModelSerializer.to_representation(self, instance)
+        poll = self.context.get('poll', None)        
+        data = {
+                    'questions': PollQuestionSerializer(poll.questions.all(), many=True).data,
+                    'answers': my_answers,
+                }
+
+        all_answers = [my_answers]
+        for question in data['questions']: # проходим по всем вопросам 
+            if question.get('is_answered') is None: # проверка чтобы не занулять вопрос на который дан ответ
+                question['is_answered'] = False # если ответ уже дан, то не делаем его False
+            for answer_option in question['answer_options']: # проходим по всем вариантам ответа 
+
+                if answer_option.get('is_answered') is None: # проверка на то что на вариант ответа еще не ответили
+                    answer_option['is_chosen'] = False # отмечаем, что вариант ответа изначально не выбран
+                    answer_option['text'] = None # отмечаем, что текст для варианта ответа изначально не указан
+
+                for answer in all_answers: # проходим по всем моим ответам
+                    if answer['answer_option'] == answer_option['id']: # выбираем ответ по совпавшим id
+                        question['is_answered'] = True # отмечаем, что вопрос отвечен
+                        answer_option['is_chosen'] = True # отмечаем, что вариант ответа был выбран
+                        answer_option['text'] = answer.get('text', None) # добавляем текст ответа, если он был дан
+
+        return data
+    
+    class Meta:
+        model = PollAnswer
+        fields = ['id', 'question', 'answer_option', 'text']
+
+
 
 class QuickPollAnswerGroupSerializer(serializers.ModelSerializer):
     quick_voting_form = QuickVotingFormSerializer()
-    answers = PollAnswerSerializer(many=True)
+    answers = QuickPollAnswerSerializer(many=True)
+
+    class Meta:
+        model = PollAnswerGroup
+        fields = '__all__'
+
+
+class PollAnswersSerializer(serializers.ModelSerializer):
+    answers = PollAnswerSerializer(many=True, read_only=True)
+    # profile = ProfileSerializer()
+
+
+    def to_representation(self, instance):
+        my_answers = serializers.ModelSerializer.to_representation(self, instance)
+        # poll = self.context.get('poll', None)        
+        data = {
+                    # 'questions': PollQuestionSerializer(poll.questions.all(), many=True).data,
+                    'answers': my_answers,
+                }
+
+        # all_answers = [my_answers]
+        # for question in data['questions']: # проходим по всем вопросам 
+        #     question_correct_quantity = 0
+        #     question_gained_quantity = 0
+        #     if question.get('is_answered') is None: # проверка чтобы не занулять вопрос на который дан ответ
+        #         question['is_answered'] = False # если ответ уже дан, то не делаем его False
+        #         question['points'] = 0  # изначально начисляем 0 баллов за каждый
+        #         question['options_quantity'] = 0  # изначально считаем колво верных вариантов ответа
+        #     for answer_option in question['answer_options']: # проходим по всем вариантам ответа 
+
+        #         if answer_option.get('is_answered') is None: # проверка на то что на вариант ответа еще не ответили
+        #             answer_option['is_chosen'] = False # отмечаем, что вариант ответа изначально не выбран
+        #             answer_option['text'] = None # отмечаем, что текст для варианта ответа изначально не указан
+        #             answer_option['points'] = 0 # отмечаем, сколько баллов получили за ответ
+
+        #         for answer in all_answers: # проходим по всем моим ответам
+        #             if answer['answer_option'] == answer_option['id']: # выбираем ответ по совпавшим id
+        #                 question['is_answered'] = True # отмечаем, что вопрос отвечен
+        #                 answer_option['is_chosen'] = True # отмечаем, что вариант ответа был выбран
+        #                 answer_option['text'] = answer.get('text', None) # добавляем текст ответа, если он был дан
+        #                 answer_option['points'] = answer['points'] # начисляем очки, которые получили после проверки правильности
+
+        #                 if answer_option['points'] is not None: # проверяем что очки вообще есть
+        #                     if answer_option['points'] > 0: # если выбрали верную опцию, то добавляем балл
+        #                         question_gained_quantity += answer_option['points']
+        #                     else:
+        #                         answer_option['points'] = -1 # если выбрали неверную опцию, то убавляем балл
+        #                         question_gained_quantity += answer_option['points']
+            
+
+            # if poll.poll_type.name == 'Викторина2':
+            #     question['points'] += round(question_gained_quantity / question_correct_quantity, 2) # начисляем очки, которые получили после проверки правильности
+            #     if question['points'] < 0:
+            #         question['points'] = 0
+            #     poll_gained_points += question['points']
+            #     poll_points += 1
+
+            #     results = {
+            #             'total': poll_points,
+            #             'correct': poll_gained_points,
+            #             'wrong': poll_points - poll_gained_points,
+            #             'percentage': round(float(poll_gained_points / poll_points) * 100, 2),
+            #         }
+                
+            #     data['results'] = results
+
+        return data
+    
+
+    class Meta:
+        model = PollAnswer
+        fields = '__all__'
+
+class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
+    answers = PollAnswersSerializer(many=True, read_only=True)
+    profile = MiniProfileSerializer()
+
 
     class Meta:
         model = PollAnswerGroup
