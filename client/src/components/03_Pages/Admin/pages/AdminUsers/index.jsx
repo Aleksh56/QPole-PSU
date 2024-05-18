@@ -112,6 +112,7 @@ const AdminUsersPage = () => {
         open={isSettingsOpen}
         handleClose={setIsSettingsOpen}
         userId={userIdToChange}
+        setUsers={setUsers}
       />
       <FrmConfirm
         open={isConfirmOpen}

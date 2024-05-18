@@ -37,6 +37,8 @@ const ConductionPollPage = () => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(true);
   const [remainingTime, setRemainingTime] = useState('');
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [newPollStarted, setNewPollStarted] = useState(false);
 
   const getRemainingTime = async () => {
     const data = await getRemainingTimeFx({ id });
@@ -47,8 +49,8 @@ const ConductionPollPage = () => {
     if (isLoading) return;
     const pollDataRequest = async () => {
       const data = await fetchPollQuestions(id);
-      getRemainingTime();
-      console.log(remainingTime);
+      if (data.poll_setts.completion_time !== null) getRemainingTime();
+
       if ((!data.is_revote_allowed && data.has_user_participated_in) || isAuthenticated === false) {
         navigate('/polls');
         return;
@@ -98,6 +100,7 @@ const ConductionPollPage = () => {
         );
       }
       setShowResults(true);
+      setFormSubmitted(true);
     }
   };
 
@@ -109,8 +112,17 @@ const ConductionPollPage = () => {
     await startConductionFx({ id }).then((res) => {
       setRemainingTime(res.data.voting_time_left_str);
       setIsCollapsed(false);
+      setNewPollStarted(true);
     });
   };
+
+  useEffect(() => {
+    if (formSubmitted || newPollStarted) {
+      resetAnswers();
+      setFormSubmitted(false);
+      setNewPollStarted(false);
+    }
+  }, [formSubmitted, newPollStarted]);
 
   return (
     <ConductionBackgroundWrapper onContextMenu={handleContextMenu}>
@@ -136,7 +148,9 @@ const ConductionPollPage = () => {
                     alignItems: 'center',
                   }}
                 >
-                  <Timer initialTime={remainingTime} onTimeEnd={() => handleTimeEnd()} />
+                  {pollData?.poll_setts?.completion_time !== null && (
+                    <Timer initialTime={remainingTime} onTimeEnd={() => handleTimeEnd()} />
+                  )}
                   {pollData?.questions?.map((item) => (
                     <QueBlock
                       key={item.id}
@@ -156,7 +170,7 @@ const ConductionPollPage = () => {
           </>
         )}
       </ConductionWrapper>
-      {isCollapsed && (
+      {isCollapsed && pollData?.poll_setts?.completion_time !== null && (
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
           <PrimaryButton caption="Начать" handleClick={handleStart} />
         </Box>

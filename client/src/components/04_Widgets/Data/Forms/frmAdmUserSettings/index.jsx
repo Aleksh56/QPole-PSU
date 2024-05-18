@@ -34,17 +34,20 @@ const styles = {
   },
 };
 
-const FrmAdmUserSettings = ({ open, handleClose, userId }) => {
+const FrmAdmUserSettings = ({ open, handleClose, userId, setUsers }) => {
   const [role, setRole] = useState('');
 
   const handleChange = (event) => setRole(event.target.value);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('User id:', userId);
-    const response = await changeRoleFx({ userId });
-    console.log(response);
-    // handleClose();
+    const response = await changeRoleFx({ userId, role });
+    if (response.ok) {
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => (user.user.id === userId ? { ...user, role: role } : user)),
+      );
+      handleClose();
+    }
   };
 
   return (
@@ -55,7 +58,7 @@ const FrmAdmUserSettings = ({ open, handleClose, userId }) => {
         </Typography>
         <form onSubmit={handleSubmit}>
           <FormControl fullWidth sx={styles.formControl}>
-            <InputLabel id="role-label">Role</InputLabel>
+            <InputLabel id="role-label">Роль</InputLabel>
             <Select
               labelId="role-label"
               id="role-select"
@@ -63,14 +66,13 @@ const FrmAdmUserSettings = ({ open, handleClose, userId }) => {
               label="Role"
               onChange={handleChange}
             >
-              <MenuItem value="admin">Admin</MenuItem>
-              <MenuItem value="editor">Editor</MenuItem>
-              <MenuItem value="viewer">Viewer</MenuItem>
+              <MenuItem value="Админ">Администратор</MenuItem>
+              <MenuItem value="Пользователь">Пользователь</MenuItem>
+              <MenuItem value="Преподаватель">Преподаватель</MenuItem>
             </Select>
           </FormControl>
-          {/* Add more settings fields here as needed */}
           <Button type="submit" variant="contained" color="primary" sx={styles.button}>
-            Save
+            Сохранить
           </Button>
         </form>
       </Box>

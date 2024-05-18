@@ -4,7 +4,7 @@ import { Box, Typography } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 
 export const HeaderWrapper = styled(Box)(() => ({
-  width: '100%',
+  width: 'calc(100% - 40px)',
   border: `${Rem(1)} solid #D7D7D7`,
   padding: Rem(20),
   borderRadius: Rem(16),
@@ -33,13 +33,13 @@ export const DescriptionWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'start',
+  width: '100%',
 }));
 
 export const DescriptionTagsWrapper = styled(Box)(() => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  width: '100%',
 }));
 
 export const StyledTitle = styled(Typography)(() => ({

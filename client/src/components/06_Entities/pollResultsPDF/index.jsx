@@ -106,7 +106,11 @@ const PollResultsPDF = ({ data, pollData }) => {
                         >{`${answer.profile.surname} ${answer.profile.name}`}</Text>
                         <Text style={styles.tableCol}>
                           {answer.answers
-                            .map((a) => (a.answers.text ? a.answers.text : a.answers.answer_option))
+                            .map((a) =>
+                              a.answers.text
+                                ? `${a.answers.text}(Свободный ответ)`
+                                : a.answers.answer_option,
+                            )
                             .join(', ')}{' '}
                         </Text>
                         <Text style={styles.tableCol}>{answer.voting_date}</Text>
@@ -118,7 +122,9 @@ const PollResultsPDF = ({ data, pollData }) => {
                             style={styles.tableCol}
                           >{`${answer.profile.surname} ${answer.profile.name}`}</Text>
                           <Text style={styles.tableCol}>
-                            {a.answers.text ? a.answers.text : a.answers.answer_option}
+                            {a.answers.text
+                              ? `${a.answers.text}(Свободный ответ)`
+                              : a.answers.answer_option}
                           </Text>
                           <Text style={styles.tableCol}>{answer.voting_date}</Text>
                         </View>

@@ -32,7 +32,29 @@ const PollResultCard = ({ data, chartType }) => {
         );
       case 'pie':
       default:
-        return <PieChart series={[{ data: chartData }]} width={450} height={200} />;
+        return (
+          <PieChart
+            series={[{ data: chartData }]}
+            width={450}
+            height={200}
+            slotProps={{
+              legend: {
+                labelStyle: {
+                  text: {
+                    maxWidth: '70px',
+                  },
+                  maxWidth: '70px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: 2,
+                },
+              },
+            }}
+          />
+        );
     }
   };
 

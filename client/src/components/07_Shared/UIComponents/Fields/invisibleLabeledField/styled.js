@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { Box, Typography } from '@mui/material';
 import Input from '@mui/material/Input';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const LabeledFieldWrapper = styled(Box)(() => ({
@@ -12,6 +13,7 @@ export const LabeledFieldWrapper = styled(Box)(() => ({
 
 export const StyledLabelTypography = styled(Typography)(() => ({
   fontSize: Rem(14),
+  width: '100%',
   color: '#6f6f6f',
 }));
 

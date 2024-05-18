@@ -1,3 +1,4 @@
+import { Box, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
@@ -8,12 +9,10 @@ import {
 } from '@/components/03_Pages/App/pages/Pole/PoleMainSettings/api/apiRequests';
 import InvisibleLabeledField from '@/components/07_Shared/UIComponents/Fields/invisibleLabeledField';
 import { useAlert } from '@/hooks/useAlert';
-import usePollData from '@/hooks/usePollData';
 
 const PollDesignSettingsTab = () => {
   const { id } = useParams();
   const { t } = useTranslation();
-  const { pollStatus } = usePollData(id);
   const { showAlert } = useAlert();
   const [poleData, setPoleData] = useState();
   const [pendingChanges, setPendingChanges] = useState({});
@@ -59,8 +58,24 @@ const PollDesignSettingsTab = () => {
 
   return (
     <InvisibleLabeledField
-      disabled={pollStatus}
-      label={t('label.completionTime')}
+      label={
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          {t('label.completionTime')}
+          <Typography
+            sx={{ textDecoration: 'underline', fontSize: '14px', cursor: 'pointer' }}
+            onClick={() => handleChange('completion_time', '00:00')}
+          >
+            Очистить
+          </Typography>
+        </Box>
+      }
       type="time"
       min="00:00:00"
       max="23:59:59"
@@ -69,8 +84,8 @@ const PollDesignSettingsTab = () => {
         pendingChanges['completion_time'] !== undefined
           ? pendingChanges['completion_time']
           : (poleData?.poll_setts?.completion_time !== null &&
-              poleData?.poll_setts?.completion_time?.split(':').splice(1).join(':')) ||
-            '00:00'
+              poleData?.poll_setts?.completion_time) ||
+            '00:00:00'
       }
     />
   );
