@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Q, BooleanField
-from django.db.models import Case, When
+from django.db.models import Case, When, Count, OuterRef
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -98,15 +98,19 @@ class PollAnswerGroup(models.Model):
         completion_time = self.poll.poll_setts.completion_time
 
         poll_time_left = self.poll.end_time_seconds_left
-
         if poll_time_left:
             if completion_time:
                 time_left = max(((self.voting_date + completion_time) - timezone.now()).total_seconds(), 0)
                 return min(time_left, poll_time_left)
             else:
                 return poll_time_left
+        else:
+            if completion_time:
+                time_left = max(((self.voting_date + completion_time) - timezone.now()).total_seconds(), 0)
+                return time_left
+
             
-        return 0            
+        return None            
 
 
     def __str__(self):
@@ -218,7 +222,7 @@ class MyPollManager(models.Manager):
             )
         )
     
-    def get_all(self, filters):
+    def get_all(self, filters=None):
         """Получение всех опросов"""
         objects = (
             super().get_queryset()
@@ -231,13 +235,17 @@ class MyPollManager(models.Manager):
                 models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
                                                 .select_related('profile')))
             .prefetch_related('registrated_users')
+            .annotate(
+                participants_quantity=Count('user_participations', filter=Q(user_participations__is_latest=True), distinct=True),
+                questions_quantity=Count('questions', distinct=True)
+            )
             .filter(filters)
-            .order_by('-created_date')   
+            .order_by('-created_date')
         )
-        
-        return objects
 
-    def get_all_with_answers(self, filters):
+        return objects
+    
+    def get_all_with_answers(self, filters=None):
         """Получение всех опросов с ответами"""
         objects = (
             self.get_all(filters)
@@ -245,14 +253,14 @@ class MyPollManager(models.Manager):
         
         return objects
     
-    def get_all_avaliable_for_voting(self, filters):
+    def get_all_avaliable_for_voting(self, filters=None):
         """Получение всех опросов, доступных для прохождения"""
 
         objects = self.get_all_with_answers(filters)
         objects = self.__annotate_time(objects)
         return objects.filter(is_avaliable_for_voting=True)
     
-    def get_all_avaliable_to_me(self, filters, user_profile):
+    def get_all_avaliable_to_me(self, user_profile, filters=None):
         """Получение всех опросов доступных мне"""
         objects = (
             self.get_all_avaliable_for_voting(filters)
@@ -290,7 +298,7 @@ class MyPollManager(models.Manager):
         
         return objects
 
-    def get_one(self, filters):
+    def get_one(self, filters=None):
         """Получение опроса по `filters`"""
         object = (
             super().get_queryset()
@@ -306,12 +314,16 @@ class MyPollManager(models.Manager):
                 models.Prefetch('questions', queryset=PollQuestion.objects.prefetch_related(
                         'answer_options'
                 ).all()))
+            .annotate(
+                participants_quantity=Count('user_participations', filter=Q(user_participations__is_latest=True), distinct=True),
+                questions_quantity=Count('questions', distinct=True)
+            )
             .filter(filters)    
         )
         
         return object
 
-    def get_one_with_answers(self, filters):
+    def get_one_with_answers(self, filters=None):
         """Получение опроса по `filters` с ответами пользователей"""
         object = (
             self.get_one(filters)
@@ -322,7 +334,7 @@ class MyPollManager(models.Manager):
         )
         return object
     
-    def get_one_quick_with_answers(self, filters):
+    def get_one_quick_with_answers(self, filters=None):
         """Получение быстрого опроса по `filters` с формами ответа пользователей"""
         object = (
             self.get_one(filters)
@@ -339,7 +351,7 @@ class MyPollManager(models.Manager):
             )
         return object
     
-    def get_one_mini(self, filters):
+    def get_one_mini(self, filters=None):
         """Получение опроса по `filters` без вопросов и вариантов ответа"""
         objects = (
             super().get_queryset()
@@ -348,6 +360,10 @@ class MyPollManager(models.Manager):
             .prefetch_related('user_participations')
             .prefetch_related('allowed_groups')
             .prefetch_related('questions')
+            .annotate(
+                participants_quantity=Count('user_participations', filter=Q(user_participations__is_latest=True), distinct=True),
+                questions_quantity=Count('questions', distinct=True)
+            )
             .filter(filters)    
         )
         
@@ -435,15 +451,6 @@ class Poll(models.Model):
         else:
             return False    
  
-    
-    @property
-    def participants_quantity(self):   # число участников опроса
-        return self.user_participations.count()
-
-    @property
-    def questions_quantity(self):   # число вопросов опроса
-        return self.questions.count()
-
     @property
     def opened_for_voting(self):
         try:
@@ -504,21 +511,21 @@ class Poll(models.Model):
         try:
             if self.poll_setts:
                 start_time = self.poll_setts.start_time
-                duration = self.poll_setts.duration
+                # duration = self.poll_setts.duration
                 end_time = self.poll_setts.end_time
 
                 if end_time:
                     time_left = max((end_time - timezone.now()).total_seconds(), 0)
                     return time_left
                 
-                elif start_time and duration:
-                    time_left = max((start_time + duration - timezone.now()).total_seconds(), 0)
-                    return time_left
+                # elif start_time and duration:
+                #     time_left = max((start_time + duration - timezone.now()).total_seconds(), 0)
+                #     return time_left
                 
-                else: return 0    
-            else: return 0
+                else: return None    
+            else: return None
         except Exception:
-            return 0
+            return None
             
     @property
     def opened_for_registration(self):

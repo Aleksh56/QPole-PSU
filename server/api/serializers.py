@@ -758,7 +758,6 @@ class PollStatsSerializer(serializers.ModelSerializer):
     def get_participants_quantity(self, instance):
         return instance.participants_quantity
 
-
     def get_questions_quantity(self, instance):
         return instance.questions_quantity
 
@@ -847,17 +846,7 @@ class QuickPollAnswerGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class MyPollAnswerSerializer(serializers.ModelSerializer):
-    # answer_option = serializers.CharField(source='answer_option.name')
-
-
-    # class Meta:
-    #     model = PollAnswer
-    #     fields = '__all__'
-
-
 class PollAnswersSerializer(serializers.ModelSerializer):
-    # answers = MyPollAnswerSerializer(many=True, read_only=True)
     answer_option = serializers.CharField(source='answer_option.name')
 
     def to_representation(self, instance):

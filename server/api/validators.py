@@ -9,8 +9,6 @@ import re
 
 class BaseValidator:
 
-
-
     def name(value, chars=None):
         if not chars:
             if len(value) > 50:

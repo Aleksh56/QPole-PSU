@@ -39,6 +39,7 @@ def users(request):
                 role = request.GET.get('role', None)
                 is_banned = bool(request.GET.get('is_paused', None))
                 name_surname_patronymic = request.GET.get('name_surname_patronymic', None)
+                order_by = request.GET.get('order_by', None)
 
 
                 filters = Q()
@@ -52,8 +53,13 @@ def users(request):
                         Q(surname__icontains=name_surname_patronymic) or
                         Q(patronymic__icontains=name_surname_patronymic)
                     )
+                if not order_by or not order_by in ['user_id', '-user_id', 'name', '-name', 'email', '-email',
+                                                    'surname', '-surname', 'patronymic', '-patronymic',
+                                                    'joining_date', '-joining_date', 'is_banned', '-is_banned',]:
+                    order_by = '-joining_date'
+
                                     
-                users = Profile.objects.filter(filters).order_by('-joining_date').select_related('role')
+                users = Profile.objects.filter(filters).order_by(order_by).select_related('role')
                 pagination_data = get_paginated_response(request, users, ProfileSerializer)
                 return Response(pagination_data)
     
@@ -135,12 +141,14 @@ def polls(request):
             poll_id = request.GET.get('poll_id', None)
 
             if poll_id:
-                poll = Poll.objects.filter(poll_id=poll_id).select_related('author', 'poll_type').first()
+                filters = Q(poll_id=poll_id)
+                poll = Poll.my_manager.get_one(filters).first()
                 if not poll:
                     raise ObjectNotFoundException('Poll')
                 serializer = PollSerializer(poll)
             else:
-                polls = Poll.objects.all().order_by('-created_date').select_related('author', 'poll_type')
+                filters = Q()
+                polls = Poll.my_manager.get_all(filters)
                 polls = get_paginated_response(request, polls, PollSerializer)
 
                 return Response(polls)

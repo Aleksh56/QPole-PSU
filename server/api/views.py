@@ -561,6 +561,7 @@ def my_poll_stats(request):
     try:
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -1677,7 +1678,6 @@ def poll(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@permission_classes([AllowAny])
 def polls_for_me(request):
     try:
         current_user = request.user
