@@ -247,7 +247,16 @@ class PollSettingsSerializer(serializers.ModelSerializer):
         if value:
             if self.instance.end_time:
                 self.instance.end_time = None
-            
+
+    def set_completion_time(self, value):
+        if value:
+            hours, minutes = map(int, value.split(':'))
+            if not (hours == 0 and minutes == 0):
+                duration_obj = timedelta(hours=hours, minutes=minutes)
+                self.instance.completion_time = duration_obj
+            else:
+                self.instance.completion_time = None
+
     # если установлен end_time, то обнулить duration
     def set_start_time(self, value):
         if not value:
@@ -413,11 +422,12 @@ class MiniPollRegistrationSerializer(serializers.ModelSerializer):
 class BaseModelSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = super().create(validated_data)
-        for attr, value in self.initial_data.items():
-            setter_name = f"set_{attr}"
-            if hasattr(self, setter_name):
-                getattr(self, setter_name)(value)
-        return instance
+        if not isinstance(self.initial_data, list):
+            for attr, value in self.initial_data.items():
+                setter_name = f"set_{attr}"
+                if hasattr(self, setter_name):
+                    getattr(self, setter_name)(value)
+            return instance
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)

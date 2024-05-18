@@ -1514,6 +1514,23 @@ def poll_voting_ended(request):
         raw_answers = None
         if poll.poll_type.name == 'Опрос':
             answers, raw_answers = poll_voting_handler(answers, poll, is_full=False)
+        if poll.poll_type.name == 'Быстрый':
+            auth_data = get_data_or_400(data, 'auth_data')
+            quick_voting_form_data = {
+                'poll': poll.id
+            }
+            serializer = QuickVotingFormSerializer(data=quick_voting_form_data)
+            if serializer.is_valid():
+                quick_voting_form = serializer.save()
+            else:
+                data = serializer_errors_wrapper(serializer.errors)
+                return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)
+            new_auth_fields = validate_auth_data(auth_data, poll, quick_voting_form)
+            reated_auth_fields = PollAuthFieldAnswer.objects.bulk_create(new_auth_fields)
+            answers, raw_answers = poll_voting_handler(answers, poll, is_full=False)
+
+
+            answers, raw_answers = poll_voting_handler(answers, poll, is_full=False)
         elif poll.poll_type.name == 'Викторина':
             answers = quizz_voting_handler(answers, poll, is_full=False)
         else:
