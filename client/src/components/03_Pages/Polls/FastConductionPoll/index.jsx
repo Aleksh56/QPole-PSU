@@ -31,7 +31,7 @@ const FastConductionPollPage = () => {
   const [pollData, setPollData] = useState({});
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [newPollStarted, setNewPollStarted] = useState(true);
+  const [newPollStarted, setNewPollStarted] = useState(false);
   const [remainingTime, setRemainingTime] = useState('');
   const [isTextLong, setIsTextLong] = useState(false);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(true);
@@ -62,6 +62,10 @@ const FastConductionPollPage = () => {
     };
     pollDataRequest();
   }, [isLoading, isAuthenticated, id]);
+
+  useEffect(() => {
+    console.log(newPollStarted);
+  }, [newPollStarted]);
 
   useEffect(() => {
     const requiredQuestions = pollData.questions
