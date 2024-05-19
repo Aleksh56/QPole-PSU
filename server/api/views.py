@@ -1267,7 +1267,7 @@ def poll_answer_group(request):
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 @transaction.atomic
 def poll_voting(request):
     try:
@@ -1308,34 +1308,62 @@ def poll_voting(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
-            check_if_user_is_allowed_to_vote(poll, my_profile)
-            
             answers = get_data_or_400(data, 'answers')
+
+            if not poll.poll_type.name == 'Быстрый':
+                check_if_user_is_allowed_to_vote(poll, my_profile)
+                    
+                # валидация и парсинг ответов
+                raw_answers = None
+                if poll.poll_type.name == 'Опрос':
+                    answers, raw_answers = poll_voting_handler(answers, poll)
+                elif poll.poll_type.name == 'Викторина':
+                    answers = quizz_voting_handler(answers, poll)
+                else:
+                    raise MyCustomException(detail="Данного типа опроса не существует")
+
+                unmake_last_answer_latest(poll, my_profile)
+                poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, raw_answers)
+
             
-            # валидация и парсинг ответов
-            raw_answers = None
-            if poll.poll_type.name == 'Опрос':
-                answers, raw_answers = poll_voting_handler(answers, poll)
-            elif poll.poll_type.name == 'Викторина':
-                answers = quizz_voting_handler(answers, poll)
+                if tx_hash:
+                    poll_answer_group.tx_hash = str(tx_hash)
+                    poll_answer_group.save()
+
             else:
-                raise MyCustomException(detail="Данного типа опроса не существует")
+                poll_answer_group_id = get_parameter_or_400(request.GET, 'poll_answer_group_id')
+                poll_answer_group = (
+                    PollAnswerGroup.objects
+                        .filter(id=poll_answer_group_id)
+                        .prefetch_related('answers')
+                        .first()
+                )
 
-            unmake_last_answer_latest(poll, my_profile)
-            poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, None, raw_answers)
+                if not poll_answer_group:
+                    raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
+                
+                quick_voting_form_id = get_parameter_or_400(request.GET, 'quick_voting_form_id')
+                quick_voting_form = get_object_or_404(QuickVotingForm, id=quick_voting_form_id)
 
-        
-            if tx_hash:
-                poll_answer_group.tx_hash = str(tx_hash)
-                poll_answer_group.save()
+                answers, _ = poll_voting_handler(answers, poll, is_full=False)
+                poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, None, 
+                                                                 poll_answer_group=poll_answer_group,
+                                                                 poll_participation_group=None,
+                                                                 quick_voting_form=quick_voting_form )
 
-            my_answer = PollAnswerGroup.objects.filter(
-                    Q(profile=my_profile) & Q(poll__poll_id=poll_id)
-                ).select_related('profile').prefetch_related('answers').first()
 
+            if not poll.poll_type.name == 'Быстрый':
+                my_answer = PollAnswerGroup.objects.filter(
+                        Q(profile=my_profile) & Q(poll__poll_id=poll_id)
+                    ).select_related('profile').prefetch_related('answers').first()
+            else:
+                my_answer = PollAnswerGroup.objects.filter(
+                        Q(id=poll_answer_group_id)
+                    ).prefetch_related('answers').first()
+                
             if not my_answer:
                 raise ObjectNotFoundException(model='PollAnswerGroup')
-            
+        
             my_answer.poll = poll
 
             serializer = PollVotingResultSerializer(my_answer)
@@ -1605,55 +1633,6 @@ def poll_voting_ended(request):
     except Exception as ex:
         logger.error(f"Внутренняя ошибка сервера в poll_voting_ended: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в poll_voting_ended: {ex}"},
-                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-@transaction.atomic
-def quick_poll_voting(request):
-    try:
-        data = request.data.copy()
-
-        poll_id = get_parameter_or_400(request.GET, 'poll_id')
-        
-        poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id)).first()
-        
-        if not poll:
-            raise ObjectNotFoundException(model='Poll')
-
-        auth_data = get_data_or_400(data, 'auth_data')             
-        answers = get_data_or_400(data, 'answers')
-
-        quick_voting_form_data = {
-            'poll': poll.id
-        }
-        serializer = QuickVotingFormSerializer(data=quick_voting_form_data)
-        if serializer.is_valid():
-            quick_voting_form = serializer.save()
-        else:
-            data = serializer_errors_wrapper(serializer.errors)
-            return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)     
-
-        new_auth_fields = validate_auth_data(auth_data, poll, quick_voting_form)
-
-        created_auth_fields = PollAuthFieldAnswer.objects.bulk_create(new_auth_fields)
-
-        # валидация и парсинг ответов
-        answers, _ = poll_voting_handler(answers, poll)
-
-        save_votes(answers, poll, my_profile, quick_voting_form, None)
-
-                    
-        return Response({'message':"Вы успешно проголосовали"}, status=status.HTTP_200_OK)  
-
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
-
-    except Exception as ex:
-        logger.error(f"Внутренняя ошибка сервера в quick_poll_voting: {ex}")
-        return Response({'message':f"Внутренняя ошибка сервера в quick_poll_voting: {ex}"},
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
