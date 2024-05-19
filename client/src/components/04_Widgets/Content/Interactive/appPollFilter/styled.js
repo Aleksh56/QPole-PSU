@@ -11,6 +11,26 @@ export const StyledStackWrapper = styled(Box)(() => ({
   // },
 }));
 
+export const FiltersWrapper = styled(Box)(() => ({
+  display: 'grid',
+  gridTemplateColumns: '1fr',
+  rowGap: '20px',
+  padding: '15px',
+}));
+
+export const MobFiltersContent = styled(Box)(() => ({
+  '@media (min-width: 900px)': {
+    display: 'none',
+  },
+}));
+
+export const MobFiltersWrapper = styled(Box)(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '8px 15px',
+}));
+
 export const StyledStack = styled(Stack)(() => ({
   width: '100%',
   display: 'grid',

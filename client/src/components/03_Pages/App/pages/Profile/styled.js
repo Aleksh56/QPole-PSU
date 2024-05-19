@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const SidebarWrapper = styled(Box)(({ isSideOpen }) => ({
@@ -17,4 +18,24 @@ export const SidebarWrapper = styled(Box)(({ isSideOpen }) => ({
     boxShadow: '2px 0 12px rgba(0,0,0,0.5)',
     backgroundColor: '#fff',
   },
+}));
+
+export const ProfileWrapper = styled(Box)(() => ({
+  display: 'flex',
+  width: '100%',
+  height: '100vh',
+}));
+
+export const ProfileContentWrapper = styled(Box)(() => ({
+  flex: 1,
+  backgroundColor: '#f7f9fa',
+  overflowY: 'auto',
+}));
+
+export const MobMenuWrapper = styled(Box)(() => ({
+  padding: '16px',
+  backgroundColor: '#e0e0e0',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
 }));

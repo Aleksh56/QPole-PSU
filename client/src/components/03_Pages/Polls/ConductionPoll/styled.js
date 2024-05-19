@@ -22,3 +22,9 @@ export const ConductionWrapper = styled(Box)(() => ({
   WebkitUserSelect: 'none',
   msUserSelect: 'none',
 }));
+
+export const StartBtnWrapper = styled(Box)(() => ({
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+}));

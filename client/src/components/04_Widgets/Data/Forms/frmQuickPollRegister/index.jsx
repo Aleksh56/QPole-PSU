@@ -24,7 +24,24 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
 
   const handleSubmit = () => {
     const { fullName, studentId, groupNumber } = formData;
-    const dataToSubmit = isStudent ? { fullName, studentId, groupNumber } : { fullName };
+    const dataToSubmit = [];
+
+    dataToSubmit.push({
+      auth_field_name: 'ФИО',
+      answer: fullName,
+    });
+
+    if (isStudent) {
+      dataToSubmit.push({
+        auth_field_name: 'Номер студенческого билета',
+        answer: studentId,
+      });
+      dataToSubmit.push({
+        auth_field_name: 'Группа',
+        answer: groupNumber,
+      });
+    }
+
     handleStart(dataToSubmit);
   };
 

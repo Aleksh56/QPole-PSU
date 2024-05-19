@@ -7,8 +7,11 @@ import { poleTabsButtonsData } from './data/PoleTabsButtonsData';
 import { deleteImageFx } from './model/image-delete';
 import {
   MainSettingsContentWrapper,
+  MobTimeSettingsWrapper,
   MobileSettingsContentWrapper,
   PoleInfoContainer,
+  SettingsWrapper,
+  TimeSettingsWrapper,
 } from './styled';
 
 import PollDesignSettingsTab from '@/components/06_Entities/PollDesignSettings';
@@ -75,7 +78,7 @@ const PoleMainSettingsPage = () => {
   const handleImageDelete = () => deleteImageFx({ id });
 
   return (
-    <Box sx={{ display: 'flex', backgroundColor: '#f9fafb', padding: '0 15px' }}>
+    <SettingsWrapper>
       <MainSettingsContentWrapper>
         <PoleInfoContainer>
           <PoleImageUpload
@@ -104,7 +107,7 @@ const PoleMainSettingsPage = () => {
             handleChange={(e) => handleFieldChange('description', e)}
             disabled={pollStatus}
           />
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px' }}>
+          <TimeSettingsWrapper>
             <InvisibleLabeledField
               label="Время начала"
               placeholder="Введите время начала опроса"
@@ -131,7 +134,7 @@ const PoleMainSettingsPage = () => {
               }
               handleChange={(e) => handleFieldChange('end_time', e)}
             />
-          </Box>
+          </TimeSettingsWrapper>
         </PoleInfoContainer>
         <Box sx={{ width: '35%' }}>
           <PollMainSettingsTabs
@@ -170,16 +173,7 @@ const PoleMainSettingsPage = () => {
           disabled={pollStatus}
         />
         <PollDesignSettingsTab />
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            columnGap: '20px',
-            '@media (max-width: 550px)': {
-              gridTemplateColumns: '1fr',
-            },
-          }}
-        >
+        <MobTimeSettingsWrapper>
           <InvisibleLabeledField
             label="Время начала"
             placeholder="Введите время начала опроса"
@@ -206,10 +200,10 @@ const PoleMainSettingsPage = () => {
             }
             handleChange={(e) => handleFieldChange('end_time', e)}
           />
-        </Box>
+        </MobTimeSettingsWrapper>
         <PollTuningTab pollData={poleData} />
       </MobileSettingsContentWrapper>
-    </Box>
+    </SettingsWrapper>
   );
 };
 

@@ -6,15 +6,18 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
+import usePollData from '@/hooks/usePollData';
+
 const FrmShareQR = () => {
   const { id } = useParams();
+  const { pollType } = usePollData(id);
   const { t } = useTranslation();
   const [surveyLink, setSurveyLink] = useState('');
 
   useEffect(() => {
     const host = window.location.host;
     const protocol = window.location.protocol;
-    const link = `${protocol}//${host}/conduct-poll/${id}`;
+    const link = `${protocol}//${host}/${pollType === 'Бытрый' ? 'quick-conduct-poll' : 'conduct-poll'}c/${id}`;
     setSurveyLink(link);
   }, [id]);
 

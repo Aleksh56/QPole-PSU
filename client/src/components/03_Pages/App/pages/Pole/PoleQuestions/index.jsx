@@ -7,7 +7,7 @@ import {
   handleGetAllQuestionRequest,
   handleGetQuestionInfoRequest,
 } from './api/apiRequests';
-import { ListWrapper } from './styled';
+import { ListWrapper, LoaderWrapper } from './styled';
 
 import FrmQueEdit from '@/components/04_Widgets/Data/Forms/frmQueEdit';
 import PollQuestionsList from '@/components/05_Features/DataDisplay/Out/PollQuestionsList';
@@ -85,15 +85,7 @@ const PoleQuestionsPage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        overflow: 'hidden',
-        padding: matches ? '0 15px' : 0,
-        height: matches ? '100vh' : 'auto',
-      }}
-    >
-      {loading ? <CLoader /> : renderQuestionList()}
-    </Box>
+    <LoaderWrapper matches={matches}>{loading ? <CLoader /> : renderQuestionList()}</LoaderWrapper>
   );
 };
 

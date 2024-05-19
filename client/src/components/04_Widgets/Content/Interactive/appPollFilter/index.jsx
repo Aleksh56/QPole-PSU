@@ -1,11 +1,18 @@
 import TuneIcon from '@mui/icons-material/Tune';
-import { Box, Button } from '@mui/material';
+import { Button } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { filterPollsRequest } from './api/apiRequests';
-import { MobileFiltersWrapper, StyledStack, StyledStackWrapper } from './styled';
+import {
+  FiltersWrapper,
+  MobFiltersContent,
+  MobFiltersWrapper,
+  MobileFiltersWrapper,
+  StyledStack,
+  StyledStackWrapper,
+} from './styled';
 
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
@@ -40,29 +47,14 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
 
   return (
     <StyledStackWrapper>
-      <Box
-        sx={{
-          '@media (min-width: 900px)': {
-            display: 'none',
-          },
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '8px 15px',
-          }}
-        >
+      <FiltersWrapper>
+        <MobFiltersWrapper>
           <TuneIcon onClick={() => setShowMobileFilters((prev) => !prev)} />
           <Button onClick={() => handleCreateModalOpen(true)}>{t('button.createPoll')}</Button>
-        </Box>
+        </MobFiltersWrapper>
         <MobileFiltersWrapper show={showMobileFilters}>
           {showMobileFilters && (
-            <Box
-              sx={{ display: 'grid', gridTemplateColumns: '1fr', rowGap: '20px', padding: '15px' }}
-            >
+            <MobFiltersContent>
               <TextField
                 label="Поиск"
                 name="name"
@@ -81,10 +73,10 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
                   onChange={handleFilterChange}
                 />
               ))}
-            </Box>
+            </MobFiltersContent>
           )}
         </MobileFiltersWrapper>
-      </Box>
+      </FiltersWrapper>
       <StyledStack>
         <TextField
           label="Поиск"

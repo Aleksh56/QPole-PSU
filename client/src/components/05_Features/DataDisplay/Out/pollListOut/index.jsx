@@ -12,6 +12,8 @@ const PollListOut = ({ polls = [] }) => {
     await regOnPollFx({ poll_id });
   };
 
+  console.log(polls);
+
   return (
     <PollListGridContainer>
       {polls.map((item) => (
@@ -30,7 +32,10 @@ const PollListOut = ({ polls = [] }) => {
                   <PrimaryButton caption="Пройден" disabled={true} />
                 )
               ) : (
-                <PrimaryButton caption="Пройти" to={`/conduct-poll/${item.poll_id}`} />
+                <PrimaryButton
+                  caption="Пройти"
+                  to={`/${item.poll_type.name === 'Быстрый' ? 'quick-conduct-poll' : 'conduct-poll'}/${item.poll_id}`}
+                />
               )
             }
           />

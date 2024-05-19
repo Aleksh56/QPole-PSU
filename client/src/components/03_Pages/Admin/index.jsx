@@ -5,7 +5,12 @@ import { NavLink, Route, Routes, useNavigate } from 'react-router-dom';
 import AdminSettings from './pages/AdminSettings';
 import AdmSupportPage from './pages/AdminSupport';
 import AdminUsersPage from './pages/AdminUsers';
-import { StyledDrawerWrapper } from './styled';
+import {
+  AdmContentWrapper,
+  AdmRouterWrapper,
+  AdminPanelWrapper,
+  StyledDrawerWrapper,
+} from './styled';
 
 import { colorConfig } from '@/app/template/config/color.config';
 import AdmHeader from '@/components/04_Widgets/Navigation/Menus/admHeader';
@@ -19,8 +24,8 @@ const AdminPanelPage = () => {
   }, []);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Box sx={{ display: 'flex', flexGrow: 1 }}>
+    <AdminPanelWrapper>
+      <AdmContentWrapper>
         <StyledDrawerWrapper variant="permanent" anchor="left">
           <Typography variant="h6" noWrap component="div" sx={{ p: 2 }}>
             Админ Панель
@@ -60,7 +65,7 @@ const AdminPanelPage = () => {
             </ListItem>
           </List>
         </StyledDrawerWrapper>
-        <Box component="main" sx={{ flexGrow: 1, backgroundColor: '#F5F6FA' }}>
+        <AdmRouterWrapper component="main">
           <AdmHeader />
           <Box sx={{ padding: '20px' }}>
             <Routes>
@@ -73,9 +78,9 @@ const AdminPanelPage = () => {
               <Route path="/settings" element={<AdminSettings />} />
             </Routes>
           </Box>
-        </Box>
-      </Box>
-    </Box>
+        </AdmRouterWrapper>
+      </AdmContentWrapper>
+    </AdminPanelWrapper>
   );
 };
 

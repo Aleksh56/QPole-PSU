@@ -19,7 +19,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/polls" element={<PollListPage />} />
         <Route path="/conduct-poll/:id" element={<ConductionPollPage />} />
-        <Route path="/test" element={<FastConductionPollPage />} />
+        <Route path="/quick-conduct-poll/:id" element={<FastConductionPollPage />} />
         <Route path="/signin" element={<AuthPage />} />
         <Route path="/signup" element={<AuthPage />} />
         <Route path="/password-reset" element={<FrmRestore />} />

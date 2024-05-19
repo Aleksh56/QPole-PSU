@@ -20,9 +20,11 @@ import {
 
 import { colorConfig } from '@/app/template/config/color.config';
 import { shareButtons } from '@/data/fields';
+import usePollData from '@/hooks/usePollData';
 
 const FrmShareMain = ({ setView }) => {
   const { id } = useParams();
+  const { pollType } = usePollData(id);
   const [surveyLink, setSurveyLink] = useState('');
   const [buttonText, setButtonText] = useState('Копировать');
   const [fieldColor, setFieldColor] = useState('rgba(39,116,248,.11)');
@@ -31,7 +33,7 @@ const FrmShareMain = ({ setView }) => {
   useEffect(() => {
     const host = window.location.host;
     const protocol = window.location.protocol;
-    const link = `${protocol}//${host}/conduct-poll/${id}`;
+    const link = `${protocol}//${host}/${pollType === 'Бытрый' ? 'quick-conduct-poll' : 'conduct-poll'}c/${id}`;
     setSurveyLink(link);
   }, [id]);
 

@@ -1,4 +1,3 @@
-import { Timer } from '@mui/icons-material';
 import { useUnit } from 'effector-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -16,6 +15,7 @@ import QueBlock from '@/components/04_Widgets/Content/Interactive/queBlock';
 import FrmQuickPollRegister from '@/components/04_Widgets/Data/Forms/frmQuickPollRegister';
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
+import Timer from '@/components/07_Shared/UIComponents/Utils/Helpers/timer';
 import { useAlert } from '@/hooks/useAlert';
 import useAuth from '@/hooks/useAuth';
 import usePageTitle from '@/hooks/usePageTitle';
@@ -31,29 +31,33 @@ const FastConductionPollPage = () => {
   const [pollData, setPollData] = useState({});
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [newPollStarted, setNewPollStarted] = useState(false);
+  const [newPollStarted, setNewPollStarted] = useState(true);
   const [remainingTime, setRemainingTime] = useState('');
   const [isTextLong, setIsTextLong] = useState(false);
   const [isSubmitEnabled, setIsSubmitEnabled] = useState(true);
 
   const getRemainingTime = async () => {
-    const data = await getRemainingTimeFx({ id });
-    setRemainingTime(data.voting_time_left_str);
+    const formId = localStorage.getItem('voting_form_id');
+    const data = await getRemainingTimeFx({ id, formId });
+    if (data) {
+      setRemainingTime(data.voting_time_left_str);
+      if (Number(data.id) === Number(formId)) {
+        setNewPollStarted(true);
+        setIsCollapsed(false);
+      }
+    } else {
+      setNewPollStarted(false);
+      setIsCollapsed(true);
+    }
   };
 
   useEffect(() => {
-    if (isLoading) return;
     const pollDataRequest = async () => {
       const data = await fetchPollQuestions(id);
       if (data.poll_setts.completion_time !== null) getRemainingTime();
-
-      if ((!data.is_revote_allowed && data.has_user_participated_in) || isAuthenticated === false) {
-        navigate('/polls');
-        return;
-      }
       if (data.mix_questions) data.questions = shuffleArray(data.questions);
+
       setIsCollapsed(data.poll_setts?.completion_time !== null);
-      if (data.has_user_started_voting) handleStart();
       setPollData(data);
     };
     pollDataRequest();
@@ -77,6 +81,7 @@ const FastConductionPollPage = () => {
     await sendAnswersRequestFx({ answers, id, isTimeEnd });
     resetAnswers();
     localStorage.removeItem('answersStore');
+    localStorage.removeItem('voting_form_id');
     if (isTimeEnd) {
       showAlert(
         'Время прохождения опроса вышло. Отмеченные варианты ответов были записаны !',
@@ -95,8 +100,8 @@ const FastConductionPollPage = () => {
   const handleTimeEnd = async () => await handleSubmit(true);
 
   const handleStart = async (data) => {
-    console.log(data);
-    await startConductionFx({ id }).then((res) => {
+    await startConductionFx({ id, data }).then((res) => {
+      localStorage.setItem('voting_form_id', res.data.id);
       setRemainingTime(res.data.voting_time_left_str);
       setIsCollapsed(false);
       setNewPollStarted(true);
@@ -107,7 +112,6 @@ const FastConductionPollPage = () => {
     if (formSubmitted || newPollStarted) {
       resetAnswers();
       setFormSubmitted(false);
-      setNewPollStarted(false);
     }
   }, [formSubmitted, newPollStarted]);
 
@@ -115,12 +119,14 @@ const FastConductionPollPage = () => {
     <ConductionBackgroundWrapper onContextMenu={handleContextMenu}>
       <Header isMainPage={false} />
       <ConductionWrapper>
-        <FrmQuickPollRegister
-          isCollapsed={isCollapsed}
-          handleStart={handleStart}
-          pollData={pollData}
-        />
-        {newPollStarted && <ConductionHeader data={[]} />}
+        <ConductionHeader data={pollData} />
+        {!newPollStarted && (
+          <FrmQuickPollRegister
+            isCollapsed={isCollapsed}
+            handleStart={handleStart}
+            pollData={pollData}
+          />
+        )}
         <AnimatePresence>
           {!isCollapsed && (
             <motion.div
