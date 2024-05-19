@@ -10,4 +10,7 @@ export const StyledNavContainer = styled(Box)(() => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: `${Rem(20)} ${Rem(15)}`,
+  '@media (max-width: 999px)': {
+    padding: 0,
+  },
 }));

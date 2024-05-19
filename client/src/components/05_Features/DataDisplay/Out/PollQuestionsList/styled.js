@@ -14,6 +14,9 @@ export const StyledAddButton = styled(Button)(() => ({
   padding: Rem(10),
   borderColor: colorConfig.primaryBlue,
   color: colorConfig.primaryBlue,
+  '@media (max-width: 999px)': {
+    marginTop: Rem(15),
+  },
 }));
 
 export const StyledQueCount = styled(Typography)(() => ({

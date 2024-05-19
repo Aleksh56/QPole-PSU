@@ -10,6 +10,16 @@ export const CardWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  '& .MuiChartsLegend-series': {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  '& .MuiPie-chart-root .recharts-text': {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
 }));
 
 export const CardInfoWrapper = styled(Box)(() => ({

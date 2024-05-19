@@ -1,5 +1,8 @@
-import { Close as CloseIcon, Publish as PublishIcon } from '@mui/icons-material';
+import { Close as CloseIcon } from '@mui/icons-material';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import { Box, IconButton, Stack, Tab, Tabs } from '@mui/material';
+import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -7,6 +10,7 @@ import { publishPollFx } from './model/publish-poll';
 import { StyledNavContainer } from './styled';
 
 import FrmShare from '@/components/04_Widgets/Data/Forms/frmShare';
+import { StyledNavLink } from '@/components/05_Features/DataDisplay/Out/appHeaderNavOut/styled';
 import PollSettingsMenuBtn from '@/components/07_Shared/UIComponents/Buttons/pollSettingsMenuBtn';
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import { useAlert } from '@/hooks/useAlert';
@@ -21,10 +25,17 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
   const [successOpen, setSuccessOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [frmShareCapt, setFrmShareCapt] = useState('');
+  const [isTabsOpen, setIsTabsOpen] = useState(false);
 
   useEffect(() => {
     setIsPublished(pollStatus);
   }, [pollStatus]);
+
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const selectedIndex = buttons.findIndex((button) => currentPath.includes(button.page));
+    setSelectedTab(selectedIndex !== -1 ? selectedIndex : 0);
+  }, [location, buttons]);
 
   const handlePublishPoll = async () => {
     const data = await publishPollFx({ id });
@@ -46,24 +57,56 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
     <>
       <StyledNavContainer>
         {window.innerWidth < 1000 ? (
-          <Tabs
-            value={selectedTab}
-            onChange={(event, newValue) => setSelectedTab(newValue)}
-            variant="scrollable"
-            sx={{ width: '100%' }}
+          <Box
+            sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
           >
-            {buttons.map((button, index) => (
-              <Tab key={button.label} icon={<button.icon />} label={button.label} />
-            ))}
-            {!isPublished && (
-              <Tab
-                key="publish"
-                icon={<PublishIcon />}
-                label="Опубликовать"
-                onClick={() => handlePublishPoll()}
-              />
-            )}
-          </Tabs>
+            <IconButton
+              sx={{ display: 'flex', alignItems: 'center', columnGap: '10px' }}
+              onClick={() => setIsTabsOpen(!isTabsOpen)}
+            >
+              Меню
+              {!isTabsOpen ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
+            </IconButton>
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: isTabsOpen ? 'auto' : 0, opacity: isTabsOpen ? 1 : 0 }}
+              transition={{ duration: 0.5 }}
+              sx={{ overflow: 'hidden' }}
+            >
+              <Tabs
+                onChange={(event, newValue) => setSelectedTab(newValue)}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  '& .MuiTabs-flexContainer': {
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  },
+                }}
+              >
+                {buttons.map((button, index) => (
+                  <StyledNavLink
+                    key={button.label}
+                    end
+                    to={`/app/tests/${id}/${button.page}`}
+                    className={({ isActive, isPending }) =>
+                      isPending ? 'pending' : isActive ? 'active' : ''
+                    }
+                    isDisabled={button.disabled}
+                    onClick={() => {
+                      setSelectedTab(index);
+                      setIsTabsOpen(false);
+                    }}
+                  >
+                    <Tab sx={{ width: '100%' }} label={button.label} disabled={button.disabled} />
+                  </StyledNavLink>
+                ))}
+                {!isPublished && (
+                  <Tab key="publish" label="Опубликовать" onClick={() => handlePublishPoll()} />
+                )}
+              </Tabs>
+            </motion.div>
+          </Box>
         ) : (
           <>
             <Stack direction="row" spacing={2}>

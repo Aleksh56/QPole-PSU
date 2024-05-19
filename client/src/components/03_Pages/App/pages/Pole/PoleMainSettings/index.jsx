@@ -205,7 +205,6 @@ const PoleMainSettingsPage = () => {
                 : poleData?.poll_setts.end_time || ''
             }
             handleChange={(e) => handleFieldChange('end_time', e)}
-            disabled={pollStatus}
           />
         </Box>
         <PollTuningTab pollData={poleData} />
