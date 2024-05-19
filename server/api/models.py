@@ -591,7 +591,7 @@ class Poll(models.Model):
 
 
 class QuickVotingForm(models.Model):
-    poll = models.ForeignKey(Poll, on_delete=models.CASCADE)
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='quick_voting_forms')
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

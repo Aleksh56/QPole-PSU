@@ -300,8 +300,8 @@ class BasePollSerializer(serializers.ModelSerializer):
     is_in_production = serializers.BooleanField(validators=[PollValidator.is_in_production], required=False)    
 
 
-    participants_quantity = serializers.SerializerMethodField()
-    questions_quantity = serializers.SerializerMethodField()
+    # participants_quantity = serializers.SerializerMethodField()
+    # questions_quantity = serializers.SerializerMethodField()
     opened_for_voting = serializers.SerializerMethodField()
     opened_for_registration = serializers.SerializerMethodField()
     has_user_participated_in = serializers.SerializerMethodField()

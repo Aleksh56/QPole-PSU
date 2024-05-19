@@ -137,8 +137,8 @@ def quizz_voting_handler(answers, poll, is_full=True):
     return parsed_answers
 
 
-def save_votes(answers, poll, my_profile, quick_voting_form, raw_answers,
-               poll_answer_group=None, poll_participation_group=None):
+def save_votes(answers, poll, my_profile, raw_answers,
+               poll_answer_group=None, poll_participation_group=None, quick_voting_form=None):
     if not poll_answer_group:
         poll_answer_group_data = {
                     'poll': poll.id,

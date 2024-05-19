@@ -115,7 +115,11 @@ def generate_poll_qr(poll):
             box_size=10,
             border=4,
         )
-        qr.add_data(SERVER_URL + 'conduct-poll/ '+ str(poll.poll_id))
+        if poll.poll_type.name in ['Опрос', 'Викторина', 'Анонимный']:
+            qr.add_data(SERVER_URL + 'conduct-poll/'+ str(poll.poll_id))
+        elif poll.poll_type.name in ['Быстрый']:
+            qr.add_data(SERVER_URL + 'quick-conduct-poll/'+ str(poll.poll_id))
+
         qr.make(fit=True)
         
         # Создание изображения QR-кода

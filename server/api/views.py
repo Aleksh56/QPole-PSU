@@ -209,9 +209,9 @@ def my_poll(request):
                         raise MyCustomException(detail="is_web3_connected не подключился")
                 elif poll.poll_type.name == 'Быстрый':
                     auth_fields = [
-                        {'poll': poll.id, 'name': 'Фамилия', 'is_main': True},
-                        {'poll': poll.id, 'name': 'Имя', 'is_main': False},
-                        {'poll': poll.id, 'name': 'Группа', 'is_main': False},
+                        {'poll': poll.id, 'name': 'ФИО', 'is_main': True, 'is_required': True},
+                        {'poll': poll.id, 'name': 'Группа', 'is_main': False, 'is_required': False},
+                        {'poll': poll.id, 'name': 'Номер студенческого билета', 'is_main': False, 'is_required': False},
                     ]
                     auth_fields_serializer = PollAuthFieldSerializer(data=auth_fields, many=True)
                     if auth_fields_serializer.is_valid():
@@ -1381,23 +1381,33 @@ def poll_voting(request):
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 @transaction.atomic
 def poll_voting_started(request):
     try:
         current_user = request.user
-        my_profile = get_object_or_404(Profile, user=current_user)
-
-        if not my_profile:
-            raise ObjectNotFoundException(model='Profile')
+        if not isinstance(current_user, AnonymousUser):
+            my_profile = get_object_or_404(Profile, user=current_user)
+        else:
+            my_profile = None
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
-
+            
             if poll_id:
-                latest_answer = PollAnswerGroup.objects.filter(
-                    Q(poll__poll_id=poll_id) & Q(profile=my_profile) & Q(is_latest=True)     
-                ).prefetch_related('answers').first()
+                poll = get_object_or_404(Poll, poll_id=poll_id)
+                if not poll.poll_type.name == 'Быстрый':
+                    latest_answer = PollAnswerGroup.objects.filter(
+                        Q(poll__poll_id=poll_id) & Q(profile=my_profile) & Q(is_latest=True)     
+                    ).prefetch_related('answers').first()
+                else:
+                    poll_answer_group_id = get_parameter_or_400(request.GET, 'poll_answer_group_id')
+                    latest_answer = (
+                        PollAnswerGroup.objects
+                            .filter(id=poll_answer_group_id)
+                            .prefetch_related('answers')
+                            .first()
+                    )
 
                 if latest_answer:
                     if not latest_answer.is_finished:
@@ -1426,39 +1436,62 @@ def poll_voting_started(request):
             if not poll:
                 raise ObjectNotFoundException(model='Poll')
 
-            check_if_user_is_allowed_to_vote(poll, my_profile)
-             
-            latest_answer = PollAnswerGroup.objects.filter(
-                Q(poll=poll) & Q(profile=my_profile) & Q(is_latest=True)     
-            ).first()
-            if latest_answer:
-                if not latest_answer.is_finished:
-                    if not latest_answer.voting_time_left == 0:
-                        active_voting = PollAnswerGroupSerializer(latest_answer).data
-                        return Response({'message':'У вас уже есть незавершенное голосование.', 'data': active_voting})
-                    else:
-                        active_voting = PollAnswerGroupSerializer(latest_answer).data
-                        return Response({'message':'Время на ответ вышло.', 'data': active_voting})
+            if not poll.poll_type.name == 'Быстрый':
+                check_if_user_is_allowed_to_vote(poll, my_profile)
+                
+                latest_answer = PollAnswerGroup.objects.filter(
+                    Q(poll=poll) & Q(profile=my_profile) & Q(is_latest=True)     
+                ).first()
+                if latest_answer:
+                    if not latest_answer.is_finished:
+                        if not latest_answer.voting_time_left == 0:
+                            active_voting = PollAnswerGroupSerializer(latest_answer).data
+                            return Response({'message':'У вас уже есть незавершенное голосование.', 'data': active_voting})
+                        else:
+                            active_voting = PollAnswerGroupSerializer(latest_answer).data
+                            return Response({'message':'Время на ответ вышло.', 'data': active_voting})
 
-            unmake_last_answer_latest(poll, my_profile)
-            poll_participant_group_data = {
-                'profile': my_profile,
-                'poll': poll.id,
-                'is_latest': True,
-            }
-            serializer = PollParticipantsGroupSerializer(data=poll_participant_group_data)
-            if serializer.is_valid():
-                poll_participant_group = serializer.save()
+                unmake_last_answer_latest(poll, my_profile)
+                poll_participant_group_data = {
+                    'profile': my_profile,
+                    'poll': poll.id,
+                    'is_latest': True,
+                }
+                serializer = PollParticipantsGroupSerializer(data=poll_participant_group_data)
+                if serializer.is_valid():
+                    poll_participant_group = serializer.save()
+                else:
+                    data = serializer_errors_wrapper(serializer.errors)
+                    return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)      
+
+                poll_answer_group_data = {
+                    'profile': my_profile,
+                    'poll': poll.id,
+                    'is_finished': False,
+                    'is_latest': True,
+                }
             else:
-                data = serializer_errors_wrapper(serializer.errors)
-                return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)      
+                auth_data = get_data_or_400(data, 'auth_data')
+                quick_voting_form_data = {
+                    'poll': poll.id
+                }
+                serializer = QuickVotingFormSerializer(data=quick_voting_form_data)
+                if serializer.is_valid():
+                    quick_voting_form = serializer.save()
+                else:
+                    data = serializer_errors_wrapper(serializer.errors)
+                    return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)   
+                new_auth_fields = validate_auth_data(auth_data, poll, quick_voting_form)
+                created_auth_fields = PollAuthFieldAnswer.objects.bulk_create(new_auth_fields)
 
-            poll_answer_group_data = {
-                'profile': my_profile,
-                'poll': poll.id,
-                'is_finished': False,
-                'is_latest': True,
-            }
+                poll_answer_group_data = {
+                    'profile': None,
+                    'quick_voting_form': quick_voting_form.id,
+                    'poll': poll.id,
+                    'is_finished': False,
+                    'is_latest': True,
+                }
+            
             serializer = PollAnswerGroupSerializer(data=poll_answer_group_data)
             if serializer.is_valid():
                 poll_answer_group = serializer.save()                
@@ -1478,24 +1511,35 @@ def poll_voting_started(request):
     
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 @transaction.atomic
 def poll_voting_ended(request):
     try:
         data = request.data.copy()
 
         current_user = request.user
-        my_profile = get_object_or_404(Profile, user=current_user)
-        if not my_profile:
-            raise ObjectNotFoundException(model='Profile')
+        if not isinstance(current_user, AnonymousUser):
+            my_profile = get_object_or_404(Profile, user=current_user)
+        else:
+            my_profile = None
 
         poll_id = get_parameter_or_400(request.GET, 'poll_id')
         poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, is_in_production=True)).first()
         if not poll:
             raise ObjectNotFoundException(model='Poll')
 
-        poll_answer_group = PollAnswerGroup.objects.filter(poll=poll, profile=my_profile,
-                                                           is_finished=False).first()
+        if not poll.poll_type.name == 'Быстрый':
+            poll_answer_group = PollAnswerGroup.objects.filter(poll=poll, profile=my_profile,
+                                                            is_finished=False).first()
+        else:
+            poll_answer_group_id = get_parameter_or_400(request.GET, 'poll_answer_group_id')
+            poll_answer_group = (
+                PollAnswerGroup.objects
+                    .filter(id=poll_answer_group_id)
+                    .prefetch_related('answers')
+                    .first()
+            )
+
         if not poll_answer_group:
             raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
         else:
@@ -1503,50 +1547,51 @@ def poll_voting_ended(request):
             poll_answer_group.voting_end_date = datetime.now()
             poll_answer_group.save()
             
-        poll_participation_group = PollParticipantsGroup.objects.filter(poll=poll, profile=my_profile,
-                                                                        is_latest=True).first()
-        if not poll_participation_group:
-            raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
-        
+        if not poll.poll_type.name == 'Быстрый':
+            poll_participation_group = PollParticipantsGroup.objects.filter(poll=poll, profile=my_profile,
+                                                                            is_latest=True).first()
+            if not poll_participation_group:
+                raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
+        else:
+            poll_participation_group=None
             
         answers = data.get('answers', [])
-        
+        if poll.poll_type.name == 'Быстрый':
+            quick_voting_form_id = get_parameter_or_400(request.GET, 'quick_voting_form_id')
+            quick_voting_form = get_object_or_404(QuickVotingForm, id=quick_voting_form_id)
+        else:
+            quick_voting_form = None
         # валидация и парсинг ответов
         raw_answers = None
         if poll.poll_type.name == 'Опрос':
             answers, raw_answers = poll_voting_handler(answers, poll, is_full=False)
         if poll.poll_type.name == 'Быстрый':
-            auth_data = get_data_or_400(data, 'auth_data')
-            quick_voting_form_data = {
-                'poll': poll.id
-            }
-            serializer = QuickVotingFormSerializer(data=quick_voting_form_data)
-            if serializer.is_valid():
-                quick_voting_form = serializer.save()
-            else:
-                data = serializer_errors_wrapper(serializer.errors)
-                return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)
-            new_auth_fields = validate_auth_data(auth_data, poll, quick_voting_form)
-            reated_auth_fields = PollAuthFieldAnswer.objects.bulk_create(new_auth_fields)
             answers, raw_answers = poll_voting_handler(answers, poll, is_full=False)
 
-
-            answers, raw_answers = poll_voting_handler(answers, poll, is_full=False)
         elif poll.poll_type.name == 'Викторина':
             answers = quizz_voting_handler(answers, poll, is_full=False)
         else:
             raise MyCustomException(detail="Данного типа опроса не существует")
 
 
-        _, answers, _ = save_votes(answers, poll, my_profile, None, raw_answers,
+        _, answers, _ = save_votes(answers, poll, my_profile, raw_answers,
                                                 poll_answer_group=poll_answer_group,
-                                                poll_participation_group=poll_participation_group)
+                                                poll_participation_group=poll_participation_group,
+                                                quick_voting_form=quick_voting_form)
 
-        my_answer = PollAnswerGroup.objects.filter(
-                Q(profile=my_profile) & Q(poll__poll_id=poll_id)
-            ).select_related('profile').prefetch_related('answers').first()
-        if not my_answer:
-            raise ObjectNotFoundException(model='PollAnswerGroup')
+        if not poll.poll_type.name == 'Быстрый':
+            my_answer = PollAnswerGroup.objects.filter(
+                    Q(profile=my_profile) & Q(poll__poll_id=poll_id)
+                ).select_related('profile').prefetch_related('answers').first()
+            if not my_answer:
+                raise ObjectNotFoundException(model='PollAnswerGroup')
+        else:
+            poll_answer_group_id = get_parameter_or_400(request.GET, 'poll_answer_group_id')
+            my_answer = PollAnswerGroup.objects.filter(
+                    Q(id=poll_answer_group_id)
+                ).prefetch_related('answers').first()
+            if not my_answer:
+                raise ObjectNotFoundException(model='PollAnswerGroup')
 
         my_answer.poll = poll
         serializer = PollVotingResultSerializer(my_answer)
