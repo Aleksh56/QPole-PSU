@@ -1481,7 +1481,7 @@ def poll_voting_started(request):
                 else:
                     data = serializer_errors_wrapper(serializer.errors)
                     return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)   
-                new_auth_fields = validate_auth_data(auth_data, poll, quick_voting_form)
+                new_auth_fields = validate_auth_data_2(auth_data, poll, quick_voting_form)
                 created_auth_fields = PollAuthFieldAnswer.objects.bulk_create(new_auth_fields)
 
                 poll_answer_group_data = {

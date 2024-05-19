@@ -430,3 +430,19 @@ def validate_auth_data(auth_data, poll, quick_voting_form):
     return new_auth_fields
 
 
+def validate_auth_data_2(auth_data, poll, quick_voting_form):
+    new_auth_fields = []
+    for auth_field_data in auth_data:
+        auth_field_data['poll'] = poll
+        auth_field_data['quick_voting_form'] = quick_voting_form
+        auth_field_name = auth_field_data.get('auth_field_name')
+        auth_field_instance = next((auth_field for auth_field in poll.auth_fields.all() if auth_field.name == auth_field_name), None)
+        
+        auth_field_data['auth_field'] = auth_field_instance
+        auth_field_data.pop('auth_field_name')
+        new_auth_field = PollAuthFieldAnswer(**auth_field_data)
+        new_auth_fields.append(new_auth_field)
+
+    return new_auth_fields
+
+
