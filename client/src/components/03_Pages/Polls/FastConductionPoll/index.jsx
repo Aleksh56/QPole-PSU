@@ -82,7 +82,8 @@ const FastConductionPollPage = () => {
   const handleContextMenu = (e) => e.preventDefault();
 
   const handleSubmit = async (isTimeEnd = false) => {
-    await sendAnswersRequestFx({ answers, id, isTimeEnd });
+    const formId = localStorage.getItem('voting_form_id');
+    await sendAnswersRequestFx({ answers, id, isTimeEnd, formId });
     resetAnswers();
     localStorage.removeItem('answersStore');
     localStorage.removeItem('voting_form_id');
