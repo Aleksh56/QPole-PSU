@@ -12,6 +12,11 @@ export const HeaderWrapper = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: '0.8fr 1fr',
   columnGap: Rem(20),
+  '@media (max-width: 450px)': {
+    gridTemplateColumns: '1fr',
+    columnGap: 0,
+    rowGap: Rem(20),
+  },
 }));
 
 export const ImageWrapper = styled(Box)(() => ({
@@ -38,8 +43,16 @@ export const DescriptionWrapper = styled(Box)(() => ({
 
 export const DescriptionTagsWrapper = styled(Box)(() => ({
   display: 'flex',
+  width: '100%',
   justifyContent: 'space-between',
   alignItems: 'center',
+  '@media (max-width: 768px)': {
+    fontSize: Rem(11),
+  },
+  '@media (max-width: 550px)': {
+    flexDirection: 'column-reverse',
+    alignItems: 'start',
+  },
 }));
 
 export const StyledTitle = styled(Typography)(() => ({
@@ -48,6 +61,15 @@ export const StyledTitle = styled(Typography)(() => ({
   padding: `${Rem(10)} 0`,
   borderBottom: `${Rem(1)} solid #000`,
   width: '100%',
+  maxHeight: Rem(100),
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  '@media (max-width: 768px)': {
+    fontSize: Rem(14),
+  },
+  '@media (max-width: 450px)': {
+    fontSize: Rem(12),
+  },
 }));
 
 export const StyledDescText = styled(Typography)(() => ({
@@ -60,4 +82,10 @@ export const StyledDescText = styled(Typography)(() => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   maxWidth: '100%',
+  '@media (max-width: 768px)': {
+    fontSize: Rem(12),
+  },
+  '@media (max-width: 550px)': {
+    fontSize: Rem(10),
+  },
 }));

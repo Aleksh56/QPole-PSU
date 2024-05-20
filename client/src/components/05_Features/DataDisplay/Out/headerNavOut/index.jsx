@@ -1,5 +1,4 @@
 import CloseIcon from '@mui/icons-material/Close';
-import MenuIcon from '@mui/icons-material/Menu';
 import { Box, Drawer, IconButton, List, ListItem } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +23,7 @@ const HeaderNavOut = ({ children, isMobile }) => {
     <StyledNavigation>
       {isMobile ? (
         <>
-          <IconButton
+          {/* <IconButton
             size="large"
             edge="start"
             color="inherit"
@@ -33,7 +32,7 @@ const HeaderNavOut = ({ children, isMobile }) => {
             // onClick={toggleDrawer(true)}
           >
             <MenuIcon />
-          </IconButton>
+          </IconButton> */}
           <Drawer anchor="right" open={isDrawerOpen} onClose={toggleDrawer(false)}>
             <Box sx={{ width: '200px', height: '100%' }}>
               <IconButton
