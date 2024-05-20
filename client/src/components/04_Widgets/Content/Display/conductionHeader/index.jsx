@@ -13,6 +13,7 @@ import {
 import config from '@/config';
 
 const ConductionHeader = ({ data }) => {
+  console.log(data);
   return (
     <HeaderWrapper>
       <ImageWrapper>
