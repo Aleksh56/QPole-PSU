@@ -1,4 +1,5 @@
 import path from 'path';
+
 import Hapi from '@hapi/hapi';
 import inert from '@hapi/inert';
 
