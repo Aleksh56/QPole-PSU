@@ -92,7 +92,8 @@ const FastConductionPollPage = () => {
       showAlert('Ваш голос успешно записан!', 'success');
     }
     setTimeout(() => {
-      navigate('/polls');
+      // navigate('/polls');
+      navigate('/');
     }, 1500);
 
     setFormSubmitted(true);
@@ -101,6 +102,7 @@ const FastConductionPollPage = () => {
   const handleTimeEnd = async () => await handleSubmit(true);
 
   const handleStart = async (data) => {
+    resetAnswers();
     await startConductionFx({ id, data }).then((res) => {
       localStorage.setItem('voting_form_id', res.data.id);
       setRemainingTime(res.data.voting_time_left_str);
