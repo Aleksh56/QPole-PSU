@@ -11,6 +11,7 @@ import {
 } from './styled';
 
 import config from '@/config';
+import { formatDateTime } from '@/utils/js/formatDate';
 
 const ConductionHeader = ({ data }) => {
   console.log(data);
@@ -23,7 +24,10 @@ const ConductionHeader = ({ data }) => {
         <DescriptionTagsWrapper>
           <Typography sx={{ fontSize: '12px', color: '#aaa' }}>{data.poll_type?.name}</Typography>
           <Box>
-            <Typography sx={{ fontSize: '12px' }}>21.12.24 17:00 – 22.12.25 12:00</Typography>
+            <Typography sx={{ fontSize: '12px' }}>
+              {formatDateTime(data?.poll_setts?.start_time)} -{' '}
+              {formatDateTime(data?.poll_setts?.end_time)}
+            </Typography>
           </Box>
         </DescriptionTagsWrapper>
         <StyledTitle>{data.name ?? ''}</StyledTitle>
