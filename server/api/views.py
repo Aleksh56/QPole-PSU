@@ -580,6 +580,7 @@ def my_poll_stats(request):
                 .filter(poll_answer_group__poll=poll, poll_answer_group__is_latest=True, poll_answer_group__is_finished=True)
                 .select_related('question', 'answer_option', 'poll_answer_group__profile')
             )
+            # print(poll_user_answers)
 
             possible_question_points_count = (
                 AnswerOption.objects
@@ -686,6 +687,7 @@ def my_poll_stats(request):
                         user_id=F('poll_answer_group__profile__user_id'),
                         profile_name=F('poll_answer_group__profile__name'),
                         profile_surname=F('poll_answer_group__profile__surname'),
+                        profile_patronymic=F('poll_answer_group__profile__patronymic'),
                         is_auth_field_main=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__is_main'),
                         auth_field_name=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__name'),
                         auth_field_answer=F('poll_answer_group__quick_voting_form__auth_field_answers__answer'),
@@ -1361,6 +1363,9 @@ def poll_voting(request):
                 my_answer = PollAnswerGroup.objects.filter(
                         Q(id=poll_answer_group_id)
                     ).prefetch_related('answers').first()
+                my_answer.is_finished = True
+                my_answer.save()
+
                 
             if not my_answer:
                 raise ObjectNotFoundException(model='PollAnswerGroup')
