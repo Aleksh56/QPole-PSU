@@ -1343,9 +1343,9 @@ def poll_voting(request):
                 if not poll_answer_group:
                     raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
                 
-                quick_voting_form_id = get_parameter_or_400(request.GET, 'quick_voting_form_id')
-                quick_voting_form = get_object_or_404(QuickVotingForm, id=quick_voting_form_id)
-
+                # quick_voting_form_id = get_parameter_or_400(request.GET, 'quick_voting_form_id')
+                # quick_voting_form = get_object_or_404(QuickVotingForm, id=quick_voting_form_id)
+                quick_voting_form = poll_answer_group.quick_voting_form
                 answers, _ = poll_voting_handler(answers, poll, is_full=False)
                 poll_answer_group, answers, tx_hash = save_votes(answers, poll, my_profile, None, 
                                                                  poll_answer_group=poll_answer_group,
@@ -1586,8 +1586,8 @@ def poll_voting_ended(request):
             
         answers = data.get('answers', [])
         if poll.poll_type.name == 'Быстрый':
-            quick_voting_form_id = get_parameter_or_400(request.GET, 'quick_voting_form_id')
-            quick_voting_form = get_object_or_404(QuickVotingForm, id=quick_voting_form_id)
+            # quick_voting_form_id = get_parameter_or_400(request.GET, 'quick_voting_form_id')
+            quick_voting_form = poll_answer_group.quick_voting_form
         else:
             quick_voting_form = None
         # валидация и парсинг ответов
