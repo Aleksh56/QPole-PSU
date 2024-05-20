@@ -18,4 +18,8 @@ export const StyledCardsWrapper = styled(Box)(() => ({
   gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
   gap: Rem(20),
   justifyContent: 'space-around',
+  '@media (max-width: 650px)': {
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: Rem(10),
+  },
 }));

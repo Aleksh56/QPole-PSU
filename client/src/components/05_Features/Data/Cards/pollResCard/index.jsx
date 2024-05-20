@@ -8,6 +8,7 @@ import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper, InfoButton
 
 const PollResultCard = ({ data, chartType }) => {
   const [infoOpen, setInfoOpen] = useState(false);
+  console.log(data);
 
   const renderChart = () => {
     const chartData = data.answer_options.map((option) => ({

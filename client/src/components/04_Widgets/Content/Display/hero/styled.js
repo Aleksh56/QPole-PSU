@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 const heroBaseStyles = {
   display: 'grid',
@@ -19,9 +20,13 @@ const breakpoints = {
 };
 
 export const StyledHeroContainer = styled(Box)(() => ({
-  position: 'relative',
-  height: '100vh',
+  // position: 'relative',
+  // height: '100vh',
   backgroundColor: 'rgba(172, 220, 255, 0.2)',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  padding: '0 15px',
 }));
 
 export const StyledHero = styled(Box)(({ theme }) => ({
@@ -36,7 +41,7 @@ export const StyledHero = styled(Box)(({ theme }) => ({
     gridTemplateColumns: '1fr 1fr',
   },
   '@media (max-width: 899px)': {
-    paddingTop: Rem(100),
+    paddingTop: Rem(80),
   },
 }));
 
@@ -52,7 +57,7 @@ export const StyledHeroTextWrapper = styled(Box)(({ theme }) => ({
 }));
 
 export const StyledHeroTextHeading = styled('h2')(({ theme }) => ({
-  fontSize: Rem(45),
+  fontSize: Rem(36),
   lineHeight: Rem(45),
   marginBottom: Rem(15),
   [theme.breakpoints.up('sm')]: {
@@ -68,7 +73,7 @@ export const StyledHeroTextHeading = styled('h2')(({ theme }) => ({
 }));
 
 export const StyledHeroTextSubHeading = styled('p')(() => ({
-  fontSize: Rem(20),
+  fontSize: Rem(18),
   lineHeight: Rem(30),
   marginBottom: Rem(25),
   color: colorConfig.primaryBlack,

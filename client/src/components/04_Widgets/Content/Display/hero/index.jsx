@@ -1,6 +1,9 @@
-import React from 'react';
+import SurveyImage from '@assets/survey.svg';
+import { ThemeProvider, useTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+
 import Header from '../../../Navigation/Menus/mainHeader';
-import SecondaryButton from '@/components/07_Shared/UIComponents/Buttons/secBtn';
+
 import {
   StyledHero,
   StyledHeroContainer,
@@ -9,13 +12,13 @@ import {
   StyledHeroTextSubHeading,
   StyledHeroTextWrapper,
 } from './styled';
-import SurveyImage from '@assets/survey.svg';
-import { useTranslation } from 'react-i18next';
-import { ThemeProvider, useTheme } from '@mui/material';
+
+import SecondaryButton from '@/components/07_Shared/UIComponents/Buttons/secBtn';
 
 const Hero = () => {
   const { t } = useTranslation();
   const theme = useTheme();
+
   return (
     <ThemeProvider theme={theme}>
       <Header />
