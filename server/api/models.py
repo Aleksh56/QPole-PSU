@@ -236,7 +236,7 @@ class MyPollManager(models.Manager):
                                                 .select_related('profile')))
             .prefetch_related('registrated_users')
             .annotate(
-                participants_quantity=Count('user_participations', filter=Q(user_participations__is_latest=True), distinct=True),
+                participants_quantity=Count('user_answers', filter=Q(user_answers__is_latest=True), distinct=True),
                 questions_quantity=Count('questions', distinct=True)
             )
             .filter(filters)
@@ -330,7 +330,11 @@ class MyPollManager(models.Manager):
             .prefetch_related(
                 models.Prefetch('user_answers', queryset=PollAnswerGroup.objects.all()
                                                 .select_related('profile', 'profile__user')
-                                                .prefetch_related('answers'))) 
+                                                .prefetch_related('answers')))
+            .annotate(
+                participants_quantity=Count('user_answers', filter=Q(user_answers__is_latest=True), distinct=True),
+                questions_quantity=Count('questions', distinct=True)
+            ) 
         )
         return object
     

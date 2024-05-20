@@ -207,7 +207,6 @@ def createPoll(w3, contract, poll_data):
         return True
     
     except Exception as ex:
-        print(ex)
         return False
 
 
@@ -225,12 +224,11 @@ def addQuestionToPoll(w3, contract, poll_data):
             })
         
         polls = contract.functions.getAllPolls().call()
-        print("Available Polls:", polls)
+        # print("Available Polls:", polls)
 
         return True
     
     except Exception as ex:
-        print(ex)
         return False
     
 
@@ -437,14 +435,9 @@ def validate_auth_data_2(auth_data, poll, quick_voting_form):
         auth_field_data['quick_voting_form'] = quick_voting_form
         auth_field_name = auth_field_data.get('auth_field_name')
         auth_field_instance = next((auth_field for auth_field in poll.auth_fields.all() if auth_field.name == auth_field_name), None)
-        # print(auth_field_instance)
         student_id = None
-        # print(auth_data)
-        # if auth_field_name == 'Номер студенческого билета':
-        #         # print(auth_data)
-        #         # student_id = next((item['answer'] for item in auth_data if item['auth_field_name'] == "Номер студенческого билета"), None)
-        #         student_id = '2281137'
-        #         print(student_id)
+        if auth_field_name == 'Номер студенческого билета':
+            student_id = auth_field_data.get('answer', None)
 
         auth_field_data['auth_field'] = auth_field_instance
         auth_field_data.pop('auth_field_name')
@@ -456,8 +449,16 @@ def validate_auth_data_2(auth_data, poll, quick_voting_form):
 
 from .models import PollAuthFieldAnswer, PollAnswerGroup
 
-def unmake_last_quick_answer_latest(student_id):
-    quick_voting_form_id = PollAuthFieldAnswer.objects.filter(answer=student_id).latest().quick_voting_form.id
-    pollanswergroup = PollAnswerGroup.objects.filter(quick_voting_form__id=quick_voting_form_id).latest()
-    pollanswergroup.is_latest = False
-    pollanswergroup.save()
+def unmake_last_quick_answer_latest(student_id, quick_voting_form_id):
+    if student_id:
+        poll_auth_field_answer = PollAuthFieldAnswer.objects.filter(Q(answer=student_id) & ~Q(quick_voting_form__id=quick_voting_form_id))
+        if poll_auth_field_answer and hasattr(poll_auth_field_answer.latest('id'), 'quick_voting_form'):
+            quick_voting_form = poll_auth_field_answer.latest('id').quick_voting_form
+            pollanswergroup = quick_voting_form.poll_answer_group
+            if pollanswergroup:
+                pollanswergroup.is_latest = False
+                pollanswergroup.save()
+            else:
+                pass
+    
+

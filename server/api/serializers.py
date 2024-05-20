@@ -919,6 +919,7 @@ class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
         if poll_type and poll_type == 'Быстрый':
             # print(instance.quick_voting_form)
             # auth_field_answers = self.context.get('auth_field_answers', None)
+            # print(auth_field_answers)
             # quick_voting_form = instance.quick_voting_form
             
             data = {

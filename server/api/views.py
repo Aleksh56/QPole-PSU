@@ -570,7 +570,7 @@ def my_poll_stats(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = Poll.my_manager.get_one(Q(poll_id=poll_id)).first()
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
             poll_members_quantity = poll.user_participations.count()
@@ -1509,9 +1509,11 @@ def poll_voting_started(request):
                 quick_voting_form_data = {
                     'poll': poll.id
                 }
+                quick_voting_form_id = None
                 serializer = QuickVotingFormSerializer(data=quick_voting_form_data)
                 if serializer.is_valid():
                     quick_voting_form = serializer.save()
+                    quick_voting_form_id = quick_voting_form.id
                 else:
                     data = serializer_errors_wrapper(serializer.errors)
                     return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)   
@@ -1528,9 +1530,8 @@ def poll_voting_started(request):
             
             serializer = PollAnswerGroupSerializer(data=poll_answer_group_data)
             if serializer.is_valid():
-                # unmake_last_quick_answer_latest(student_id)  
-                poll_answer_group = serializer.save() 
-                # unmake_last_quick_answer_latest(poll, poll_answer_group.id)               
+                unmake_last_quick_answer_latest(student_id, quick_voting_form_id)  
+                poll_answer_group = serializer.save()           
                 return Response({'message':"Вы успешно начали голосование", 'data':serializer.data}, status=status.HTTP_200_OK)
             else:
                 data = serializer_errors_wrapper(serializer.errors)
@@ -1833,13 +1834,13 @@ def poll_registration(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_users_votes(request):
     try:
         current_user = request.user
-        my_profile = get_object_or_404(Profile, user=current_user)
-        # my_profile = get_object_or_404(Profile, user__id=1)
+        # my_profile = get_object_or_404(Profile, user=current_user)
+        my_profile = get_object_or_404(Profile, user__id=1)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -1860,9 +1861,9 @@ def my_poll_users_votes(request):
             else:
                 answers = poll.user_answers.all().order_by('-voting_date')
 
-            # auth_field_answers = poll.auth_field_answers.all()
-            # print(auth_field_answers)
-            auth_field_answers = None
+            auth_field_answers = poll.auth_field_answers.all()
+            print(auth_field_answers)
+            # auth_field_answers = None
             context = {'poll': poll, 'poll_type': 'Быстрый', 'auth_field_answers':auth_field_answers}
             paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer, context=context)
             paginated_result['results'] = {
