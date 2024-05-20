@@ -13,7 +13,6 @@ const useUserData = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!isAuthenticated) {
-        console.log('Пользователь не аутентифицирован');
         return;
       }
 
@@ -23,7 +22,6 @@ const useUserData = () => {
       const { data } = await handleRequest('get', '/api/my_profile/', null, headers);
       setUserRole(data.role);
       setUserData(data);
-      console.log(userData);
     };
 
     fetchUserData();

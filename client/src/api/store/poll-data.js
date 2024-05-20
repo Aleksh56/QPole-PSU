@@ -16,7 +16,7 @@ export const pollDataCache = createStore(initialCache).on(
   },
 );
 
-pollDataCache.watch((state) => console.log(state));
+// pollDataCache.watch((state) => console.log(state));
 
 export const fetchPollDataFx = createEffect(async (pollId) => {
   // const currentCache = pollDataCache.getState();

@@ -33,9 +33,9 @@ const FrmShareMain = ({ setView }) => {
   useEffect(() => {
     const host = window.location.host;
     const protocol = window.location.protocol;
-    const link = `${protocol}//${host}/${pollType === 'Быcтрый' ? 'quick-conduct-poll' : 'conduct-poll'}c/${id}`;
+    const link = `${protocol}//${host}/${pollType === 'Быстрый' ? 'quick-conduct-poll' : 'conduct-poll'}/${id}`;
     setSurveyLink(link);
-  }, [id]);
+  }, [id, pollType]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(surveyLink);

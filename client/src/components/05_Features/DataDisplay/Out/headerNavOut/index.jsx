@@ -30,7 +30,7 @@ const HeaderNavOut = ({ children, isMobile }) => {
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
-            onClick={toggleDrawer(true)}
+            // onClick={toggleDrawer(true)}
           >
             <MenuIcon />
           </IconButton>

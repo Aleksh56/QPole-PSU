@@ -82,10 +82,8 @@ const refreshToken = async () => {
 export const handleRequest = async (method, url, data, successMessage) => {
   try {
     const response = await api[method](url, data);
-    console.log(successMessage, response);
     return { data: response.data, ok: true };
   } catch (error) {
-    console.log(error);
     if (error.response && error.response.status === 500) {
       console.error(`${successMessage} failed with 500 status:`, error.response.data);
       throw error;

@@ -49,4 +49,4 @@ export const $answersStore = createStore(initialState)
 
 $answersStore.watch(saveStateToLocalStorage);
 
-$answersStore.watch((state) => console.log(state));
+// $answersStore.watch((state) => console.log(state));

@@ -35,8 +35,6 @@ const PoleMainSettingsPage = () => {
   const [timeoutHandlers, setTimeoutHandlers] = useState({});
   const [currentDate, setCurrentDate] = useState('');
 
-  console.log(pollStatus);
-
   const location = useLocation();
   const isNewPole = location.state?.isNewPole;
 
@@ -46,9 +44,8 @@ const PoleMainSettingsPage = () => {
   };
 
   useEffect(() => {
-    if (!isNewPole) {
-      fetchPoleData();
-    }
+    fetchPoleData();
+
     const currentISODate = new Date().toISOString().slice(0, 16);
     setCurrentDate(currentISODate);
   }, [isNewPole]);
@@ -116,7 +113,7 @@ const PoleMainSettingsPage = () => {
               value={
                 pendingChanges['start_time'] !== undefined
                   ? pendingChanges['start_time']
-                  : poleData?.poll_setts.start_time || ''
+                  : poleData?.poll_setts?.start_time || ''
               }
               handleChange={(e) => handleFieldChange('start_time', e)}
               disabled={pollStatus}
@@ -130,7 +127,7 @@ const PoleMainSettingsPage = () => {
               value={
                 pendingChanges['end_time'] !== undefined
                   ? pendingChanges['end_time']
-                  : poleData?.poll_setts.end_time || ''
+                  : poleData?.poll_setts?.end_time || ''
               }
               handleChange={(e) => handleFieldChange('end_time', e)}
             />
@@ -182,7 +179,7 @@ const PoleMainSettingsPage = () => {
             value={
               pendingChanges['start_time'] !== undefined
                 ? pendingChanges['start_time']
-                : poleData?.poll_setts.start_time || ''
+                : poleData?.poll_setts?.start_time || ''
             }
             handleChange={(e) => handleFieldChange('start_time', e)}
             disabled={pollStatus}
@@ -196,7 +193,7 @@ const PoleMainSettingsPage = () => {
             value={
               pendingChanges['end_time'] !== undefined
                 ? pendingChanges['end_time']
-                : poleData?.poll_setts.end_time || ''
+                : poleData?.poll_setts?.end_time || ''
             }
             handleChange={(e) => handleFieldChange('end_time', e)}
           />

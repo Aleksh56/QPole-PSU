@@ -6,6 +6,6 @@ const setPollsData = createEvent('Set polls data');
 
 $polls.on(setPollsData, (_, newArray) => newArray);
 
-$polls.watch((state) => console.log(`Polls Effector store:`, state));
+// $polls.watch((state) => console.log(`Polls Effector store:`, state));
 
 export { $polls, setPollsData };

@@ -15,8 +15,6 @@ import { StyledProfileFieldsBox } from '@/constants/styles';
 const ProfileUserData = ({ caption = '', boxCaption = '', ProfileInfoFields = [], user_id }) => {
   const [fieldValues, setFieldValues] = useState({});
 
-  console.log(ProfileInfoFields);
-
   useEffect(() => {
     const initialFieldValues = ProfileInfoFields.reduce((acc, { key, initialValue }) => {
       acc[key] = initialValue;

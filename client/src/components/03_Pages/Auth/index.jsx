@@ -31,7 +31,6 @@ const AuthPage = () => {
 
   const handleFormSubmit = useCallback(
     async (event) => {
-      console.log(event);
       const formData = {
         email: event.email,
         password: event.password,

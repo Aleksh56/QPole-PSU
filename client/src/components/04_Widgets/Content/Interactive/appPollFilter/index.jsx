@@ -22,7 +22,6 @@ import useUserData from '@/hooks/useUserData';
 const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => {} }) => {
   const { t } = useTranslation();
   const userData = useUserData();
-  console.log(userData);
   const [filters, setFilters] = useState({
     search: '',
     poll_type: 'Все типы',

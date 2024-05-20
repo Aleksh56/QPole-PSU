@@ -8,7 +8,7 @@ export const appHeaderData = [
 
 export const commonHeaderLinksData = [
   { caption: 'Главная', to: '/' },
-  { caption: 'Опросы', to: '/polls' },
+  // { caption: 'Опросы', to: '/polls' },
 ];
 
 export const adminPanelSidebarLinks = [

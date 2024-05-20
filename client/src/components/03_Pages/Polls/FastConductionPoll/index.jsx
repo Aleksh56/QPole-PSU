@@ -64,10 +64,6 @@ const FastConductionPollPage = () => {
   }, [isLoading, isAuthenticated, id]);
 
   useEffect(() => {
-    console.log(newPollStarted);
-  }, [newPollStarted]);
-
-  useEffect(() => {
     const requiredQuestions = pollData.questions
       ?.filter((q) => q.is_required)
       .map((item) => item.id);

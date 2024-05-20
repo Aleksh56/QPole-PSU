@@ -12,8 +12,6 @@ const PollListOut = ({ polls = [] }) => {
     await regOnPollFx({ poll_id });
   };
 
-  console.log(polls);
-
   return (
     <PollListGridContainer>
       {polls.map((item) => (

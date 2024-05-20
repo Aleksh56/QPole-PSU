@@ -22,7 +22,7 @@ const AdmUsrFilters = () => {
   };
 
   const handleResetFilters = () => {
-    console.log('Фильтры сброшены');
+    // console.log('Фильтры сброшены');
   };
 
   return (

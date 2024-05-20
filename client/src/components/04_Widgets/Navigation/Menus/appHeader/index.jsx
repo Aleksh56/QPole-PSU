@@ -43,8 +43,6 @@ const AppHeader = () => {
     navigate('/');
   };
 
-  console.log(userData);
-
   return (
     <StyledHeaderWrapper>
       <StyledHeaderContainer>

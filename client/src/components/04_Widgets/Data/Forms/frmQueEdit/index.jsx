@@ -47,7 +47,6 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
     const correctOptions = question?.answer_options?.filter((option) => option.is_correct);
     setSelectedOption(correctOptions?.length ? correctOptions?.map((option) => option.id) : []);
     setEditedQuestion(question);
-    console.log(selectedOption);
   }, [question]);
 
   useEffect(() => {

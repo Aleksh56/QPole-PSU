@@ -40,7 +40,6 @@ const PollResultsPage = () => {
   }, [id]);
 
   const handleChartTypeChange = (event) => setChartType(event.target.value);
-  console.log(questions);
   const handleDownloadClick = () => {
     setShowPDFExporter(true);
   };

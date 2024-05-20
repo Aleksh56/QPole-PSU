@@ -34,7 +34,6 @@ const QueTypeSelect = ({ question, questionType, setQuestionType, setQuestion })
   ];
 
   useEffect(() => {
-    console.log(question);
     let initialQuestionType = 'single';
     if (question.is_free) {
       initialQuestionType = 'free';
@@ -43,21 +42,17 @@ const QueTypeSelect = ({ question, questionType, setQuestionType, setQuestion })
     }
 
     const initialQuestionTypeObject = queTypes.find((item) => item.name === initialQuestionType);
-    console.log(initialQuestionType);
 
     // Устанавливаем отображаемую подпись для типа вопроса
     setQuestionType(initialQuestionTypeObject.caption);
-    console.log(questionType);
   }, [question]);
 
   const handleTypeChange = async (e) => {
-    console.log(e);
     const selectedType = e.target.value;
     setQuestionType(selectedType);
 
     const selectedTypeObject = queTypes.find((item) => item.caption === selectedType);
     if (selectedTypeObject) {
-      console.log(selectedTypeObject.type);
       await changePollTypeFx(id, question.id, selectedTypeObject.type).then((res) =>
         setQuestion(res.data),
       );

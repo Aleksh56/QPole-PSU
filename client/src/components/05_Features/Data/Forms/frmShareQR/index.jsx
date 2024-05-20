@@ -17,9 +17,10 @@ const FrmShareQR = () => {
   useEffect(() => {
     const host = window.location.host;
     const protocol = window.location.protocol;
-    const link = `${protocol}//${host}/${pollType === 'Быcтрый' ? 'quick-conduct-poll' : 'conduct-poll'}/${id}`;
+    const link = `${protocol}//${host}/${pollType === 'Быстрый' ? 'quick-conduct-poll' : 'conduct-poll'}/${id}`;
+
     setSurveyLink(link);
-  }, [id]);
+  }, [id, pollType]);
 
   const downloadQR = () => {
     const canvas = document.getElementById('qrCodeEl');
