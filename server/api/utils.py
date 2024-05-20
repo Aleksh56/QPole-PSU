@@ -107,42 +107,42 @@ from qrcode import QRCode, constants
 from qpoll.settings import SERVER_URL
 
 
-def generate_poll_qr(poll):
-    # Генерация QR-кода на основе poll_id
-        qr = QRCode(
-            version=1,
-            error_correction=constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        if poll.poll_type.name in ['Опрос', 'Викторина', 'Анонимный']:
-            qr.add_data(SERVER_URL + 'conduct-poll/'+ str(poll.poll_id))
-        elif poll.poll_type.name in ['Быстрый']:
-            qr.add_data(SERVER_URL + 'quick-conduct-poll/'+ str(poll.poll_id))
+# def generate_poll_qr(poll):
+#     # Генерация QR-кода на основе poll_id
+#         qr = QRCode(
+#             version=1,
+#             error_correction=constants.ERROR_CORRECT_L,
+#             box_size=10,
+#             border=4,
+#         )
+#         if poll.poll_type.name in ['Опрос', 'Викторина', 'Анонимный']:
+#             qr.add_data(SERVER_URL + 'conduct-poll/'+ str(poll.poll_id))
+#         elif poll.poll_type.name in ['Быстрый']:
+#             qr.add_data(SERVER_URL + 'quick-conduct-poll/'+ str(poll.poll_id))
 
-        qr.make(fit=True)
+#         qr.make(fit=True)
         
-        # Создание изображения QR-кода
-        qr_image = qr.make_image(fill_color="black", back_color="white")
+#         # Создание изображения QR-кода
+#         qr_image = qr.make_image(fill_color="black", back_color="white")
         
-        # Сохранение изображения в памяти
-        qr_image_buffer = BytesIO()
-        qr_image.save(qr_image_buffer, format="PNG")
+#         # Сохранение изображения в памяти
+#         qr_image_buffer = BytesIO()
+#         qr_image.save(qr_image_buffer, format="PNG")
         
-        # Создание объекта InMemoryUploadedFile для изображения QR-кода
-        qr_image_file = InMemoryUploadedFile(
-            qr_image_buffer,
-            None,
-            f'qrcode_poll_{poll.poll_id}.png',
-            'image/png',
-            qr_image.tell,
-            None
-        )
+#         # Создание объекта InMemoryUploadedFile для изображения QR-кода
+#         qr_image_file = InMemoryUploadedFile(
+#             qr_image_buffer,
+#             None,
+#             f'qrcode_poll_{poll.poll_id}.png',
+#             'image/png',
+#             qr_image.tell,
+#             None
+#         )
         
-        # Сохранение изображения QR-кода в поле qrcode
-        poll.qrcode.save(f'qrcode_poll_{poll.poll_id}.png', qr_image_file)
+#         # Сохранение изображения QR-кода в поле qrcode
+#         poll.qrcode.save(f'qrcode_poll_{poll.poll_id}.png', qr_image_file)
         
-        return poll
+#         return poll
 
 
 from base64 import b64encode

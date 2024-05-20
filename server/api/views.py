@@ -199,14 +199,15 @@ def my_poll(request):
             if serializer.is_valid():
                 poll = serializer.save()
                 if poll.poll_type.name == 'Анонимный':
-                    if is_web3_connected(w3):
-                        poll_data = {
-                            'poll_id': poll.poll_id,
-                            'poll_type': 'Анонимный',
-                        }
-                        createPoll(w3, contract, poll_data)
-                    else:
-                        raise MyCustomException(detail="is_web3_connected не подключился")
+                    pass
+                #     if is_web3_connected(w3):
+                #         poll_data = {
+                #             'poll_id': poll.poll_id,
+                #             'poll_type': 'Анонимный',
+                #         }
+                #         createPoll(w3, contract, poll_data)
+                #     else:
+                #         raise MyCustomException(detail="is_web3_connected не подключился")
                 elif poll.poll_type.name == 'Быстрый':
                     auth_fields = [
                         {'poll': poll.id, 'name': 'ФИО', 'is_main': True, 'is_required': True},
@@ -831,15 +832,15 @@ def my_poll_question(request):
             if serializer.is_valid():
                 poll_question = serializer.save()
 
-                if poll.poll_type.name == 'Анонимный':
-                    if is_web3_connected(w3):
-                        poll_data = {
-                            'poll_id': poll.poll_id,
-                            'question_id': poll_question.id,
-                        }
-                        addQuestionToPoll(w3, contract, poll_data)
-                    else:
-                        raise MyCustomException(detail="is_web3_connected не подключился")
+                # if poll.poll_type.name == 'Анонимный':
+                #     if is_web3_connected(w3):
+                #         poll_data = {
+                #             'poll_id': poll.poll_id,
+                #             'question_id': poll_question.id,
+                #         }
+                #         addQuestionToPoll(w3, contract, poll_data)
+                #     else:
+                #         raise MyCustomException(detail="is_web3_connected не подключился")
 
 
                 return Response(f"Вопрос {poll_question} успешно проинициализирован", status=status.HTTP_201_CREATED)
@@ -1028,16 +1029,16 @@ def my_poll_question_option(request):
             serializer = PollQuestionOptionSerializer(data=data, context={'has_free_option': has_free_option})
             if serializer.is_valid():
                 answer_option = serializer.save()
-                if poll.poll_type.name == 'Анонимный':
-                    if is_web3_connected(w3):
-                        poll_data = {
-                            'poll_id': poll.poll_id,
-                            'question_id': poll_question.id,
-                            'option_id': answer_option.id,
-                        }
-                        addAnswerToQuestion(w3, contract, poll_data)
-                    else:
-                        raise MyCustomException(detail="is_web3_connected не подключился")
+                # if poll.poll_type.name == 'Анонимный':
+                #     if is_web3_connected(w3):
+                #         poll_data = {
+                #             'poll_id': poll.poll_id,
+                #             'question_id': poll_question.id,
+                #             'option_id': answer_option.id,
+                #         }
+                #         addAnswerToQuestion(w3, contract, poll_data)
+                #     else:
+                #         raise MyCustomException(detail="is_web3_connected не подключился")
                     
                 return Response(f"Вариант ответа {answer_option} успешно проинициализирован", status=status.HTTP_201_CREATED)
             else:

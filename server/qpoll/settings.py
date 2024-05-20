@@ -38,27 +38,33 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
-            'formatter': 'file_format',  
+            'formatter': 'file_format',
             'encoding': 'utf-8',
         },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'console_format',  
+            'formatter': 'console_format',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],  
+            'handlers': ['file', 'console'],
             'level': 'INFO',
+            'propagate': True,
         },
         'api': {
-            'handlers': ['file'],  
+            'handlers': ['file'],
             'level': 'DEBUG',
+            'propagate': True,
         },
-    }
-
+    },
+    'root': {
+        'handlers': ['file', 'console'],
+        'level': 'ERROR',
+    },
 }
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -252,30 +258,30 @@ SERVER_EMAIL = env('SERVER_EMAIL')
 
 
 
-w3 = Web3(Web3.HTTPProvider('http://188.225.45.226:8545'))
+# w3 = Web3(Web3.HTTPProvider('http://188.225.45.226:8545'))
 
-import json
+# import json
 
-def connect_to_web3():
-    my_abi = None
-    my_contract_address = None
+# def connect_to_web3():
+#     my_abi = None
+#     my_contract_address = None
         
-    #    with open('qpoll/contract_address.txt', 'r') as file:
-    #        my_contract_address = file.read()
-    # my_contract_address = my_contract_address.strip()
+#     #    with open('qpoll/contract_address.txt', 'r') as file:
+#     #        my_contract_address = file.read()
+#     # my_contract_address = my_contract_address.strip()
 
 
-    with open('qpoll/MiniPoll.json', 'r') as f:
-        data = json.load(f)
-        my_abi = data['abi']
+#     with open('qpoll/MiniPoll.json', 'r') as f:
+#         data = json.load(f)
+#         my_abi = data['abi']
 
         
-    contract_address = w3.to_checksum_address('0xedd273449312c66e29fc9b8ce286db2f032f2931')
+#     contract_address = w3.to_checksum_address('0xedd273449312c66e29fc9b8ce286db2f032f2931')
 
-    abi = my_abi
-    return contract_address, abi
+#     abi = my_abi
+#     return contract_address, abi
 
 
-contract_address, abi = connect_to_web3()
+# contract_address, abi = connect_to_web3()
 
-contract = w3.eth.contract(address=contract_address, abi=abi)
+# contract = w3.eth.contract(address=contract_address, abi=abi)

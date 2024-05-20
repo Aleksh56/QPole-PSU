@@ -4,7 +4,7 @@ from functools import partial
 
 from .validators import *
 from .models import *
-from .utils import generate_poll_qr, get_qrcode_img_bytes
+# from .utils import generate_poll_qr, get_qrcode_img_bytes
 from .exсeptions import *
 
 from login.validators import validate_number
@@ -354,14 +354,14 @@ class BasePollSerializer(serializers.ModelSerializer):
         model = Poll
         fields = '__all__'
 
-    def create(self, validated_data):
-        poll = super().create(validated_data)
-        poll_setts = PollSettings.objects.create()
-        poll = generate_poll_qr(poll)
-        poll.poll_setts = poll_setts
-        poll.save()
+    # def create(self, validated_data):
+    #     poll = super().create(validated_data)
+    #     poll_setts = PollSettings.objects.create()
+    #     poll = generate_poll_qr(poll)
+    #     poll.poll_setts = poll_setts
+    #     poll.save()
 
-        return poll
+    #     return poll
 
 class MiniPollSerializer(BasePollSerializer):
     poll_type = PollTypeSerializer(required=True)
@@ -370,7 +370,7 @@ class MiniPollSerializer(BasePollSerializer):
 
     allowed_groups = StudyGroupSerializer(many=True, required=False)
 
-    qrcode_img = serializers.SerializerMethodField()
+    # qrcode_img = serializers.SerializerMethodField()
 
     is_user_in_allowed_groups = serializers.SerializerMethodField()
     
@@ -378,13 +378,13 @@ class MiniPollSerializer(BasePollSerializer):
         profile = self.context.get('profile')
         return instance.is_user_in_allowed_groups(user_profile=profile)
     
-    def get_qrcode_img(self, instance):
-        qrcode_path = instance.qrcode
+    # def get_qrcode_img(self, instance):
+    #     qrcode_path = instance.qrcode
         
-        if qrcode_path:
-            return get_qrcode_img_bytes(qrcode_path.path)
+    #     if qrcode_path:
+    #         return get_qrcode_img_bytes(qrcode_path.path)
 
-        return None
+    #     return None
 
     class Meta:
         model = Poll
@@ -487,7 +487,7 @@ class PollSerializer(BasePollSerializer):
     registrated_users = MiniProfileSerializer(many=True, required=False)
    
 
-    qrcode_img = serializers.SerializerMethodField()
+    # qrcode_img = serializers.SerializerMethodField()
     
     is_user_in_allowed_groups = serializers.SerializerMethodField()
     
@@ -495,13 +495,13 @@ class PollSerializer(BasePollSerializer):
         profile = self.context.get('profile')
         return instance.is_user_in_allowed_groups(user_profile=profile)
 
-    def get_qrcode_img(self, instance):
-        qrcode_path = instance.qrcode
+    # def get_qrcode_img(self, instance):
+    #     qrcode_path = instance.qrcode
         
-        if qrcode_path:
-            return get_qrcode_img_bytes(qrcode_path.path)
+    #     if qrcode_path:
+    #         return get_qrcode_img_bytes(qrcode_path.path)
 
-        return None
+    #     return None
 
     def set_is_in_production(self, value):
         """Если убрали из продакшена, удаляем все ответы"""

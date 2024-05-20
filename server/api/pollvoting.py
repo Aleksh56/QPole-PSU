@@ -4,7 +4,7 @@ from .models import PollAnswer
 
 from datetime import datetime
 from .utils import PollVoting
-from qpoll.settings import w3, contract
+# from qpoll.settings import w3, contract
 
 def poll_voting_handler(answers, poll, is_full=True):
     raw_answers = answers
@@ -230,9 +230,9 @@ def save_votes(answers, poll, my_profile, raw_answers,
     }
 
     tx_hash = None
-    if poll.poll_type.name == "Анонимный":
-        poll_answer_group_data['profile'] = None
-        tx_hash = PollVoting(w3, contract, poll_data)
+    # if poll.poll_type.name == "Анонимный":
+    #     poll_answer_group_data['profile'] = None
+    #     tx_hash = PollVoting(w3, contract, poll_data)
 
     return poll_answer_group, poll_answers, tx_hash
 
