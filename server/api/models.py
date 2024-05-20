@@ -375,7 +375,7 @@ class Poll(models.Model):
     poll_id = models.CharField(max_length=100, unique=True, db_index=True) # уникальный id
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='my_polls') # автор опроса
     image = models.ImageField(verbose_name='Фото опроса', upload_to=f'images/poll_images/', blank=True, null=True) # фото 
-    name = models.CharField(max_length=50, blank=True, null=True) # имя опроса
+    name = models.CharField(max_length=150, blank=True, null=True) # имя опроса
     description = models.TextField(blank=True, null=True) # текст начать опрос
     tags = models.TextField(blank=True, null=True) # тэги
 
@@ -633,7 +633,7 @@ class PollSettings(models.Model):
 
 class PollAuthField(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='auth_fields')
-    name = models.CharField(max_length=50, null=True, blank=True)
+    name = models.CharField(max_length=150, null=True, blank=True)
     description = models.CharField(max_length=150, null=True, blank=True)
 
     is_required = models.BooleanField(default=True)

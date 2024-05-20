@@ -354,14 +354,14 @@ class BasePollSerializer(serializers.ModelSerializer):
         model = Poll
         fields = '__all__'
 
-    # def create(self, validated_data):
-    #     poll = super().create(validated_data)
-    #     poll_setts = PollSettings.objects.create()
-    #     poll = generate_poll_qr(poll)
-    #     poll.poll_setts = poll_setts
-    #     poll.save()
+    def create(self, validated_data):
+        poll = super().create(validated_data)
+        poll_setts = PollSettings.objects.create()
+        # poll = generate_poll_qr(poll)
+        poll.poll_setts = poll_setts
+        poll.save()
 
-    #     return poll
+        return poll
 
 class MiniPollSerializer(BasePollSerializer):
     poll_type = PollTypeSerializer(required=True)

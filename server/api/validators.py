@@ -11,8 +11,8 @@ class BaseValidator:
 
     def name(value, chars=None):
         if not chars:
-            if len(value) > 50:
-                raise ValidationError("Название должно содержать менее 50 символов.")
+            if len(value) > 200:
+                raise ValidationError("Название должно содержать менее 200 символов.")
         else:
             if len(value) > chars:
                 raise ValidationError(f"Название должно содержать менее {chars} символов.")
@@ -81,8 +81,8 @@ class ProfileValidator(BaseValidator):
 class PollValidator(BaseValidator):
 
     def name(value):
-        if len(value) > 50:
-            raise ValidationError("Название должно содержать менее 50 символов.")
+        if len(value) > 150:
+            raise ValidationError("Название должно содержать менее 150 символов.")
 
     def duration(value):
         pass
@@ -164,8 +164,8 @@ class ReleasePollValidator(BaseReleaseValidator):
                 raise PollValidationException(f"Заголовок текущего опроса должен содержать более {min_len - 1} символов.")
             
         if not max_len:
-            if len(value) > 50:
-                raise PollValidationException(f"Заголовок текущего опроса должен содержать менее 50 символов.")
+            if len(value) > 150:
+                raise PollValidationException(f"Заголовок текущего опроса должен содержать менее 150 символов.")
         else:
             if len(value) > max_len:
                 raise PollValidationException(f"Заголовок текущего опроса должен содержать менее {max_len} символов.")
@@ -187,8 +187,8 @@ class ReleaseQuestionValidator(BaseReleaseValidator):
                 raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать более {min_len - 1} символов.")
             
         if not max_len:
-            if len(value) > 50:
-                raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать менее 50 символов.")
+            if len(value) > 150:
+                raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать менее 150 символов.")
         else:
             if len(value) > max_len:
                 raise PollValidationException(f"Текст вопроса №{self.instance.order_id} должен содержать менее {max_len} символов.")
@@ -212,8 +212,8 @@ class ReleaseOptionValidator(BaseReleaseValidator):
                     raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать более {min_len - 1} символов.")
                 
             if not max_len:
-                if len(value) > 50:
-                    raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать менее 50 символов.")
+                if len(value) > 150:
+                    raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать менее 150 символов.")
             else:
                 if len(value) > max_len:
                     raise PollValidationException(f"Текст варианта ответа №{self.instance.order_id} вопроса №{self.instance.question.order_id} должен содержать менее {max_len} символов.")
