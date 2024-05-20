@@ -917,22 +917,37 @@ class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
     def get_profile(self, instance):
         poll_type = self.context.get('poll_type', None)
         if poll_type and poll_type == 'Быстрый':
-            # print(instance.quick_voting_form)
-            # auth_field_answers = self.context.get('auth_field_answers', None)
-            # print(auth_field_answers)
-            # quick_voting_form = instance.quick_voting_form
-            
-            data = {
-                'name': 'name',
-                'surname': 'surname',
-                'partonymic': 'partonymic',
-                'student_id': 'student_id',
-                'group': 'group',
-            }
-            return data
-        else:
-            return MiniProfileSerializer(instance.profile).data
+            auth_field_answers_dict = self.context.get('auth_field_answers_dict', {})
+            answer_group_id = instance.id
 
+            cur_quick_voting_form = None
+            for quick_voting_form_id, answers in auth_field_answers_dict.items():
+                if any(answer.quick_voting_form.poll_answer_group.id == answer_group_id for answer in answers):
+                    cur_quick_voting_form = quick_voting_form_id
+                    break
+
+            if cur_quick_voting_form is not None:
+                cur_quick_voting_form_fields = {
+                    answer.auth_field.name: answer.answer
+                    for answer in auth_field_answers_dict[cur_quick_voting_form]
+                }
+
+                fio = cur_quick_voting_form_fields.get('ФИО', '')
+                fio_parts = fio.split(' ')
+                while len(fio_parts) < 3:
+                    fio_parts.append('')
+
+                surname, name, patronymic = fio_parts
+                data = {
+                    'name': name,
+                    'surname': surname,
+                    'patronymic': patronymic,
+                    'student_id': cur_quick_voting_form_fields.get('Номер студенческого билета', ''),
+                    'group': cur_quick_voting_form_fields.get('Группа', ''),
+                }
+                return data
+
+        return MiniProfileSerializer(instance.profile).data
 
     class Meta:
         model = PollAnswerGroup

@@ -598,10 +598,10 @@ class QuickVotingForm(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='quick_voting_forms')
     date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        if hasattr(self, 'poll_answer_group'):
-            return f"Форма авторизции на {self.poll_answer_group}"
-        else: return super().__str__()
+    # def __str__(self):
+    #     if hasattr(self, 'poll_answer_group'):
+    #         return f"Форма авторизции на {self.poll_answer_group}"
+    #     else: return super().__str__()
 
 
 class PollRegistration(models.Model):

@@ -573,7 +573,7 @@ def my_poll_stats(request):
             poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
-            poll_members_quantity = poll.user_participations.count()
+            poll_members_quantity = poll.user_answers.count()
 
             poll_user_answers = (
                 poll.all_answers
@@ -1834,13 +1834,13 @@ def poll_registration(request):
 
 
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 @transaction.atomic
 def my_poll_users_votes(request):
     try:
         current_user = request.user
-        # my_profile = get_object_or_404(Profile, user=current_user)
-        my_profile = get_object_or_404(Profile, user__id=1)
+        my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -1848,7 +1848,7 @@ def my_poll_users_votes(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = Poll.my_manager.get_one_quick_with_answers(Q(poll_id=poll_id)).first()
+            poll = Poll.my_manager.get_one(Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
@@ -1856,23 +1856,52 @@ def my_poll_users_votes(request):
 
             if user_id:
                 answers = (
-                    poll.user_answers.filter(profile__user_id=user_id).order_by('-voting_date')      
+                    poll.user_answers.filter(profile__user_id=user_id)
+                    .prefetch_related(
+                            models.Prefetch('answers', queryset=PollAnswer.objects.all().select_related('answer_option'))
+                        )
+                    .order_by('-voting_date')      
                 )
             else:
-                answers = poll.user_answers.all().order_by('-voting_date')
+                answers = (
+                    poll.user_answers
+                    .prefetch_related(
+                            models.Prefetch('answers', queryset=PollAnswer.objects.all().select_related('answer_option'))
+                        )
+                    .all()
+                    .order_by('-voting_date')
+                )
 
-            auth_field_answers = poll.auth_field_answers.all()
-            print(auth_field_answers)
-            # auth_field_answers = None
-            context = {'poll': poll, 'poll_type': 'Быстрый', 'auth_field_answers':auth_field_answers}
-            paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer, context=context)
+            auth_field_answers = (
+                poll.auth_field_answers
+                .select_related('auth_field', 'quick_voting_form', 'quick_voting_form__poll_answer_group')
+                .all()
+            )
+
+            auth_field_answers_dict = {}
+            for answer in auth_field_answers:
+                quick_voting_form_id = answer.quick_voting_form.id
+                if quick_voting_form_id not in auth_field_answers_dict:
+                    auth_field_answers_dict[quick_voting_form_id] = []
+                auth_field_answers_dict[quick_voting_form_id].append(answer)
+
+            context = {
+                'poll': poll,
+                'poll_type': 'Быстрый',
+                'auth_field_answers_dict': auth_field_answers_dict
+            }
+
+            paginated_result = get_paginated_response(
+                request, answers, MyPollUsersAnswersSerializer, context=context
+            )
+
             paginated_result['results'] = {
                 'poll_data': PollSerializer(poll).data,
                 'answers': paginated_result['results']
             }
 
             return Response(paginated_result)
-
+        
     except APIException as api_exception:
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
 
