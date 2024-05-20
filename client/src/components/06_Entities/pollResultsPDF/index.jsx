@@ -103,7 +103,7 @@ const PollResultsPDF = ({ data, pollData }) => {
                       <View style={styles.tableRow}>
                         <Text
                           style={styles.tableCol}
-                        >{`${answer.profile.surname} ${answer.profile.name}`}</Text>
+                        >{`${answer?.profile?.surname} ${answer?.profile?.name}`}</Text>
                         <Text style={styles.tableCol}>
                           {answer.answers
                             .map((a) =>
@@ -120,7 +120,7 @@ const PollResultsPDF = ({ data, pollData }) => {
                         <View key={`${idx}-${aIdx}`} style={styles.tableRow}>
                           <Text
                             style={styles.tableCol}
-                          >{`${answer.profile.surname} ${answer.profile.name}`}</Text>
+                          >{`${answer?.profile?.surname} ${answer?.profile?.name}`}</Text>
                           <Text style={styles.tableCol}>
                             {a.answers.text
                               ? `${a.answers.text}(Свободный ответ)`
