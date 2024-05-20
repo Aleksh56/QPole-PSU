@@ -912,7 +912,25 @@ class PollAnswersSerializer(serializers.ModelSerializer):
 
 class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
     answers = PollAnswersSerializer(many=True, read_only=True)
-    profile = MiniProfileSerializer()
+    profile = serializers.SerializerMethodField()
+
+    def get_profile(self, instance):
+        poll_type = self.context.get('poll_type', None)
+        if poll_type and poll_type == 'Быстрый':
+            # print(instance.quick_voting_form)
+            # auth_field_answers = self.context.get('auth_field_answers', None)
+            # quick_voting_form = instance.quick_voting_form
+            
+            data = {
+                'name': 'name',
+                'surname': 'surname',
+                'partonymic': 'partonymic',
+                'student_id': 'student_id',
+                'group': 'group',
+            }
+            return data
+        else:
+            return MiniProfileSerializer(instance.profile).data
 
 
     class Meta:

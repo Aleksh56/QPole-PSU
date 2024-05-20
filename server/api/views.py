@@ -1275,10 +1275,10 @@ def poll_answer_group(request):
 def poll_voting(request):
     try:
         current_user = request.user
-        my_profile = get_object_or_404(Profile, user=current_user)
-
-        if not my_profile:
-            raise ObjectNotFoundException(model='Profile')
+        if not isinstance(current_user, AnonymousUser):
+            my_profile = get_object_or_404(Profile, user=current_user)
+        else:
+            my_profile = None
 
         if request.method == 'GET':
             poll_id = request.GET.get('poll_id', None)
@@ -1344,7 +1344,7 @@ def poll_voting(request):
 
                 if not poll_answer_group:
                     raise ObjectNotFoundException(detail='Вы еще не начали прохождение.')
-                
+                  
                 # quick_voting_form_id = get_parameter_or_400(request.GET, 'quick_voting_form_id')
                 # quick_voting_form = get_object_or_404(QuickVotingForm, id=quick_voting_form_id)
                 quick_voting_form = poll_answer_group.quick_voting_form
@@ -1515,7 +1515,7 @@ def poll_voting_started(request):
                 else:
                     data = serializer_errors_wrapper(serializer.errors)
                     return Response({'message': data}, status=status.HTTP_400_BAD_REQUEST)   
-                new_auth_fields = validate_auth_data_2(auth_data, poll, quick_voting_form)
+                new_auth_fields, student_id = validate_auth_data_2(auth_data, poll, quick_voting_form)
                 created_auth_fields = PollAuthFieldAnswer.objects.bulk_create(new_auth_fields)
 
                 poll_answer_group_data = {
@@ -1528,7 +1528,9 @@ def poll_voting_started(request):
             
             serializer = PollAnswerGroupSerializer(data=poll_answer_group_data)
             if serializer.is_valid():
-                poll_answer_group = serializer.save()                
+                # unmake_last_quick_answer_latest(student_id)  
+                poll_answer_group = serializer.save() 
+                # unmake_last_quick_answer_latest(poll, poll_answer_group.id)               
                 return Response({'message':"Вы успешно начали голосование", 'data':serializer.data}, status=status.HTTP_200_OK)
             else:
                 data = serializer_errors_wrapper(serializer.errors)
@@ -1837,6 +1839,7 @@ def my_poll_users_votes(request):
     try:
         current_user = request.user
         my_profile = get_object_or_404(Profile, user=current_user)
+        # my_profile = get_object_or_404(Profile, user__id=1)
 
         if not my_profile:
             raise ObjectNotFoundException(model='Profile')
@@ -1844,7 +1847,7 @@ def my_poll_users_votes(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id)).first()
+            poll = Poll.my_manager.get_one_quick_with_answers(Q(poll_id=poll_id)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
@@ -1857,7 +1860,10 @@ def my_poll_users_votes(request):
             else:
                 answers = poll.user_answers.all().order_by('-voting_date')
 
-            context = {'poll': poll}
+            # auth_field_answers = poll.auth_field_answers.all()
+            # print(auth_field_answers)
+            auth_field_answers = None
+            context = {'poll': poll, 'poll_type': 'Быстрый', 'auth_field_answers':auth_field_answers}
             paginated_result = get_paginated_response(request, answers, MyPollUsersAnswersSerializer, context=context)
             paginated_result['results'] = {
                 'poll_data': PollSerializer(poll).data,
