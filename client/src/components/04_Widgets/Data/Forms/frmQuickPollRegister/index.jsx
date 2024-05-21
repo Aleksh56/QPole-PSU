@@ -1,6 +1,6 @@
 import { Box, Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ContentWrapper, HeaderWrapper, RegTitle } from './styled';
 
@@ -13,6 +13,7 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
     studentId: '',
     groupNumber: '',
   });
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,6 +46,18 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
     handleStart(dataToSubmit);
   };
 
+  const validateForm = () => {
+    if (isStudent) {
+      setIsButtonDisabled(!formData.fullName || !formData.studentId || !formData.groupNumber);
+    } else {
+      setIsButtonDisabled(!formData.fullName);
+    }
+  };
+
+  useEffect(() => {
+    validateForm();
+  }, [formData, isStudent]);
+
   return (
     <HeaderWrapper>
       <RegTitle>Регистрация на опрос</RegTitle>
@@ -60,7 +73,13 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
         />
         <FormControlLabel
           control={
-            <Checkbox checked={isStudent} onChange={(e) => setIsStudent(e.target.checked)} />
+            <Checkbox
+              checked={isStudent}
+              onChange={(e) => {
+                setIsStudent(e.target.checked);
+                validateForm();
+              }}
+            />
           }
           label="Я студент"
         />
@@ -97,7 +116,7 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
       </ContentWrapper>
       {isCollapsed && pollData?.poll_setts?.completion_time !== null && (
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-          <PrimaryButton caption="Начать" handleClick={handleSubmit} />
+          <PrimaryButton caption="Начать" handleClick={handleSubmit} disabled={isButtonDisabled} />
         </Box>
       )}
     </HeaderWrapper>

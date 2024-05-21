@@ -11,6 +11,7 @@ import { getPollAnswersFx, getPollResultsFx } from './model/get-results';
 import { ResultsGridWrapper, SettingsWrapper, Wrapper } from './styled';
 
 import PollResultCard from '@/components/05_Features/Data/Cards/pollResCard';
+import GenExcelResults from '@/components/06_Entities/genExcelResults';
 import PollResultsPDF from '@/components/06_Entities/pollResultsPDF';
 import NoDataHelper from '@/components/07_Shared/UIComponents/Utils/Helpers/noDataHelper';
 import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
@@ -56,6 +57,7 @@ const PollResultsPage = () => {
           </MenuItem>
         </Select>
         <Button onClick={handleDownloadClick}>{t('button.downloadPDF')}</Button>
+        <GenExcelResults questions={questions} data={answers} />
         {showPDFExporter && (
           <Suspense fallback={<div>Загрузка PDF...</div>}>
             <PdfExporter
