@@ -14,13 +14,32 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
     groupNumber: '',
   });
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [fullNameError, setFullNameError] = useState('');
+  const [studentIdError, setStudentIdError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+
+    if (name === 'fullName') {
+      if (value.length > 70) {
+        setFullNameError('ФИО не может превышать 70 символов');
+      } else {
+        setFullNameError('');
+      }
+    }
+
+    if (name === 'studentId') {
+      if (value.length > 20) {
+        setStudentIdError('Номер студенческого билета не может превышать 20 символов');
+      } else {
+        setStudentIdError('');
+      }
+    }
   };
 
   const handleSubmit = () => {
@@ -48,9 +67,15 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
 
   const validateForm = () => {
     if (isStudent) {
-      setIsButtonDisabled(!formData.fullName || !formData.studentId || !formData.groupNumber);
+      setIsButtonDisabled(
+        !formData.fullName ||
+          formData.fullName.length > 70 ||
+          !formData.studentId ||
+          formData.studentId.length > 20 ||
+          !formData.groupNumber,
+      );
     } else {
-      setIsButtonDisabled(!formData.fullName);
+      setIsButtonDisabled(!formData.fullName || formData.fullName.length > 70);
     }
   };
 
@@ -70,6 +95,8 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
           name="fullName"
           value={formData.fullName}
           onChange={handleChange}
+          error={!!fullNameError}
+          helperText={fullNameError}
         />
         <FormControlLabel
           control={
@@ -100,6 +127,8 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
                 name="studentId"
                 value={formData.studentId}
                 onChange={handleChange}
+                error={!!studentIdError}
+                helperText={studentIdError}
               />
               <TextField
                 label="Номер группы"

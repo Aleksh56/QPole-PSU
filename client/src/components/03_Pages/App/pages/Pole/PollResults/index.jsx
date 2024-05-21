@@ -44,7 +44,6 @@ const PollResultsPage = () => {
   const handleDownloadClick = () => {
     setShowPDFExporter(true);
   };
-
   return isResults ? (
     <Wrapper>
       <SettingsWrapper>
