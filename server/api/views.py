@@ -570,7 +570,7 @@ def my_poll_stats(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id)).first()
+            poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, author=my_profile)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
             poll_members_quantity = poll.user_answers.count()
@@ -1868,7 +1868,7 @@ def my_poll_users_votes(request):
                     .prefetch_related(
                             models.Prefetch('answers', queryset=PollAnswer.objects.all().select_related('answer_option'))
                         )
-                    .all()
+                    .filter(is_finished=True, is_latest=True)
                     .order_by('-voting_date')
                 )
 
