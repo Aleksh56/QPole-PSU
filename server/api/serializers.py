@@ -934,9 +934,10 @@ class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
 
                 fio = cur_quick_voting_form_fields.get('ФИО', '')
                 fio_parts = fio.split(' ')
+                fio_parts = [part.strip() for part in fio_parts]
                 while len(fio_parts) < 3:
                     fio_parts.append('')
-
+                fio_parts = fio_parts[0:3]
                 surname, name, patronymic = fio_parts
                 data = {
                     'name': name,

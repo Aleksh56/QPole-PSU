@@ -156,7 +156,7 @@ class AnswerOption(models.Model):
 
 
 class PollQuestion(models.Model):
-    name = models.CharField(max_length=100, default=None, null=True, blank=True)
+    name = models.CharField(max_length=250, default=None, null=True, blank=True)
     info = models.CharField(max_length=500, default=None, null=True, blank=True)
     image = models.ImageField(verbose_name='Фото вопроса', upload_to=f'images/poll_questions/', blank=True, null=True, default=None)
     poll = models.ForeignKey('Poll', related_name='questions', on_delete=models.CASCADE) # связь с опросом

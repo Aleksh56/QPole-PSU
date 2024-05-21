@@ -26,6 +26,16 @@ services:
     depends_on:
       - app
 
+  db:
+    image: mysql:latest
+    ports:
+      - '3306:3306'
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'qpoll_db_password229'  
+      MYSQL_DATABASE: 'qpoll_db'
+      MYSQL_PASSWORD: qpoll_db_password229
+
 volumes:
   static-data:
   media-data:
