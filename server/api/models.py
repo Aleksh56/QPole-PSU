@@ -258,7 +258,7 @@ class MyPollManager(models.Manager):
 
         objects = self.get_all_with_answers(filters)
         objects = self.__annotate_time(objects)
-        return objects.filter(is_avaliable_for_voting=True)
+        return objects.filter(Q(is_avaliable_for_voting=True), ~Q(poll_type__name__in=['Быстрый', 'Анонимный']))
     
     def get_all_avaliable_to_me(self, user_profile, filters=None):
         """Получение всех опросов доступных мне"""
@@ -651,7 +651,7 @@ class PollAuthFieldAnswer(models.Model):
     auth_field = models.ForeignKey(PollAuthField, on_delete=models.CASCADE, related_name='answers')
     quick_voting_form = models.ForeignKey(QuickVotingForm, on_delete=models.CASCADE, related_name='auth_field_answers')
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='auth_field_answers')
-    answer = models.CharField(max_length=150, null=True, blank=True)
+    answer = models.CharField(max_length=150)
 
     def __str__(self):
         return f"Ответ '{self.quick_voting_form}' на поле авторизации '{self.auth_field.name}' на {self.poll}"

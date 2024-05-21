@@ -240,7 +240,7 @@ def my_poll(request):
                 data = serializer_errors_wrapper(serializer.errors)
                 return Response({'message':data}, status=status.HTTP_400_BAD_REQUEST)         
 
-        elif request.method == 'PUT':   
+        elif request.method == 'PUT':
             data = request.data
 
             request_type = get_parameter_or_400(request.GET, 'request_type')
@@ -1891,16 +1891,17 @@ def my_poll_users_votes(request):
                 'auth_field_answers_dict': auth_field_answers_dict
             }
 
-            paginated_result = get_paginated_response(
-                request, answers, MyPollUsersAnswersSerializer, context=context
-            )
-
-            paginated_result['results'] = {
+            # paginated_result = get_paginated_response(
+            #     request, answers, MyPollUsersAnswersSerializer, context=context
+            # )
+            result = {}
+            answers = MyPollUsersAnswersSerializer(answers, context=context, many=True).data
+            result['results'] = {
                 'poll_data': PollSerializer(poll).data,
-                'answers': paginated_result['results']
+                'answers': answers
             }
 
-            return Response(paginated_result)
+            return Response(result)
         
     except APIException as api_exception:
         return Response({'message': f"{api_exception.detail}"}, api_exception.status_code)
