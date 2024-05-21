@@ -42,12 +42,21 @@ jobs:
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_HOST=${{ secrets.SERVER_HOST }}
-            
             EMAIL_HOST_USER="theroflx@yandex.ru"
             EMAIL_HOST_PASSWORD="whespimmmanwnoxh"
             DEFAULT_FROM_EMAIL="theroflx@yandex.ru"
             SERVER_EMAIL="theroflx@yandex.ru"
             RECOVERY_CODE='7EYV7EXXYUUNKTPDFK9KWF37'
             EOF
+            cat <<EOF > /home/db/.env
+            SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+            DEBUG=False
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=${{ secrets.SERVER_HOST }}
+            EOF
+            cd /home/db
+            docker-compose up -d
             cd /home/server
             docker-compose up -d --build
