@@ -8,7 +8,6 @@ import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper, InfoButton
 
 const PollResultCard = ({ data, chartType }) => {
   const [infoOpen, setInfoOpen] = useState(false);
-  console.log(data);
 
   const renderChart = () => {
     const chartData = data.answer_options.map((option) => ({
@@ -17,7 +16,7 @@ const PollResultCard = ({ data, chartType }) => {
       label: option.is_free_response ? 'Другое' : option.name,
     }));
 
-    const xAxisData = data.answer_options.map((opt, index) => `Ответ - ${index}`);
+    const xAxisData = data.answer_options.map((opt) => opt?.name);
 
     const barChartData = data.answer_options.map((option) => option.votes_quantity);
 

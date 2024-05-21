@@ -54,14 +54,15 @@ const FastConductionPollPage = () => {
   useEffect(() => {
     const pollDataRequest = async () => {
       const data = await fetchPollQuestions(id);
-      if (data.poll_setts.completion_time !== null) getRemainingTime();
+      const formId = localStorage.getItem('voting_form_id');
+      if (data.poll_setts.completion_time !== null && formId) getRemainingTime();
       if (data.mix_questions) data.questions = shuffleArray(data.questions);
 
       setIsCollapsed(data.poll_setts?.completion_time !== null);
       setPollData(data);
     };
     pollDataRequest();
-  }, [isLoading, isAuthenticated, id]);
+  }, [id]);
 
   useEffect(() => {
     const requiredQuestions = pollData.questions

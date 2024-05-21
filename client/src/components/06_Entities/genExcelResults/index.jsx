@@ -24,15 +24,27 @@ const GenExcelResults = ({ data, questions }) => {
 
     worksheet.addRow(headers);
 
-    data?.forEach(({ fullName, studentNumber, groupNumber, question1, question2 }) => {
-      worksheet.addRow([fullName, studentNumber, groupNumber, question1, question2]);
+    answers.forEach((answer) => {
+      const row = [];
+      row.push(`${answer.profile.patronymic} ${answer.profile.name} ${answer.profile.surname}`);
+      row.push(answer.profile.student_id);
+      row.push(answer.profile.group);
+
+      questions.forEach((question) => {
+        const questionAnswer = answer.answers.find((a) => a.answers.question === question.id);
+        const answerText = questionAnswer
+          ? questionAnswer.answers.text
+            ? `${questionAnswer.answers.text} (Свободный ответ)`
+            : questionAnswer.answers.answer_option
+          : '';
+        row.push(answerText);
+      });
+
+      worksheet.addRow(row);
     });
 
     headers.forEach((header, index) => {
-      worksheet.getColumn(index + 1).eachCell((cell) => {
-        const column = worksheet.getColumn(index + 1);
-        column.width = Math.max(column.width, cell.value ? cell.value.toString().length + 5 : 10);
-      });
+      worksheet.getColumn(index + 1).width = header.length + 5;
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
