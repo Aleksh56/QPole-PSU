@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import { useUnit } from 'effector-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -54,12 +55,16 @@ const FastConductionPollPage = () => {
   useEffect(() => {
     const pollDataRequest = async () => {
       const data = await fetchPollQuestions(id);
-      const formId = localStorage.getItem('voting_form_id');
-      if (data.poll_setts.completion_time !== null && formId) getRemainingTime();
-      if (data.mix_questions) data.questions = shuffleArray(data.questions);
+      if (data !== undefined) {
+        const formId = localStorage.getItem('voting_form_id');
+        if (data.poll_setts.completion_time !== null && formId) getRemainingTime();
+        if (data.mix_questions) data.questions = shuffleArray(data.questions);
 
-      setIsCollapsed(data.poll_setts?.completion_time !== null);
-      setPollData(data);
+        setIsCollapsed(data.poll_setts?.completion_time !== null);
+        setPollData(data);
+      } else {
+        navigate('/not-found');
+      }
     };
     pollDataRequest();
   }, [id]);
@@ -124,12 +129,16 @@ const FastConductionPollPage = () => {
       <Header isMainPage={false} />
       <ConductionWrapper>
         <ConductionHeader data={pollData} />
-        {!newPollStarted && (
+        {!newPollStarted && pollData?.opened_for_voting ? (
           <FrmQuickPollRegister
             isCollapsed={isCollapsed}
             handleStart={handleStart}
             pollData={pollData}
           />
+        ) : (
+          <Box sx={{ width: '100%', textAlign: 'center', fontSize: '20px', fontWeight: 500 }}>
+            Опрос завершен !
+          </Box>
         )}
         <AnimatePresence>
           {!isCollapsed && (

@@ -1,14 +1,14 @@
 import PollResultsSVG from '@assets/Analytics.svg';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PieChartIcon from '@mui/icons-material/PieChart';
-import { Button, MenuItem, Select } from '@mui/material';
+import { Button, MenuItem } from '@mui/material';
 import { Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
 
 import { getPollAnswersFx, getPollResultsFx } from './model/get-results';
-import { ResultsGridWrapper, SettingsWrapper, Wrapper } from './styled';
+import { ResultsGridWrapper, SettingsWrapper, StldSelect, Wrapper } from './styled';
 
 import PollResultCard from '@/components/05_Features/Data/Cards/pollResCard';
 import GenExcelResults from '@/components/06_Entities/genExcelResults';
@@ -41,20 +41,22 @@ const PollResultsPage = () => {
   }, [id]);
 
   const handleChartTypeChange = (event) => setChartType(event.target.value);
+
   const handleDownloadClick = () => {
     setShowPDFExporter(true);
   };
+
   return isResults ? (
     <Wrapper>
       <SettingsWrapper>
-        <Select value={chartType} onChange={handleChartTypeChange} displayEmpty>
+        <StldSelect value={chartType} onChange={handleChartTypeChange} displayEmpty>
           <MenuItem value="pie">
             <PieChartIcon /> Pie Chart
           </MenuItem>
           <MenuItem value="bar">
             <BarChartIcon /> Bar Chart
           </MenuItem>
-        </Select>
+        </StldSelect>
         <Button onClick={handleDownloadClick}>{t('button.downloadPDF')}</Button>
         <GenExcelResults questions={questions} data={answers} />
         {showPDFExporter && (

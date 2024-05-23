@@ -1,6 +1,7 @@
-import { colorConfig } from '@/app/template/config/color.config';
 import styled from '@emotion/styled';
 import { Switch } from '@mui/material';
+
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const IOSSwitch = styled(Switch)(() => ({
   width: 42,

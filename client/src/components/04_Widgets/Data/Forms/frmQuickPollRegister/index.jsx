@@ -131,7 +131,7 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
                 helperText={studentIdError}
               />
               <TextField
-                label="Номер группы"
+                label="Ваша группа"
                 variant="outlined"
                 fullWidth
                 margin="normal"

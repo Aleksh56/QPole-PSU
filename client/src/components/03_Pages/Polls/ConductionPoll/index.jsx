@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 import { useUnit } from 'effector-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -48,16 +49,23 @@ const ConductionPollPage = () => {
     if (isLoading) return;
     const pollDataRequest = async () => {
       const data = await fetchPollQuestions(id);
-      if (data.poll_setts.completion_time !== null) getRemainingTime();
+      if (data) {
+        if (data.poll_setts.completion_time !== null) getRemainingTime();
 
-      if ((!data.is_revote_allowed && data.has_user_participated_in) || isAuthenticated === false) {
-        navigate('/polls');
-        return;
+        if (
+          (!data.is_revote_allowed && data.has_user_participated_in) ||
+          isAuthenticated === false
+        ) {
+          navigate('/polls');
+          return;
+        }
+        if (data.mix_questions) data.questions = shuffleArray(data.questions);
+        setIsCollapsed(data.poll_setts?.completion_time !== null);
+        if (data.has_user_started_voting) handleStart();
+        setPollData(data);
+      } else {
+        navigate('/not-found');
       }
-      if (data.mix_questions) data.questions = shuffleArray(data.questions);
-      setIsCollapsed(data.poll_setts?.completion_time !== null);
-      if (data.has_user_started_voting) handleStart();
-      setPollData(data);
     };
     pollDataRequest();
   }, [isLoading, isAuthenticated, id]);
@@ -169,10 +177,16 @@ const ConductionPollPage = () => {
           </>
         )}
       </ConductionWrapper>
-      {isCollapsed && pollData?.poll_setts?.completion_time !== null && (
+      {isCollapsed &&
+      pollData?.poll_setts?.completion_time !== null &&
+      pollData.opened_for_voting ? (
         <StartBtnWrapper>
           <PrimaryButton caption="Начать" handleClick={handleStart} />
         </StartBtnWrapper>
+      ) : (
+        <Box sx={{ width: '100%', textAlign: 'center', fontSize: '20px', fontWeight: 500 }}>
+          Опрос завершен !
+        </Box>
       )}
     </ConductionBackgroundWrapper>
   );

@@ -177,6 +177,15 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
           }}
           disabled={pollStatus}
         />
+        <InvisibleLabeledField
+          placeholder="Введите описание"
+          value={editedQuestion.info || ''}
+          handleChange={(e) => {
+            handleFieldChange('info', e, question.id);
+            if (onQuestionUpdate) onQuestionUpdate(question.id, 'info', e);
+          }}
+          disabled={pollStatus}
+        />
         <QueTypeSelect
           question={editedQuestion}
           questionType={questionType}
@@ -257,7 +266,18 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
           </>
         )}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          '@media (max-width: 1000px)': {
+            flexDirection: 'column',
+            alignItems: 'start',
+            rowGap: '10px',
+          },
+        }}
+      >
         <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '10px' }}>
           {options.length === 0 && !question.is_free && (
             <Typography>Вы не создали ни одного варианта ответа</Typography>
@@ -299,7 +319,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
                 checked={isRequired}
               />
             }
-            sx={{ flexDirection: 'row-reverse' }}
+            sx={{ flexDirection: 'row-reverse', margin: 0 }}
           />
         </Box>
       </Box>

@@ -71,7 +71,7 @@ const PoleQuestionsPage = () => {
             onQuestionUpdate={handleQuestionUpdate}
           />
         </Box>
-        <Box sx={{ width: '75%' }}>
+        <Box sx={{ width: '75%', display: matches ? 'none' : 'block' }}>
           {Object.keys(selectedQuestion).length > 0 && (
             <FrmQueEdit
               question={selectedQuestion}
