@@ -1,5 +1,7 @@
 import { Workbook } from 'exceljs';
 
+import { DownloadBtn } from './styled';
+
 const GenExcelResults = ({ data, questions }) => {
   console.log(data);
   const answers = data?.answers ?? [];
@@ -15,20 +17,43 @@ const GenExcelResults = ({ data, questions }) => {
       .filter((item) => item !== null);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) {
+      return 'Дата не указана';
+    }
+
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+
+    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+  };
+
   const downloadExcel = async () => {
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet('My Sheet');
 
     const questionsNames = questions?.map((question) => question.name);
-    const headers = ['ФИО', 'Номер студенческого', 'Номер группы', ...questionsNames];
+    const headers = [
+      'ФИО',
+      'Номер студенческого',
+      'Номер группы',
+      'Дата голосования',
+      ...questionsNames,
+    ];
 
     worksheet.addRow(headers);
 
     answers.forEach((answer) => {
       const row = [];
-      row.push(`${answer.profile.patronymic} ${answer.profile.name} ${answer.profile.surname}`);
+      row.push(`${answer.profile.surname} ${answer.profile.name} ${answer.profile.patronymic}`);
       row.push(answer.profile.student_id);
       row.push(answer.profile.group);
+      row.push(formatDate(answer.voting_date));
 
       questions.forEach((question) => {
         const questionAnswer = answer.answers.find((a) => a.answers.question === question.id);
@@ -63,7 +88,7 @@ const GenExcelResults = ({ data, questions }) => {
 
   return (
     <div>
-      <button onClick={downloadExcel}>Скачать Excel</button>
+      <DownloadBtn onClick={downloadExcel}>Выгрузить в Excel</DownloadBtn>
     </div>
   );
 };

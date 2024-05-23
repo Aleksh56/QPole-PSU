@@ -23,5 +23,6 @@ export const ListWrapper = styled(Box)(() => ({
 export const LoaderWrapper = styled(Box)(({ matches }) => ({
   overflow: 'hidden',
   padding: matches ? '0 15px' : 0,
-  height: matches ? '100vh' : 'auto',
+  height: 'auto',
+  minHeight: matches ? '100vh' : 'unset',
 }));

@@ -42,6 +42,7 @@ const PollQuestionsList = ({
   const matches = useMediaQuery('(max-width:1000px)');
 
   const handleToggleQuestion = useCallback((question_id) => {
+    onSelectQuestion(question_id);
     setExpanded((prev) => ({
       ...prev,
       [question_id]: !prev[question_id],
@@ -84,7 +85,21 @@ const PollQuestionsList = ({
               expanded={expanded[question.id] || false}
               onChange={() => handleToggleQuestion(question.id)}
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>{question.name}</AccordionSummary>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    alignItems: 'center',
+                    columnGap: '20px',
+                    width: '100%',
+                    marginRight: '20px',
+                  }}
+                >
+                  <Typography>{question.name}</Typography>
+                  <DeleteOutlineIcon onClick={(e) => handleDeleteQuestion(e, question.id)} />
+                </Box>
+              </AccordionSummary>
               <AccordionDetails>
                 <FrmQueEdit
                   question={selectedQuestion}

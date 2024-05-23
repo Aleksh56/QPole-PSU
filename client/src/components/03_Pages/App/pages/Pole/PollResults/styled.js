@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box } from '@mui/material';
+import { Box, Select } from '@mui/material';
 
 import { Rem } from '@/utils/convertToRem';
 
@@ -11,6 +11,20 @@ export const Wrapper = styled(Box)(() => ({
   margin: `${Rem(24)} auto`,
   columnGap: Rem(30),
   padding: '0 15px',
+  '@media (max-width: 1250px)': {
+    padding: '0',
+  },
+}));
+
+export const StldSelect = styled(Select)(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  '& .MuiSelect-select': {
+    padding: 0,
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    border: 0,
+  },
 }));
 
 export const SettingsWrapper = styled(Box)(() => ({
@@ -26,4 +40,7 @@ export const ResultsGridWrapper = styled(Box)(() => ({
   gridTemplateColumns: 'repeat(2, 1fr)',
   gap: Rem(30),
   width: '100%',
+  '@media (max-width: 1250px)': {
+    gridTemplateColumns: '1fr',
+  },
 }));

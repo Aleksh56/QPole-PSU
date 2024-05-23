@@ -21,6 +21,7 @@ export const StyledHeader = styled('header')(({ isSticky, isMainPage }) => ({
 export const StyledLogoLink = styled(Link)(() => ({
   fontSize: Rem(36),
   color: colorConfig.primaryBlue,
+  cursor: 'pointer',
 }));
 
 export const StyledContainer = styled(Box)(() => ({

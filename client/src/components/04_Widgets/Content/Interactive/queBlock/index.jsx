@@ -90,7 +90,8 @@ const QueBlock = ({ question, isMixed, setIsLong }) => {
 
   return (
     <StyledFormControl component="fieldset">
-      <Typography>{question.name}</Typography>
+      <Typography sx={{ fontSize: '15px' }}>{question.name}</Typography>
+      <Typography sx={{ fontSize: '13px', color: '#868686' }}>{question.info}</Typography>
       {question.is_free ? (
         options.map((option) => (
           <TextField
