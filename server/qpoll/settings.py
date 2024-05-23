@@ -7,7 +7,7 @@ from datetime import timedelta
 env = environ.Env()
 environ.Env.read_env()
 
-from web3 import Web3
+# from web3 import Web3
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -51,19 +51,21 @@ LOGGING = {
         'django': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
         'api': {
             'handlers': ['file'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
     },
     'root': {
         'handlers': ['file', 'console'],
         'level': 'ERROR',
+        'propagate': False,
     },
 }
+
 
 
 INSTALLED_APPS = [

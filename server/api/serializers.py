@@ -914,6 +914,14 @@ class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
     answers = PollAnswersSerializer(many=True, read_only=True)
     profile = serializers.SerializerMethodField()
 
+    # answerss = serializers.SerializerMethodField()
+
+    # def get_answerss(self, instance):
+    #     if instance.answers.count() > 2:
+    #         print(instance.id, end=" ")
+    #         print(instance.answers.all())
+
+
     def get_profile(self, instance):
         poll_type = self.context.get('poll_type', None)
         if poll_type and poll_type == 'Быстрый':
@@ -932,16 +940,15 @@ class MyPollUsersAnswersSerializer(serializers.ModelSerializer):
                     for answer in auth_field_answers_dict[cur_quick_voting_form]
                 }
 
-                fio = cur_quick_voting_form_fields.get('ФИО', '')
-                fio_parts = fio.split(' ')
-                fio_parts = [part.strip() for part in fio_parts]
+                fio = cur_quick_voting_form_fields.get('ФИО', '').strip()
+                fio_parts = list(filter(None, map(str.strip, fio.split(' ', maxsplit=2))))
                 while len(fio_parts) < 3:
                     fio_parts.append('')
                 fio_parts = fio_parts[0:3]
                 surname, name, patronymic = fio_parts
                 data = {
-                    'name': name,
                     'surname': surname,
+                    'name': name,
                     'patronymic': patronymic,
                     'student_id': cur_quick_voting_form_fields.get('Номер студенческого билета', ''),
                     'group': cur_quick_voting_form_fields.get('Группа', ''),

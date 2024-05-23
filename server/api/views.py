@@ -1848,7 +1848,7 @@ def my_poll_users_votes(request):
         if request.method == 'GET':
             poll_id = get_parameter_or_400(request.GET, 'poll_id')
 
-            poll = Poll.my_manager.get_one(Q(poll_id=poll_id)).first()
+            poll = Poll.my_manager.get_one(Q(poll_id=poll_id, author=my_profile)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
 
