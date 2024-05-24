@@ -56,12 +56,20 @@ const GenExcelResults = ({ data, questions }) => {
       row.push(formatDate(answer.voting_date));
 
       questions.forEach((question) => {
-        const questionAnswer = answer.answers.find((a) => a.answers.question === question.id);
-        const answerText = questionAnswer
-          ? questionAnswer.answers.text
-            ? `${questionAnswer.answers.text} (Свободный ответ)`
-            : questionAnswer.answers.answer_option
-          : '';
+        const questionAnswer = answer.answers.filter((a) => a.answers.question === question.id);
+        console.log(questionAnswer);
+        const answerText =
+          questionAnswer.length > 0
+            ? questionAnswer
+                .map((qa) => {
+                  if (qa.answers.text) {
+                    return `${qa.answers.text} (Свободный ответ)`;
+                  } else {
+                    return qa.answers.answer_option || '';
+                  }
+                })
+                .join(', ')
+            : '';
         row.push(answerText);
       });
 

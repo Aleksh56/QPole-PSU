@@ -8,7 +8,7 @@ const AdminPrivateRoute = () => {
   const { role } = useUserRole();
   const location = useLocation();
 
-  return isAuthenticated === true && role === 'Админ' ? (
+  return isAuthenticated === true && role === 'Администратор' ? (
     <Outlet />
   ) : (
     <Navigate to="/app" state={{ from: location }} replace />

@@ -1,8 +1,8 @@
 import PollResultsSVG from '@assets/Analytics.svg';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PieChartIcon from '@mui/icons-material/PieChart';
-import { Button, MenuItem } from '@mui/material';
-import { Suspense, useEffect, useState } from 'react';
+import { MenuItem } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
@@ -12,9 +12,7 @@ import { ResultsGridWrapper, SettingsWrapper, StldSelect, Wrapper } from './styl
 
 import PollResultCard from '@/components/05_Features/Data/Cards/pollResCard';
 import GenExcelResults from '@/components/06_Entities/genExcelResults';
-import PollResultsPDF from '@/components/06_Entities/pollResultsPDF';
 import NoDataHelper from '@/components/07_Shared/UIComponents/Utils/Helpers/noDataHelper';
-import PdfExporter from '@/components/07_Shared/UIComponents/Utils/Helpers/pdfExporter';
 import usePageTitle from '@/hooks/usePageTitle';
 import usePollData from '@/hooks/usePollData';
 
@@ -57,20 +55,17 @@ const PollResultsPage = () => {
             <BarChartIcon /> Bar Chart
           </MenuItem>
         </StldSelect>
-        <Button onClick={handleDownloadClick}>{t('button.downloadPDF')}</Button>
+        {/* <Button onClick={handleDownloadClick}>{t('button.downloadPDF')}</Button> */}
+        {/* {showPDFExporter && <Suspense fallback={<div>Загрузка PDF...</div>}></Suspense>} */}
         <GenExcelResults questions={questions} data={answers} />
-        {showPDFExporter && (
-          <Suspense fallback={<div>Загрузка PDF...</div>}>
-            <PdfExporter
-              document={<PollResultsPDF data={answers} pollData={pollData} />}
-              fileName="poll-results.pdf"
-            />
-          </Suspense>
-        )}
+        {/* <PdfExporter
+          document={<PollResultsPDF data={answers} pollData={pollData} />}
+          fileName="poll-results.pdf"
+        /> */}
       </SettingsWrapper>
       <ResultsGridWrapper>
         {questions.map((item) => (
-          <PollResultCard key={v4()} data={item} chartType={chartType} />
+          <PollResultCard key={v4()} data={item} chartType={chartType} answers={answers} />
         ))}
       </ResultsGridWrapper>
     </Wrapper>

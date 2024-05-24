@@ -5,7 +5,6 @@ import { nameReducer } from '@/utils/js/nameReducer';
 
 const FrmOtherResults = ({ open, onClose, data }) => {
   const filteredData = data.answer_options.filter((option) => option.is_free_response);
-
   return (
     <Dialog open={open} onClose={onClose} scroll="paper" maxWidth="sm" fullWidth>
       <DialogTitle>Результаты</DialogTitle>

@@ -66,7 +66,7 @@ const FrmAdmUserSettings = ({ open, handleClose, userId, setUsers }) => {
               label="Role"
               onChange={handleChange}
             >
-              <MenuItem value="Админ">Администратор</MenuItem>
+              <MenuItem value="Администратор">Администратор</MenuItem>
               <MenuItem value="Пользователь">Пользователь</MenuItem>
               <MenuItem value="Преподаватель">Преподаватель</MenuItem>
             </Select>

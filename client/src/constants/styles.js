@@ -39,10 +39,22 @@ export const StyledFirstHeroWrapper = styled(Box)(() => ({
   maxWidth: Rem(1200),
   margin: '0 auto',
   padding: `${Rem(70)} ${Rem(15)}`,
+  '@media (max-width: 900px)': {
+    gridTemplateColumns: '1fr',
+    textAlign: 'center',
+    padding: `${Rem(50)} ${Rem(10)}`,
+  },
+  '@media (max-width: 600px)': {
+    padding: `${Rem(30)} ${Rem(10)}`,
+  },
 }));
 
 export const StyledFirstLeftColumn = styled(Box)(() => ({
   textAlign: 'left',
+  '@media (max-width: 900px)': {
+    textAlign: 'center',
+    marginBottom: Rem(20),
+  },
 }));
 
 export const StyledFirstTypography = styled(Typography)(() => ({
@@ -50,6 +62,14 @@ export const StyledFirstTypography = styled(Typography)(() => ({
   fontSize: Rem(34),
   fontWeight: 700,
   color: '#515151',
+  '@media (max-width: 900px)': {
+    fontSize: Rem(28),
+    marginBottom: Rem(30),
+  },
+  '@media (max-width: 600px)': {
+    fontSize: Rem(24),
+    marginBottom: Rem(20),
+  },
 }));
 
 export const StyledFirstButton = styled(Button)(() => ({
@@ -58,6 +78,12 @@ export const StyledFirstButton = styled(Button)(() => ({
   padding: `${Rem(10)} ${Rem(20)}`,
   border: 'none',
   cursor: 'pointer',
+  '@media (max-width: 900px)': {
+    padding: `${Rem(8)} ${Rem(16)}`,
+  },
+  '@media (max-width: 600px)': {
+    padding: `${Rem(6)} ${Rem(12)}`,
+  },
 }));
 
 export const StyledFirstInfoWrapper = styled(Box)(() => ({
@@ -65,4 +91,8 @@ export const StyledFirstInfoWrapper = styled(Box)(() => ({
   gridTemplateColumns: '1fr 0.75fr',
   columnGap: Rem(15),
   alignItems: 'center',
+  '@media (max-width: 900px)': {
+    gridTemplateColumns: '1fr',
+    rowGap: Rem(15),
+  },
 }));

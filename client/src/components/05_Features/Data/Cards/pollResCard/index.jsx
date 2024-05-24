@@ -6,7 +6,7 @@ import FrmOtherResults from '../../Forms/frmOtherResults';
 
 import { CardAnswersCount, CardHeading, CardInfoWrapper, CardWrapper, InfoButton } from './styled';
 
-const PollResultCard = ({ data, chartType }) => {
+const PollResultCard = ({ data, chartType, answers }) => {
   const [infoOpen, setInfoOpen] = useState(false);
 
   const renderChart = () => {

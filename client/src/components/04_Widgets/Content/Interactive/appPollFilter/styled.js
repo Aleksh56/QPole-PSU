@@ -23,6 +23,9 @@ export const FiltersWrapper = styled(Box)(() => ({
 }));
 
 export const MobFiltersContent = styled(Box)(() => ({
+  display: 'grid',
+  gridTemplateColumns: '1fr',
+  rowGap: Rem(20),
   '@media (min-width: 900px)': {
     display: 'none',
   },

@@ -1,4 +1,5 @@
 import BlockIcon from '@mui/icons-material/Block';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useEffect, useState } from 'react';
 
@@ -27,16 +28,16 @@ const AdminUsersPage = () => {
     fetchAllUsers();
   }, []);
 
-  const handleOpenConfirm = (userId) => {
+  const handleOpenConfirm = (userId, status) => {
     setIsConfirmOpen(true);
-    setUserIdToBlock(userId);
+    setUserIdToBlock({ id: userId, status });
   };
 
   const handleBlockUser = async () => {
     try {
-      const updatedUser = await banUserFx(userIdToBlock);
+      const updatedUser = await banUserFx({ id: userIdToBlock.id, status: userIdToBlock.status });
       setUsers((prevUsers) =>
-        prevUsers.map((user) => (user.user.id === userIdToBlock ? updatedUser : user)),
+        prevUsers.map((user) => (user.user.id === userIdToBlock.id ? updatedUser : user)),
       );
       setIsConfirmOpen(false);
       setUserIdToBlock(null);
@@ -90,11 +91,19 @@ const AdminUsersPage = () => {
       caption: 'Действия',
       render: (_, user) => (
         <>
-          <BlockIcon
-            onClick={() => handleOpenConfirm(user.user.id)}
-            color="error"
-            sx={{ cursor: 'pointer' }}
-          />
+          {!user.is_banned ? (
+            <BlockIcon
+              onClick={() => handleOpenConfirm(user.user.id, 1)}
+              color="error"
+              sx={{ cursor: 'pointer' }}
+            />
+          ) : (
+            <GroupAddIcon
+              onClick={() => handleOpenConfirm(user.user.id, 0)}
+              color="success"
+              sx={{ cursor: 'pointer' }}
+            />
+          )}
           <SettingsIcon
             onClick={() => handleChangeStatus(user.user.id)}
             sx={{ ml: 1, cursor: 'pointer' }}

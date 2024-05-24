@@ -1,6 +1,7 @@
 import TuneIcon from '@mui/icons-material/Tune';
 import { Button } from '@mui/material';
 import TextField from '@mui/material/TextField';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -44,36 +45,53 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
     await filterPollsRequest(field, value, setPollData);
   };
 
+  const handleHideMobileFilters = () => {
+    setShowMobileFilters(false);
+  };
+  const handleToggleMobileFilters = () => {
+    setShowMobileFilters((prev) => !prev);
+  };
+
   return (
     <StyledStackWrapper>
       <FiltersWrapper>
         <MobFiltersWrapper>
-          <TuneIcon onClick={() => setShowMobileFilters((prev) => !prev)} />
+          <TuneIcon onClick={handleToggleMobileFilters} />
           <Button onClick={() => handleCreateModalOpen(true)}>{t('button.createPoll')}</Button>
         </MobFiltersWrapper>
         <MobileFiltersWrapper show={showMobileFilters}>
-          {showMobileFilters && (
-            <MobFiltersContent>
-              <TextField
-                label="Поиск"
-                name="name"
-                variant="outlined"
-                InputLabelProps={{ shrink: true }}
-                placeholder="Введите название"
-                onChange={handleFilterChange}
-              />
-              {appFilterOptions.map((filter) => (
-                <FilterSelect
-                  key={filter.name}
-                  label={filter.label}
-                  name={filter.name}
-                  value={filters[filter.name]}
-                  options={filter.options}
-                  onChange={handleFilterChange}
-                />
-              ))}
-            </MobFiltersContent>
-          )}
+          <AnimatePresence>
+            {showMobileFilters && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <MobFiltersContent>
+                  <TextField
+                    label="Поиск"
+                    name="name"
+                    variant="outlined"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    placeholder="Введите название"
+                    onChange={handleFilterChange}
+                  />
+                  {appFilterOptions.map((filter) => (
+                    <FilterSelect
+                      key={filter.name}
+                      label={filter.label}
+                      name={filter.name}
+                      value={filters[filter.name]}
+                      options={filter.options}
+                      onChange={handleFilterChange}
+                    />
+                  ))}
+                </MobFiltersContent>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </MobileFiltersWrapper>
       </FiltersWrapper>
       <StyledStack>

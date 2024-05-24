@@ -33,7 +33,7 @@ const AppBurgerMenu = ({ drawerOpen, toggleDrawer, userData, role }) => {
             <Typography>{item.caption}</Typography>
           </LinkWrapper>
         ))}
-        {role === 'Админ' && (
+        {role === 'Администратор' && (
           <LinkWrapper key={v4()} to="/admin-panel">
             <AdminPanelSettingsIcon />
             <Typography>Админ-панель</Typography>
