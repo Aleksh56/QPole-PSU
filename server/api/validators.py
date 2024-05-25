@@ -233,8 +233,8 @@ class ReleasePollSettingsValidator(BaseReleaseValidator):
     def validate_start_time(self):
         value = getattr(self.instance, 'start_time', None)
         if value:
-            if self.instance.start_time + timedelta(minutes=10) < datetime.now():
-                raise PollValidationException(f"Начало опроса должно быть не более чем на 10 минут раньше текущего времени")
+            if self.instance.start_time + timedelta(hours=1) < datetime.now():
+                raise PollValidationException(f"Начало опроса должно быть не более чем на час раньше текущего времени")
             
             if self.instance.start_time > datetime.now() + timedelta(weeks=1):
                 raise PollValidationException(f"Прохождение опроса не может быть запланировано больше чем на неделю заранее")

@@ -402,7 +402,7 @@ def check_if_user_is_allowed_to_vote(poll, user_profile):
     return True
 
 
-from .models import PollAuthFieldAnswer, PollAuthField
+from .models import PollAuthFieldAnswer
 from .exсeptions import MyCustomException
 
 def validate_auth_data(auth_data, poll, quick_voting_form):
@@ -430,14 +430,23 @@ def validate_auth_data(auth_data, poll, quick_voting_form):
 
 def validate_auth_data_2(auth_data, poll, quick_voting_form):
     new_auth_fields = []
+    student_id = None
+
     for auth_field_data in auth_data:
         auth_field_data['poll'] = poll
         auth_field_data['quick_voting_form'] = quick_voting_form
         auth_field_name = auth_field_data.get('auth_field_name')
         auth_field_instance = next((auth_field for auth_field in poll.auth_fields.all() if auth_field.name == auth_field_name), None)
-        student_id = None
-        if auth_field_name == 'Номер студенческого билета':
-            student_id = auth_field_data.get('answer', None)
+
+        answer = auth_field_data.get('answer', None)
+        
+        if answer:
+            if auth_field_name in ['Номер студенческого билета', 'Группа']:
+                auth_field_data['answer'] = answer.upper()
+            
+            if auth_field_name == 'Номер студенческого билета':
+                auth_field_data['answer'] = auth_field_data['answer'].replace(' ', '')
+                student_id = auth_field_data.get('answer', None)
 
         auth_field_data['auth_field'] = auth_field_instance
         auth_field_data.pop('auth_field_name')
@@ -445,6 +454,8 @@ def validate_auth_data_2(auth_data, poll, quick_voting_form):
         new_auth_fields.append(new_auth_field)
 
     return new_auth_fields, student_id
+
+
 
 
 from .models import PollAuthFieldAnswer, PollAnswerGroup
