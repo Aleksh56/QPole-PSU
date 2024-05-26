@@ -7,11 +7,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Set the working directory
 WORKDIR /app
 
-# Copy the entire project to the working directory
-COPY . /app/
-
 # Copy the requirements file separately to leverage Docker cache
-COPY ./requirements.txt /app/
+COPY ./requirements.txt /app/requirements.txt
 
 # Install system dependencies
 RUN apt-get update --allow-unauthenticated \
@@ -20,6 +17,9 @@ RUN apt-get update --allow-unauthenticated \
 
 # Install Python dependencies, including MySQL Connector
 RUN pip install -r requirements.txt
+
+# Copy the entire project to the working directory
+COPY . /app/
 
 # Run migrations
 RUN python manage.py makemigrations
@@ -33,5 +33,5 @@ RUN python manage.py collectstatic --noinput
 # Expose port 8000
 EXPOSE 8000
 
-# Run Gunicorn
-ENTRYPOINT ["gunicorn", "qpoll.wsgi", "-b", "0.0.0.0:8000"]
+# Run Daphne
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "qpoll.asgi:application"]
