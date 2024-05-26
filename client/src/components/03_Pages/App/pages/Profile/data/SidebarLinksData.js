@@ -1,5 +1,5 @@
-import HomeIcon from '@mui/icons-material/Home';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
 
 export const SidebarLinksData = [

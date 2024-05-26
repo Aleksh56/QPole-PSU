@@ -25,6 +25,7 @@
     "date-fns": "^3.6.0",
     "effector": "^23.2.0",
     "effector-react": "^23.2.0",
+    "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "form-data": "^4.0.0",
     "framer-motion": "^11.1.8",

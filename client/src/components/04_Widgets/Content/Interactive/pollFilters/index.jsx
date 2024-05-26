@@ -1,18 +1,12 @@
 import FilterListIcon from '@mui/icons-material/FilterList';
-import {
-  Button,
-  FormControlLabel,
-  FormGroup,
-  TextField,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
+import { FormControlLabel, TextField, Typography, useMediaQuery } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { applyFiltersFx } from './models/apply-filters';
-import { FiltersButton, FiltersWrapper } from './styled';
+import { FiltersButton, FiltersWrapper, StyledFormGroup } from './styled';
 
+import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appTypesFilter } from '@/data/filters';
@@ -46,12 +40,10 @@ const PollFilters = ({ setPolls }) => {
           <FilterListIcon sx={{ mr: 1 }} /> Фильтры
         </FiltersButton>
       ) : (
-        <Typography variant="h6">
-          <FilterListIcon sx={{ mr: 1 }} /> Фильтры
-        </Typography>
+        <Typography variant="h6">Фильтры</Typography>
       )}
       {(!matches || isFiltersOpen) && (
-        <FormGroup>
+        <StyledFormGroup>
           <TextField
             label="Поиск"
             name="name"
@@ -78,10 +70,12 @@ const PollFilters = ({ setPolls }) => {
             }
             label="Анонимный"
           />
-          <Button variant="contained" onClick={handleApplyFilters} sx={{ mt: 2 }}>
-            {t('button.applyFilters')}
-          </Button>
-        </FormGroup>
+          <PrimaryButton
+            caption={t('button.applyFilters')}
+            handleClick={handleApplyFilters}
+            style={{ marginTop: '5px' }}
+          />
+        </StyledFormGroup>
       )}
     </FiltersWrapper>
   );

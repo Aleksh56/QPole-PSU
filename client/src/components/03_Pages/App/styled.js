@@ -50,7 +50,7 @@ export const PollsGrid = styled(Box)({
     gridTemplateColumns: '1fr',
   },
   '@media (max-width: 500px)': {
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: '1fr',
   },
 });
 

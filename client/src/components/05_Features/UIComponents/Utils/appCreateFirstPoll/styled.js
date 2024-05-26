@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Box, Button, Typography } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const StyledHeroWrapper = styled(Box)(() => ({
@@ -10,10 +11,22 @@ export const StyledHeroWrapper = styled(Box)(() => ({
   maxWidth: Rem(1200),
   margin: '0 auto',
   padding: `${Rem(70)} ${Rem(15)}`,
+  '@media (max-width: 900px)': {
+    gridTemplateColumns: '1fr',
+    textAlign: 'center',
+    padding: `${Rem(50)} ${Rem(10)}`,
+  },
+  '@media (max-width: 600px)': {
+    padding: `${Rem(30)} ${Rem(10)}`,
+  },
 }));
 
 export const StyledLeftColumn = styled(Box)(() => ({
   textAlign: 'left',
+  '@media (max-width: 900px)': {
+    textAlign: 'center',
+    marginBottom: Rem(20),
+  },
 }));
 
 export const StyledTypography = styled(Typography)(() => ({
@@ -21,6 +34,14 @@ export const StyledTypography = styled(Typography)(() => ({
   fontSize: Rem(34),
   fontWeight: 700,
   color: '#515151',
+  '@media (max-width: 900px)': {
+    fontSize: Rem(28),
+    marginBottom: Rem(30),
+  },
+  '@media (max-width: 600px)': {
+    fontSize: Rem(24),
+    marginBottom: Rem(20),
+  },
 }));
 
 export const StyledDescription = styled(Typography)(() => ({}));
@@ -31,6 +52,12 @@ export const StyledButton = styled(Button)(() => ({
   padding: `${Rem(10)} ${Rem(20)}`,
   border: 'none',
   cursor: 'pointer',
+  '@media (max-width: 900px)': {
+    padding: `${Rem(8)} ${Rem(16)}`,
+  },
+  '@media (max-width: 600px)': {
+    padding: `${Rem(6)} ${Rem(12)}`,
+  },
 }));
 
 export const StyledInfoWrapper = styled(Box)(() => ({
@@ -38,4 +65,8 @@ export const StyledInfoWrapper = styled(Box)(() => ({
   gridTemplateColumns: '1fr 0.75fr',
   columnGap: Rem(15),
   alignItems: 'center',
+  '@media (max-width: 900px)': {
+    gridTemplateColumns: '1fr',
+    rowGap: Rem(15),
+  },
 }));

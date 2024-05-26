@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 import { fetchAllPollsFx } from './model/fetch-polls';
@@ -38,13 +39,17 @@ const PollListPage = () => {
         {!loading && (
           <ContentWrapper>
             <PollListOut polls={polls} />
-            <CustomPagination
-              pageSize={pageSize}
-              totalPages={totalPages}
-              currentPage={currPage}
-              handlePageChange={handlePageChange}
-              handlePageSizeChange={handlePageSizeChange}
-            />
+            {polls.length > 0 ? (
+              <CustomPagination
+                pageSize={pageSize}
+                totalPages={totalPages}
+                currentPage={currPage}
+                handlePageChange={handlePageChange}
+                handlePageSizeChange={handlePageSizeChange}
+              />
+            ) : (
+              <Typography>Опросов не найдено !Ф</Typography>
+            )}
           </ContentWrapper>
         )}
         {loading && <CLoader />}

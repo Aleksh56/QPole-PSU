@@ -39,6 +39,9 @@ export const StldCardMedia = styled(CardMedia)(() => ({
   backgroundSize: 'cover',
   padding: Rem(25),
   borderRadius: Rem(16),
+  '@media (max-width: 768px)': {
+    height: Rem(150),
+  },
 }));
 
 export const StldCardContent = styled(CardContent)(() => ({

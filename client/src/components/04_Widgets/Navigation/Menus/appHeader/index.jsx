@@ -61,7 +61,7 @@ const AppHeader = () => {
             <AccountCircleIcon fontSize="small" />
           </StyledHeaderProfile>
           <Menu slots={{ listbox: Listbox }}>
-            {role === 'Админ' && (
+            {role === 'Администратор' && (
               <MenuItem>
                 <Button onClick={() => navigate('/admin-panel')}>
                   {t('navigation.adminPanel')}
