@@ -2,11 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField, Value
-from django.db.models import Count, Case, When, F, Sum, Subquery, OuterRef, Max
-from django.db.models.functions import Coalesce
-from django.db import transaction
 from django.contrib.auth.models import AnonymousUser
+from django.shortcuts import render
 
 from .permissions import *
 from .exсeptions import *
@@ -17,8 +14,10 @@ from .pollvoting import *
 
 from admin_api.models import Settings
 
+from .consumers import PollStatsConsumer
 
 import os
+import json
 
 import logging
 logger = logging.getLogger('debug') 
@@ -573,141 +572,12 @@ def my_poll_stats(request):
             poll = Poll.my_manager.get_one_with_answers(Q(poll_id=poll_id, author=my_profile)).first()
             if not poll:
                 raise ObjectNotFoundException('Poll')
-            poll_members_quantity = poll.user_answers.count()
+            
+            stats = calculate_my_poll_stats(poll, PollStatsSerializer)
+            send_poll_stats(poll.id, stats)
+            # send_poll_user_votes(poll.id, answers)
 
-            poll_user_answers = (
-                poll.all_answers
-                .filter(poll_answer_group__poll=poll, poll_answer_group__is_latest=True, poll_answer_group__is_finished=True)
-                .select_related('question', 'answer_option', 'poll_answer_group__profile')
-            )
-            # print(poll_user_answers)
-
-            possible_question_points_count = (
-                AnswerOption.objects
-                .filter(question__poll=poll)
-                .values('question_id')
-                .annotate(
-                    correct_options_quantity=Sum(
-                        Case(
-                            When(is_correct=True, then=1),
-                            default=0,
-                            output_field=models.IntegerField()
-                        )
-                    )
-                )
-            )
-
-            question_statistics = (
-                poll_user_answers
-                .filter(poll_answer_group__poll=poll)
-                .values('poll_answer_group__id', 'question_id')
-                .annotate(
-                    quantity=Count('poll_answer_group__id', distinct=True),
-                    correct_answers_quantity = Count(Case(
-                        When(points=1, then=1),
-                        default=0
-                    )),
-                    incorrect_answers_quantity=Count(Case(
-                        When(points=0, then=1),
-                        default=None
-                    )),
-                    possible_question_points_count=Subquery(
-                        possible_question_points_count.filter(question_id=OuterRef('question_id'))
-                                                              .values('correct_options_quantity')[:1]
-                    ),
-                    correct_percentage=ExpressionWrapper(
-                        100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
-                        / F('possible_question_points_count'),
-                        output_field=FloatField()
-                    ),
-                )
-            ) 
-
-            questions_percentage = (
-                question_statistics
-                .values('question_id')
-                .annotate(
-                    answers_quantity=Count('poll_answer_group__id', distinct=True),
-                    answer_percentage=F('answers_quantity') / Value(poll_members_quantity) * 100,
-                    correct_percentage=ExpressionWrapper((F('correct_percentage') / F('answers_quantity')),
-                        output_field=FloatField()
-                    ),
-                )
-            )  
-            # print(questions_percentage)
-
-            poll_statistics = (
-                questions_percentage
-                .aggregate(
-                    total_questions=Count('question_id'),
-                    total_participants=Max('answers_quantity'),
-                    average_correct_percentage=Coalesce(
-                        Sum('correct_percentage') / Count('question_id'),
-                        Value(0),
-                        output_field=FloatField()
-                    ),
-                )
-            )
-            # print(poll_statistics)
-
-            options_answers_count = (
-                poll_user_answers
-                .filter(poll_answer_group__poll=poll)
-                .values('answer_option')
-                .annotate(
-                    quantity=Count('poll_answer_group__id', distinct=True),
-                )
-            )
-
-            if poll.poll_type.name in ['Опрос', 'Викторина', 'Анонимный']:
-                free_answers = (
-                    poll_user_answers
-                    .filter(
-                        poll_answer_group__poll__poll_id=poll_id,
-                        text__isnull=False
-                    )
-                    .values(
-                        'text',
-                        'question_id',
-                        user_id=F('poll_answer_group__profile__user_id'),
-                        profile_name=F('poll_answer_group__profile__name'),
-                        profile_surname=F('poll_answer_group__profile__surname')
-                    )
-                )
-            elif poll.poll_type.name in ['Быстрый']:
-                free_answers = (
-                    poll_user_answers
-                    .filter(
-                        poll_answer_group__poll__poll_id=poll_id,
-                        text__isnull=False
-                    )
-                    .values(
-                        'text',
-                        'question_id',
-                        user_id=F('poll_answer_group__profile__user_id'),
-                        profile_name=F('poll_answer_group__profile__name'),
-                        profile_surname=F('poll_answer_group__profile__surname'),
-                        profile_patronymic=F('poll_answer_group__profile__patronymic'),
-                        is_auth_field_main=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__is_main'),
-                        auth_field_name=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__name'),
-                        auth_field_answer=F('poll_answer_group__quick_voting_form__auth_field_answers__answer'),
-                    )
-                    .filter(
-                        is_auth_field_main=True
-                    )
-                )
-
-            context = {
-                'poll_statistics': poll_statistics,
-                'question_statistics': question_statistics,
-                'questions_percentage': questions_percentage,
-                'options_answers_count': options_answers_count,
-                'free_answers': free_answers
-            }
-
-
-            stats = PollStatsSerializer(poll, context=context)
-            return Response(stats.data)
+            return Response(stats)
 
 
     except APIException as api_exception:
@@ -1369,11 +1239,14 @@ def poll_voting(request):
                 
             if not my_answer:
                 raise ObjectNotFoundException(model='PollAnswerGroup')
-        
+            
             my_answer.poll = poll
-
             serializer = PollVotingResultSerializer(my_answer)
-                      
+
+            stats = calculate_my_poll_stats(poll, PollStatsSerializer)
+            send_poll_stats(poll.id, stats)
+            send_poll_user_votes(poll.id, answers)
+
             return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK)
     
         elif request.method == 'DELETE':
@@ -1632,7 +1505,11 @@ def poll_voting_ended(request):
 
         my_answer.poll = poll
         serializer = PollVotingResultSerializer(my_answer)
-                    
+
+        stats = calculate_my_poll_stats(poll, PollStatsSerializer)
+        send_poll_stats(poll.id, stats)
+        send_poll_user_votes(poll.id, answers)
+
         return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK) 
 
     
@@ -1901,6 +1778,8 @@ def my_poll_users_votes(request):
                 'answers': answers
             }
 
+            send_poll_user_votes(poll.id, answers)
+
             return Response(result)
         
     except APIException as api_exception:
@@ -2021,4 +1900,13 @@ def my_support_requests(request):
         logger.error(f"Внутренняя ошибка сервера в my_support_requests: {ex}")
         return Response({'message':f"Внутренняя ошибка сервера в my_support_requests: {ex}"},
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+
+
+@api_view(['GET'])
+def index(request):
+
+    return Response(200)
+
+def room(request, room_name):
+    return render(request, "api/room.html", {"room_name": room_name})
 

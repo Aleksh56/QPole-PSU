@@ -74,7 +74,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
+
+    'channels',
 
     'django_otp',
     'django_otp.plugins.otp_totp',
@@ -150,6 +153,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'qpoll.wsgi.application'
+ASGI_APPLICATION = 'qpoll.asgi.application'
 
 
 
@@ -221,7 +225,11 @@ REST_FRAMEWORK = {
 
 SILENCED_SYSTEM_CHECKS = ['fields.W340']
 
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 # CACHES = {
 #     "default": {

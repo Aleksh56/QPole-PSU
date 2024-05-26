@@ -473,3 +473,175 @@ def unmake_last_quick_answer_latest(student_id, quick_voting_form_id):
                 pass
     
 
+from django.db.models import Q, Prefetch, ExpressionWrapper, FloatField, Value, IntegerField
+from django.db.models import Count, Case, When, F, Sum, Subquery, OuterRef, Max
+from django.db.models.functions import Coalesce
+from django.db import transaction
+
+def calculate_my_poll_stats(poll, PollStatsSerializer):
+    poll_members_quantity = poll.user_answers.count()
+
+    poll_user_answers = (
+        poll.all_answers
+        .filter(poll_answer_group__poll=poll, poll_answer_group__is_latest=True, poll_answer_group__is_finished=True)
+        .select_related('question', 'answer_option', 'poll_answer_group__profile')
+    )
+    # print(poll_user_answers)
+
+    possible_question_points_count = (
+        AnswerOption.objects
+        .filter(question__poll=poll)
+        .values('question_id')
+        .annotate(
+            correct_options_quantity=Sum(
+                Case(
+                    When(is_correct=True, then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            )
+        )
+    )
+
+    question_statistics = (
+        poll_user_answers
+        .filter(poll_answer_group__poll=poll)
+        .values('poll_answer_group__id', 'question_id')
+        .annotate(
+            quantity=Count('poll_answer_group__id', distinct=True),
+            correct_answers_quantity = Count(Case(
+                When(points=1, then=1),
+                default=0
+            )),
+            incorrect_answers_quantity=Count(Case(
+                When(points=0, then=1),
+                default=None
+            )),
+            possible_question_points_count=Subquery(
+                possible_question_points_count.filter(question_id=OuterRef('question_id'))
+                                                        .values('correct_options_quantity')[:1]
+            ),
+            correct_percentage=ExpressionWrapper(
+                100 * (F('correct_answers_quantity') - F('incorrect_answers_quantity')) 
+                / F('possible_question_points_count'),
+                output_field=FloatField()
+            ),
+        )
+    ) 
+
+    questions_percentage = (
+        question_statistics
+        .values('question_id')
+        .annotate(
+            answers_quantity=Count('poll_answer_group__id', distinct=True),
+            answer_percentage=F('answers_quantity') / Value(poll_members_quantity) * 100,
+            correct_percentage=ExpressionWrapper((F('correct_percentage') / F('answers_quantity')),
+                output_field=FloatField()
+            ),
+        )
+    )  
+    # print(questions_percentage)
+
+    poll_statistics = (
+        questions_percentage
+        .aggregate(
+            total_questions=Count('question_id'),
+            total_participants=Max('answers_quantity'),
+            average_correct_percentage=Coalesce(
+                Sum('correct_percentage') / Count('question_id'),
+                Value(0),
+                output_field=FloatField()
+            ),
+        )
+    )
+    # print(poll_statistics)
+
+    options_answers_count = (
+        poll_user_answers
+        .filter(poll_answer_group__poll=poll)
+        .values('answer_option')
+        .annotate(
+            quantity=Count('poll_answer_group__id', distinct=True),
+        )
+    )
+
+    if poll.poll_type.name in ['Опрос', 'Викторина', 'Анонимный']:
+        free_answers = (
+            poll_user_answers
+            .filter(
+                poll_answer_group__poll__poll_id=poll.poll_id,
+                text__isnull=False
+            )
+            .values(
+                'text',
+                'question_id',
+                user_id=F('poll_answer_group__profile__user_id'),
+                profile_name=F('poll_answer_group__profile__name'),
+                profile_surname=F('poll_answer_group__profile__surname')
+            )
+        )
+    elif poll.poll_type.name in ['Быстрый']:
+        free_answers = (
+            poll_user_answers
+            .filter(
+                poll_answer_group__poll__poll_id=poll.poll_id,
+                text__isnull=False
+            )
+            .values(
+                'text',
+                'question_id',
+                user_id=F('poll_answer_group__profile__user_id'),
+                profile_name=F('poll_answer_group__profile__name'),
+                profile_surname=F('poll_answer_group__profile__surname'),
+                profile_patronymic=F('poll_answer_group__profile__patronymic'),
+                is_auth_field_main=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__is_main'),
+                auth_field_name=F('poll_answer_group__quick_voting_form__auth_field_answers__auth_field__name'),
+                auth_field_answer=F('poll_answer_group__quick_voting_form__auth_field_answers__answer'),
+            )
+            .filter(
+                is_auth_field_main=True
+            )
+        )
+
+    context = {
+        'poll_statistics': poll_statistics,
+        'question_statistics': question_statistics,
+        'questions_percentage': questions_percentage,
+        'options_answers_count': options_answers_count,
+        'free_answers': free_answers
+    }
+
+
+    stats = PollStatsSerializer(poll, context=context)
+    return stats.data
+
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+
+def send_poll_stats(poll_id, stats):
+    channel_layer = get_channel_layer()
+    group_name = f"poll_{poll_id}"
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            "type": "send_message",
+            'content':'my_poll_stats',
+            "message": {'data': stats}  
+        }
+    )
+
+def send_poll_user_votes(poll_id, votes):
+    channel_layer = get_channel_layer()
+    group_name = f"poll_{poll_id}"
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            "type": "send_message",
+            'content':'my_poll_users_votes',
+            "message": {'data': votes}  
+        }
+    )

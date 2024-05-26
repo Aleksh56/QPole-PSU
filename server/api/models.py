@@ -680,12 +680,15 @@ class SupportRequest(models.Model):
 
 
 def format_time(seconds):
-    days, remainder = divmod(seconds, 86400)
-    hours, remainder = divmod(remainder, 3600)
-    minutes, seconds = divmod(remainder, 60)
+    if seconds is not None:
+        days, remainder = divmod(seconds, 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, seconds = divmod(remainder, 60)
     
-    # Форматируем строку
-    time_string = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
-    return time_string
+        # Форматируем строку
+        time_string = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
+        return time_string
+    
+    else: return None
 
 
