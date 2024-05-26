@@ -639,6 +639,7 @@ class PollAuthField(models.Model):
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='auth_fields')
     name = models.CharField(max_length=150, null=True, blank=True)
     description = models.CharField(max_length=150, null=True, blank=True)
+    example = models.CharField(max_length=150, null=True, blank=True)
 
     is_required = models.BooleanField(default=True)
     is_main = models.BooleanField(default=False)

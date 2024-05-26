@@ -622,7 +622,7 @@ from asgiref.sync import async_to_sync
 
 def send_poll_stats(poll_id, stats):
     channel_layer = get_channel_layer()
-    group_name = f"poll_{poll_id}"
+    group_name = f"poll_{poll_id}".replace('-', '')
 
     async_to_sync(channel_layer.group_send)(
         group_name,
@@ -635,7 +635,7 @@ def send_poll_stats(poll_id, stats):
 
 def send_poll_user_votes(poll_id, votes):
     channel_layer = get_channel_layer()
-    group_name = f"poll_{poll_id}"
+    group_name = f"poll_{poll_id}".replace('-', '')
 
     async_to_sync(channel_layer.group_send)(
         group_name,

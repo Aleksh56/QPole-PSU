@@ -18,7 +18,7 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
-SERVER_URL = 'http://188.225.45.226:3000/'
+SERVER_URL = 'http://147.45.102.7:3000/'
 
 LOGGING = {
     'version': 1,
@@ -104,9 +104,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'corsheaders.middleware.CorsMiddleware',
-    # 'api.middleware.BanMiddleware'
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+    'api.middleware.MaintenanceMiddleware',
 ]
 
 DEBUG_TOOLBAR_PANELS = [
@@ -267,6 +268,11 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = env('SERVER_EMAIL')
 
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
 
 # w3 = Web3(Web3.HTTPProvider('http://188.225.45.226:8545'))
 

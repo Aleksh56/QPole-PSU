@@ -5,9 +5,9 @@ from rest_framework import status
 from rest_framework import generics
 from django.db.models import Q
 from django.db import transaction
+from django.core.cache import cache
 
-
-from api.exсeptions import ObjectNotFoundException, APIException, ObjectAlreadyExistsException
+from api.exсeptions import ObjectNotFoundException, APIException, ObjectAlreadyExistsException, MissingFieldException
 from api.serializers import PollSerializer, SupportRequestSerializer, StudyGroupSerializer
 from api.models import Poll, UserRole, StudyGroup
 from api.permissions import IsOwnerOrReadOnly
@@ -297,7 +297,7 @@ def support_request(request):
 
 
 
-@api_view(['GET', 'PATCH'])
+@api_view(['GET', 'PATCH', 'PUT'])
 @permission_classes([IsAdminUser])
 @transaction.atomic
 def project_settings(request):
@@ -327,7 +327,26 @@ def project_settings(request):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
 
-   
+        elif request.method == 'PUT':
+            data = request.data
+
+            settings = Settings.objects.first()
+            if not settings:
+                raise ObjectNotFoundException(model='Settings')
+            
+            is_under_maintenance = data.get('is_under_maintenance', None)
+            if isinstance(is_under_maintenance, None):
+                raise MissingFieldException('is_under_maintenance')\
+                
+            serializer = ProjectSettingsSerializer(instance=settings, data=data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                cache.set('is_under_maintenance', is_under_maintenance, 60 * 60 * 24)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+            
     except APIException as api_exception:
         return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
     

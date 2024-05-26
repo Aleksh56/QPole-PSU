@@ -1244,8 +1244,44 @@ def poll_voting(request):
             serializer = PollVotingResultSerializer(my_answer)
 
             stats = calculate_my_poll_stats(poll, PollStatsSerializer)
-            send_poll_stats(poll.id, stats)
-            send_poll_user_votes(poll.id, answers)
+            answers = (
+                    PollAnswerGroup.objects
+                    .filter(poll=poll)
+                    .prefetch_related(
+                            models.Prefetch('answers', queryset=PollAnswer.objects.all().select_related('answer_option'))
+                        )
+                    .filter(is_finished=True, is_latest=True)
+                    .order_by('-voting_date')
+                )
+
+            auth_field_answers = (
+                poll.auth_field_answers
+                .select_related('auth_field', 'quick_voting_form', 'quick_voting_form__poll_answer_group')
+                .all()
+            )
+
+            auth_field_answers_dict = {}
+            for answer in auth_field_answers:
+                quick_voting_form_id = answer.quick_voting_form.id
+                if quick_voting_form_id not in auth_field_answers_dict:
+                    auth_field_answers_dict[quick_voting_form_id] = []
+                auth_field_answers_dict[quick_voting_form_id].append(answer)
+
+            context = {
+                'poll': poll,
+                'poll_type': 'Быстрый',
+                'auth_field_answers_dict': auth_field_answers_dict
+            }
+
+            result = {}
+            answers = MyPollUsersAnswersSerializer(answers, context=context, many=True).data
+            result['results'] = {
+                'poll_data': PollSerializer(poll).data,
+                'answers': answers
+            }
+            
+            send_poll_stats(poll.poll_id, stats)
+            send_poll_user_votes(poll.id, result)
 
             return Response({'message':"Вы успешно проголосовали", 'data':serializer.data}, status=status.HTTP_200_OK)
     

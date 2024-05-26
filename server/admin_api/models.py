@@ -10,7 +10,7 @@ class Settings(models.Model):
     min_question_options_quantity = models.PositiveSmallIntegerField(default=1)
     max_revotes_quantity = models.PositiveSmallIntegerField(default=2)
 
-    # max_revotes_quantity = models.PositiveSmallIntegerField(default=2)
+    is_under_maintenance = models.BooleanField(default=False)
 
 
     
