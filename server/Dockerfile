@@ -34,4 +34,5 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Run Daphne
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "qpoll.asgi:application"]
+# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "qpoll.asgi:application"]
+ENTRYPOINT ["gunicorn", "qpoll.wsgi", "-b", "0.0.0.0:8000"]

@@ -16,9 +16,5 @@ server {
     location / {
         proxy_pass      http://${APP_HOST}:${APP_PORT};
         include         /etc/nginx/proxy_params;
-
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
     }
 }
