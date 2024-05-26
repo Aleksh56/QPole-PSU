@@ -68,7 +68,12 @@ const PollResultCard = ({ data, chartType, answers }) => {
         <InfoButton onClick={() => setInfoOpen(true)}>Подробнее</InfoButton>
       </CardInfoWrapper>
       {renderChart()}
-      <FrmOtherResults open={infoOpen} onClose={() => setInfoOpen(false)} data={data} />
+      <FrmOtherResults
+        open={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        data={data}
+        answers={answers}
+      />
     </CardWrapper>
   );
 };
