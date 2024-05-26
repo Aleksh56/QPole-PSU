@@ -15,16 +15,12 @@
 
         const chatSocket = new WebSocket(
             'ws://'
-            + window.location.host
+            + location.host
             + '/ws/poll_results/'
             + roomName
             + '/'
         );
-        console.log('ws://'
-        + window.location.host
-        + '/ws/poll_results/'
-        + roomName
-        + '/')
+        console.log(chatSocket)
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             document.querySelector('#chat-log').value += (data.message + '\n');
@@ -50,6 +46,25 @@
             }));
             messageInputDom.value = '';
         };
+
+
+        const socket1 = new WebSocket(
+            'wss://'
+            + location.host
+            + '/ws/poll_results/'
+            + roomName
+            + '/'
+        );
+        console.log(socket1)
+
+        const socket2 = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/poll_results/'
+            + roomName
+            + '/'
+        );
+        console.log(socket1)
     </script>
 </body>
 </html>
