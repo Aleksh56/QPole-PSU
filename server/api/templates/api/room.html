@@ -47,24 +47,6 @@
             messageInputDom.value = '';
         };
 
-
-        const socket1 = new WebSocket(
-            'wss://'
-            + location.host
-            + '/ws/poll_results/'
-            + roomName
-            + '/'
-        );
-        console.log(socket1)
-
-        const socket2 = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/poll_results/'
-            + roomName
-            + '/'
-        );
-        console.log(socket1)
     </script>
 </body>
 </html>
