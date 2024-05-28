@@ -58,13 +58,18 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
       <StyledNavContainer>
         {window.innerWidth < 1000 ? (
           <Box
-            sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%',
+            }}
           >
             <IconButton
               sx={{ display: 'flex', alignItems: 'center', columnGap: '10px' }}
               onClick={() => setIsTabsOpen(!isTabsOpen)}
             >
-              Меню
+              {buttons[selectedTab]?.label}
               {!isTabsOpen ? <ArrowDropDownIcon /> : <ArrowDropUpIcon />}
             </IconButton>
             <motion.div
@@ -101,8 +106,10 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
                     <Tab sx={{ width: '100%' }} label={button.label} disabled={button.disabled} />
                   </StyledNavLink>
                 ))}
-                {!isPublished && (
+                {!isPublished ? (
                   <Tab key="publish" label="Опубликовать" onClick={() => handlePublishPoll()} />
+                ) : (
+                  <Tab key="share" label="Поделиться" onClick={() => handleShareOpen()} />
                 )}
               </Tabs>
             </motion.div>

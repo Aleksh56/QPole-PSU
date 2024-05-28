@@ -1,28 +1,18 @@
 import ErrorImage from '@assets/404.svg';
-import { Box, Container, Typography } from '@mui/material';
+import { Container } from '@mui/material';
 
+import { InfoText, TitleText, WorksWrapper } from '@/app/template/base/styles';
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 
 const NotFoundPage = () => {
   return (
     <Container>
       <Header isMainPage={false} />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '80vh',
-          textAlign: 'center',
-        }}
-      >
+      <WorksWrapper>
         <img src={ErrorImage} style={{ maxWidth: '500px' }} />
-        <Typography sx={{ fontSize: '26px', fontWeight: 500 }}>Такой страницы нет</Typography>
-        <Typography sx={{ fontSize: '18px', fontWeight: 500, color: '#868686' }}>
-          Но есть много других интересных страниц
-        </Typography>
-      </Box>
+        <TitleText>Такой страницы нет</TitleText>
+        <InfoText>Но есть много других интересных страниц</InfoText>
+      </WorksWrapper>
     </Container>
   );
 };

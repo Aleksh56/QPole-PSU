@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { Box, Drawer, List, Typography } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
 import { Link } from 'react-router-dom';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledDrawer = styled(Drawer)(() => ({
   zIndex: 9000,
@@ -42,4 +43,5 @@ export const LinkWrapper = styled(Link)(() => ({
   display: 'flex',
   alignItems: 'center',
   columnGap: Rem(20),
+  color: '#000',
 }));

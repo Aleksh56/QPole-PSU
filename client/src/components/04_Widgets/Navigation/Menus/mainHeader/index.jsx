@@ -34,9 +34,8 @@ const Header = ({ isMainPage = true }) => {
         <StyledLogoLink to="/">QPoll</StyledLogoLink>
         <HeaderNavOut isMobile={isMobile}>
           <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '12px' }}>
-            <PrimaryButton caption={t('button.createQuiz')} to="/signup" disabled={true} />
+            <PrimaryButton caption={t('button.createQuiz')} to="/signup" />
             <PrimaryButton
-              disabled={true}
               caption={isAuthenticated ? t('button.profile') : t('button.login')}
               to={isAuthenticated ? '/app' : '/signin'}
             />

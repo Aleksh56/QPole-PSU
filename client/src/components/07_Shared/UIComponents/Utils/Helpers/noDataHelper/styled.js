@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Box, Button, Typography } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const StyledHeroWrapper = styled(Box)(() => ({

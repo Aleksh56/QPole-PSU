@@ -1,26 +1,27 @@
-import React, { memo } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { Box } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { Box } from '@mui/material';
+import { memo } from 'react';
 import { v4 } from 'uuid';
-import CloseIcon from '@mui/icons-material/Close';
+
 import {
+  CloseButtonWrapper,
   StyledList,
   StyledNavItem,
   StyledNavItemCaption,
   StyledProfileContentWrapper,
   StyledProfileSidebarHeading,
   StyledProfileWrapper,
-  CloseButtonWrapper,
 } from './styled';
 
 const ProfileSidebar = memo(({ linksData = {}, onClose }) => {
   return (
     <StyledProfileWrapper>
       <CloseButtonWrapper>
-        <CloseIcon onClick={() => onClose()} sx={{ display: { xs: 'block', sm: 'none' } }} />
+        <CloseIcon onClick={() => onClose()} />
       </CloseButtonWrapper>
       <StyledProfileContentWrapper>
         <StyledList component="nav" aria-label="main mailbox folders">
@@ -35,6 +36,7 @@ const ProfileSidebar = memo(({ linksData = {}, onClose }) => {
               className={({ isActive, isPending }) =>
                 isPending ? 'pending' : isActive ? 'active' : ''
               }
+              onClick={() => onClose()}
             >
               <ListItemIcon sx={{ minWidth: 'unset' }}>
                 <item.icon />

@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import { useUnit } from 'effector-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -9,7 +8,11 @@ import { getRemainingTimeFx } from '../ConductionPoll/model/get-remaining-time';
 import { sendAnswersRequestFx } from '../ConductionPoll/model/send-answers';
 import { startConductionFx } from '../ConductionPoll/model/start-conduction';
 import { $answersStore, resetAnswers } from '../ConductionPoll/store/answer-store';
-import { ConductionBackgroundWrapper, ConductionWrapper } from '../ConductionPoll/styled';
+import {
+  ConductionBackgroundWrapper,
+  ConductionWrapper,
+  VoteEndedText,
+} from '../ConductionPoll/styled';
 
 import ConductionHeader from '@/components/04_Widgets/Content/Display/conductionHeader';
 import QueBlock from '@/components/04_Widgets/Content/Interactive/queBlock';
@@ -136,9 +139,7 @@ const FastConductionPollPage = () => {
             pollData={pollData}
           />
         ) : (
-          <Box sx={{ width: '100%', textAlign: 'center', fontSize: '20px', fontWeight: 500 }}>
-            Опрос завершен !
-          </Box>
+          <VoteEndedText>Опрос завершен !</VoteEndedText>
         )}
         <AnimatePresence>
           {!isCollapsed && (

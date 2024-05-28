@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 import { Rem } from '@/utils/convertToRem';
 
@@ -27,4 +27,11 @@ export const StartBtnWrapper = styled(Box)(() => ({
   width: '100%',
   display: 'flex',
   justifyContent: 'center',
+}));
+
+export const VoteEndedText = styled(Typography)(() => ({
+  width: '100%',
+  textAlign: 'center',
+  fontSize: '20px',
+  fontWeight: 500,
 }));

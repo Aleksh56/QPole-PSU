@@ -12,8 +12,11 @@ export const PollListPageContentWrapper = styled(Box)(() => ({
   margin: '0 auto',
   padding: `${Rem(70)} ${Rem(15)}`,
   '@media (max-width: 1000px)': {
-    gridTemplateColumns: '1fr',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
     padding: `${Rem(50)} ${Rem(10)}`,
+    minHeight: '80vh',
   },
 }));
 
