@@ -4,7 +4,7 @@ pkill -f ganache-cli
 killall -q ganache-cli
 ps aux | grep ganache
 
-nohup ganache-cli --host 0.0.0.0 > ganache_output.txt 2>&1 &
+ganache-cli --host 0.0.0.0 > ganache_output.txt 2>&1 &
 GANACHE_PID=$!
 
 sleep 5

@@ -30,6 +30,7 @@ contract MiniPoll {
 
     Poll[] public polls;
     mapping(string => bool) private existingPollIDs;
+    mapping(string => VoteInput[]) private pollResponses;
 
      function vote(string memory poll_id, VoteInput[] memory votes) public {
         (uint pollIndex, bool found) = findPollIndex(poll_id);
@@ -44,6 +45,11 @@ contract MiniPoll {
 
             polls[pollIndex].questions[questionIndex].answer_options[answerIndex].votes++;
         }
+        pollResponses[poll_id] = votes;
+    }
+
+    function getPollResponses(string memory poll_id) public view returns (VoteInput[] memory) {
+        return pollResponses[poll_id];
     }
 
     function findAnswerIndex(uint pollIndex, uint questionIndex, uint answerId) private view returns (uint, bool) {
