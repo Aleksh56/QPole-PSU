@@ -1,7 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
+
+import { CompTimeWrapper } from './styled';
 
 import {
   changePoleData,
@@ -59,14 +61,7 @@ const PollDesignSettingsTab = () => {
   return (
     <InvisibleLabeledField
       label={
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            alignItems: 'center',
-            width: '100%',
-          }}
-        >
+        <CompTimeWrapper>
           {t('label.completionTime')}
           <Typography
             sx={{ textDecoration: 'underline', fontSize: '14px', cursor: 'pointer' }}
@@ -74,7 +69,7 @@ const PollDesignSettingsTab = () => {
           >
             Очистить
           </Typography>
-        </Box>
+        </CompTimeWrapper>
       }
       type="time"
       min="00:00:00"

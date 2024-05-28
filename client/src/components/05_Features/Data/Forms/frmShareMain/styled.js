@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import { Rem } from '@/utils/convertToRem';
-import { Box, Button, TextField, Typography } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Box, Button, TextField, Typography } from '@mui/material';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const LinkTitle = styled(Typography)(() => ({
   fontSize: Rem(14),
@@ -44,7 +45,7 @@ export const LinkField = styled(TextField)(({ propColor, textColor }) => ({
       border: 'rgba(39, 116, 248, .51)',
     },
     '& .MuiInputBase-input': {
-      padding: '10px 14px',
+      padding: `${Rem(10)} ${Rem(14)}`,
     },
   },
 }));
@@ -57,7 +58,7 @@ export const LinkDesc = styled(Typography)(() => ({
 }));
 
 export const LinkContent = styled(Box)(() => ({
-  padding: '16px 24px 16px',
+  padding: `${Rem(16)} ${Rem(24)} ${Rem(16)}`,
 }));
 
 export const BtnsWrapper = styled(Box)(() => ({
@@ -71,7 +72,7 @@ export const ShareBtn = styled(Button)(() => ({
   width: '100%',
   padding: `${Rem(16)} ${Rem(24)}`,
   justifyContent: 'space-between',
-  borderBottom: '1px solid #e9ebef',
+  borderBottom: `${Rem(1)} solid #e9ebef`,
 }));
 
 export const ShareBtnContent = styled(Box)(() => ({

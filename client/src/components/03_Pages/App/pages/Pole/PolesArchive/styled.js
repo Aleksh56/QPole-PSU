@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import { Box } from '@mui/material';
-import { Rem } from '@/utils/convertToRem';
 import { Link } from 'react-router-dom';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledAppContentWrapper = styled(Box)(() => ({
   maxWidth: Rem(1200),
@@ -14,14 +15,14 @@ export const StyledAppContentWrapper = styled(Box)(() => ({
 export const ContentWrapper = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
-  rowGap: '20px',
+  rowGap: Rem(20),
   width: '100%',
 });
 
 export const PollsGrid = styled(Box)({
   display: 'grid',
   gridTemplateColumns: 'repeat(4, 1fr)',
-  gap: '20px',
+  gap: Rem(20),
 });
 
 export const StyledArchiveLink = styled(Link)({
@@ -29,6 +30,6 @@ export const StyledArchiveLink = styled(Link)({
   display: 'grid',
   gridTemplateColumns: 'auto 1fr',
   alignItems: 'center',
-  columnGap: '10px',
+  columnGap: Rem(10),
   color: colorConfig.primaryBlue,
 });

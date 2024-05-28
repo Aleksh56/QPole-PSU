@@ -9,24 +9,18 @@ const heroBaseStyles = {
   height: '100vh',
   maxWidth: Rem(1200),
   margin: '0 auto',
-  padding: '0 15px',
+  padding: `0 ${Rem(15)}`,
   alignItems: 'center',
   justifyContent: 'center',
   textAlign: 'left',
 };
 
-const breakpoints = {
-  medium: 1024,
-};
-
 export const StyledHeroContainer = styled(Box)(() => ({
-  // position: 'relative',
-  // height: '100vh',
   backgroundColor: 'rgba(172, 220, 255, 0.2)',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  padding: '0 15px',
+  padding: `0 ${Rem(15)}`,
 }));
 
 export const StyledHero = styled(Box)(({ theme }) => ({

@@ -12,7 +12,7 @@ export const StyledHeader = styled('header')(({ isSticky, isMainPage }) => ({
   left: 0,
   width: '100%',
   background: isSticky ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-  backdropFilter: isSticky ? 'blur(5px)' : 'none',
+  backdropFilter: isSticky ? `blur(${Rem(5)})` : 'none',
   transition: 'background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out',
   boxSizing: 'border-box',
   zIndex: 100,
@@ -27,7 +27,7 @@ export const StyledLogoLink = styled(Link)(() => ({
 export const StyledContainer = styled(Box)(() => ({
   maxWidth: Rem(1200),
   margin: '0 auto',
-  padding: '0 15px',
+  padding: `0 ${Rem(15)}`,
   display: 'grid',
   gridTemplateColumns: '1fr auto',
   alignItems: 'center',

@@ -5,18 +5,14 @@ import { Rem } from '@/utils/convertToRem';
 
 export const StyledStackWrapper = styled(Box)(() => ({
   width: '100%',
-  boxShadow: '1px 20px 20px 0 #00000030',
-  // '@media (max-width: 900px)': {
-  //   display: 'none',
-  // },
+  boxShadow: `${Rem(1)} ${Rem(20)} ${Rem(20)} 0 #00000030`,
 }));
 
 export const FiltersWrapper = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr',
-  rowGap: '20px',
-  padding: '15px',
-  padding: '8px 15px',
+  rowGap: Rem(20),
+  padding: Rem(15),
   '@media (min-width: 900px)': {
     display: 'none',
   },
@@ -35,7 +31,7 @@ export const MobFiltersWrapper = styled(Box)(() => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  padding: '8px 15px',
+  padding: `${Rem(8)} ${Rem(15)}`,
   '@media (min-width: 900px)': {
     display: 'none',
   },

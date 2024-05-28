@@ -4,11 +4,11 @@ import { Box, Typography } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 
 export const Styled2AuthContainerHeading = styled(Typography)(() => ({
-  marginTop: '48px',
-  fontSize: '18px',
-  lineHeight: '24px',
+  marginTop: Rem(48),
+  fontSize: Rem(18),
+  lineHeight: Rem(24),
   '@media (max-width: 768px)': {
-    marginTop: '20px',
+    marginTop: Rem(20),
   },
 }));
 
@@ -21,7 +21,7 @@ export const StyledAuthContentWrapper = styled(Box)(() => ({
 export const StyledImage = styled('img')(() => ({
   width: Rem(70),
   height: Rem(70),
-  marginRight: '15px',
+  marginRight: Rem(15),
 }));
 
 export const Styled2AuthHeading = styled(Typography)(() => ({
@@ -39,11 +39,11 @@ export const Styled2AuthInfo = styled(Typography)(() => ({
 }));
 
 export const Stld2AuthInfoWrapper = styled(Box)(() => ({
-  marginRight: '100px',
+  marginRight: Rem(100),
   '@media (max-width: 768px)': {
-    marginRight: '50px',
+    marginRight: Rem(50),
   },
   '@media (max-width: 450px)': {
-    marginRight: '20px',
+    marginRight: Rem(20),
   },
 }));

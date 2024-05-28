@@ -8,7 +8,7 @@ export const FiltersWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  border: '1px solid black',
+  border: `${Rem(1)} solid black`,
   borderRadius: Rem(10),
   backgroundColor: '#fff',
   marginBottom: Rem(20),

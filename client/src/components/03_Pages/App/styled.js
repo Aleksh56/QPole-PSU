@@ -25,7 +25,7 @@ export const StyledAppContentWrapper = styled(Box)(() => ({
 export const ContentWrapper = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
-  rowGap: '20px',
+  rowGap: Rem(20),
   width: '100%',
 });
 
@@ -33,15 +33,15 @@ export const PollsGridWrapper = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  rowGap: '30px',
+  rowGap: Rem(30),
   '@media (max-width: 768px)': {
-    padding: '20px',
+    padding: Rem(20),
   },
 });
 
 export const PollsGrid = styled(Box)({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 0.5fr))',
+  gridTemplateColumns: `repeat(auto-fit, minmax(${Rem(400)}, 0.5fr))`,
   gap: '3rem',
   justifyContent: 'start',
   padding: '1rem',
@@ -59,7 +59,7 @@ export const StyledArchiveLink = styled(Link)({
   display: 'grid',
   gridTemplateColumns: 'auto 1fr',
   alignItems: 'center',
-  columnGap: '10px',
+  columnGap: Rem(10),
   color: colorConfig.primaryBlue,
   '@media (max-width: 768px)': {
     fontSize: Rem(14),

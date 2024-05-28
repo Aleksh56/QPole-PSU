@@ -28,7 +28,7 @@ export const StyledQueCount = styled(Typography)(() => ({
 export const StyledCard = styled(Card)(({ selected }) => ({
   marginBottom: Rem(5),
   boxShadow: selected ? 'none' : 3,
-  border: selected ? '1px solid blue' : 'none',
+  border: selected ? `${Rem(1)} solid blue` : 'none',
   cursor: 'pointer',
   '& .MuiCardContent-root': {
     paddingBottom: Rem(10),
@@ -63,4 +63,13 @@ export const IconsWrapper = styled(Box)(() => ({
     width: Rem(22),
     height: Rem(22),
   },
+}));
+
+export const QueAccordion = styled(Box)(() => ({
+  display: 'grid',
+  gridTemplateColumns: '1fr auto',
+  alignItems: 'center',
+  columnGap: Rem(20),
+  width: '100%',
+  marginRight: Rem(20),
 }));

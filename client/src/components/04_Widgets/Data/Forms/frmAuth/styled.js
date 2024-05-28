@@ -47,7 +47,7 @@ export const StyledForm = styled('form')(() => ({
   },
   '& .css-md26zr-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
     {
-      border: `2px solid ${colorConfig.primaryBlue}`,
+      border: `${Rem(2)} solid ${colorConfig.primaryBlue}`,
     },
 }));
 

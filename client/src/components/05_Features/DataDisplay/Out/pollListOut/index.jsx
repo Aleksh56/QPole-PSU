@@ -1,7 +1,6 @@
-import { Grid } from '@mui/material';
 import { v4 } from 'uuid';
 
-import { PollListGridContainer } from './styled';
+import { CardsWrapper, PollListGridContainer } from './styled';
 
 import { regOnPollFx } from '@/api/common-requests/poll-register';
 import AppPoleCard from '@/components/04_Widgets/Data/Cards/appPoleCard';
@@ -15,18 +14,7 @@ const PollListOut = ({ polls = [] }) => {
   return (
     <PollListGridContainer>
       {polls.map((item) => (
-        <Grid
-          key={v4()}
-          item
-          xs={12}
-          sm={6}
-          sx={{
-            maxHeight: '280px',
-            '@media (max-width: 1000px)': {
-              maxHeight: 'unset',
-            },
-          }}
-        >
+        <CardsWrapper key={v4()} item xs={12} sm={6}>
           <AppPoleCard
             pollData={item}
             cardButton={
@@ -48,7 +36,7 @@ const PollListOut = ({ polls = [] }) => {
               )
             }
           />
-        </Grid>
+        </CardsWrapper>
       ))}
     </PollListGridContainer>
   );

@@ -32,6 +32,6 @@ export const StartBtnWrapper = styled(Box)(() => ({
 export const VoteEndedText = styled(Typography)(() => ({
   width: '100%',
   textAlign: 'center',
-  fontSize: '20px',
+  fontSize: Rem(20),
   fontWeight: 500,
 }));

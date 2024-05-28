@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { Avatar, Box, Typography } from '@mui/material';
+
 import { Rem } from '@/utils/convertToRem';
 
 export const StyledProfileAvatar = styled(Avatar)(() => ({
@@ -13,17 +14,17 @@ export const StyledProfileAvatar = styled(Avatar)(() => ({
 }));
 
 export const ProfileTitle = styled(Typography)(() => ({
-  fontSize: '24px',
+  fontSize: Rem(24),
 }));
 
 export const BoxCaption = styled(Typography)(() => ({
-  marginTop: '48px',
-  fontSize: '18px',
-  lineHeight: '24px',
+  marginTop: Rem(48),
+  fontSize: Rem(18),
+  lineHeight: Rem(24),
 }));
 
 export const ProfileFieldsWrapper = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr',
-  rowGap: '15px',
+  rowGap: Rem(15),
 }));

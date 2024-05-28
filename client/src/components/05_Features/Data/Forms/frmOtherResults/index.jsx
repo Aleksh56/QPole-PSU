@@ -1,5 +1,7 @@
-import { Box, Dialog, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, Typography } from '@mui/material';
 import { v4 } from 'uuid';
+
+import { NameWrapper } from './styled';
 
 import { nameReducer } from '@/utils/js/nameReducer';
 
@@ -34,15 +36,7 @@ const FrmOtherResults = ({ open, onClose, data, answers }) => {
       <DialogContent dividers>
         {filteredAnswers.length > 0 ? (
           filteredAnswers.map((item, index) => (
-            <Box
-              key={v4()}
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                padding: '8px 0',
-                borderBottom: index < data.length - 1 ? '1px solid #e0e0e0' : 'none',
-              }}
-            >
+            <NameWrapper key={v4()} isLower={index < data.length - 1}>
               <Typography variant="body1" component="p">
                 {nameReducer(
                   `${item.profile.surname} ${item.profile.name} ${item.profile.patronymic}`,
@@ -51,7 +45,7 @@ const FrmOtherResults = ({ open, onClose, data, answers }) => {
               <Typography variant="body2" component="p">
                 {item.text}
               </Typography>
-            </Box>
+            </NameWrapper>
           ))
         ) : (
           <p>Ответов &apos;Другое&apos; не найдено</p>

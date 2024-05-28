@@ -1,13 +1,13 @@
 import { Close as CloseIcon } from '@mui/icons-material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import { Box, IconButton, Stack, Tab, Tabs } from '@mui/material';
+import { Box, IconButton, Stack, Tab } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { publishPollFx } from './model/publish-poll';
-import { StyledNavContainer } from './styled';
+import { MobMenuWrapper, StyledNavContainer, TabsMenu } from './styled';
 
 import FrmShare from '@/components/04_Widgets/Data/Forms/frmShare';
 import { StyledNavLink } from '@/components/05_Features/DataDisplay/Out/appHeaderNavOut/styled';
@@ -57,14 +57,7 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
     <>
       <StyledNavContainer>
         {window.innerWidth < 1000 ? (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              width: '100%',
-            }}
-          >
+          <MobMenuWrapper>
             <IconButton
               sx={{ display: 'flex', alignItems: 'center', columnGap: '10px' }}
               onClick={() => setIsTabsOpen(!isTabsOpen)}
@@ -78,17 +71,7 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
               transition={{ duration: 0.5 }}
               sx={{ overflow: 'hidden' }}
             >
-              <Tabs
-                onChange={(event, newValue) => setSelectedTab(newValue)}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  '& .MuiTabs-flexContainer': {
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  },
-                }}
-              >
+              <TabsMenu onChange={(event, newValue) => setSelectedTab(newValue)}>
                 {buttons.map((button, index) => (
                   <StyledNavLink
                     key={button.label}
@@ -111,9 +94,9 @@ const PollSettingsMenuNavigation = ({ buttons }) => {
                 ) : (
                   <Tab key="share" label="Поделиться" onClick={() => handleShareOpen()} />
                 )}
-              </Tabs>
+              </TabsMenu>
             </motion.div>
-          </Box>
+          </MobMenuWrapper>
         ) : (
           <>
             <Stack direction="row" spacing={2}>

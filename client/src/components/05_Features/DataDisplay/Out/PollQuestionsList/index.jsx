@@ -17,6 +17,7 @@ import { copyQuestionFx } from './model/copy-question';
 import {
   IconsWrapper,
   ListWrapper,
+  QueAccordion,
   StyledAddButton,
   StyledCard,
   StyledCardContent,
@@ -86,19 +87,10 @@ const PollQuestionsList = ({
               onChange={() => handleToggleQuestion(question.id)}
             >
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto',
-                    alignItems: 'center',
-                    columnGap: '20px',
-                    width: '100%',
-                    marginRight: '20px',
-                  }}
-                >
+                <QueAccordion>
                   <Typography>{question.name}</Typography>
                   <DeleteOutlineIcon onClick={(e) => handleDeleteQuestion(e, question.id)} />
-                </Box>
+                </QueAccordion>
               </AccordionSummary>
               <AccordionDetails>
                 <FrmQueEdit

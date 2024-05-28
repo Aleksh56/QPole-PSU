@@ -3,6 +3,8 @@ import PortraitOutlinedIcon from '@mui/icons-material/PortraitOutlined';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
 import QuizIcon from '@mui/icons-material/Quiz';
 
+import { Rem } from '@/utils/convertToRem';
+
 export const pollTuningSettings = [
   {
     heading: 'Настройки результатов',
@@ -61,8 +63,8 @@ export const admSupportTableCols = [
           style={{
             color: !is_seen ? '#EF3826' : '#00B69B',
             backgroundColor: !is_seen ? 'rgba(239, 56, 38, .2)' : 'rgba(0, 182, 155, .3)',
-            padding: '6px 16px',
-            borderRadius: '5px',
+            padding: `${Rem(6)} ${Rem(16)}`,
+            borderRadius: Rem(5),
             fontWeight: 500,
           }}
         >
@@ -79,8 +81,8 @@ export const admSupportTableCols = [
           style={{
             color: !is_closed ? '#EF3826' : '#00B69B',
             backgroundColor: !is_closed ? 'rgba(239, 56, 38, .2)' : 'rgba(0, 182, 155, .3)',
-            padding: '6px 16px',
-            borderRadius: '5px',
+            padding: `${Rem(6)} ${Rem(16)}`,
+            borderRadius: Rem(5),
             fontWeight: 500,
           }}
         >
@@ -128,35 +130,37 @@ export const surveySettings = {
   },
 };
 
+const pollAdminLabel = 'Введите количество';
+
 export const pollAdminSettings = [
   {
     caption: 'Максимальное количество вопросов',
-    label: 'Введите количество',
+    label: pollAdminLabel,
     link: 'max_questions_quantity',
   },
   {
     caption: 'Минимальное количество вопросов',
-    label: 'Введите количество',
+    label: pollAdminLabel,
     link: 'min_questions_quantity',
   },
   {
     caption: 'Максимальное количество ответов в вопросе',
-    label: 'Введите количество',
+    label: pollAdminLabel,
     link: 'max_question_options_quantity',
   },
   {
     caption: 'Минимальное количество ответов в вопросе',
-    label: 'Введите количество',
+    label: pollAdminLabel,
     link: 'min_question_options_quantity',
   },
   {
     caption: 'Максимальное количество повторных прохождений',
-    label: 'Введите количество',
+    label: pollAdminLabel,
     link: 'max_users_polls_quantity',
   },
   {
     caption: 'Максимальное количество опросов у пользователя',
-    label: 'Введите количество',
+    label: pollAdminLabel,
     link: 'max_revotes_quantity',
   },
 ];
