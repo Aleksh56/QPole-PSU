@@ -31,9 +31,10 @@ RUN python manage.py migrate
 RUN python manage.py collectstatic --noinput
 
 # Expose port 8000
-EXPOSE 8000
+# EXPOSE 8000
+EXPOSE 9000
 
 # Run Daphne
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "qpoll.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "9000", "qpoll.asgi:application"]
 # ENTRYPOINT ["gunicorn", "qpoll.wsgi", "-b", "0.0.0.0:8000"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "qpoll.wsgi:application"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "qpoll.wsgi:application"]

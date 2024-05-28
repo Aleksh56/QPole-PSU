@@ -3,16 +3,16 @@
 version: "3.3"
 
 services:
-  wsgi:
-    build: .
-    command: gunicorn --bind 0.0.0.0:8000 qpoll.wsgi:application
-    container_name: django-server-container-wsgi
-    volumes:
-      - .:/app
-      - static-data:/vol/static
-      - media-data:/vol/media
-    ports:
-      - "8000:8000"
+  # wsgi:
+  #   build: .
+  #   command: gunicorn --bind 0.0.0.0:8000 qpoll.wsgi:application
+  #   container_name: django-server-container-wsgi
+  #   volumes:
+  #     - .:/app
+  #     - static-data:/vol/static
+  #     - media-data:/vol/media
+  #   ports:
+  #     - "8000:8000"
 
   asgi:
     build: .
@@ -35,8 +35,6 @@ services:
     ports:
       - 80:80
       - 443:443
-    depends_on:
-      - wsgi
 
 volumes:
   static-data:
