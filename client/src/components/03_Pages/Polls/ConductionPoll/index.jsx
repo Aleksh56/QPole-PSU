@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import { useUnit } from 'effector-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -11,7 +10,12 @@ import { getRemainingTimeFx } from './model/get-remaining-time';
 import { sendAnswersRequestFx } from './model/send-answers';
 import { startConductionFx } from './model/start-conduction';
 import { $answersStore, resetAnswers } from './store/answer-store';
-import { ConductionBackgroundWrapper, ConductionWrapper, StartBtnWrapper } from './styled';
+import {
+  ConductionBackgroundWrapper,
+  ConductionWrapper,
+  StartBtnWrapper,
+  VoteEndedText,
+} from './styled';
 
 import ConductionHeader from '@/components/04_Widgets/Content/Display/conductionHeader';
 import QueBlock from '@/components/04_Widgets/Content/Interactive/queBlock';
@@ -184,9 +188,7 @@ const ConductionPollPage = () => {
           <PrimaryButton caption="Начать" handleClick={handleStart} />
         </StartBtnWrapper>
       ) : (
-        <Box sx={{ width: '100%', textAlign: 'center', fontSize: '20px', fontWeight: 500 }}>
-          Опрос завершен !
-        </Box>
+        <VoteEndedText>Опрос завершен !</VoteEndedText>
       )}
     </ConductionBackgroundWrapper>
   );

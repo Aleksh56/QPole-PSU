@@ -37,3 +37,13 @@ export const Styled2AuthInfo = styled(Typography)(() => ({
   color: '#697074',
   lineHeight: Rem(14),
 }));
+
+export const Stld2AuthInfoWrapper = styled(Box)(() => ({
+  marginRight: '100px',
+  '@media (max-width: 768px)': {
+    marginRight: '50px',
+  },
+  '@media (max-width: 450px)': {
+    marginRight: '20px',
+  },
+}));

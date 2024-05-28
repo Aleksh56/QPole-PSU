@@ -1,6 +1,8 @@
 import { FormControl, MenuItem, Select, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { v4 } from 'uuid';
+
+import { SelectedTimezoneText } from './styled';
 
 import { StyledProfileContainer, StyledProfileFieldsBox } from '@/constants/styles';
 import useFormInput from '@/hooks/useFormInput';
@@ -19,20 +21,9 @@ const ProfileTimezone = ({ caption = '', selectCaption = '', options = [] }) => 
 
   return (
     <StyledProfileContainer>
-      <Typography
-        variant="h6"
-        gutterBottom
-        sx={{
-          marginTop: '48px',
-          fontSize: '18px',
-          lineHeight: '24px',
-          '@media (max-width: 768px)': {
-            marginTop: '20px',
-          },
-        }}
-      >
+      <SelectedTimezoneText variant="h6" gutterBottom>
         {caption}
-      </Typography>
+      </SelectedTimezoneText>
       <StyledProfileFieldsBox>
         <FormControl fullWidth>
           <Typography id="demo-simple-select-label" sx={{ marginBottom: '6px', fontSize: '14px' }}>

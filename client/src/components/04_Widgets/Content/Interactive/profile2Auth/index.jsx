@@ -1,9 +1,10 @@
 import SecurityIcon from '@assets/security.svg';
-import { Box, FormControlLabel } from '@mui/material';
+import { FormControlLabel } from '@mui/material';
 import { useState } from 'react';
 
 import { connect2AuthFx } from './model/connect-2auth';
 import {
+  Stld2AuthInfoWrapper,
   Styled2AuthContainerHeading,
   Styled2AuthHeading,
   Styled2AuthInfo,
@@ -27,23 +28,13 @@ const Profile2AuthBlock = ({ caption = '' }) => {
       <StyledProfileFieldsBox>
         <StyledAuthContentWrapper>
           <StyledImage src={SecurityIcon} alt="Security icon" />
-          <Box
-            sx={{
-              marginRight: '100px',
-              '@media (max-width: 768px)': {
-                marginRight: '50px',
-              },
-              '@media (max-width: 450px)': {
-                marginRight: '20px',
-              },
-            }}
-          >
+          <Stld2AuthInfoWrapper>
             <Styled2AuthHeading>Двухфакторная аутентификация</Styled2AuthHeading>
             <Styled2AuthInfo>
               Добавьте дополнительную безопасность своей учетной записи, используя двухфакторную
               аутентификацию
             </Styled2AuthInfo>
-          </Box>
+          </Stld2AuthInfoWrapper>
           <FormControlLabel
             control={
               <CustomSwitch

@@ -26,6 +26,7 @@ export const CloseButtonWrapper = styled(Box)(() => ({
   top: '10px',
   right: '10px',
   zIndex: 9001,
+  display: 'block',
   '@media (min-width: 1001px)': {
     display: 'none',
   },

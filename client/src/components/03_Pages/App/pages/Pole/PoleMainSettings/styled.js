@@ -6,7 +6,7 @@ import { Rem } from '@/utils/convertToRem';
 export const SettingsWrapper = styled(Box)(() => ({
   display: 'flex',
   backgroundColor: '#f9fafb',
-  padding: '0 15px',
+  padding: '15px',
 }));
 
 export const MainSettingsContentWrapper = styled(Box)(() => ({

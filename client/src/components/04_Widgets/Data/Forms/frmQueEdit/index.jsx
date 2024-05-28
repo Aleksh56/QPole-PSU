@@ -1,4 +1,4 @@
-import { DeleteOutline, DragIndicator } from '@mui/icons-material';
+import { DeleteOutline } from '@mui/icons-material';
 import {
   Box,
   Checkbox,
@@ -22,7 +22,7 @@ import {
   handleChangeQuestionInfoRequest,
 } from './api/apiRequests';
 import { deleteImageFx } from './model/delete-image';
-import { QueSettingsWrapper } from './styled';
+import { QueBtnWrapper, QueSettingsWrapper, StyledDragIndicator } from './styled';
 
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
@@ -201,13 +201,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
         pollType={pollType}
         renderItem={(item) => (
           <>
-            <DragIndicator
-              sx={{
-                cursor: item.is_free_response || pollStatus ? 'default' : 'grab',
-                opacity: item.is_free_response ? 0 : 1,
-                marginRight: '10px',
-              }}
-            />
+            <StyledDragIndicator isFree={item.is_free_response} status={pollStatus} />
             {pollType === 'Викторина' &&
               (question.has_multiple_choices ? (
                 <Box sx={{ width: '24px', height: '24px', marginRight: '15px' }}>
@@ -266,18 +260,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
           </>
         )}
       />
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          '@media (max-width: 1000px)': {
-            flexDirection: 'column',
-            alignItems: 'start',
-            rowGap: '10px',
-          },
-        }}
-      >
+      <QueBtnWrapper>
         <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '10px' }}>
           {options.length === 0 && !question.is_free && (
             <Typography>Вы не создали ни одного варианта ответа</Typography>
@@ -322,7 +305,7 @@ const FrmQueEdit = ({ question, setSelectedQuestion, onQuestionUpdate }) => {
             sx={{ flexDirection: 'row-reverse', margin: 0 }}
           />
         </Box>
-      </Box>
+      </QueBtnWrapper>
     </Box>
   );
 };

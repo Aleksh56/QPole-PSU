@@ -1,30 +1,18 @@
 import TechWorks from '@assets/works.svg';
-import { Box, Container, Typography } from '@mui/material';
+import { Container } from '@mui/material';
 
+import { InfoText, TitleText, WorksWrapper } from '@/app/template/base/styles';
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 
 const MaintenancePage = () => {
   return (
     <Container>
       <Header isMainPage={false} />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '80vh',
-          textAlign: 'center',
-        }}
-      >
+      <WorksWrapper>
         <img src={TechWorks} style={{ maxWidth: '500px' }} />
-        <Typography sx={{ fontSize: '26px', fontWeight: 500 }}>
-          Ведутся технические работы
-        </Typography>
-        <Typography sx={{ fontSize: '18px', fontWeight: 500, color: '#868686' }}>
-          В течении некоторого времени сервис будет недоступен
-        </Typography>
-      </Box>
+        <TitleText>Ведутся технические работы</TitleText>
+        <InfoText>В течении некоторого времени сервис будет недоступен</InfoText>
+      </WorksWrapper>
     </Container>
   );
 };

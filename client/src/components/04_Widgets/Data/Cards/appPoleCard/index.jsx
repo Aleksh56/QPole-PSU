@@ -56,11 +56,11 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
             <Box zIndex="tooltip">
               <MoreHorizIcon onClick={handleMenuToggle} />
               <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
-                <MenuItem onClick={(e) => handleAction(e, closePollFx)}>Close Poll</MenuItem>
+                <MenuItem onClick={(e) => handleAction(e, closePollFx)}>Закрыть опрос</MenuItem>
                 <MenuItem onClick={(e) => handleAction(e, duplicatePollFx)}>
-                  Duplicate Poll
+                  Копировать опрос
                 </MenuItem>
-                <MenuItem onClick={(e) => handleAction(e, deletePollFx)}>Delete Poll</MenuItem>
+                <MenuItem onClick={(e) => handleAction(e, deletePollFx)}>Удалить опрос</MenuItem>
               </Menu>
             </Box>
           )}

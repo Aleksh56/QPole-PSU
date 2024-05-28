@@ -1,11 +1,10 @@
+import { StyledButton, StyledDescription, StyledTypography } from './styled';
+
 import {
-  StyledButton,
-  StyledDescription,
-  StyledHeroWrapper,
-  StyledInfoWrapper,
-  StyledLeftColumn,
-  StyledTypography,
-} from './styled';
+  StyledFirstHeroWrapper,
+  StyledFirstInfoWrapper,
+  StyledFirstLeftColumn,
+} from '@/constants/styles';
 
 const NoDataHelper = ({
   title = '',
@@ -15,16 +14,16 @@ const NoDataHelper = ({
   image = '',
 }) => {
   return (
-    <StyledHeroWrapper>
-      <StyledLeftColumn>
+    <StyledFirstHeroWrapper>
+      <StyledFirstLeftColumn>
         <StyledTypography variant={'h4'}>{title}</StyledTypography>
-        <StyledInfoWrapper>
+        <StyledFirstInfoWrapper>
           {description && <StyledDescription variant={'body1'}>{description}</StyledDescription>}
           {btnCaption && <StyledButton onClick={() => handler(true)}>{btnCaption}</StyledButton>}
-        </StyledInfoWrapper>
-      </StyledLeftColumn>
+        </StyledFirstInfoWrapper>
+      </StyledFirstLeftColumn>
       <img src={image} alt={`${image}`} />
-    </StyledHeroWrapper>
+    </StyledFirstHeroWrapper>
   );
 };
 

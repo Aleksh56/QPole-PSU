@@ -1,8 +1,8 @@
-import { Box, Checkbox, FormControlLabel, TextField } from '@mui/material';
+import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-import { ContentWrapper, HeaderWrapper, RegTitle } from './styled';
+import { ContentWrapper, HeaderWrapper, RegTitle, StartBtnWrapper } from './styled';
 
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 
@@ -144,9 +144,9 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
         </AnimatePresence>
       </ContentWrapper>
       {isCollapsed && pollData?.poll_setts?.completion_time !== null && (
-        <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+        <StartBtnWrapper>
           <PrimaryButton caption="Начать" handleClick={handleSubmit} disabled={isButtonDisabled} />
-        </Box>
+        </StartBtnWrapper>
       )}
     </HeaderWrapper>
   );

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Table, TableBody, TableCell, TableRow, Paper } from '@mui/material';
+import { Paper, Table, TableBody, TableCell, TableRow } from '@mui/material';
+
 import { StyledTableContainer, StyledTableHead } from './styled';
 
 const CustomTable = ({ columns, data }) => {

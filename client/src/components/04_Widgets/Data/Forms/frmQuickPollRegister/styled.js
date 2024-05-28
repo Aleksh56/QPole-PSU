@@ -23,3 +23,10 @@ export const RegTitle = styled(Typography)(() => ({
 export const ContentWrapper = styled(Box)(() => ({
   width: '100%',
 }));
+
+export const StartBtnWrapper = styled(Box)(() => ({
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  marginTop: '20px',
+}));

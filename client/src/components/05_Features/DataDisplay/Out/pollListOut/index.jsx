@@ -15,7 +15,18 @@ const PollListOut = ({ polls = [] }) => {
   return (
     <PollListGridContainer>
       {polls.map((item) => (
-        <Grid key={v4()} item xs={12} sm={6} sx={{ maxHeight: '280px' }}>
+        <Grid
+          key={v4()}
+          item
+          xs={12}
+          sm={6}
+          sx={{
+            maxHeight: '280px',
+            '@media (max-width: 1000px)': {
+              maxHeight: 'unset',
+            },
+          }}
+        >
           <AppPoleCard
             pollData={item}
             cardButton={

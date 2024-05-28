@@ -1,6 +1,5 @@
 import ResultsIcon from '@mui/icons-material/BarChart';
 import QuestionsIcon from '@mui/icons-material/HelpOutline';
-import PublishIcon from '@mui/icons-material/Public';
 import SettingsIcon from '@mui/icons-material/Settings';
 import IntegrationIcon from '@mui/icons-material/SettingsEthernet';
 
@@ -30,5 +29,4 @@ export const poleNavigationButtonsData = [
     component: '4',
     disabled: true,
   },
-  { icon: PublishIcon, label: 'Публикация', page: 'publish', component: '5', disabled: true },
 ];

@@ -1,6 +1,6 @@
 import MenuIcon from '@mui/icons-material/Menu';
 import { Box, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import ProfileAboutPage from '../ProfileAbout';
