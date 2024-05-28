@@ -59,7 +59,7 @@ jobs:
           port: 22
           script: |
             cd /home/client
-            echo 'VITE_BASE_URL=http://${{ secrets.SERVER_HOST }}' > .env
+            echo 'VITE_BASE_URL=http://${{ secrets.SERVER_HOST }}\nVITE_BASE_WS_URL=${{ secrets.SERVER_HOST }}' > .env
             cd deploy
             docker stop my-frontend-app-container || true
             docker rm my-frontend-app-container || true
