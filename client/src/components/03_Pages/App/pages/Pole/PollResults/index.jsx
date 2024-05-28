@@ -5,6 +5,7 @@ import { MenuItem } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
+import { w3cwebsocket } from 'websocket';
 
 import { getPollAnswersFx, getPollResultsFx } from './model/get-results';
 import { ResultsGridWrapper, SettingsWrapper, StldSelect, Wrapper } from './styled';
@@ -33,7 +34,7 @@ const PollResultsPage = () => {
     };
     fetchResults();
 
-    const socket = new WebSocket(`ws://${config.serverUrl.wsMain}/ws/poll/${id}/`);
+    const socket = new w3cwebsocket(`ws://${config.serverUrl.wsMain}/`);
 
     socket.onmessage = function (event) {
       const message = JSON.parse(event.data);
