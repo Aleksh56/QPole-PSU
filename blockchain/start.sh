@@ -1,10 +1,16 @@
 #!/bin/bash
 
-pkill -f ganache-cli
-killall -q ganache-cli
-ps aux | grep ganache
 
-ganache-cli --host 0.0.0.0 > ganache_output.txt 2>&1 &
+# pkill -f ganache-cli
+# killall -q ganache-cli
+# ps aux | grep ganache
+
+# ganache-cli --host 0.0.0.0 > ganache_output.txt 2>&1 &
+docker stop ganache || true
+
+sleep 5
+
+docker run -d -p 8545:8545 --name ganache trufflesuite/ganache-cli -h 0.0.0.0
 GANACHE_PID=$!
 
 sleep 5

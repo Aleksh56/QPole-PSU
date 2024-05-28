@@ -37,4 +37,5 @@ jobs:
             cd deploy
             docker stop my-blockchain-app-container || true
             docker rm my-blockchain-app-container || true
+            docker stop ganache || true
             docker-compose up -d --build
