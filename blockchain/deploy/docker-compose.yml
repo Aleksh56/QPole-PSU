@@ -1,0 +1,9 @@
+services:
+  blockchain:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: my-blockchain-app-container
+    ports:
+      - "8545:8545"
+    restart: always
