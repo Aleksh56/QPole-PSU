@@ -6,7 +6,7 @@ import { Rem } from '@/utils/convertToRem';
 export const SettingsWrapper = styled(Box)(() => ({
   display: 'flex',
   backgroundColor: '#f9fafb',
-  padding: '15px',
+  padding: Rem(15),
 }));
 
 export const MainSettingsContentWrapper = styled(Box)(() => ({
@@ -25,9 +25,9 @@ export const MobileSettingsContentWrapper = styled(Box)(() => ({
   display: 'grid',
   backgroundColor: '#fff',
   gridTemplateColumns: '1fr',
-  rowGap: '15px',
-  padding: '25px',
-  borderRadius: '15px',
+  rowGap: Rem(15),
+  padding: Rem(25),
+  borderRadius: Rem(15),
   '@media (min-width: 1000px)': {
     display: 'none',
   },
@@ -37,20 +37,20 @@ export const PoleInfoContainer = styled(Box)(() => ({
   width: '65%',
   backgroundColor: '#fff',
   padding: Rem(40),
-  boxShadow: '0 2px 4px rgba(0,0,0,.05), 0 8px 20px rgba(0,0,0,.1)',
+  boxShadow: `0 ${Rem(2)} ${Rem(4)} rgba(0,0,0,.05), 0 ${Rem(8)} ${Rem(20)} rgba(0,0,0,.1)`,
   borderRadius: Rem(5),
 }));
 
 export const TimeSettingsWrapper = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  columnGap: '20px',
+  columnGap: Rem(20),
 }));
 
 export const MobTimeSettingsWrapper = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  columnGap: '20px',
+  columnGap: Rem(20),
   '@media (max-width: 550px)': {
     gridTemplateColumns: '1fr',
   },
@@ -58,5 +58,5 @@ export const MobTimeSettingsWrapper = styled(Box)(() => ({
 
 export const PoleInfoSwitchContainer = styled(Box)(() => ({
   display: 'grid',
-  rowGap: '5px',
+  rowGap: Rem(5),
 }));

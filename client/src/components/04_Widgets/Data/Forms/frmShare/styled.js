@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
-import { Rem } from '@/utils/convertToRem';
-import { Dialog, DialogTitle } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { Dialog, DialogTitle } from '@mui/material';
+
+import { Rem } from '@/utils/convertToRem';
 
 export const ShareDialog = styled(Dialog)(() => ({
-  '& .MuiPaper-root': { borderRadius: '24px' },
+  '& .MuiPaper-root': { borderRadius: Rem(24) },
 }));
 
 export const ShareDialogTitle = styled(DialogTitle)(() => ({

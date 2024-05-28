@@ -22,9 +22,9 @@ export const DialogContentWrapper = styled(Box)(() => ({
 export const ButtonContainer = styled(Box)(() => ({
   cursor: 'pointer',
   textAlign: 'center',
-  padding: '20px 10px',
+  padding: `${Rem(20)} ${Rem(10)}`,
   borderRadius: Rem(7),
-  boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.1), 0px 2px 4px rgba(0, 0, 0, 0.05)',
+  boxShadow: `0 ${Rem(8)} ${Rem(20)} rgba(0, 0, 0, 0.1), 0 ${Rem(2)} ${Rem(4)} rgba(0, 0, 0, 0.05)`,
   transition: 'transform 0.3s ease',
   '&:hover': {
     transform: 'translateY(-8px)',

@@ -10,7 +10,7 @@ export const Wrapper = styled(Box)(() => ({
   maxWidth: Rem(1200),
   margin: `${Rem(24)} auto`,
   columnGap: Rem(30),
-  padding: '0 15px',
+  padding: `0 ${Rem(15)}`,
   '@media (max-width: 1250px)': {
     padding: '0',
   },

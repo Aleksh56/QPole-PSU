@@ -18,7 +18,7 @@ export const StldCard = styled(Card)(() => ({
   boxShadow: 'none',
   display: 'grid',
   gridTemplateColumns: '1fr 1fr', // Equal division for two columns
-  border: `1px solid ${colorConfig.primaryGray}`,
+  border: `${Rem(1)} solid ${colorConfig.primaryGray}`,
   position: 'relative',
   overflow: 'hidden',
   transition: 'transform 0.3s ease',

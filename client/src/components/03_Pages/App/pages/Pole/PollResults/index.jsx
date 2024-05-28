@@ -5,7 +5,6 @@ import { MenuItem } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { v4 } from 'uuid';
-import { w3cwebsocket } from 'websocket';
 
 import { getPollAnswersFx, getPollResultsFx } from './model/get-results';
 import { ResultsGridWrapper, SettingsWrapper, StldSelect, Wrapper } from './styled';
@@ -33,15 +32,16 @@ const PollResultsPage = () => {
       setIsResults(data.participants_quantity > 0);
     };
     fetchResults();
-
-    const socket = new w3cwebsocket(`ws://${config.serverUrl.wsMain}/`);
+    const parsed_id = id.replace(/-/g, '');
+    const socket = new WebSocket(`ws://${config.serverUrl.wsMain}:9000/ws/${parsed_id}/`);
 
     socket.onmessage = function (event) {
-      const message = JSON.parse(event.data);
-      if (message.type === 'results') {
+      const { message } = JSON.parse(event.data);
+      console.log(message);
+      if (message.content === 'my_poll_stats') {
         setQuestions(message.data.questions);
         setIsResults(message.data.participants_quantity > 0);
-      } else if (message.type === 'answers') {
+      } else if (message.content === 'my_poll_users_votes') {
         setAnswers(message.data);
       }
     };

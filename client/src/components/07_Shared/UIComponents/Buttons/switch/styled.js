@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Switch } from '@mui/material';
 
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const IOSSwitch = styled(Switch)(() => ({
   width: 42,
@@ -12,7 +13,7 @@ export const IOSSwitch = styled(Switch)(() => ({
     margin: 2,
     transitionDuration: '300ms',
     '&.Mui-checked': {
-      transform: 'translateX(16px)',
+      transform: `translateX(${Rem(16)})`,
       color: '#fff',
       '& + .MuiSwitch-track': {
         backgroundColor: colorConfig.primaryBlue,
@@ -25,7 +26,7 @@ export const IOSSwitch = styled(Switch)(() => ({
     },
     '&.Mui-focusVisible .MuiSwitch-thumb': {
       color: '#33cf4d',
-      border: '6px solid #fff',
+      border: `${Rem(6)} solid #fff`,
     },
     '&.Mui-disabled .MuiSwitch-thumb': {
       color: 'grey',

@@ -4,7 +4,7 @@ import { Box, Typography } from '@mui/material';
 import { Rem } from '@/utils/convertToRem';
 
 export const HeaderWrapper = styled(Box)(() => ({
-  width: 'calc(100% - 40px)',
+  width: `calc(100% - ${Rem(40)})`,
   border: `${Rem(1)} solid #D7D7D7`,
   padding: Rem(20),
   borderRadius: Rem(16),
@@ -30,7 +30,7 @@ export const ImageWrapper = styled(Box)(() => ({
 export const StyledImage = styled('img')(() => ({
   width: '100%',
   height: '100%',
-  borderRadius: '16px',
+  borderRadius: Rem(16),
   objectFit: 'cover',
 }));
 

@@ -15,7 +15,7 @@ export const QueSettingsWrapper = styled(Box)(() => ({
 export const StyledDragIndicator = styled(DragIndicator)(({ isFree, status }) => ({
   cursor: isFree || status ? 'default' : 'grab',
   opacity: isFree ? 0 : 1,
-  marginRight: '10px',
+  marginRight: Rem(10),
 }));
 
 export const QueBtnWrapper = styled(Box)(() => ({
@@ -25,6 +25,6 @@ export const QueBtnWrapper = styled(Box)(() => ({
   '@media (max-width: 1000px)': {
     flexDirection: 'column',
     alignItems: 'start',
-    rowGap: '10px',
+    rowGap: Rem(10),
   },
 }));

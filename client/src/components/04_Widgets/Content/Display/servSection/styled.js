@@ -15,11 +15,11 @@ export const StyledSectionHeading = styled(Typography)(() => ({
 
 export const StyledCardsWrapper = styled(Box)(() => ({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+  gridTemplateColumns: `repeat(auto-fill, minmax(${Rem(300)}, 1fr))`,
   gap: Rem(20),
   justifyContent: 'space-around',
   '@media (max-width: 650px)': {
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gridTemplateColumns: `repeat(auto-fill, minmax(${Rem(280)}, 1fr))`,
     gap: Rem(10),
   },
 }));

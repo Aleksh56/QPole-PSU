@@ -49,11 +49,11 @@ export const Listbox = styled('ul')(() => ({
   overflow: 'auto',
   outline: 0,
   background: '#fff',
-  border: '1px solid gray',
+  border: `${Rem(1)} solid gray`,
   color: '#000',
   zIndex: 1,
   '@media (max-width: 768px)': {
-    minWidth: '150px',
+    minWidth: Rem(150),
   },
 }));
 

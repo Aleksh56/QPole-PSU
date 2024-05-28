@@ -27,7 +27,7 @@ export const ImageWrapper = styled(Box)(() => ({
 export const StyledImage = styled('img')(() => ({
   width: '100%',
   height: '100%',
-  borderRadius: '16px',
+  borderRadius: Rem(16),
   objectFit: 'cover',
 }));
 
@@ -46,6 +46,6 @@ export const DescriptionTagsWrapper = styled(Box)(() => ({
 
 export const ResultContainer = styled(Grid)(() => ({
   marginTop: Rem(30),
-  border: '1px solid black',
+  border: `${Rem(1)} solid black`,
   rowGap: Rem(10),
 }));

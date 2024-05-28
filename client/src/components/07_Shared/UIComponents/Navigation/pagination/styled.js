@@ -1,7 +1,8 @@
-import { colorConfig } from '@/app/template/config/color.config';
 import styled from '@emotion/styled';
 import { Box, Pagination, Stack } from '@mui/material';
 import { Rem } from '@utils/convertToRem';
+
+import { colorConfig } from '@/app/template/config/color.config';
 
 export const StyledStack = styled(Stack)(() => ({
   display: 'flex',
@@ -47,6 +48,6 @@ export const StyledPagination = styled(Pagination)(() => ({
   '& .MuiPaginationItem-outlined.MuiPaginationItem-rounded.Mui-selected': {
     backgroundColor: colorConfig.primaryBlue,
     color: '#fff',
-    boxShadow: `0px 0px 7px -1px ${colorConfig.primaryBlue}`,
+    boxShadow: `0 0 ${Rem(7)} -1px ${colorConfig.primaryBlue}`,
   },
 }));

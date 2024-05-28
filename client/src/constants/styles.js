@@ -6,9 +6,9 @@ import { Rem } from '@/utils/convertToRem';
 export const StyledProfileContainer = styled(Box)(() => ({
   maxWidth: Rem(580),
   margin: '0 auto',
-  padding: '50px 20px 0 20px',
+  padding: `${Rem(50)} ${Rem(20)} 0 ${Rem(20)}`,
   '@media (max-width: 768px)': {
-    padding: '25px 20px 0 20px',
+    padding: `${Rem(25)} ${Rem(20)} 0 ${Rem(20)}`,
   },
 }));
 
@@ -17,14 +17,14 @@ export const StyledProfileFieldsBox = styled(Box)(() => ({
   marginBottom: Rem(10),
   padding: Rem(15),
   backgroundColor: '#fff',
-  boxShadow: '0px 1px 3px rgba(140,148,155,0.1),0px 5px 10px rgba(140,148,155,0.08)',
+  boxShadow: `0 ${Rem(1)} ${Rem(3)} rgba(140,148,155,0.1),0 ${Rem(5)} ${Rem(10)} rgba(140,148,155,0.08)`,
   borderRadius: Rem(10),
 }));
 
 export const StyledFormControlLabel = styled(FormControlLabel)(() => ({
   maxWidth: 'max-content',
   '& .MuiTypography-root': {
-    fontSize: '14px',
+    fontSize: Rem(14),
     color: '#909090',
   },
 }));

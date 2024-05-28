@@ -5,7 +5,7 @@ import { Rem } from '@/utils/convertToRem';
 
 export const CardWrapper = styled(Box)(() => ({
   padding: Rem(20),
-  boxShadow: '0 2px 4px rgba(0,0,0,.05), 0 8px 20px rgba(0,0,0,.1)',
+  boxShadow: `0 ${Rem(2)} ${Rem(4)} rgba(0,0,0,.05), 0 ${Rem(8)} ${Rem(20)} rgba(0,0,0,.1)`,
   borderRadius: Rem(10),
   display: 'flex',
   flexDirection: 'column',

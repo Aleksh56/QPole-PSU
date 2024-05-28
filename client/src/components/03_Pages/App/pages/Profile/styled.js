@@ -15,7 +15,7 @@ export const SidebarWrapper = styled(Box)(({ isSideOpen }) => ({
     width: Rem(240),
     transform: isSideOpen ? 'translateX(0)' : 'translateX(-100%)',
     zIndex: 1200,
-    boxShadow: '2px 0 12px rgba(0,0,0,0.5)',
+    boxShadow: `${Rem(2)} 0 ${Rem(12)} rgba(0,0,0,0.5)`,
     backgroundColor: '#fff',
   },
 }));
@@ -33,7 +33,7 @@ export const ProfileContentWrapper = styled(Box)(() => ({
 }));
 
 export const MobMenuWrapper = styled(Box)(() => ({
-  padding: '16px',
+  padding: Rem(16),
   backgroundColor: '#e0e0e0',
   display: 'flex',
   alignItems: 'center',

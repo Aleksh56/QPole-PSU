@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import { Rem } from '@/utils/convertToRem';
 import { NavLink } from 'react-router-dom';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledNavigation = styled('nav')(() => ({
   '@media (max-width: 900px)': {
@@ -15,7 +16,7 @@ export const StyledNavigationList = styled('ul')(() => ({
   columnGap: Rem(15),
   '& a:not(:last-child)': {
     paddingRight: Rem(15),
-    borderRight: '2px solid #D4D4D4',
+    borderRight: `${Rem(2)} solid #D4D4D4`,
   },
 }));
 

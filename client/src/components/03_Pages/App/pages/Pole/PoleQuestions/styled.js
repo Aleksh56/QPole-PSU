@@ -8,7 +8,7 @@ export const ListWrapper = styled(Box)(() => ({
   width: '100%',
   maxWidth: Rem(1200),
   margin: '0 auto',
-  padding: `${Rem(20)} 15px`,
+  padding: `${Rem(20)} ${Rem(15)}`,
   columnGap: Rem(30),
   '@media (max-width: 1000px)': {
     alignItems: 'center',
@@ -22,7 +22,7 @@ export const ListWrapper = styled(Box)(() => ({
 
 export const LoaderWrapper = styled(Box)(({ matches }) => ({
   overflow: 'hidden',
-  padding: matches ? '0 15px' : 0,
+  padding: matches ? `0 ${Rem(15)}` : 0,
   height: 'auto',
   minHeight: matches ? '100vh' : 'unset',
 }));
