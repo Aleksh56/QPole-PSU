@@ -34,4 +34,5 @@ class PollStatsConsumer(AsyncWebsocketConsumer):
         if isinstance(message, dict):
             message['content'] = event.get('content', None)
 
+        print(message)
         await self.send(text_data=json.dumps({"message": message}))

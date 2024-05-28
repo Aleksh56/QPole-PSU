@@ -3,14 +3,26 @@
 version: "3.3"
 
 services:
-  app:
-    build:
-      context: .
-    container_name: django-server-container
-    restart: always
+  wsgi:
+    build: .
+    command: gunicorn --bind 0.0.0.0:8000 qpoll.wsgi:application
+    container_name: django-server-container-wsgi
     volumes:
+      - .:/app
       - static-data:/vol/static
       - media-data:/vol/media
+    ports:
+      - "8000:8000"
+
+  asgi:
+    build: .
+    command: daphne -b 0.0.0.0 -p 9000 qpoll.asgi:application
+    container_name: django-server-container-asgi
+    volumes:
+      - .:/app
+    ports:
+      - "9000:9000"
+
 
   proxy:
     build:
@@ -24,7 +36,7 @@ services:
       - 80:80
       - 443:443
     depends_on:
-      - app
+      - wsgi
 
 volumes:
   static-data:

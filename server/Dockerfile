@@ -16,7 +16,7 @@ RUN apt-get update --allow-unauthenticated \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies, including MySQL Connector
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire project to the working directory
 COPY . /app/
@@ -35,4 +35,5 @@ EXPOSE 8000
 
 # Run Daphne
 # CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "qpoll.asgi:application"]
-ENTRYPOINT ["gunicorn", "qpoll.wsgi", "-b", "0.0.0.0:8000"]
+# ENTRYPOINT ["gunicorn", "qpoll.wsgi", "-b", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "qpoll.wsgi:application"]
