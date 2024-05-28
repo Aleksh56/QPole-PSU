@@ -34,4 +34,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install 16
             nvm use 16
-            npm install
+            cd deploy
+            docker stop my-blockchain-app-container || true
+            docker rm my-blockchain-app-container || true
+            docker-compose up -d --build
