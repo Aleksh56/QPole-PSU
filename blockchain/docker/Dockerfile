@@ -6,6 +6,6 @@ COPY . /app/
 
 RUN npm install
 
-RUN chmod +x /start.sh
+RUN chmod +x /app/start.sh
 
-CMD ["/start.sh"]
+CMD ["/app/start.sh"]
