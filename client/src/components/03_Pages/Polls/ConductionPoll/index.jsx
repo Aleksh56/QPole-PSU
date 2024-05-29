@@ -7,6 +7,7 @@ import PollResult from '../PollResult';
 
 import { fetchPollQuestions } from './model/fetch-questions';
 import { getRemainingTimeFx } from './model/get-remaining-time';
+import { sendAnonymousAnswersFx } from './model/send-anonymous-answers';
 import { sendAnswersRequestFx } from './model/send-answers';
 import { startConductionFx } from './model/start-conduction';
 import { $answersStore, resetAnswers } from './store/answer-store';
@@ -87,6 +88,7 @@ const ConductionPollPage = () => {
   }, [pollData.questions, answers]);
 
   const handleSubmit = async (isTimeEnd = false) => {
+    await sendAnonymousAnswersFx({ answers, id, isTimeEnd });
     const response = await sendAnswersRequestFx({ answers, id, isTimeEnd });
     setResults(response.data);
     resetAnswers();
