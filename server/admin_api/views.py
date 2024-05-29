@@ -430,3 +430,9 @@ def study_group(request):
         return Response(f"Внутренняя ошибка сервера в admin study_group: {ex}",
                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
+
+
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+
+class test_api(RetrieveUpdateDestroyAPIView):
+    pass

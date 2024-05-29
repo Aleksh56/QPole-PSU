@@ -47,7 +47,7 @@ def register(request):
                     user = serializer.save()
                     data['user'] = user.id
                     data['email'] = email
-                    data['role'] = 3
+                    data['role'] = 2
 
                     serializer = ProfileSerializer(data=data)
                     if serializer.is_valid():

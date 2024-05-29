@@ -108,6 +108,7 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
     'api.middleware.MaintenanceMiddleware',
+    'api.middleware.BannedUserMiddleware',
 ]
 
 DEBUG_TOOLBAR_PANELS = [
@@ -268,11 +269,11 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = env('SERVER_EMAIL')
 
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
-}
+CSRF_TRUSTED_ORIGINS = [
+    'http://147.45.102.7',
+    'https://147.45.102.7',
+]
+
 
 # w3 = Web3(Web3.HTTPProvider('http://188.225.45.226:8545'))
 

@@ -13,7 +13,7 @@ logger = logging.getLogger('debug')
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, verbose_name='Пользователь')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='profile')
     email = models.EmailField('Почта', blank=True, null=True)
     name = models.CharField('Имя', max_length=50, blank=True, null=True)
     surname = models.CharField('Фамилия', max_length=50, blank=True, null=True)
@@ -530,7 +530,23 @@ class Poll(models.Model):
             else: return None
         except Exception:
             return None
-            
+
+    @property
+    def start_end_seconds_left(self):
+        try:
+            if self.poll_setts:
+                start_time = self.poll_setts.start_time
+
+                if start_time:
+                    time_left = max((start_time - timezone.now()).total_seconds(), 0)
+                    return time_left
+                else:
+                    return None
+            else:
+                return None
+        except Exception:
+            return None
+
     @property
     def opened_for_registration(self):
         try:

@@ -4,7 +4,6 @@ from functools import partial
 
 from .validators import *
 from .models import *
-# from .utils import generate_poll_qr, get_qrcode_img_bytes
 from .exсeptions import *
 
 from login.validators import validate_number
@@ -312,8 +311,30 @@ class BasePollSerializer(serializers.ModelSerializer):
     end_time_left = serializers.SerializerMethodField()
     registration_start_time_left = serializers.SerializerMethodField()
     registration_end_time_left = serializers.SerializerMethodField()
-    
 
+    has_poll_started = serializers.SerializerMethodField()
+    has_poll_ended = serializers.SerializerMethodField()
+    
+    def get_has_poll_started(self, instance):
+        start_end_seconds_left = instance.start_end_seconds_left
+        if start_end_seconds_left is None:
+            return None
+        
+        if start_end_seconds_left == 0:
+            return True
+        else:
+            return False
+
+    def get_has_poll_ended(self, instance):
+        end_time_seconds_left = instance.end_time_seconds_left
+        if end_time_seconds_left is None:
+            return None
+        
+        if end_time_seconds_left == 0:
+            return True
+        else:
+            return False
+    
     def get_start_time_left(self, instance):
         return instance.start_time_left
     

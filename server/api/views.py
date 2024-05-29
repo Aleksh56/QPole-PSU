@@ -14,10 +14,7 @@ from .pollvoting import *
 
 from admin_api.models import Settings
 
-from .consumers import PollStatsConsumer
-
 import os
-import json
 
 import logging
 logger = logging.getLogger('debug') 

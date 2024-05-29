@@ -1,4 +1,3 @@
-# chat/consumers.py
 import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -34,5 +33,4 @@ class PollStatsConsumer(AsyncWebsocketConsumer):
         if isinstance(message, dict):
             message['content'] = event.get('content', None)
 
-        print(message)
         await self.send(text_data=json.dumps({"message": message}))
