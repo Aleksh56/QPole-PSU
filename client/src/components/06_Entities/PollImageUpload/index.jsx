@@ -34,9 +34,6 @@ const PollImageUpload = ({ image = '', onFileSelect, handleDelete, disabled }) =
   const handleFileClear = () => {
     handleDelete();
     setPreview('');
-    if (onFileClear) {
-      onFileClear();
-    }
   };
 
   return (

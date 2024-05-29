@@ -96,7 +96,7 @@ const GenExcelResults = ({ data, questions }) => {
 
   return (
     <div>
-      <DownloadBtn onClick={downloadExcel}>Выгрузить в Excel1</DownloadBtn>
+      <DownloadBtn onClick={downloadExcel}>Выгрузить в Excel</DownloadBtn>
     </div>
   );
 };
