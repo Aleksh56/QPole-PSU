@@ -293,7 +293,6 @@ class BasePollSerializer(serializers.ModelSerializer):
     name = serializers.CharField(validators=[BaseValidator.name], required=False, allow_blank=True)
     description = serializers.CharField(validators=[BaseValidator.description], required=False, allow_blank=True)
     tags = serializers.CharField(validators=[BaseValidator.description], required=False, allow_blank=True)
-    image = serializers.ImageField(validators=[BaseValidator.image], required=False)
     duration = serializers.DurationField(validators=[PollValidator.duration], required=False)  
     
     is_in_production = serializers.BooleanField(validators=[PollValidator.is_in_production], required=False)    
@@ -507,8 +506,7 @@ class PollSerializer(BasePollSerializer):
     auth_fields = PollAuthFieldSerializer(many=True, required=False)
     registrated_users = MiniProfileSerializer(many=True, required=False)
    
-
-    # qrcode_img = serializers.SerializerMethodField()
+    image = serializers.ImageField(validators=[BaseValidator.image], required=False)
     
     is_user_in_allowed_groups = serializers.SerializerMethodField()
     

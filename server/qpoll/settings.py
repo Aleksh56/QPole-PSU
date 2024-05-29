@@ -7,7 +7,6 @@ from datetime import timedelta
 env = environ.Env()
 environ.Env.read_env()
 
-# from web3 import Web3
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -275,30 +274,33 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 
-# w3 = Web3(Web3.HTTPProvider('http://188.225.45.226:8545'))
+from web3 import Web3
 
-# import json
+w3 = Web3(Web3.HTTPProvider('http://147.45.102.7:8545'))
 
-# def connect_to_web3():
-#     my_abi = None
-#     my_contract_address = None
+import json
+
+def connect_to_web3():
+    my_abi = None
+    my_contract_address = None
+    
+    with open('qpoll/contract_address.txt', 'r') as file:
+        my_contract_address = file.read()
         
-#     #    with open('qpoll/contract_address.txt', 'r') as file:
-#     #        my_contract_address = file.read()
-#     # my_contract_address = my_contract_address.strip()
+    my_contract_address = my_contract_address.strip()
 
 
-#     with open('qpoll/MiniPoll.json', 'r') as f:
-#         data = json.load(f)
-#         my_abi = data['abi']
+    with open('qpoll/MiniPoll.json', 'r') as f:
+        data = json.load(f)
+        my_abi = data['abi']
 
-        
-#     contract_address = w3.to_checksum_address('0xedd273449312c66e29fc9b8ce286db2f032f2931')
+ 
+    contract_address = w3.to_checksum_address(my_contract_address)
 
-#     abi = my_abi
-#     return contract_address, abi
+    abi = my_abi
+    return contract_address, abi
 
 
-# contract_address, abi = connect_to_web3()
+contract_address, abi = connect_to_web3()
 
-# contract = w3.eth.contract(address=contract_address, abi=abi)
+contract = w3.eth.contract(address=contract_address, abi=abi)
