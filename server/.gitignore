@@ -29,7 +29,4 @@ __pycache__/
 
 test.py
 
-qpoll/contract_address.txt
-qpoll/MiniPoll.json
-
 .env

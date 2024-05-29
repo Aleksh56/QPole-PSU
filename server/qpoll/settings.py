@@ -284,11 +284,10 @@ def connect_to_web3():
     my_abi = None
     my_contract_address = None
     
-    # with open('qpoll/contract_address.txt', 'r') as file:
-    #     my_contract_address = file.read()
-
-
-    my_contract_address = '0x3cd53c52de7e9919c3969f0ea73732b01af7611c'.strip()
+    with open('qpoll/contract_address.txt', 'r') as file:
+        my_contract_address = file.read()
+        
+    my_contract_address = my_contract_address.strip()
 
 
     with open('qpoll/MiniPoll.json', 'r') as f:
