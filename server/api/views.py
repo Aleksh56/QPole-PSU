@@ -21,6 +21,16 @@ import os
 import logging
 logger = logging.getLogger('debug') 
 
+from .generics import CRUDapi
+
+class MyProfile(CRUDapi):
+    model = Profile
+    serializer_class = ProfileSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+    lookup_field = 'user_id'
+    lookup_url_kwarg = 'user_id'
+    order_by = 'user_id'
+
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH'])
 @permission_classes([IsAuthenticated])
@@ -87,35 +97,16 @@ def my_profile(request):
         
 
 
-@api_view(['GET', 'POST', 'DELETE', 'PATCH'])
-@permission_classes([IsAuthenticated])
-@transaction.atomic
-def study_group(request):
-    try:
-        if request.method == 'GET':
-            study_group_name = request.GET.get('study_group_name', None)
 
-            if study_group_name:
-                study_group = StudyGroup.objects.filter(name=study_group_name).first()
-                if not study_group:
-                    raise ObjectNotFoundException('StudyGroup')
-                serializer = StudyGroupSerializer(study_group)
-            else:
-                study_groups = StudyGroup.objects.all().order_by('-id')
-                study_groups = get_paginated_response(request, study_groups, StudyGroupSerializer)
+class StudyGroupAPI(CRUDapi):
+    model = StudyGroup
+    serializer_class = StudyGroupSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'name'
+    lookup_url_kwarg = 'study_group_name'
+    order_by = 'id'
 
-                return Response(study_groups)
-    
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
-    except APIException as api_exception:
-        return Response({'message':f"{api_exception}"}, api_exception.status_code)
-    
-    except Exception as ex:
-        return Response(f"Внутренняя ошибка сервера в study_group: {ex}",
-                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+    http_method_names = ['GET']
 
 
 @api_view(['GET', 'POST', 'DELETE', 'PATCH', 'PUT'])

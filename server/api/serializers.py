@@ -249,9 +249,9 @@ class PollSettingsSerializer(serializers.ModelSerializer):
 
     def set_completion_time(self, value):
         if value:
-            hours, minutes = map(int, value.split(':'))
-            if not (hours == 0 and minutes == 0):
-                duration_obj = timedelta(hours=hours, minutes=minutes)
+            minutes, seconds = map(int, value.split(':'))
+            if not (minutes == 0 and seconds == 0):
+                duration_obj = timedelta(minutes=minutes, seconds=seconds)
                 self.instance.completion_time = duration_obj
             else:
                 self.instance.completion_time = None

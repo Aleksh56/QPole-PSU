@@ -3,9 +3,9 @@ from .views import *
 from .tests import *
 
 urlpatterns = [
-    path('my_profile/', my_profile, name='my_profile'),
+    path('my_profile/', MyProfile.as_view(), name='my_profile'),
     path('my_poll/', my_poll, name='my_poll'),
-    path('study_group/', study_group, name='study_group'),
+    path('study_group/', StudyGroupAPI.as_view(), name='study_group'),
     path('my_poll_settings/', my_poll_settings, name='my_poll_settings'),
     path('my_poll_question/', my_poll_question, name='my_poll_question'),
     path('my_poll_question_option/', my_poll_question_option, name='my_poll_question_option'),

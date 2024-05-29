@@ -177,3 +177,16 @@ class PollValidationException(APIException):
 
     def __init__(self, detail=default_detail):
         self.detail = {'message':f"{detail}", 'severity': 'error'}
+
+
+class InstanceNotFoundException(APIException):
+    status_code = 404
+    default_code = 'instance_not_found'
+
+    def __init__(self, model=None, detail=None):
+        if detail is None:
+            detail = f"Объект модели '{model}' не найден."
+        self.detail = detail
+
+    def __str__(self):
+        return self.detail
