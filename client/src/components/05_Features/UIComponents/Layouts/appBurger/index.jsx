@@ -13,9 +13,9 @@ import {
   UserWrapper,
 } from './styled';
 
-import { appHeaderData } from '@/data/navigation';
+import { appHeaderMobileData } from '@/data/navigation';
 
-const AppBurgerMenu = ({ drawerOpen, toggleDrawer, userData, role }) => {
+const AppBurgerMenu = ({ drawerOpen, toggleDrawer, userData, role, onExit }) => {
   return (
     <StyledDrawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
       <BurgerList>
@@ -27,8 +27,8 @@ const AppBurgerMenu = ({ drawerOpen, toggleDrawer, userData, role }) => {
           </UserInfo>
           <KeyboardArrowRightIcon />
         </UserWrapper>
-        {appHeaderData.map((item) => (
-          <LinkWrapper key={v4()} to={item.to}>
+        {appHeaderMobileData(onExit).map((item) => (
+          <LinkWrapper key={v4()} to={item.to} onClick={item.onClick}>
             <item.icon />
             <Typography>{item.caption}</Typography>
           </LinkWrapper>

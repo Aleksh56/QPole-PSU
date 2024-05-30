@@ -1,11 +1,12 @@
-import { Button } from '@mui/material';
-import { Box } from '@mui/system';
 import FileSaver from 'file-saver';
 import QRCode from 'qrcode.react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
+import { QRCodeWrapper } from './styled';
+
+import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import usePollData from '@/hooks/usePollData';
 
 const FrmShareQR = () => {
@@ -30,10 +31,10 @@ const FrmShareQR = () => {
   };
 
   return (
-    <Box>
+    <QRCodeWrapper>
       <QRCode id="qrCodeEl" value={surveyLink} size={256} level={'H'} includeMargin={true} />
-      <Button onClick={downloadQR}>{t('button.downloadQR')}</Button>
-    </Box>
+      <PrimaryButton caption={t('button.downloadQR')} handleClick={downloadQR} />
+    </QRCodeWrapper>
   );
 };
 

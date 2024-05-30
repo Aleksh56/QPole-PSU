@@ -54,6 +54,7 @@ const AppHeader = () => {
           toggleDrawer={toggleDrawer}
           userData={userData}
           role={role}
+          onExit={handleLogOut}
         />
         <Dropdown>
           <StyledHeaderProfile>
