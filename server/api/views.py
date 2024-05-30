@@ -1546,7 +1546,7 @@ class PollAPI(CRUDapi):
     # сделать наследование всех PollAPI
     # добавь варьирование в зависимости от poll_id
 
-    queryset = Poll.my_manager.get_all_avaliable_for_voting()
+    queryset = Poll.my_manager.get_all()
 
 
 class PollForMeAPI(PollAPI):

@@ -255,13 +255,14 @@ class MyPollManager(models.Manager):
     
     def get_all_avaliable_for_voting(self, filters=Q()):
         """Получение всех опросов, доступных для прохождения"""
-
+        filters &= Q(is_in_production=True)
         objects = self.get_all_with_answers(filters)
         objects = self.__annotate_time(objects)
         return objects.filter(Q(is_avaliable_for_voting=True), ~Q(poll_type__name__in=['Быстрый', 'Анонимный']))
     
     def get_all_avaliable_to_me(self, user_profile, filters=Q()):
         """Получение всех опросов доступных мне"""
+        filters &= Q(is_in_production=True)
         objects = (
             self.get_all_avaliable_for_voting(filters)
             .annotate(
