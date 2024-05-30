@@ -2,7 +2,7 @@ import MiniPollABI from '@config/ABI.json';
 import { createEffect } from 'effector';
 import Web3 from 'web3';
 
-const ganacheUrl = 'http://147.45.102.7:8545';
+const ganacheUrl = 'http://81.200.154.220:8545';
 
 export const sendAnonymousAnswersFx = createEffect(async ({ answers, id, isTimeEnd }) => {
   const web3 = new Web3(ganacheUrl);
