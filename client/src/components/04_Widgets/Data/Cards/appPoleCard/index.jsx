@@ -38,7 +38,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
   return (
     <StldCard>
       <StldCardMedia
-        image={pollData.image ? `${config.serverUrl.main}${pollData.image}` : zaglushka}
+        image={pollData.image ? `${config.serverUrl.main}/${pollData.image}` : zaglushka}
         title="Poll Image"
       />
       <StldCardContent>

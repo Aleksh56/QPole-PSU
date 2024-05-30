@@ -7,8 +7,7 @@ import { v4 } from 'uuid';
 
 import { StyledNavigation, StyledNavigationLink } from './styled';
 
-import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
-import { commonHeaderLinksData } from '@/data/navigation';
+import { mainHeaderLinksData, mobileHeaderLinksData } from '@/data/navigation';
 import useAuth from '@/hooks/useAuth';
 
 const HeaderNavOut = ({ children, isMobile }) => {
@@ -16,9 +15,7 @@ const HeaderNavOut = ({ children, isMobile }) => {
   const { isAuthenticated } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const toggleDrawer = (open) => (event) => {
-    setIsDrawerOpen(open);
-  };
+  const toggleDrawer = (open) => (event) => setIsDrawerOpen(open);
 
   return (
     <StyledNavigation>
@@ -42,30 +39,25 @@ const HeaderNavOut = ({ children, isMobile }) => {
               >
                 <CloseIcon />
               </IconButton>
-              <List style={{ width: '200px', height: '100%' }}>
-                {commonHeaderLinksData.map((item) => {
+              <List style={{ width: '200px', height: '100%', marginTop: '30px' }}>
+                {mobileHeaderLinksData(isAuthenticated).map((item) => {
                   return (
                     <ListItem key={v4()}>
                       <StyledNavigationLink key={v4()} to={item.to}>
+                        <item.icon />
                         {item.caption}
                       </StyledNavigationLink>
                     </ListItem>
                   );
                 })}
-                <Box sx={{ display: 'grid', rowGap: '20px', padding: '0 16px' }}>
-                  <PrimaryButton caption={t('button.createQuiz')} to="/signup" />
-                  <PrimaryButton
-                    caption={isAuthenticated ? t('button.profile') : t('button.login')}
-                    to={isAuthenticated ? '/app' : '/signin'}
-                  />
-                </Box>
+                <Box sx={{ display: 'grid', rowGap: '20px', padding: '0 16px' }}></Box>
               </List>
             </Box>
           </Drawer>
         </>
       ) : (
         <>
-          {commonHeaderLinksData.map((item) => {
+          {mainHeaderLinksData.map((item) => {
             return (
               <StyledNavigationLink key={v4()} to={item.to}>
                 {item.caption}

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import { Rem } from '@/utils/convertToRem';
 import { Link } from 'react-router-dom';
+
 import { colorConfig } from '@/app/template/config/color.config';
+import { Rem } from '@/utils/convertToRem';
 
 export const StyledNavigation = styled('nav')(() => ({
   display: 'grid',
@@ -13,4 +14,8 @@ export const StyledNavigation = styled('nav')(() => ({
 export const StyledNavigationLink = styled(Link)(() => ({
   color: colorConfig.primaryBlack,
   opacity: '.7',
+  display: 'grid',
+  alignItems: 'center',
+  gridTemplateColumns: 'auto 1fr',
+  columnGap: Rem(10),
 }));
