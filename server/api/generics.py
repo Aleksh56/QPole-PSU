@@ -20,12 +20,17 @@ from django.contrib.auth.models import AnonymousUser
 class CRUDapi(RetrieveUpdateDestroyAPIView):
     model = None
     serializer_class = None
+    mini_serializer_class = None
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = 'id'
     lookup_url_kwarg = 'id'
     order_by = 'id'
 
     queryset = None
+
+    model_type_model = None
+    model_type_model_field = None
+    model_type_model_url_kwarg  = None
 
     put_action_name = 'request_type'
 
@@ -36,7 +41,27 @@ class CRUDapi(RetrieveUpdateDestroyAPIView):
         current_user = self.request.user
         return get_object_or_404(Profile, user=current_user) if not isinstance(current_user, AnonymousUser) else None
     
+    def get_profile_to_context(self):
+        profile = self.get_profile()
+        return {'profile': profile} if profile else {}
 
+    def get_serializer_class(self):
+        if self.request.query_params.get(self.lookup_url_kwarg, None):
+            return self.serializer_class
+
+        return self.mini_serializer_class
+    
+    def get_serializer(self, *args, **kwargs):
+        kwargs['context'] = self.get_serializer_context()
+        return self.get_serializer_class()(*args, **kwargs)
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update(self.get_profile_to_context())
+        return context
+
+
+    
     def get_permissions(self):
         if self.request.method in ['PATCH', 'DELETE', 'POST', 'PUT']:
             self.permission_classes = [IsOwnerOrReadOnly]
@@ -45,21 +70,34 @@ class CRUDapi(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         if not self.model:
             raise AssertionError("Необходимо указать Модель.")
-        
-        if not self.queryset:
-            queryset = self.model.objects.all()
-            
-            filter_params = self.request.query_params.dict()
-            filter_params.pop('page', None)
-            filter_params.pop('page_size', None)
-            filter_params.pop(self.lookup_url_kwarg, None)
-            
-            if filter_params:
-                queryset = queryset.filter(**filter_params)
 
-            return queryset
-        else:
-            return self.queryset
+        queryset = self.queryset if self.queryset is not None else self.model.objects.all()
+
+        filter_params = self.request.query_params.dict()
+        filter_params.pop('page', None)
+        filter_params.pop('page_size', None)
+        filter_params.pop(self.lookup_url_kwarg, None)
+
+        filters = Q()
+
+        filter_fields = getattr(self.model._meta, 'filter_fields', [])
+
+
+        for field in filter_fields:
+            value = filter_params.get(field, None)
+            if value:
+                if field == self.model_type_model_url_kwarg:
+                    model_type = self.model_type_model.objects.filter(name=value).first()
+                    if not model_type:
+                        raise ObjectNotFoundException(model=self.model_type_model)
+                    filters &= Q(**{self.model_type_model_field: model_type})
+                elif field == 'name':
+                    filters &= Q(name__icontains=value)
+                else:
+                    filters &= Q(**{field: value})
+
+        queryset = queryset.filter(filters)
+        return queryset
 
     def get_object(self):
         lookup_url_kwarg_data = self.request.query_params.get(self.lookup_url_kwarg)
@@ -82,7 +120,8 @@ class CRUDapi(RetrieveUpdateDestroyAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             queryset = self.get_queryset().order_by(self.order_by)
-            pagination_data = get_paginated_response(request, queryset, self.serializer_class)
+            pagination_data = get_paginated_response(request, queryset, self.get_serializer_class(),
+                                                     context=self.get_serializer_context())
             return Response(pagination_data, status=status.HTTP_200_OK)
    
     @transaction.atomic
@@ -137,5 +176,6 @@ class CRUDapi(RetrieveUpdateDestroyAPIView):
     def handle_exception(self, exc):
         if isinstance(exc, APIException):
             return Response({'message': f"{exc}"}, exc.status_code)
+        logger.error(f"Внутренняя ошибка сервера в poll: {exc}")
         return Response(f"Внутренняя ошибка сервера в {self.__class__.__name__}: {exc}", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

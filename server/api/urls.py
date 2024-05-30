@@ -3,7 +3,7 @@ from .views import *
 from .tests import *
 
 urlpatterns = [
-    path('my_profile/', MyProfile.as_view(), name='my_profile'),
+    path('my_profile/', my_profile, name='my_profile'),
     path('my_poll/', my_poll, name='my_poll'),
     path('study_group/', StudyGroupAPI.as_view(), name='study_group'),
     path('my_poll_settings/', my_poll_settings, name='my_poll_settings'),
@@ -13,7 +13,7 @@ urlpatterns = [
     path('my_poll_stats/', my_poll_stats, name='my_poll_stats'),
     path('my_quick_poll_poll_user_answers/', my_quick_poll_poll_user_answers, name='my_quick_poll_poll_user_answers'),
     path('poll_answer_group/', poll_answer_group, name='poll_answer_group'),
-    path('poll/', poll, name='poll'),
+    path('poll/', PollAPI.as_view(), name='poll'),
     path('polls_for_me/', polls_for_me, name='polls_for_me'),
     path('poll_voting/', poll_voting, name='poll_voting'),
     path('poll_voting_started/', poll_voting_started, name='poll_voting_started'),

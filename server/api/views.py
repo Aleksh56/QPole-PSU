@@ -25,7 +25,8 @@ from .generics import CRUDapi
 
 class MyProfile(CRUDapi):
     model = Profile
-    serializer_class = ProfileSerializer
+    serializer_class = GetProfileSerializer
+    mini_serializer_class = ProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
     lookup_field = 'user_id'
     lookup_url_kwarg = 'user_id'
@@ -1527,67 +1528,29 @@ def poll_voting_ended(request):
 
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def poll(request):
-    try:
-        current_user = request.user
-        if not isinstance(current_user, AnonymousUser):
-            my_profile = get_object_or_404(Profile, user=current_user)
-        else:
-            my_profile = None
+class PollAPI(CRUDapi):
+    model = Poll
+    serializer_class = PollSerializer
+    mini_serializer_class = MiniPollSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'poll_id'
+    lookup_url_kwarg = 'poll_id'
+    order_by = '-created_date'
+    filter_fields = ['poll_type', 'name', 'is_anonymous', 'is_paused', 'is_closed']
 
-        if request.method == 'GET':
-            poll_id = request.GET.get('poll_id', None)
+    model_type_model = PollType
+    model_type_model_field = 'poll_type'
+    model_type_model_url_kwarg  = 'poll_type'
 
-            if poll_id:
-                filters = Q(poll_id=poll_id) & Q(is_in_production=True)
-                poll = Poll.my_manager.get_one(filters).first()
-                if not poll:
-                    raise ObjectNotFoundException(model='Poll')
-                
-                serializer = PollSerializer(poll, context={'profile': my_profile})
-                return Response(serializer.data)
-            
-            else:
-                poll_type = request.GET.get('poll_type', None)
-                name = request.GET.get('name', None)
-                is_anonymous = request.GET.get('is_anonymous', None)
-                is_paused = request.GET.get('is_paused', None)
-                is_closed = request.GET.get('is_closed', None)
+    # http_method_names = ['GET']
+    # сделать наследование всех PollAPI
+    # добавь варьирование в зависимости от poll_id
 
-                filters = Q(is_in_production=True)
-                if poll_type:
-                    poll_type = PollType.objects.filter(name=poll_type).first()
-                    if not poll_type:
-                        raise ObjectNotFoundException(model='PollType')
-                    filters &= Q(poll_type=poll_type)
-                if name:
-                    filters &= Q(name__icontains=name)
-                if is_anonymous:
-                    filters &= Q(is_anonymous=is_anonymous)
-                if is_paused:
-                    filters &= Q(is_paused=is_paused)
-                if is_closed:
-                    filters &= Q(is_closed=is_closed)
+    queryset = Poll.my_manager.get_all_avaliable_for_voting()
 
 
-                polls = Poll.my_manager.get_all_avaliable_for_voting(filters)
-                # print(polls)
-
-                context = get_profile_to_context(my_profile)
-                pagination_data = get_paginated_response(request, polls, MiniPollSerializer, context=context)
-                return Response(pagination_data)
-
-            
-    except APIException as api_exception:
-            return Response({'message':f"{api_exception.detail}"}, api_exception.status_code)
-        
-    except Exception as ex:
-        logger.error(f"Внутренняя ошибка сервера в poll: {ex}")
-        return Response({'message':f"Внутренняя ошибка сервера в poll: {ex}"},
-                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+class PollForMeAPI(PollAPI):
+    queryset = Poll.my_manager.get_all_avaliable_for_voting()
 
 
 @api_view(['GET'])

@@ -222,7 +222,7 @@ class MyPollManager(models.Manager):
             )
         )
     
-    def get_all(self, filters=None):
+    def get_all(self, filters=Q()):
         """Получение всех опросов"""
         objects = (
             super().get_queryset()
@@ -245,7 +245,7 @@ class MyPollManager(models.Manager):
 
         return objects
     
-    def get_all_with_answers(self, filters=None):
+    def get_all_with_answers(self, filters=Q()):
         """Получение всех опросов с ответами"""
         objects = (
             self.get_all(filters)
@@ -253,14 +253,14 @@ class MyPollManager(models.Manager):
         
         return objects
     
-    def get_all_avaliable_for_voting(self, filters=None):
+    def get_all_avaliable_for_voting(self, filters=Q()):
         """Получение всех опросов, доступных для прохождения"""
 
         objects = self.get_all_with_answers(filters)
         objects = self.__annotate_time(objects)
         return objects.filter(Q(is_avaliable_for_voting=True), ~Q(poll_type__name__in=['Быстрый', 'Анонимный']))
     
-    def get_all_avaliable_to_me(self, user_profile, filters=None):
+    def get_all_avaliable_to_me(self, user_profile, filters=Q()):
         """Получение всех опросов доступных мне"""
         objects = (
             self.get_all_avaliable_for_voting(filters)
@@ -298,7 +298,7 @@ class MyPollManager(models.Manager):
         
         return objects
 
-    def get_one(self, filters=None):
+    def get_one(self, filters=Q()):
         """Получение опроса по `filters`"""
         object = (
             super().get_queryset()
@@ -323,7 +323,7 @@ class MyPollManager(models.Manager):
         
         return object
 
-    def get_one_with_answers(self, filters=None):
+    def get_one_with_answers(self, filters=Q()):
         """Получение опроса по `filters` с ответами пользователей"""
         object = (
             self.get_one(filters)
@@ -338,7 +338,7 @@ class MyPollManager(models.Manager):
         )
         return object
     
-    def get_one_quick_with_answers(self, filters=None):
+    def get_one_quick_with_answers(self, filters=Q()):
         """Получение быстрого опроса по `filters` с формами ответа пользователей"""
         object = (
             self.get_one(filters)
@@ -355,7 +355,7 @@ class MyPollManager(models.Manager):
             )
         return object
     
-    def get_one_mini(self, filters=None):
+    def get_one_mini(self, filters=Q()):
         """Получение опроса по `filters` без вопросов и вариантов ответа"""
         objects = (
             super().get_queryset()
