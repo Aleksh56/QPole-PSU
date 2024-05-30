@@ -17,7 +17,7 @@ export const sendAnonymousAnswersFx = createEffect(async ({ answers, id, isTimeE
   );
 
   const accounts = await web3.eth.getAccounts();
-  const account = accounts[0];
+
   console.log(voteHashes);
   miniPollContract.methods
     .vote(id, voteHashes)
@@ -28,4 +28,9 @@ export const sendAnonymousAnswersFx = createEffect(async ({ answers, id, isTimeE
     .catch((error) => {
       console.error('Ошибка при отправке голосов пользователя:', error);
     });
+  const allVotes = await miniPollContract.methods.getPollResponses(id).call();
+  const decodedVotes = allVotes.map((vote) => {
+    return web3.utils.hexToAscii(vote);
+  });
+  console.log('Все голоса для ID:', id, decodedVotes);
 });
