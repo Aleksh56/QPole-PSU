@@ -143,7 +143,7 @@ const FrmQuickPollRegister = ({ isCollapsed, pollData, handleStart }) => {
           )}
         </AnimatePresence>
       </ContentWrapper>
-      {isCollapsed && pollData?.poll_setts?.completion_time !== null && (
+      {isCollapsed && (
         <StartBtnWrapper>
           <PrimaryButton caption="Начать" handleClick={handleSubmit} disabled={isButtonDisabled} />
         </StartBtnWrapper>

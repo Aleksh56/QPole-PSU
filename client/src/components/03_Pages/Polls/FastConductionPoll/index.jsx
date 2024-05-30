@@ -63,7 +63,7 @@ const FastConductionPollPage = () => {
         if (data.poll_setts.completion_time !== null && formId) getRemainingTime();
         if (data.mix_questions) data.questions = shuffleArray(data.questions);
 
-        setIsCollapsed(data.poll_setts?.completion_time !== null);
+        setIsCollapsed(true);
         setPollData(data);
       } else {
         navigate('/not-found');
