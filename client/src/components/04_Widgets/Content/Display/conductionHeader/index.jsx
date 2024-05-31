@@ -10,15 +10,13 @@ import {
   StyledTitle,
 } from './styled';
 
-import config from '@/config';
 import { formatDateTime } from '@/utils/js/formatDate';
 
 const ConductionHeader = ({ data }) => {
-  console.log(data);
   return (
     <HeaderWrapper>
       <ImageWrapper>
-        <StyledImage src={config.serverUrl.main + data.image} />
+        <StyledImage src={data.image} />
       </ImageWrapper>
       <DescriptionWrapper>
         <DescriptionTagsWrapper>
