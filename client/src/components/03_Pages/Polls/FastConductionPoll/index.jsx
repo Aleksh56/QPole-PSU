@@ -139,7 +139,7 @@ const FastConductionPollPage = () => {
             pollData={pollData}
           />
         ) : (
-          <VoteEndedText>Опрос завершен !</VoteEndedText>
+          !pollData?.opened_for_voting && <VoteEndedText>Опрос завершен !</VoteEndedText>
         )}
         <AnimatePresence>
           {!isCollapsed && (
