@@ -2,7 +2,6 @@ import { Dialog, DialogContent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { v4 } from 'uuid';
 
-import { createPole } from './api/apiRequests';
 import {
   ButtonContainer,
   ButtonContainerDescription,
@@ -11,13 +10,15 @@ import {
   StyledDialogTitle,
 } from './styled';
 
+import { createPollFx } from '@/api/models/Poll/create-poll';
+
 const FrmCreatePoll = ({ isOpen, onClose, title, buttons }) => {
   const navigate = useNavigate();
 
-  const handlePoleTypeSelect = async (poleType) => {
-    const newPoleId = v4();
-    await createPole(poleType, newPoleId);
-    navigate(`/app/tests/${newPoleId}/main`, { state: { isNewPole: true } });
+  const handlePoleTypeSelect = async (pollType) => {
+    const newID = v4();
+    await createPollFx({ pollType, newID });
+    navigate(`/app/tests/${newID}/main`, { state: { isNewPole: true } });
   };
 
   return (

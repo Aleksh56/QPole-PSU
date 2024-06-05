@@ -2,9 +2,8 @@ import { Box, Grid, Paper, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 
-import { changeSettingsFx } from './model/change-settings';
-import { getSettingsFx } from './model/get-settings';
-
+import { changeSettingsFx } from '@/api/models/Admin/PollSettings/change-settings';
+import { getSettingsFx } from '@/api/models/Admin/PollSettings/get-settings';
 import { pollAdminSettings } from '@/data/fields';
 
 const AdminSettings = () => {

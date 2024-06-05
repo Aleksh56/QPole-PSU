@@ -3,9 +3,8 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useEffect, useState } from 'react';
 
-import { banUserFx } from './models/ban-user';
-import { getAllUsersFx } from './models/get-users';
-
+import { banUserFx } from '@/api/models/Admin/UserSettings/ban-user';
+import { getAllUsersFx } from '@/api/models/Admin/UserSettings/get-users';
 import { roleColorsConf } from '@/app/template/config/role.colors';
 import AdmUsrFilters from '@/components/04_Widgets/Content/Interactive/admUsrFilters';
 import FrmAdmUserSettings from '@/components/04_Widgets/Data/Forms/frmAdmUserSettings';

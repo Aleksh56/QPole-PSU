@@ -21,9 +21,9 @@ import {
   handleChangeAnswerRequest,
   handleChangeQuestionInfoRequest,
 } from './api/apiRequests';
-import { deleteImageFx } from './model/delete-image';
 import { QueBtnWrapper, QueSettingsWrapper, StyledDragIndicator } from './styled';
 
+import { deleteImageFx } from '@/api/models/Questions/QuestionSettings/delete-image';
 import PoleImageUpload from '@/components/06_Entities/PollImageUpload';
 import QueTypeSelect from '@/components/06_Entities/QueTypeSelect';
 import CustomSwitch from '@/components/07_Shared/UIComponents/Buttons/switch';

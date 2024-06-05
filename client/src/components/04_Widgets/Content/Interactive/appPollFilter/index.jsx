@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { filterPollsRequest } from './api/apiRequests';
 import {
   FiltersWrapper,
   MobFiltersContent,
@@ -15,6 +14,7 @@ import {
   StyledStackWrapper,
 } from './styled';
 
+import { filterPollsFx } from '@/api/models/Poll/filter-polls';
 import PrimaryButton from '@/components/07_Shared/UIComponents/Buttons/primaryBtn';
 import FilterSelect from '@/components/07_Shared/UIComponents/Fields/filterSelect';
 import { appFilterOptions } from '@/data/filters';
@@ -42,7 +42,7 @@ const AppPollFilters = ({ handleCreateModalOpen = () => {}, setPollData = () => 
   };
 
   const applyFilters = async (field, value) => {
-    await filterPollsRequest(field, value, setPollData);
+    await filterPollsFx({ field, value, setPollData });
   };
 
   const handleHideMobileFilters = () => {

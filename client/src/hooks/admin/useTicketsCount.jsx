@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { getTicketsFx } from '@/api/common-requests/tickets/get-tickets';
+import { getTicketsFx } from '@/api/models/Tickets/get-tickets';
 
 const useTicketsCount = () => {
   const [ticketsCount, setTicketsCount] = useState(0);

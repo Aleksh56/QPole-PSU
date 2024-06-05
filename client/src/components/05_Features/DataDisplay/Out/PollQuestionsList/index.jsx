@@ -13,7 +13,6 @@ import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { deleteQuestionRequest } from './api/apiRequests';
-import { copyQuestionFx } from './model/copy-question';
 import {
   IconsWrapper,
   ListWrapper,
@@ -25,6 +24,7 @@ import {
   StyledQueCount,
 } from './styled';
 
+import { copyQuestionFx } from '@/api/models/Questions/copy-question';
 import FrmQueEdit from '@/components/04_Widgets/Data/Forms/frmQueEdit';
 import usePollData from '@/hooks/usePollData';
 

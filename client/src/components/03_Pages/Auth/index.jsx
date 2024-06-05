@@ -52,7 +52,7 @@ const AuthPage = () => {
           showAlert('Вход успешно выполнен !', 'success');
           setTimeout(() => {
             navigate('/app');
-          }, 1300);
+          }, 1000);
         }
       } catch (error) {
         showAlert('Логин или пароль неверные !', 'error');

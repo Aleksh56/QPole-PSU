@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 
-import { changeRoleFx } from './models/change-role';
+import { changeRoleFx } from '@/api/models/Admin/UserSettings/change-role';
 
 const styles = {
   modal: {

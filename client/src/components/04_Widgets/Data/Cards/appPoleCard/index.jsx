@@ -3,9 +3,6 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Box, Menu, MenuItem, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
-import { closePollFx } from './model/close-poll';
-import { deletePollFx } from './model/delete-poll';
-import { duplicatePollFx } from './model/duplicate-poll';
 import {
   ActionsWrapper,
   ChipsWrapper,
@@ -17,6 +14,9 @@ import {
   StldPollName,
 } from './styled';
 
+import { closePollFx } from '@/api/models/Poll/close-poll';
+import { copyPollFx } from '@/api/models/Poll/copy-poll';
+import { deletePollFx } from '@/api/models/Poll/delete-poll';
 import config from '@/config';
 
 const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
@@ -57,9 +57,7 @@ const AppPoleCard = React.memo(({ pollData, fetchData, cardButton }) => {
               <MoreHorizIcon onClick={handleMenuToggle} />
               <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
                 <MenuItem onClick={(e) => handleAction(e, closePollFx)}>Закрыть опрос</MenuItem>
-                <MenuItem onClick={(e) => handleAction(e, duplicatePollFx)}>
-                  Копировать опрос
-                </MenuItem>
+                <MenuItem onClick={(e) => handleAction(e, copyPollFx)}>Копировать опрос</MenuItem>
                 <MenuItem onClick={(e) => handleAction(e, deletePollFx)}>Удалить опрос</MenuItem>
               </Menu>
             </Box>

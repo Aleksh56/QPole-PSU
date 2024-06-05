@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { publishPollFx } from './model/publish-poll';
 import { MobMenuWrapper, StyledNavContainer, TabsMenu } from './styled';
 
+import { publishPollFx } from '@/api/models/Poll/publish-poll';
 import FrmShare from '@/components/04_Widgets/Data/Forms/frmShare';
 import { StyledNavLink } from '@/components/05_Features/DataDisplay/Out/appHeaderNavOut/styled';
 import PollSettingsMenuBtn from '@/components/07_Shared/UIComponents/Buttons/pollSettingsMenuBtn';

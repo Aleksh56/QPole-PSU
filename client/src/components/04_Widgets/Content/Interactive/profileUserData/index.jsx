@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { changeUserDataFx } from './models/change-user-data';
 import {
   BoxCaption,
   ProfileFieldsWrapper,
@@ -9,6 +8,7 @@ import {
   StyledProfileContainer,
 } from './styled';
 
+import { changeUserDataFx } from '@/api/models/User/change-user-data';
 import ProfileAccFld from '@/components/07_Shared/UIComponents/Fields/profileAccFld';
 import { StyledProfileFieldsBox } from '@/constants/styles';
 

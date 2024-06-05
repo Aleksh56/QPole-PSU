@@ -1,7 +1,7 @@
 import TechWorks from '@assets/works.svg';
 import { Container } from '@mui/material';
 
-import { InfoText, TitleText, WorksWrapper } from '@/app/template/base/styles';
+import { InfoText, TitleText, WorksWrapper } from '@/app/template/common/styles';
 import Header from '@/components/04_Widgets/Navigation/Menus/mainHeader';
 
 const MaintenancePage = () => {

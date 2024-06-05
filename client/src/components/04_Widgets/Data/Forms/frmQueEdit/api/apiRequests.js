@@ -1,5 +1,6 @@
-import { handleRequest } from '@/api/api';
 import axios from 'axios';
+
+import { handleRequest } from '@/api/api';
 import config from '@/config';
 
 export const handleChangeAnswerRequest = async (id, q_id, opt_id, isTrue) => {
@@ -21,7 +22,7 @@ export const handleChangeQuestionInfoRequest = async (fieldName, value, id, q_id
           Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
           'content-type': 'multipart/form-data',
         },
-      }
+      },
     );
     return;
   }
@@ -34,7 +35,7 @@ export const handleChangeQuestionInfoRequest = async (fieldName, value, id, q_id
 export const getAllOptionsRequest = async (id, q_id) => {
   return handleRequest(
     'get',
-    `/api/my_poll_question_option/?poll_id=${id}&poll_question_id=${q_id}`
+    `/api/my_poll_question_option/?poll_id=${id}&poll_question_id=${q_id}`,
   );
 };
 
@@ -58,7 +59,7 @@ export const changeOptionRequest = async (id, q_id, opt_id, fieldName, value) =>
 export const deleteOptionRequest = async (id, q_id, opt_id) => {
   return handleRequest(
     'delete',
-    `/api/my_poll_question_option/?poll_id=${id}&poll_question_id=${q_id}&question_option_id=${opt_id}`
+    `/api/my_poll_question_option/?poll_id=${id}&poll_question_id=${q_id}&question_option_id=${opt_id}`,
   );
 };
 

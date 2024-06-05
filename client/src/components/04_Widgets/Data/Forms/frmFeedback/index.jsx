@@ -3,8 +3,7 @@ import { Box, Button, MenuItem, TextField } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { sendTicketFx } from './model/send-ticket';
-
+import { sendTicketFx } from '@/api/models/Tickets/send-ticket';
 import { useAlert } from '@/hooks/useAlert';
 
 const FrmFeedback = () => {

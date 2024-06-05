@@ -1,6 +1,7 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { pathcPollSettingsFx } from '../model/patch-poll';
+
+import { patchPollSettingsFx } from '@/api/models/Poll/PollSettings/patch-poll-settings';
 
 const usePollSettings = (initialSettings) => {
   const { id } = useParams();
@@ -13,10 +14,10 @@ const usePollSettings = (initialSettings) => {
   const handleSwitchChange = useCallback(
     (field) => async (event) => {
       const value = event.target.checked;
-      pathcPollSettingsFx({ id, value, field });
+      patchPollSettingsFx({ id, value, field });
       setSettings((prev) => ({ ...prev, [field]: value }));
     },
-    []
+    [],
   );
 
   return [settings, handleSwitchChange];

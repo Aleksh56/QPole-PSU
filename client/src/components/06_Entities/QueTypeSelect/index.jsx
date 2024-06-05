@@ -3,9 +3,9 @@ import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { changePollTypeFx } from './models/change-poll-type';
 import { TypeSelect } from './styled';
 
+import { changeQuestionTypeFx } from '@/api/models/Questions/QuestionSettings/change-que-type';
 import usePollData from '@/hooks/usePollData';
 
 const QueTypeSelect = ({ question, questionType, setQuestionType, setQuestion }) => {
@@ -53,7 +53,7 @@ const QueTypeSelect = ({ question, questionType, setQuestionType, setQuestion })
 
     const selectedTypeObject = queTypes.find((item) => item.caption === selectedType);
     if (selectedTypeObject) {
-      await changePollTypeFx(id, question.id, selectedTypeObject.type).then((res) =>
+      await changeQuestionTypeFx(id, question.id, selectedTypeObject.type).then((res) =>
         setQuestion(res.data),
       );
     }
